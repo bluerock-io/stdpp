@@ -70,3 +70,11 @@ Failed to progress.
   
   ============================
   bool_decide (∅ ⊆ {[1; 2; 3]}) = true
+1 goal
+  
+  ============================
+  {[3 := false; 2 := true]} = {[2 := true; 3 := false]}
+1 goal
+  
+  ============================
+  Some true = Some true

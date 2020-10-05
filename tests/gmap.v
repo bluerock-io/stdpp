@@ -1,4 +1,4 @@
-From stdpp Require Import gmap.
+From stdpp Require Import pmap gmap.
 
 Goal {[1; 2; 3]} =@{gset nat} ∅.
 Proof.
@@ -71,4 +71,15 @@ Qed.
 
 Theorem gmap_insert_comm :
   <[3:=false]> {[2:=true]} =@{gmap nat bool} <[2:=true]> {[3:=false]}.
-Proof. reflexivity. Qed.
+Proof.
+  simpl. Show.
+  reflexivity.
+Qed.
+
+Transparent gmap_empty.
+Arguments map_insert _ _ _ / _ _ _ _ : assert.
+Arguments Plookup _ _ _ / : assert.
+
+Theorem gmap_lookup_concrete :
+  lookup (M:=gmap nat bool) 2 (<[3:=false]> {[2:=true]}) = Some true.
+Proof. simpl. Show. reflexivity. Qed.

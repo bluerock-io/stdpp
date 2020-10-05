@@ -8,6 +8,7 @@ Leibniz equality to become extensional. *)
 From Coq Require Import PArith.
 From stdpp Require Import mapset countable.
 From stdpp Require Export fin_maps.
+From stdpp Require Export sprop.
 From stdpp Require Import options.
 
 Local Open Scope positive_scope.
@@ -255,37 +256,43 @@ Qed.
 
 (** Packed version and instance of the finite map type class *)
 Inductive Pmap (A : Type) : Type :=
-  PMap { pmap_car : Pmap_raw A; pmap_prf : Pmap_wf pmap_car }.
+  PMap { pmap_car : Pmap_raw A; pmap_prf : is_true (Pmap_wf pmap_car) }.
 Global Arguments PMap {_} _ _ : assert.
 Global Arguments pmap_car {_} _ : assert.
 Global Arguments pmap_prf {_} _ : assert.
+
 Lemma Pmap_eq {A} (m1 m2 : Pmap A) : m1 = m2 ↔ pmap_car m1 = pmap_car m2.
 Proof.
   split; [by intros ->|intros]; destruct m1 as [t1 ?], m2 as [t2 ?].
-  simplify_eq/=; f_equal; apply proof_irrel.
+  simplify_eq/=; f_equal.
 Qed.
 Global Instance Pmap_eq_dec `{EqDecision A} : EqDecision (Pmap A) := λ m1 m2,
   match Pmap_raw_eq_dec (pmap_car m1) (pmap_car m2) with
   | left H => left (proj2 (Pmap_eq m1 m2) H)
   | right H => right (H ∘ proj1 (Pmap_eq m1 m2))
   end.
-Global Instance Pempty {A} : Empty (Pmap A) := PMap ∅ I.
+
+Global Instance Pempty {A} : Empty (Pmap A) := PMap ∅ stt.
 Global Instance Plookup {A} : Lookup positive A (Pmap A) := λ i m, pmap_car m !! i.
 Global Instance Ppartial_alter {A} : PartialAlter positive A (Pmap A) := λ f i m,
-  let (t,Ht) := m in PMap (partial_alter f i t) (Ppartial_alter_wf f i _ Ht).
+  let (t,Ht) := m in PMap (partial_alter f i t) (is_true_fmap (Ppartial_alter_wf f i _) Ht).
 Global Instance Pfmap : FMap Pmap := λ A B f m,
-  let (t,Ht) := m in PMap (f <$> t) (Pfmap_wf f _ Ht).
+  let (t,Ht) := m in PMap (f <$> t) (is_true_fmap (Pfmap_wf f _) Ht).
 Global Instance Pto_list {A} : FinMapToList positive A (Pmap A) := λ m,
   let (t,Ht) := m in Pto_list_raw 1 t [].
 Global Instance Pomap : OMap Pmap := λ A B f m,
-  let (t,Ht) := m in PMap (omap f t) (Pomap_wf f _ Ht).
+  let (t,Ht) := m in PMap (omap f t) (is_true_fmap (Pomap_wf f _) Ht).
 Global Instance Pmerge : Merge Pmap := λ A B C f m1 m2,
-  let (t1,Ht1) := m1 in let (t2,Ht2) := m2 in PMap _ (Pmerge_wf f _ _ Ht1 Ht2).
+  let (t1,Ht1) := m1 in
+  let (t2,Ht2) := m2 in
+  PMap _ (is_true_bind Ht1 (λ Ht1,
+          is_true_bind Ht2 (λ Ht2,
+          is_true_intro $ Pmerge_wf f _ _ Ht1 Ht2))).
 
 Global Instance Pmap_finmap : FinMap positive Pmap.
 Proof.
-  split.
-  - by intros ? [t1 ?] [t2 ?] ?; apply Pmap_eq, Pmap_wf_eq.
+ split.
+  - intros ? [t1 ?] [t2 ?] ?; apply Pmap_eq, Pmap_wf_eq; auto using is_true_elim.
   - by intros ? [].
   - intros ?? [??] ?. by apply Plookup_alter.
   - intros ?? [??] ??. by apply Plookup_alter_ne.

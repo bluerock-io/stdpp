@@ -68,3 +68,7 @@ Proof.
   Show.
   reflexivity.
 Qed.
+
+Theorem gmap_insert_comm :
+  <[3:=false]> {[2:=true]} =@{gmap nat bool} <[2:=true]> {[3:=false]}.
+Proof. reflexivity. Qed.

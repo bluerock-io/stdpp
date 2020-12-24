@@ -103,9 +103,13 @@ Instance pretty_nat : Pretty nat := λ x, pretty (N.of_nat x).
 Instance pretty_nat_inj : Inj (=@{nat}) (=) pretty.
 Proof. apply _. Qed.
 
+Instance pretty_positive : Pretty positive := λ x, pretty (Npos x).
+Instance pretty_positive_inj : Inj (=@{positive}) (=) pretty.
+Proof. apply _. Qed.
+
 Instance pretty_Z : Pretty Z := λ x,
   match x with
-  | Z0 => "0" | Zpos x => pretty (Npos x) | Zneg x => "-" +:+ pretty (Npos x)
+  | Z0 => "0" | Zpos x => pretty x | Zneg x => "-" +:+ pretty x
   end%string.
 Instance pretty_Z_inj : Inj (=@{Z}) (=) pretty.
 Proof.

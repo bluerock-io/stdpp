@@ -38,6 +38,8 @@ Coq 8.8 and 8.9 are no longer supported.
     for Coq's number types `nat`, `N`, and `Z`.
 - Fix a bug where `pretty 0` was defined as `""`, the empty string. It now
   returns `"0"` for `N`, `Z`, and `nat`.
+- Remove duplicate `map_fmap_empty` of `fmap_empty`, and rename
+  `map_fmap_empty_inv` into `fmap_empty_inv` for consistency's sake.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`):
@@ -52,6 +54,8 @@ s/\bQp_not_plus_ge\b/Qp_not_add_le_l/g
 s/\bQp_le_plus_l\b/Qp_le_add_l/g
 s/\bQp_mult_plus_distr_l\b/Qp_mul_add_distr_r/g
 s/\bQp_mult_plus_distr_r\b/Qp_mul_add_distr_l/g
+s/\bmap_fmap_empty\b/fmap_empty/g
+s/\bmap_fmap_empty_inv\b/fmap_empty_inv/g
 ' $(find theories -name "*.v")
 ```
 

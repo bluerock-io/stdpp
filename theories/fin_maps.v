@@ -296,13 +296,6 @@ Lemma map_subset_empty {A} (m : M A) : m ⊄ ∅.
 Proof.
   intros [_ []]. rewrite map_subseteq_spec. intros ??. by rewrite lookup_empty.
 Qed.
-Lemma map_fmap_empty {A B} (f : A → B) : f <$> (∅ : M A) = ∅.
-Proof. by apply map_eq; intros i; rewrite lookup_fmap, !lookup_empty. Qed.
-Lemma map_fmap_empty_inv {A B} (f : A → B) m : f <$> m = ∅ → m = ∅.
-Proof.
-  intros Hm. apply map_eq; intros i. generalize (f_equal (lookup i) Hm).
-  by rewrite lookup_fmap, !lookup_empty, fmap_None.
-Qed.
 
 Lemma map_subset_alt {A} (m1 m2 : M A) :
   m1 ⊂ m2 ↔ m1 ⊆ m2 ∧ ∃ i, m1 !! i = None ∧ is_Some (m2 !! i).
@@ -663,6 +656,13 @@ Lemma fmap_empty {A B} (f : A → B) : f <$> ∅ = ∅.
 Proof. apply map_empty; intros i. by rewrite lookup_fmap, lookup_empty. Qed.
 Lemma omap_empty {A B} (f : A → option B) : omap f ∅ = ∅.
 Proof. apply map_empty; intros i. by rewrite lookup_omap, lookup_empty. Qed.
+
+Lemma fmap_empty_inv {A B} (f : A → B) m : f <$> m = ∅ → m = ∅.
+Proof.
+  intros Hm. apply map_eq; intros i. generalize (f_equal (lookup i) Hm).
+  by rewrite lookup_fmap, !lookup_empty, fmap_None.
+Qed.
+
 Lemma fmap_insert {A B} (f: A → B) m i x: f <$> <[i:=x]>m = <[i:=f x]>(f <$> m).
 Proof.
   apply map_eq; intros i'; destruct (decide (i' = i)) as [->|].
@@ -692,7 +692,7 @@ Proof.
 Qed.
 Lemma map_fmap_singleton {A B} (f : A → B) i x : f <$> {[i := x]} = {[i := f x]}.
 Proof.
-  by unfold singletonM, map_singleton; rewrite fmap_insert, map_fmap_empty.
+  by unfold singletonM, map_singleton; rewrite fmap_insert, fmap_empty.
 Qed.
 Lemma omap_singleton {A B} (f : A → option B) i x y :
   f x = Some y → omap f {[ i := x ]} = {[ i := y ]}.

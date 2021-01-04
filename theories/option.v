@@ -225,6 +225,9 @@ Proof. intros. by apply option_bind_ext. Qed.
 Lemma bind_Some {A B} (f : A → option B) (mx : option A) y :
   mx ≫= f = Some y ↔ ∃ x, mx = Some x ∧ f x = Some y.
 Proof. destruct mx; naive_solver. Qed.
+Lemma bind_Some_equiv {A} `{Equiv B} (f : A → option B) (mx : option A) y :
+  mx ≫= f ≡ Some y ↔ ∃ x, mx = Some x ∧ f x ≡ Some y.
+Proof. destruct mx; (split; [inversion 1|]); naive_solver. Qed.
 Lemma bind_None {A B} (f : A → option B) (mx : option A) :
   mx ≫= f = None ↔ mx = None ∨ ∃ x, mx = Some x ∧ f x = None.
 Proof. destruct mx; naive_solver. Qed.

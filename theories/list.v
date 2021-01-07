@@ -3113,7 +3113,7 @@ End Forall2_proper.
 
 Section Forall3.
   Context {A B C} (P : A → B → C → Prop).
-  Hint Extern 0 (Forall3 _ _ _ _) => constructor : core.
+  Local Hint Extern 0 (Forall3 _ _ _ _) => constructor : core.
 
   Lemma Forall3_app l1 l2 k1 k2 k1' k2' :
     Forall3 P l1 k1 k1' → Forall3 P l2 k2 k2' →

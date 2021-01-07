@@ -54,49 +54,49 @@ Module nat_cancel.
     https://gitlab.mpi-sws.org/FP/iris-coq/issues/153
 
   we wrap the entire canceler in the [NoBackTrack] class. *)
-  Instance nat_cancel_start m n m' n' :
+  Global Instance nat_cancel_start m n m' n' :
     TCNoBackTrack (NatCancelL m n m' n') → NatCancel m n m' n'.
   Proof. by intros [?]. Qed.
 
   Class MakeNatS (n1 n2 m : nat) := make_nat_S : m = n1 + n2.
-  Instance make_nat_S_0_l n : MakeNatS 0 n n.
+  Global Instance make_nat_S_0_l n : MakeNatS 0 n n.
   Proof. done. Qed.
-  Instance make_nat_S_1 n : MakeNatS 1 n (S n).
+  Global Instance make_nat_S_1 n : MakeNatS 1 n (S n).
   Proof. done. Qed.
 
   Class MakeNatPlus (n1 n2 m : nat) := make_nat_plus : m = n1 + n2.
-  Instance make_nat_plus_0_l n : MakeNatPlus 0 n n.
+  Global Instance make_nat_plus_0_l n : MakeNatPlus 0 n n.
   Proof. done. Qed.
-  Instance make_nat_plus_0_r n : MakeNatPlus n 0 n.
+  Global Instance make_nat_plus_0_r n : MakeNatPlus n 0 n.
   Proof. unfold MakeNatPlus. by rewrite Nat.add_0_r. Qed.
-  Instance make_nat_plus_default n1 n2 : MakeNatPlus n1 n2 (n1 + n2) | 100.
+  Global Instance make_nat_plus_default n1 n2 : MakeNatPlus n1 n2 (n1 + n2) | 100.
   Proof. done. Qed.
 
-  Instance nat_cancel_leaf_here m : NatCancelR m m 0 0 | 0.
+  Global Instance nat_cancel_leaf_here m : NatCancelR m m 0 0 | 0.
   Proof. by unfold NatCancelR, NatCancelL. Qed.
-  Instance nat_cancel_leaf_else m n : NatCancelR m n m n | 100.
+  Global Instance nat_cancel_leaf_else m n : NatCancelR m n m n | 100.
   Proof. by unfold NatCancelR. Qed.
-  Instance nat_cancel_leaf_plus m m' m'' n1 n2 n1' n2' n1'n2' :
+  Global Instance nat_cancel_leaf_plus m m' m'' n1 n2 n1' n2' n1'n2' :
     NatCancelR m n1 m' n1' → NatCancelR m' n2 m'' n2' →
     MakeNatPlus n1' n2' n1'n2' → NatCancelR m (n1 + n2) m'' n1'n2' | 2.
   Proof. unfold NatCancelR, NatCancelL, MakeNatPlus. lia. Qed.
-  Instance nat_cancel_leaf_S_here m n m' n' :
+  Global Instance nat_cancel_leaf_S_here m n m' n' :
     NatCancelR m n m' n' → NatCancelR (S m) (S n) m' n' | 3.
   Proof. unfold NatCancelR, NatCancelL. lia. Qed.
-  Instance nat_cancel_leaf_S_else m n m' n' :
+  Global Instance nat_cancel_leaf_S_else m n m' n' :
     NatCancelR m n m' n' → NatCancelR m (S n) m' (S n') | 4.
   Proof. unfold NatCancelR, NatCancelL. lia. Qed.
 
   (** The instance [nat_cancel_S_both] is redundant, but may reduce proof search
   quite a bit, e.g. when canceling constants in constants. *)
-  Instance nat_cancel_S_both m n m' n' :
+  Global Instance nat_cancel_S_both m n m' n' :
     NatCancelL m n m' n' → NatCancelL (S m) (S n) m' n' | 1.
   Proof. unfold NatCancelL. lia. Qed.
-  Instance nat_cancel_plus m1 m2 m1' m2' m1'm2' n n' n'' :
+  Global Instance nat_cancel_plus m1 m2 m1' m2' m1'm2' n n' n'' :
     NatCancelL m1 n m1' n' → NatCancelL m2 n' m2' n'' →
     MakeNatPlus m1' m2' m1'm2' → NatCancelL (m1 + m2) n m1'm2' n'' | 2.
   Proof. unfold NatCancelL, MakeNatPlus. lia. Qed.
-  Instance nat_cancel_S m m' m'' Sm' n n' n'' :
+  Global Instance nat_cancel_S m m' m'' Sm' n n' n'' :
     NatCancelL m n m' n' → NatCancelR 1 n' m'' n'' →
     MakeNatS m'' m' Sm' → NatCancelL (S m) n Sm' n'' | 3.
   Proof. unfold NatCancelR, NatCancelL, MakeNatS. lia. Qed.

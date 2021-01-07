@@ -7,9 +7,9 @@ From stdpp Require Import options.
 (* Pick up extra assumptions from section parameters. *)
 Set Default Proof Using "Type*".
 
-Arguments length {_} _ : assert.
-Arguments cons {_} _ _ : assert.
-Arguments app {_} _ _ : assert.
+Global Arguments length {_} _ : assert.
+Global Arguments cons {_} _ _ : assert.
+Global Arguments app {_} _ _ : assert.
 
 Instance: Params (@length) 1 := {}.
 Instance: Params (@cons) 1 := {}.
@@ -19,18 +19,18 @@ Notation tail := tl.
 Notation take := firstn.
 Notation drop := skipn.
 
-Arguments head {_} _ : assert.
-Arguments tail {_} _ : assert.
-Arguments take {_} !_ !_ / : assert.
-Arguments drop {_} !_ !_ / : assert.
+Global Arguments head {_} _ : assert.
+Global Arguments tail {_} _ : assert.
+Global Arguments take {_} !_ !_ / : assert.
+Global Arguments drop {_} !_ !_ / : assert.
 
 Instance: Params (@head) 1 := {}.
 Instance: Params (@tail) 1 := {}.
 Instance: Params (@take) 1 := {}.
 Instance: Params (@drop) 1 := {}.
 
-Arguments Permutation {_} _ _ : assert.
-Arguments Forall_cons {_} _ _ _ _ _ : assert.
+Global Arguments Permutation {_} _ _ : assert.
+Global Arguments Forall_cons {_} _ _ _ _ _ : assert.
 Remove Hints Permutation_cons : typeclass_instances.
 
 Notation "(::)" := cons (only parsing) : list_scope.
@@ -53,7 +53,7 @@ Infix "≡ₚ@{ A }" :=
   (@Permutation A) (at level 70, no associativity, only parsing) : stdpp_scope.
 Notation "(≡ₚ@{ A } )" := (@Permutation A) (only parsing) : stdpp_scope.
 
-Instance maybe_cons {A} : Maybe2 (@cons A) := λ l,
+Global Instance maybe_cons {A} : Maybe2 (@cons A) := λ l,
   match l with x :: l => Some (x,l) | _ => None end.
 
 (** * Definitions *)
@@ -65,7 +65,7 @@ Existing Instance list_equiv.
 
 (** The operation [l !! i] gives the [i]th element of the list [l], or [None]
 in case [i] is out of bounds. *)
-Instance list_lookup {A} : Lookup nat A (list A) :=
+Global Instance list_lookup {A} : Lookup nat A (list A) :=
   fix go i l {struct l} : option A := let _ : Lookup _ _ _ := @go in
   match l with
   | [] => None | x :: l => match i with 0 => Some x | S i => l !! i end
@@ -73,7 +73,7 @@ Instance list_lookup {A} : Lookup nat A (list A) :=
 
 (** The operation [l !!! i] is a total version of the lookup operation
 [l !! i]. *)
-Instance list_lookup_total `{!Inhabited A} : LookupTotal nat A (list A) :=
+Global Instance list_lookup_total `{!Inhabited A} : LookupTotal nat A (list A) :=
   fix go i l {struct l} : A := let _ : LookupTotal _ _ _ := @go in
   match l with
   | [] => inhabitant
@@ -82,7 +82,7 @@ Instance list_lookup_total `{!Inhabited A} : LookupTotal nat A (list A) :=
 
 (** The operation [alter f i l] applies the function [f] to the [i]th element
 of [l]. In case [i] is out of bounds, the list is returned unchanged. *)
-Instance list_alter {A} : Alter nat A (list A) := λ f,
+Global Instance list_alter {A} : Alter nat A (list A) := λ f,
   fix go i l {struct l} :=
   match l with
   | [] => []
@@ -91,7 +91,7 @@ Instance list_alter {A} : Alter nat A (list A) := λ f,
 
 (** The operation [<[i:=x]> l] overwrites the element at position [i] with the
 value [x]. In case [i] is out of bounds, the list is returned unchanged. *)
-Instance list_insert {A} : Insert nat A (list A) :=
+Global Instance list_insert {A} : Insert nat A (list A) :=
   fix go i y l {struct l} := let _ : Insert _ _ _ := @go in
   match l with
   | [] => []
@@ -107,7 +107,7 @@ Instance: Params (@list_inserts) 1 := {}.
 (** The operation [delete i l] removes the [i]th element of [l] and moves
 all consecutive elements one position ahead. In case [i] is out of bounds,
 the list is returned unchanged. *)
-Instance list_delete {A} : Delete nat (list A) :=
+Global Instance list_delete {A} : Delete nat (list A) :=
   fix go (i : nat) (l : list A) {struct l} : list A :=
   match l with
   | [] => []
@@ -118,12 +118,12 @@ Instance list_delete {A} : Delete nat (list A) :=
 singleton list [[x]], and [None] into the empty list [[]]. *)
 Definition option_list {A} : option A → list A := option_rect _ (λ x, [x]) [].
 Instance: Params (@option_list) 1 := {}.
-Instance maybe_list_singleton {A} : Maybe (λ x : A, [x]) := λ l,
+Global Instance maybe_list_singleton {A} : Maybe (λ x : A, [x]) := λ l,
   match l with [x] => Some x | _ => None end.
 
 (** The function [filter P l] returns the list of elements of [l] that
 satisfies [P]. The order remains unchanged. *)
-Instance list_filter {A} : Filter A (list A) :=
+Global Instance list_filter {A} : Filter A (list A) :=
   fix go P _ l := let _ : Filter _ _ := @go in
   match l with
   | [] => []
@@ -178,7 +178,7 @@ Fixpoint resize {A} (n : nat) (y : A) (l : list A) : list A :=
   | [] => replicate n y
   | x :: l => match n with 0 => [] | S n => x :: resize n y l end
   end.
-Arguments resize {_} !_ _ !_ : assert.
+Global Arguments resize {_} !_ _ !_ : assert.
 Instance: Params (@resize) 2 := {}.
 
 (** The function [reshape k l] transforms [l] into a list of lists whose sizes
@@ -203,18 +203,18 @@ Definition foldl {A B} (f : A → B → A) : A → list B → A :=
   fix go a l := match l with [] => a | x :: l => go (f a x) l end.
 
 (** The monadic operations. *)
-Instance list_ret: MRet list := λ A x, x :: @nil A.
-Instance list_fmap : FMap list := λ A B f,
+Global Instance list_ret: MRet list := λ A x, x :: @nil A.
+Global Instance list_fmap : FMap list := λ A B f,
   fix go (l : list A) := match l with [] => [] | x :: l => f x :: go l end.
-Instance list_omap : OMap list := λ A B f,
+Global Instance list_omap : OMap list := λ A B f,
   fix go (l : list A) :=
   match l with
   | [] => []
   | x :: l => match f x with Some y => y :: go l | None => go l end
   end.
-Instance list_bind : MBind list := λ A B f,
+Global Instance list_bind : MBind list := λ A B f,
   fix go (l : list A) := match l with [] => [] | x :: l => f x ++ go l end.
-Instance list_join: MJoin list :=
+Global Instance list_join: MJoin list :=
   fix go A (ls : list (list A)) : list A :=
   match ls with [] => [] | l :: ls => l ++ @mjoin _ go _ ls end.
 Definition mapM `{MBind M, MRet M} {A B} (f : A → M B) : list A → M (list B) :=
@@ -247,8 +247,8 @@ Inductive zipped_Forall {A} (P : list A → list A → A → Prop) :
   | zipped_Forall_nil l : zipped_Forall P l []
   | zipped_Forall_cons l k x :
      P l k x → zipped_Forall P (x :: l) k → zipped_Forall P l (x :: k).
-Arguments zipped_Forall_nil {_ _} _ : assert.
-Arguments zipped_Forall_cons {_ _} _ _ _ _ _ : assert.
+Global Arguments zipped_Forall_nil {_ _} _ : assert.
+Global Arguments zipped_Forall_cons {_ _} _ _ _ _ _ : assert.
 
 (** The function [mask f βs l] applies the function [f] to elements in [l] at
 positions that are [true] in [βs]. *)
@@ -337,7 +337,7 @@ Inductive Forall3 {A B C} (P : A → B → C → Prop) :
      P x y z → Forall3 P l k k' → Forall3 P (x :: l) (y :: k) (z :: k').
 
 (** Set operations on lists *)
-Instance list_subseteq {A} : SubsetEq (list A) := λ l1 l2, ∀ x, x ∈ l1 → x ∈ l2.
+Global Instance list_subseteq {A} : SubsetEq (list A) := λ l1 l2, ∀ x, x ∈ l1 → x ∈ l2.
 
 Section list_set.
   Context `{dec : EqDecision A}.
@@ -3988,7 +3988,7 @@ Lemma foldr_permutation_proper {A B} (R : relation B) `{!PreOrder R}
     (Hf : ∀ a1 a2 b, R (f a1 (f a2 b)) (f a2 (f a1 b))) :
   Proper ((≡ₚ) ==> R) (foldr f b).
 Proof. intros l1 l2 Hl. apply foldr_permutation; auto. Qed.
-Instance foldr_permutation_proper' {A} (R : relation A) `{!PreOrder R}
+Global Instance foldr_permutation_proper' {A} (R : relation A) `{!PreOrder R}
     (f : A → A → A) (a : A) `{!∀ a, Proper (R ==> R) (f a), !Assoc R f, !Comm R f} :
   Proper ((≡ₚ) ==> R) (foldr f a).
 Proof.
@@ -4261,7 +4261,7 @@ Qed.
 Lemma TCForall_Forall {A} (P : A → Prop) xs : TCForall P xs ↔ Forall P xs.
 Proof. split; induction 1; constructor; auto. Qed.
 
-Instance TCForall_app {A} (P : A → Prop) xs ys :
+Global Instance TCForall_app {A} (P : A → Prop) xs ys :
   TCForall P xs → TCForall P ys → TCForall P (xs ++ ys).
 Proof. rewrite !TCForall_Forall. apply Forall_app_2. Qed.
 
@@ -4385,9 +4385,9 @@ over the type of constants, but later we use [nat]s and a list representing
 a corresponding environment. *)
 Inductive rlist (A : Type) :=
   rnil : rlist A | rnode : A → rlist A | rapp : rlist A → rlist A → rlist A.
-Arguments rnil {_} : assert.
-Arguments rnode {_} _ : assert.
-Arguments rapp {_} _ _ : assert.
+Global Arguments rnil {_} : assert.
+Global Arguments rnode {_} _ : assert.
+Global Arguments rapp {_} _ _ : assert.
 
 Module rlist.
 Fixpoint to_list {A} (t : rlist A) : list A :=

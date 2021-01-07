@@ -7,9 +7,9 @@ From stdpp Require Import options.
 Record listset_nodup A := ListsetNoDup {
   listset_nodup_car : list A; listset_nodup_prf : NoDup listset_nodup_car
 }.
-Arguments ListsetNoDup {_} _ _ : assert.
-Arguments listset_nodup_car {_} _ : assert.
-Arguments listset_nodup_prf {_} _ : assert.
+Global Arguments ListsetNoDup {_} _ _ : assert.
+Global Arguments listset_nodup_car {_} _ : assert.
+Global Arguments listset_nodup_prf {_} _ : assert.
 
 Section list_set.
 Context `{EqDecision A}.
@@ -29,7 +29,7 @@ Global Instance listset_nodup_difference: Difference C :=
   λ '(ListsetNoDup l Hl) '(ListsetNoDup k Hk),
     ListsetNoDup _ (NoDup_list_difference _ k Hl).
 
-Instance listset_nodup_set: Set_ A C.
+Local Instance listset_nodup_set: Set_ A C.
 Proof.
   split; [split | | ].
   - by apply not_elem_of_nil.

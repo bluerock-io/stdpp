@@ -7,7 +7,7 @@ From stdpp Require Import options.
 Notation natmap_raw A := (list (option A)).
 Definition natmap_wf {A} (l : natmap_raw A) :=
   match last l with None => True | Some x => is_Some x end.
-Instance natmap_wf_pi {A} (l : natmap_raw A) : ProofIrrel (natmap_wf l).
+Global Instance natmap_wf_pi {A} (l : natmap_raw A) : ProofIrrel (natmap_wf l).
 Proof. unfold natmap_wf. case_match; apply _. Qed.
 
 Lemma natmap_wf_inv {A} (o : option A) (l : natmap_raw A) :
@@ -26,9 +26,9 @@ Record natmap (A : Type) : Type := NatMap {
   natmap_car : natmap_raw A;
   natmap_prf : natmap_wf natmap_car
 }.
-Arguments NatMap {_} _ _ : assert.
-Arguments natmap_car {_} _ : assert.
-Arguments natmap_prf {_} _ : assert.
+Global Arguments NatMap {_} _ _ : assert.
+Global Arguments natmap_car {_} _ : assert.
+Global Arguments natmap_prf {_} _ : assert.
 Lemma natmap_eq {A} (m1 m2 : natmap A) :
   m1 = m2 ↔ natmap_car m1 = natmap_car m2.
 Proof.
@@ -41,8 +41,8 @@ Global Instance natmap_eq_dec `{EqDecision A} : EqDecision (natmap A) := λ m1 m
   | right H => right (H ∘ proj1 (natmap_eq m1 m2))
   end.
 
-Instance natmap_empty {A} : Empty (natmap A) := NatMap [] I.
-Instance natmap_lookup {A} : Lookup nat A (natmap A) := λ i m,
+Global Instance natmap_empty {A} : Empty (natmap A) := NatMap [] I.
+Global Instance natmap_lookup {A} : Lookup nat A (natmap A) := λ i m,
   let (l,_) := m in mjoin (l !! i).
 
 Fixpoint natmap_singleton_raw {A} (i : nat) (x : A) : natmap_raw A :=
@@ -90,7 +90,7 @@ Proof.
   revert i. induction l; [intro | intros [|?]]; simpl; repeat case_match;
     eauto using natmap_singleton_wf, natmap_cons_canon_wf, natmap_wf_inv.
 Qed.
-Instance natmap_alter {A} : PartialAlter nat A (natmap A) := λ f i m,
+Global Instance natmap_alter {A} : PartialAlter nat A (natmap A) := λ f i m,
   let (l,Hl) := m in NatMap _ (natmap_alter_wf f i l Hl).
 Lemma natmap_lookup_alter_raw {A} (f : option A → option A) i l :
   mjoin (natmap_alter_raw f i l !! i) = f (mjoin (l !! i)).
@@ -144,7 +144,7 @@ Proof.
     autorewrite with natmap; auto;
     match goal with |- context [?o ≫= _] => by destruct o end.
 Qed.
-Instance natmap_merge: Merge natmap := λ A B C f m1 m2,
+Global Instance natmap_merge: Merge natmap := λ A B C f m1 m2,
   let (l1, Hl1) := m1 in let (l2, Hl2) := m2 in
   NatMap (natmap_merge_raw f l1 l2) (natmap_merge_wf _ _ _ Hl1 Hl2).
 
@@ -186,7 +186,7 @@ Proof.
   revert i. induction l as [|[?|] ? IH]; simpl; try constructor; auto.
   rewrite natmap_elem_of_to_list_raw_aux. intros (?&?&?). lia.
 Qed.
-Instance natmap_to_list {A} : FinMapToList nat A (natmap A) := λ m,
+Global Instance natmap_to_list {A} : FinMapToList nat A (natmap A) := λ m,
   let (l,_) := m in natmap_to_list_raw 0 l.
 
 Definition natmap_map_raw {A B} (f : A → B) : natmap_raw A → natmap_raw B :=
@@ -202,7 +202,7 @@ Lemma natmap_lookup_map_raw {A B} (f : A → B) i l :
 Proof.
   unfold natmap_map_raw. rewrite list_lookup_fmap. by destruct (l !! i).
 Qed.
-Instance natmap_map: FMap natmap := λ A B f m,
+Global Instance natmap_map: FMap natmap := λ A B f m,
   let (l,Hl) := m in NatMap (natmap_map_raw f l) (natmap_map_wf _ _ Hl).
 
 Instance: FinMap nat natmap.
@@ -256,7 +256,7 @@ Qed.
 
 (** Finally, we can construct sets of [nat]s satisfying extensional equality. *)
 Notation natset := (mapset natmap).
-Instance natmap_dom {A} : Dom (natmap A) natset := mapset_dom.
+Global Instance natmap_dom {A} : Dom (natmap A) natset := mapset_dom.
 Instance: FinMapDom nat natmap natset := mapset_dom_spec.
 
 (* Fixpoint avoids this definition from being unfolded *)

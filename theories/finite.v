@@ -8,10 +8,10 @@ Class Finite A `{EqDecision A} := {
   elem_of_enum x : x ∈ enum
 }.
 Global Hint Mode Finite ! - : typeclass_instances.
-Arguments enum : clear implicits.
-Arguments enum _ {_ _} : assert.
-Arguments NoDup_enum : clear implicits.
-Arguments NoDup_enum _ {_ _} : assert.
+Global Arguments enum : clear implicits.
+Global Arguments enum _ {_ _} : assert.
+Global Arguments NoDup_enum : clear implicits.
+Global Arguments NoDup_enum _ {_ _} : assert.
 Definition card A `{Finite A} := length (enum A).
 
 Program Definition finite_countable `{Finite A} : Countable A := {|
@@ -19,7 +19,7 @@ Program Definition finite_countable `{Finite A} : Countable A := {|
     Pos.of_nat $ S $ default 0 $ fst <$> list_find (x =.) (enum A);
   decode := λ p, enum A !! pred (Pos.to_nat p)
 |}.
-Arguments Pos.of_nat : simpl never.
+Global Arguments Pos.of_nat : simpl never.
 Next Obligation.
   intros ?? [xs Hxs HA] x; unfold encode, decode; simpl.
   destruct (list_find_elem_of (x =.) xs x) as [[i y] Hi]; auto.

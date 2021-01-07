@@ -22,10 +22,10 @@ all nodes. *)
 Inductive Pmap_raw (A : Type) : Type :=
   | PLeaf: Pmap_raw A
   | PNode: option A → Pmap_raw A → Pmap_raw A → Pmap_raw A.
-Arguments PLeaf {_} : assert.
-Arguments PNode {_} _ _ _ : assert.
+Global Arguments PLeaf {_} : assert.
+Global Arguments PNode {_} _ _ _ : assert.
 
-Instance Pmap_raw_eq_dec `{EqDecision A} : EqDecision (Pmap_raw A).
+Global Instance Pmap_raw_eq_dec `{EqDecision A} : EqDecision (Pmap_raw A).
 Proof. solve_decision. Defined.
 
 Fixpoint Pmap_wf {A} (t : Pmap_raw A) : bool :=
@@ -34,7 +34,7 @@ Fixpoint Pmap_wf {A} (t : Pmap_raw A) : bool :=
   | PNode None PLeaf PLeaf => false
   | PNode _ l r => Pmap_wf l && Pmap_wf r
   end.
-Arguments Pmap_wf _ !_ / : simpl nomatch, assert.
+Global Arguments Pmap_wf _ !_ / : simpl nomatch, assert.
 Lemma Pmap_wf_l {A} o (l r : Pmap_raw A) : Pmap_wf (PNode o l r) → Pmap_wf l.
 Proof. destruct o, l, r; simpl; rewrite ?andb_True; tauto. Qed.
 Lemma Pmap_wf_r {A} o (l r : Pmap_raw A) : Pmap_wf (PNode o l r) → Pmap_wf r.
@@ -42,15 +42,15 @@ Proof. destruct o, l, r; simpl; rewrite ?andb_True; tauto. Qed.
 Local Hint Immediate Pmap_wf_l Pmap_wf_r : core.
 Definition PNode' {A} (o : option A) (l r : Pmap_raw A) :=
   match l, o, r with PLeaf, None, PLeaf => PLeaf | _, _, _ => PNode o l r end.
-Arguments PNode' : simpl never.
+Global Arguments PNode' : simpl never.
 Lemma PNode_wf {A} o (l r : Pmap_raw A) :
   Pmap_wf l → Pmap_wf r → Pmap_wf (PNode' o l r).
 Proof. destruct o, l, r; simpl; auto. Qed.
 Local Hint Resolve PNode_wf : core.
 
 (** Operations *)
-Instance Pempty_raw {A} : Empty (Pmap_raw A) := PLeaf.
-Instance Plookup_raw {A} : Lookup positive A (Pmap_raw A) :=
+Global Instance Pempty_raw {A} : Empty (Pmap_raw A) := PLeaf.
+Global Instance Plookup_raw {A} : Lookup positive A (Pmap_raw A) :=
   fix go (i : positive) (t : Pmap_raw A) {struct t} : option A :=
   let _ : Lookup _ _ _ := @go in
   match t with
@@ -256,33 +256,33 @@ Qed.
 (** Packed version and instance of the finite map type class *)
 Inductive Pmap (A : Type) : Type :=
   PMap { pmap_car : Pmap_raw A; pmap_prf : Pmap_wf pmap_car }.
-Arguments PMap {_} _ _ : assert.
-Arguments pmap_car {_} _ : assert.
-Arguments pmap_prf {_} _ : assert.
+Global Arguments PMap {_} _ _ : assert.
+Global Arguments pmap_car {_} _ : assert.
+Global Arguments pmap_prf {_} _ : assert.
 Lemma Pmap_eq {A} (m1 m2 : Pmap A) : m1 = m2 ↔ pmap_car m1 = pmap_car m2.
 Proof.
   split; [by intros ->|intros]; destruct m1 as [t1 ?], m2 as [t2 ?].
   simplify_eq/=; f_equal; apply proof_irrel.
 Qed.
-Instance Pmap_eq_dec `{EqDecision A} : EqDecision (Pmap A) := λ m1 m2,
+Global Instance Pmap_eq_dec `{EqDecision A} : EqDecision (Pmap A) := λ m1 m2,
   match Pmap_raw_eq_dec (pmap_car m1) (pmap_car m2) with
   | left H => left (proj2 (Pmap_eq m1 m2) H)
   | right H => right (H ∘ proj1 (Pmap_eq m1 m2))
   end.
-Instance Pempty {A} : Empty (Pmap A) := PMap ∅ I.
-Instance Plookup {A} : Lookup positive A (Pmap A) := λ i m, pmap_car m !! i.
-Instance Ppartial_alter {A} : PartialAlter positive A (Pmap A) := λ f i m,
+Global Instance Pempty {A} : Empty (Pmap A) := PMap ∅ I.
+Global Instance Plookup {A} : Lookup positive A (Pmap A) := λ i m, pmap_car m !! i.
+Global Instance Ppartial_alter {A} : PartialAlter positive A (Pmap A) := λ f i m,
   let (t,Ht) := m in PMap (partial_alter f i t) (Ppartial_alter_wf f i _ Ht).
-Instance Pfmap : FMap Pmap := λ A B f m,
+Global Instance Pfmap : FMap Pmap := λ A B f m,
   let (t,Ht) := m in PMap (f <$> t) (Pfmap_wf f _ Ht).
-Instance Pto_list {A} : FinMapToList positive A (Pmap A) := λ m,
+Global Instance Pto_list {A} : FinMapToList positive A (Pmap A) := λ m,
   let (t,Ht) := m in Pto_list_raw 1 t [].
-Instance Pomap : OMap Pmap := λ A B f m,
+Global Instance Pomap : OMap Pmap := λ A B f m,
   let (t,Ht) := m in PMap (omap f t) (Pomap_wf f _ Ht).
-Instance Pmerge : Merge Pmap := λ A B C f m1 m2,
+Global Instance Pmerge : Merge Pmap := λ A B C f m1 m2,
   let (t1,Ht1) := m1 in let (t2,Ht2) := m2 in PMap _ (Pmerge_wf f _ _ Ht1 Ht2).
 
-Instance Pmap_finmap : FinMap positive Pmap.
+Global Instance Pmap_finmap : FinMap positive Pmap.
 Proof.
   split.
   - by intros ? [t1 ?] [t2 ?] ?; apply Pmap_eq, Pmap_wf_eq.
@@ -312,5 +312,5 @@ Qed.
 (** * Finite sets *)
 (** We construct sets of [positives]s satisfying extensional equality. *)
 Notation Pset := (mapset Pmap).
-Instance Pmap_dom {A} : Dom (Pmap A) Pset := mapset_dom.
-Instance Pmap_dom_spec : FinMapDom positive Pmap Pset := mapset_dom_spec.
+Global Instance Pmap_dom {A} : Dom (Pmap A) Pset := mapset_dom.
+Global Instance Pmap_dom_spec : FinMapDom positive Pmap Pset := mapset_dom_spec.

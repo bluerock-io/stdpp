@@ -55,19 +55,19 @@ Class FinMap K M `{FMap M, ∀ A, Lookup K A (M A), ∀ A, Empty (M A), ∀ A,
 finite map implementations. These generic implementations do not cause a
 significant performance loss, which justifies including them in the finite map
 interface as primitive operations. *)
-Instance map_insert `{PartialAlter K A M} : Insert K A M :=
+Global Instance map_insert `{PartialAlter K A M} : Insert K A M :=
   λ i x, partial_alter (λ _, Some x) i.
-Instance map_alter `{PartialAlter K A M} : Alter K A M :=
+Global Instance map_alter `{PartialAlter K A M} : Alter K A M :=
   λ f, partial_alter (fmap f).
-Instance map_delete `{PartialAlter K A M} : Delete K M :=
+Global Instance map_delete `{PartialAlter K A M} : Delete K M :=
   partial_alter (λ _, None).
-Instance map_singleton `{PartialAlter K A M, Empty M} :
+Global Instance map_singleton `{PartialAlter K A M, Empty M} :
   SingletonM K A M := λ i x, <[i:=x]> ∅.
 
 Definition list_to_map `{Insert K A M, Empty M} : list (K * A) → M :=
   fold_right (λ p, <[p.1:=p.2]>) ∅.
 
-Instance map_size `{FinMapToList K A M} : Size M := λ m, length (map_to_list m).
+Global Instance map_size `{FinMapToList K A M} : Size M := λ m, length (map_to_list m).
 
 Definition map_to_set `{FinMapToList K A M,
     Singleton B C, Empty C, Union C} (f : K → A → B) (m : M) : C :=
@@ -76,16 +76,16 @@ Definition set_to_map `{Elements B C, Insert K A M, Empty M}
     (f : B → K * A) (X : C) : M :=
   list_to_map (f <$> elements X).
 
-Instance map_union_with `{Merge M} {A} : UnionWith A (M A) :=
+Global Instance map_union_with `{Merge M} {A} : UnionWith A (M A) :=
   λ f, merge (union_with f).
-Instance map_intersection_with `{Merge M} {A} : IntersectionWith A (M A) :=
+Global Instance map_intersection_with `{Merge M} {A} : IntersectionWith A (M A) :=
   λ f, merge (intersection_with f).
-Instance map_difference_with `{Merge M} {A} : DifferenceWith A (M A) :=
+Global Instance map_difference_with `{Merge M} {A} : DifferenceWith A (M A) :=
   λ f, merge (difference_with f).
 
 (** Higher precedence to make sure it's not used for other types with a [Lookup]
 instance, such as lists. *)
-Instance map_equiv `{∀ A, Lookup K A (M A), Equiv A} : Equiv (M A) | 20 :=
+Global Instance map_equiv `{∀ A, Lookup K A (M A), Equiv A} : Equiv (M A) | 20 :=
   λ m1 m2, ∀ i, m1 !! i ≡ m2 !! i.
 
 Definition map_Forall `{Lookup K A M} (P : K → A → Prop) : M → Prop :=
@@ -102,20 +102,20 @@ Infix "##ₘ" := map_disjoint (at level 70) : stdpp_scope.
 Global Hint Extern 0 (_ ##ₘ _) => symmetry; eassumption : core.
 Notation "( m ##ₘ.)" := (map_disjoint m) (only parsing) : stdpp_scope.
 Notation "(.##ₘ m )" := (λ m2, m2 ##ₘ m) (only parsing) : stdpp_scope.
-Instance map_subseteq `{∀ A, Lookup K A (M A)} {A} : SubsetEq (M A) :=
+Global Instance map_subseteq `{∀ A, Lookup K A (M A)} {A} : SubsetEq (M A) :=
   map_included (=).
 
 (** The union of two finite maps only has a meaningful definition for maps
 that are disjoint. However, as working with partial functions is inconvenient
 in Coq, we define the union as a total function. In case both finite maps
 have a value at the same index, we take the value of the first map. *)
-Instance map_union `{Merge M} {A} : Union (M A) := union_with (λ x _, Some x).
-Instance map_intersection `{Merge M} {A} : Intersection (M A) :=
+Global Instance map_union `{Merge M} {A} : Union (M A) := union_with (λ x _, Some x).
+Global Instance map_intersection `{Merge M} {A} : Intersection (M A) :=
   intersection_with (λ x _, Some x).
 
 (** The difference operation removes all values from the first map whose
 index contains a value in the second map as well. *)
-Instance map_difference `{Merge M} {A} : Difference (M A) :=
+Global Instance map_difference `{Merge M} {A} : Difference (M A) :=
   difference_with (λ _ _, None).
 
 (** A stronger variant of map that allows the mapped function to use the index
@@ -136,7 +136,7 @@ is unspecified. *)
 Definition map_fold `{FinMapToList K A M} {B}
   (f : K → A → B → B) (b : B) : M → B := foldr (curry f) b ∘ map_to_list.
 
-Instance map_filter `{FinMapToList K A M, Insert K A M, Empty M} : Filter (K * A) M :=
+Global Instance map_filter `{FinMapToList K A M, Insert K A M, Empty M} : Filter (K * A) M :=
   λ P _, map_fold (λ k v m, if decide (P (k,v)) then <[k := v]>m else m) ∅.
 
 Fixpoint map_seq `{Insert nat A M, Empty M} (start : nat) (xs : list A) : M :=
@@ -145,7 +145,7 @@ Fixpoint map_seq `{Insert nat A M, Empty M} (start : nat) (xs : list A) : M :=
   | x :: xs => <[start:=x]> (map_seq (S start) xs)
   end.
 
-Instance finmap_lookup_total `{!Lookup K A (M A), !Inhabited A} :
+Global Instance finmap_lookup_total `{!Lookup K A (M A), !Inhabited A} :
   LookupTotal K A (M A) | 20 := λ i m, default inhabitant (m !! i).
 Typeclasses Opaque finmap_lookup_total.
 

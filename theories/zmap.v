@@ -7,12 +7,12 @@ Local Open Scope Z_scope.
 
 Record Zmap (A : Type) : Type :=
   ZMap { Zmap_0 : option A; Zmap_pos : Pmap A; Zmap_neg : Pmap A }.
-Arguments Zmap_0 {_} _ : assert.
-Arguments Zmap_pos {_} _ : assert.
-Arguments Zmap_neg {_} _ : assert.
-Arguments ZMap {_} _ _ _ : assert.
+Global Arguments Zmap_0 {_} _ : assert.
+Global Arguments Zmap_pos {_} _ : assert.
+Global Arguments Zmap_neg {_} _ : assert.
+Global Arguments ZMap {_} _ _ _ : assert.
 
-Instance Zmap_eq_dec `{EqDecision A} : EqDecision (Zmap A).
+Global Instance Zmap_eq_dec `{EqDecision A} : EqDecision (Zmap A).
 Proof.
  refine (λ t1 t2,
   match t1, t2 with
@@ -20,31 +20,31 @@ Proof.
      cast_if_and3 (decide (x = y)) (decide (t1 = t2)) (decide (t1' = t2'))
   end); abstract congruence.
 Defined.
-Instance Zempty {A} : Empty (Zmap A) := ZMap None ∅ ∅.
-Instance Zlookup {A} : Lookup Z A (Zmap A) := λ i t,
+Global Instance Zempty {A} : Empty (Zmap A) := ZMap None ∅ ∅.
+Global Instance Zlookup {A} : Lookup Z A (Zmap A) := λ i t,
   match i with
   | Z0 => Zmap_0 t | Zpos p => Zmap_pos t !! p | Zneg p => Zmap_neg t !! p
   end.
-Instance Zpartial_alter {A} : PartialAlter Z A (Zmap A) := λ f i t,
+Global Instance Zpartial_alter {A} : PartialAlter Z A (Zmap A) := λ f i t,
   match i, t with
   | Z0, ZMap o t t' => ZMap (f o) t t'
   | Zpos p, ZMap o t t' => ZMap o (partial_alter f p t) t'
   | Zneg p, ZMap o t t' => ZMap o t (partial_alter f p t')
   end.
-Instance Zto_list {A} : FinMapToList Z A (Zmap A) := λ t,
+Global Instance Zto_list {A} : FinMapToList Z A (Zmap A) := λ t,
   match t with
   | ZMap o t t' => from_option (λ x, [(0,x)]) [] o ++
      (prod_map Zpos id <$> map_to_list t) ++
      (prod_map Zneg id <$> map_to_list t')
   end.
-Instance Zomap: OMap Zmap := λ A B f t,
+Global Instance Zomap: OMap Zmap := λ A B f t,
   match t with ZMap o t t' => ZMap (o ≫= f) (omap f t) (omap f t') end.
-Instance Zmerge: Merge Zmap := λ A B C f t1 t2,
+Global Instance Zmerge: Merge Zmap := λ A B C f t1 t2,
   match t1, t2 with
   | ZMap o1 t1 t1', ZMap o2 t2 t2' =>
      ZMap (f o1 o2) (merge f t1 t2) (merge f t1' t2')
   end.
-Instance Nfmap: FMap Zmap := λ A B f t,
+Global Instance Nfmap: FMap Zmap := λ A B f t,
   match t with ZMap o t t' => ZMap (f <$> o) (f <$> t) (f <$> t') end.
 
 Instance: FinMap Z Zmap.
@@ -91,5 +91,5 @@ Qed.
 (** * Finite sets *)
 (** We construct sets of [Z]s satisfying extensional equality. *)
 Notation Zset := (mapset Zmap).
-Instance Zmap_dom {A} : Dom (Zmap A) Zset := mapset_dom.
+Global Instance Zmap_dom {A} : Dom (Zmap A) Zset := mapset_dom.
 Instance: FinMapDom Z Zmap Zset := mapset_dom_spec.

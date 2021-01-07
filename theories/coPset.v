@@ -18,7 +18,7 @@ Local Open Scope positive_scope.
 Inductive coPset_raw :=
   | coPLeaf : bool → coPset_raw
   | coPNode : bool → coPset_raw → coPset_raw → coPset_raw.
-Instance coPset_raw_eq_dec : EqDecision coPset_raw.
+Global Instance coPset_raw_eq_dec : EqDecision coPset_raw.
 Proof. solve_decision. Defined.
 
 Fixpoint coPset_wf (t : coPset_raw) : bool :=
@@ -28,7 +28,7 @@ Fixpoint coPset_wf (t : coPset_raw) : bool :=
   | coPNode false (coPLeaf false) (coPLeaf false) => false
   | coPNode _ l r => coPset_wf l && coPset_wf r
   end.
-Arguments coPset_wf !_ / : simpl nomatch, assert.
+Global Arguments coPset_wf !_ / : simpl nomatch, assert.
 
 Lemma coPNode_wf_l b l r : coPset_wf (coPNode b l r) → coPset_wf l.
 Proof. destruct b, l as [[]|],r as [[]|]; simpl; rewrite ?andb_True; tauto. Qed.
@@ -42,7 +42,7 @@ Definition coPNode' (b : bool) (l r : coPset_raw) : coPset_raw :=
   | false, coPLeaf false, coPLeaf false => coPLeaf false
   | _, _, _ => coPNode b l r
   end.
-Arguments coPNode' : simpl never.
+Global Arguments coPNode' : simpl never.
 Lemma coPNode_wf b l r : coPset_wf l → coPset_wf r → coPset_wf (coPNode' b l r).
 Proof. destruct b, l as [[]|], r as [[]|]; simpl; auto. Qed.
 Global Hint Resolve coPNode_wf : core.
@@ -55,7 +55,7 @@ Fixpoint coPset_elem_of_raw (p : positive) (t : coPset_raw) {struct t} : bool :=
   | coPNode _ _ r, p~1 => coPset_elem_of_raw p r
   end.
 Local Notation e_of := coPset_elem_of_raw.
-Arguments coPset_elem_of_raw _ !_ / : simpl nomatch, assert.
+Global Arguments coPset_elem_of_raw _ !_ / : simpl nomatch, assert.
 Lemma coPset_elem_of_node b l r p :
   e_of p (coPNode' b l r) = e_of p (coPNode b l r).
 Proof. by destruct p, b, l as [[]|], r as [[]|]. Qed.
@@ -87,7 +87,7 @@ Fixpoint coPset_singleton_raw (p : positive) : coPset_raw :=
   | p~0 => coPNode' false (coPset_singleton_raw p) (coPLeaf false)
   | p~1 => coPNode' false (coPLeaf false) (coPset_singleton_raw p)
   end.
-Instance coPset_union_raw : Union coPset_raw :=
+Global Instance coPset_union_raw : Union coPset_raw :=
   fix go t1 t2 := let _ : Union _ := @go in
   match t1, t2 with
   | coPLeaf false, coPLeaf false => coPLeaf false
@@ -98,7 +98,7 @@ Instance coPset_union_raw : Union coPset_raw :=
   | coPNode b1 l1 r1, coPNode b2 l2 r2 => coPNode' (b1||b2) (l1 ∪ l2) (r1 ∪ r2)
   end.
 Local Arguments union _ _!_ !_ / : assert.
-Instance coPset_intersection_raw : Intersection coPset_raw :=
+Global Instance coPset_intersection_raw : Intersection coPset_raw :=
   fix go t1 t2 := let _ : Intersection _ := @go in
   match t1, t2 with
   | coPLeaf true, coPLeaf true => coPLeaf true
@@ -152,22 +152,22 @@ Qed.
 (** * Packed together + set operations *)
 Definition coPset := { t | coPset_wf t }.
 
-Instance coPset_singleton : Singleton positive coPset := λ p,
+Global Instance coPset_singleton : Singleton positive coPset := λ p,
   coPset_singleton_raw p ↾ coPset_singleton_wf _.
-Instance coPset_elem_of : ElemOf positive coPset := λ p X, e_of p (`X).
-Instance coPset_empty : Empty coPset := coPLeaf false ↾ I.
-Instance coPset_top : Top coPset := coPLeaf true ↾ I.
-Instance coPset_union : Union coPset := λ X Y,
+Global Instance coPset_elem_of : ElemOf positive coPset := λ p X, e_of p (`X).
+Global Instance coPset_empty : Empty coPset := coPLeaf false ↾ I.
+Global Instance coPset_top : Top coPset := coPLeaf true ↾ I.
+Global Instance coPset_union : Union coPset := λ X Y,
   let (t1,Ht1) := X in let (t2,Ht2) := Y in
   (t1 ∪ t2) ↾ coPset_union_wf _ _ Ht1 Ht2.
-Instance coPset_intersection : Intersection coPset := λ X Y,
+Global Instance coPset_intersection : Intersection coPset := λ X Y,
   let (t1,Ht1) := X in let (t2,Ht2) := Y in
   (t1 ∩ t2) ↾ coPset_intersection_wf _ _ Ht1 Ht2.
-Instance coPset_difference : Difference coPset := λ X Y,
+Global Instance coPset_difference : Difference coPset := λ X Y,
   let (t1,Ht1) := X in let (t2,Ht2) := Y in
   (t1 ∩ coPset_opp_raw t2) ↾ coPset_intersection_wf _ _ Ht1 (coPset_opp_wf _).
 
-Instance coPset_top_set : TopSet positive coPset.
+Global Instance coPset_top_set : TopSet positive coPset.
 Proof.
   split; [split; [split| |]|].
   - by intros ??.
@@ -186,23 +186,23 @@ Qed.
 Local Definition coPset_top_subseteq := top_subseteq (C:=coPset).
 Global Hint Resolve coPset_top_subseteq : core.
 
-Instance coPset_leibniz : LeibnizEquiv coPset.
+Global Instance coPset_leibniz : LeibnizEquiv coPset.
 Proof.
   intros X Y; rewrite elem_of_equiv; intros HXY.
   apply (sig_eq_pi _), coPset_eq; try apply @proj2_sig.
   intros p; apply eq_bool_prop_intro, (HXY p).
 Qed.
 
-Instance coPset_elem_of_dec : RelDecision (∈@{coPset}).
+Global Instance coPset_elem_of_dec : RelDecision (∈@{coPset}).
 Proof. solve_decision. Defined.
-Instance coPset_equiv_dec : RelDecision (≡@{coPset}).
+Global Instance coPset_equiv_dec : RelDecision (≡@{coPset}).
 Proof. refine (λ X Y, cast_if (decide (X = Y))); abstract (by fold_leibniz). Defined.
-Instance mapset_disjoint_dec : RelDecision (##@{coPset}).
+Global Instance mapset_disjoint_dec : RelDecision (##@{coPset}).
 Proof.
  refine (λ X Y, cast_if (decide (X ∩ Y = ∅)));
   abstract (by rewrite disjoint_intersection_L).
 Defined.
-Instance mapset_subseteq_dec : RelDecision (⊆@{coPset}).
+Global Instance mapset_subseteq_dec : RelDecision (⊆@{coPset}).
 Proof.
  refine (λ X Y, cast_if (decide (X ∪ Y = Y))); abstract (by rewrite subseteq_union_L).
 Defined.
@@ -232,7 +232,7 @@ Proof.
     exists ([1] ++ ((~0) <$> ll) ++ ((~1) <$> rl))%list; intros [i|i|]; simpl;
       rewrite elem_of_cons, elem_of_app, !elem_of_list_fmap; naive_solver.
 Qed.
-Instance coPset_finite_dec (X : coPset) : Decision (set_finite X).
+Global Instance coPset_finite_dec (X : coPset) : Decision (set_finite X).
 Proof.
   refine (cast_if (decide (coPset_finite (`X)))); by rewrite coPset_finite_spec.
 Defined.
@@ -339,15 +339,15 @@ Proof.
 Qed.
 
 (** * Domain of finite maps *)
-Instance Pmap_dom_coPset {A} : Dom (Pmap A) coPset := λ m, Pset_to_coPset (dom _ m).
-Instance Pmap_dom_coPset_spec: FinMapDom positive Pmap coPset.
+Global Instance Pmap_dom_coPset {A} : Dom (Pmap A) coPset := λ m, Pset_to_coPset (dom _ m).
+Global Instance Pmap_dom_coPset_spec: FinMapDom positive Pmap coPset.
 Proof.
   split; try apply _; intros A m i; unfold dom, Pmap_dom_coPset.
   by rewrite elem_of_Pset_to_coPset, elem_of_dom.
 Qed.
-Instance gmap_dom_coPset {A} : Dom (gmap positive A) coPset := λ m,
+Global Instance gmap_dom_coPset {A} : Dom (gmap positive A) coPset := λ m,
   gset_to_coPset (dom _ m).
-Instance gmap_dom_coPset_spec: FinMapDom positive (gmap positive) coPset.
+Global Instance gmap_dom_coPset_spec: FinMapDom positive (gmap positive) coPset.
 Proof.
   split; try apply _; intros A m i; unfold dom, gmap_dom_coPset.
   by rewrite elem_of_gset_to_coPset, elem_of_dom.

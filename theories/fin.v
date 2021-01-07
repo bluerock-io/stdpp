@@ -17,7 +17,7 @@ Notation FS := Fin.FS.
 
 Declare Scope fin_scope.
 Delimit Scope fin_scope with fin.
-Arguments Fin.FS _ _%fin : assert.
+Global Arguments Fin.FS _ _%fin : assert.
 
 Notation "0" := Fin.F1 : fin_scope. Notation "1" := (FS 0) : fin_scope.
 Notation "2" := (FS 1) : fin_scope. Notation "3" := (FS 2) : fin_scope.
@@ -33,7 +33,7 @@ Coercion fin_to_nat : fin >-> nat.
 Notation nat_to_fin := Fin.of_nat_lt.
 Notation fin_rect2 := Fin.rect2.
 
-Instance fin_dec {n} : EqDecision (fin n).
+Global Instance fin_dec {n} : EqDecision (fin n).
 Proof.
  refine (fin_rect2
   (λ n (i j : fin n), { i = j } + { i ≠ j })
@@ -71,9 +71,9 @@ Ltac inv_fin i :=
     end
   end.
 
-Instance FS_inj {n} : Inj (=) (=) (@FS n).
+Global Instance FS_inj {n} : Inj (=) (=) (@FS n).
 Proof. intros i j. apply Fin.FS_inj. Qed.
-Instance fin_to_nat_inj {n} : Inj (=) (=) (@fin_to_nat n).
+Global Instance fin_to_nat_inj {n} : Inj (=) (=) (@fin_to_nat n).
 Proof.
   intros i. induction i; intros j; inv_fin j; intros; f_equal/=; auto with lia.
 Qed.

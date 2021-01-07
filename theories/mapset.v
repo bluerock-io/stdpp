@@ -10,8 +10,8 @@ Unset Default Proof Using.
 
 Record mapset (M : Type → Type) : Type :=
   Mapset { mapset_car: M (unit : Type) }.
-Arguments Mapset {_} _ : assert.
-Arguments mapset_car {_} _ : assert.
+Global Arguments Mapset {_} _ : assert.
+Global Arguments mapset_car {_} _ : assert.
 
 Section mapset.
 Context `{FinMap K M}.
@@ -37,7 +37,7 @@ Proof.
   f_equal. apply map_eq. intros i. apply option_eq. intros []. by apply E.
 Qed.
 
-Instance mapset_set: Set_ K (mapset M).
+Local Instance mapset_set: Set_ K (mapset M).
 Proof.
   split; [split | | ].
   - unfold empty, elem_of, mapset_empty, mapset_elem_of.
@@ -124,8 +124,8 @@ Proof.
   - destruct (Is_true_reflect (f a)); naive_solver.
   - naive_solver.
 Qed.
-Instance mapset_dom {A} : Dom (M A) (mapset M) := mapset_dom_with (λ _, true).
-Instance mapset_dom_spec: FinMapDom K M (mapset M).
+Local Instance mapset_dom {A} : Dom (M A) (mapset M) := mapset_dom_with (λ _, true).
+Local Instance mapset_dom_spec: FinMapDom K M (mapset M).
 Proof.
   split; try apply _. intros. unfold dom, mapset_dom, is_Some.
   rewrite elem_of_mapset_dom_with; naive_solver.
@@ -136,4 +136,4 @@ End mapset.
 not unfold it and try to unify [∈] against goals with [=]. *)
 Opaque mapset_elem_of.
 
-Arguments mapset_eq_dec : simpl never.
+Global Arguments mapset_eq_dec : simpl never.

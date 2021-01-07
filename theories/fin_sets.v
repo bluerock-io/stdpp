@@ -9,12 +9,12 @@ From stdpp Require Import options.
 Set Default Proof Using "Type*".
 
 (** Operations *)
-Instance set_size `{Elements A C} : Size C := length ∘ elements.
+Global Instance set_size `{Elements A C} : Size C := length ∘ elements.
 
 Definition set_fold `{Elements A C} {B}
   (f : A → B → B) (b : B) : C → B := foldr f b ∘ elements.
 
-Instance set_filter
+Global Instance set_filter
     `{Elements A C, Empty C, Singleton A C, Union C} : Filter A C := λ P _ X,
   list_to_set (filter P (elements X)).
 Typeclasses Opaque set_filter.
@@ -24,7 +24,7 @@ Definition set_map `{Elements A C, Singleton B D, Empty D, Union D}
   list_to_set (f <$> elements X).
 Typeclasses Opaque set_map.
 
-Instance set_fresh `{Elements A C, Fresh A (list A)} : Fresh A C :=
+Global Instance set_fresh `{Elements A C, Fresh A (list A)} : Fresh A C :=
   fresh ∘ elements.
 Typeclasses Opaque set_filter.
 
@@ -53,7 +53,7 @@ Implicit Types X Y : C.
 Lemma fin_set_finite X : set_finite X.
 Proof. by exists (elements X); intros; rewrite elem_of_elements. Qed.
 
-Instance elem_of_dec_slow : RelDecision (∈@{C}) | 100.
+Local Instance elem_of_dec_slow : RelDecision (∈@{C}) | 100.
 Proof.
   refine (λ x X, cast_if (decide_rel (∈) x (elements X)));
     by rewrite <-(elem_of_elements _).

@@ -26,24 +26,24 @@ Record gmap K `{Countable K} A := GMap {
   gmap_car : Pmap A;
   gmap_prf : gmap_wf K gmap_car
 }.
-Arguments GMap {_ _ _ _} _ _ : assert.
-Arguments gmap_car {_ _ _ _} _ : assert.
+Global Arguments GMap {_ _ _ _} _ _ : assert.
+Global Arguments gmap_car {_ _ _ _} _ : assert.
 Lemma gmap_eq `{Countable K} {A} (m1 m2 : gmap K A) :
   m1 = m2 ↔ gmap_car m1 = gmap_car m2.
 Proof.
   split; [by intros ->|intros]. destruct m1, m2; simplify_eq/=.
   f_equal; apply proof_irrel.
 Qed.
-Instance gmap_eq_eq `{Countable K, EqDecision A} : EqDecision (gmap K A).
+Global Instance gmap_eq_eq `{Countable K, EqDecision A} : EqDecision (gmap K A).
 Proof.
  refine (λ m1 m2, cast_if (decide (gmap_car m1 = gmap_car m2)));
   abstract (by rewrite gmap_eq).
 Defined.
 
 (** * Operations on the data structure *)
-Instance gmap_lookup `{Countable K} {A} : Lookup K A (gmap K A) :=
+Global Instance gmap_lookup `{Countable K} {A} : Lookup K A (gmap K A) :=
   λ i '(GMap m _), m !! encode i.
-Instance gmap_empty `{Countable K} {A} : Empty (gmap K A) := GMap ∅ I.
+Global Instance gmap_empty `{Countable K} {A} : Empty (gmap K A) := GMap ∅ I.
 (** Block reduction, even on concrete [gmap]s.
 Marking [gmap_empty] as [simpl never] would not be enough, because of
 https://github.com/coq/coq/issues/2972 and
@@ -61,7 +61,7 @@ Proof.
   - rewrite lookup_partial_alter_ne by done. by apply Hm.
 Qed.
 
-Instance gmap_partial_alter `{Countable K} {A} :
+Global Instance gmap_partial_alter `{Countable K} {A} :
     PartialAlter K A (gmap K A) := λ f i '(GMap m Hm),
   GMap (partial_alter f (encode i) m) (gmap_partial_alter_wf f m i Hm).
 
@@ -71,7 +71,7 @@ Proof.
   unfold gmap_wf; rewrite !bool_decide_spec.
   intros ? p x. rewrite lookup_fmap, fmap_Some; intros (?&?&?); eauto.
 Qed.
-Instance gmap_fmap `{Countable K} : FMap (gmap K) := λ A B f '(GMap m Hm),
+Global Instance gmap_fmap `{Countable K} : FMap (gmap K) := λ A B f '(GMap m Hm),
   GMap (f <$> m) (gmap_fmap_wf f m Hm).
 Lemma gmap_omap_wf `{Countable K} {A B} (f : A → option B) m :
   gmap_wf K m → gmap_wf K (omap f m).
@@ -79,7 +79,7 @@ Proof.
   unfold gmap_wf; rewrite !bool_decide_spec.
   intros ? p x; rewrite lookup_omap, bind_Some; intros (?&?&?); eauto.
 Qed.
-Instance gmap_omap `{Countable K} : OMap (gmap K) := λ A B f '(GMap m Hm),
+Global Instance gmap_omap `{Countable K} : OMap (gmap K) := λ A B f '(GMap m Hm),
   GMap (omap f m) (gmap_omap_wf f m Hm).
 Lemma gmap_merge_wf `{Countable K} {A B C}
     (f : option A → option B → option C) m1 m2 :
@@ -90,14 +90,14 @@ Proof.
   intros Hm1 Hm2 p z; rewrite lookup_merge by done; intros.
   destruct (m1 !! _) eqn:?, (m2 !! _) eqn:?; naive_solver.
 Qed.
-Instance gmap_merge `{Countable K} : Merge (gmap K) := λ A B C f '(GMap m1 Hm1) '(GMap m2 Hm2),
+Global Instance gmap_merge `{Countable K} : Merge (gmap K) := λ A B C f '(GMap m1 Hm1) '(GMap m2 Hm2),
   let f' o1 o2 := match o1, o2 with None, None => None | _, _ => f o1 o2 end in
   GMap (merge f' m1 m2) (gmap_merge_wf f m1 m2 Hm1 Hm2).
-Instance gmap_to_list `{Countable K} {A} : FinMapToList K A (gmap K A) := λ '(GMap m _),
+Global Instance gmap_to_list `{Countable K} {A} : FinMapToList K A (gmap K A) := λ '(GMap m _),
   omap (λ '(i, x), (., x) <$> decode i) (map_to_list m).
 
 (** * Instantiation of the finite map interface *)
-Instance gmap_finmap `{Countable K} : FinMap K (gmap K).
+Global Instance gmap_finmap `{Countable K} : FinMap K (gmap K).
 Proof.
   split.
   - unfold lookup; intros A [m1 Hm1] [m2 Hm2] Hm.

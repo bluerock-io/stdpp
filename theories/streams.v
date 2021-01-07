@@ -6,7 +6,7 @@ Delimit Scope stream_scope with stream.
 Open Scope stream_scope.
 
 CoInductive stream (A : Type) : Type := scons : A → stream A → stream A.
-Arguments scons {_} _ _ : assert.
+Global Arguments scons {_} _ _ : assert.
 Infix ":.:" := scons (at level 60, right associativity) : stream_scope.
 Bind Scope stream_scope with stream.
 
@@ -17,7 +17,7 @@ CoInductive stream_equiv' {A} (s1 s2 : stream A) : Prop :=
   scons_equiv' :
     shead s1 = shead s2 → stream_equiv' (stail s1) (stail s2) →
     stream_equiv' s1 s2.
-Instance stream_equiv {A} : Equiv (stream A) := stream_equiv'.
+Global Instance stream_equiv {A} : Equiv (stream A) := stream_equiv'.
 
 Reserved Infix "!.!" (at level 20).
 Fixpoint slookup {A} (i : nat) (s : stream A) : A :=

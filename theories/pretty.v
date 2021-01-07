@@ -24,7 +24,7 @@ Fixpoint pretty_N_go_help (x : N) (acc : Acc (<)%N x) (s : string) : string :=
   end.
 Definition pretty_N_go (x : N) : string → string :=
   pretty_N_go_help x (wf_guard 32 N.lt_wf_0 x).
-Instance pretty_N : Pretty N := λ x,
+Global Instance pretty_N : Pretty N := λ x,
   if decide (x = 0)%N then "0" else pretty_N_go x "".
 
 Lemma pretty_N_go_0 s : pretty_N_go 0 s = s.
@@ -70,7 +70,7 @@ Proof.
     unfold pretty_N_char. by repeat case_match.
 Qed.
 
-Instance pretty_N_inj : Inj (=@{N}) (=) pretty.
+Global Instance pretty_N_inj : Inj (=@{N}) (=) pretty.
 Proof.
   cut (∀ x y s s', pretty_N_go x s = pretty_N_go y s' →
     String.length s = String.length s' → x = y ∧ s = s').
@@ -99,19 +99,19 @@ Proof.
   rewrite (N.div_mod x 10), (N.div_mod y 10) by done. lia.
 Qed.
 
-Instance pretty_nat : Pretty nat := λ x, pretty (N.of_nat x).
-Instance pretty_nat_inj : Inj (=@{nat}) (=) pretty.
+Global Instance pretty_nat : Pretty nat := λ x, pretty (N.of_nat x).
+Global Instance pretty_nat_inj : Inj (=@{nat}) (=) pretty.
 Proof. apply _. Qed.
 
-Instance pretty_positive : Pretty positive := λ x, pretty (Npos x).
-Instance pretty_positive_inj : Inj (=@{positive}) (=) pretty.
+Global Instance pretty_positive : Pretty positive := λ x, pretty (Npos x).
+Global Instance pretty_positive_inj : Inj (=@{positive}) (=) pretty.
 Proof. apply _. Qed.
 
-Instance pretty_Z : Pretty Z := λ x,
+Global Instance pretty_Z : Pretty Z := λ x,
   match x with
   | Z0 => "0" | Zpos x => pretty x | Zneg x => "-" +:+ pretty x
   end%string.
-Instance pretty_Z_inj : Inj (=@{Z}) (=) pretty.
+Global Instance pretty_Z_inj : Inj (=@{Z}) (=) pretty.
 Proof.
   unfold pretty, pretty_Z.
   intros [|x|x] [|y|y] Hpretty; simplify_eq/=; try done.

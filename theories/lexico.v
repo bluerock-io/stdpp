@@ -10,17 +10,17 @@ Notation cast_trichotomy T :=
   | inright _ => inright _
   end.
 
-Instance prod_lexico `{Lexico A, Lexico B} : Lexico (A * B) := λ p1 p2,
+Global Instance prod_lexico `{Lexico A, Lexico B} : Lexico (A * B) := λ p1 p2,
   (**i 1.) *) lexico (p1.1) (p2.1) ∨
   (**i 2.) *) p1.1 = p2.1 ∧ lexico (p1.2) (p2.2).
 
-Instance bool_lexico : Lexico bool := λ b1 b2,
+Global Instance bool_lexico : Lexico bool := λ b1 b2,
   match b1, b2 with false, true => True | _, _ => False end.
-Instance nat_lexico : Lexico nat := (<).
-Instance N_lexico : Lexico N := (<)%N.
-Instance Z_lexico : Lexico Z := (<)%Z.
+Global Instance nat_lexico : Lexico nat := (<).
+Global Instance N_lexico : Lexico N := (<)%N.
+Global Instance Z_lexico : Lexico Z := (<)%Z.
 Typeclasses Opaque bool_lexico nat_lexico N_lexico Z_lexico.
-Instance list_lexico `{Lexico A} : Lexico (list A) :=
+Global Instance list_lexico `{Lexico A} : Lexico (list A) :=
   fix go l1 l2 :=
   let _ : Lexico (list A) := @go in
   match l1, l2 with
@@ -28,7 +28,7 @@ Instance list_lexico `{Lexico A} : Lexico (list A) :=
   | x1 :: l1, x2 :: l2 => lexico (x1,l1) (x2,l2)
   | _, _ => False
   end.
-Instance sig_lexico `{Lexico A} (P : A → Prop) `{∀ x, ProofIrrel (P x)} :
+Global Instance sig_lexico `{Lexico A} (P : A → Prop) `{∀ x, ProofIrrel (P x)} :
   Lexico (sig P) := λ x1 x2, lexico (`x1) (`x2).
 
 Lemma prod_lexico_irreflexive `{Lexico A, Lexico B, !Irreflexive (@lexico A _)}
@@ -44,7 +44,7 @@ Proof.
   by left; trans x2.
 Qed.
 
-Instance prod_lexico_po `{Lexico A, Lexico B, !StrictOrder (@lexico A _)}
+Global Instance prod_lexico_po `{Lexico A, Lexico B, !StrictOrder (@lexico A _)}
   `{!StrictOrder (@lexico B _)} : StrictOrder (@lexico (A * B) _).
 Proof.
   split.
@@ -53,7 +53,7 @@ Proof.
   - intros [??] [??] [??] ??.
     eapply prod_lexico_transitive; eauto. apply transitivity.
 Qed.
-Instance prod_lexico_trichotomyT `{Lexico A, tA : !TrichotomyT (@lexico A _)}
+Global Instance prod_lexico_trichotomyT `{Lexico A, tA : !TrichotomyT (@lexico A _)}
   `{Lexico B, tB : !TrichotomyT (@lexico B _)}: TrichotomyT (@lexico (A * B) _).
 Proof.
  red; refine (λ p1 p2,
@@ -65,13 +65,13 @@ Proof.
     abstract (unfold lexico, prod_lexico; auto using injective_projections).
 Defined.
 
-Instance bool_lexico_po : StrictOrder (@lexico bool _).
+Global Instance bool_lexico_po : StrictOrder (@lexico bool _).
 Proof.
   split.
   - by intros [] ?.
   - by intros [] [] [] ??.
 Qed.
-Instance bool_lexico_trichotomy: TrichotomyT (@lexico bool _).
+Global Instance bool_lexico_trichotomy: TrichotomyT (@lexico bool _).
 Proof.
  red; refine (λ b1 b2,
   match b1, b2 with
@@ -82,9 +82,9 @@ Proof.
   end); abstract (unfold strict, lexico, bool_lexico; naive_solver).
 Defined.
 
-Instance nat_lexico_po : StrictOrder (@lexico nat _).
+Global Instance nat_lexico_po : StrictOrder (@lexico nat _).
 Proof. unfold lexico, nat_lexico. apply _. Qed.
-Instance nat_lexico_trichotomy: TrichotomyT (@lexico nat _).
+Global Instance nat_lexico_trichotomy: TrichotomyT (@lexico nat _).
 Proof.
  red; refine (λ n1 n2,
   match Nat.compare n1 n2 as c return Nat.compare n1 n2 = c → _ with
@@ -94,9 +94,9 @@ Proof.
   end eq_refl).
 Defined.
 
-Instance N_lexico_po : StrictOrder (@lexico N _).
+Global Instance N_lexico_po : StrictOrder (@lexico N _).
 Proof. unfold lexico, N_lexico. apply _. Qed.
-Instance N_lexico_trichotomy: TrichotomyT (@lexico N _).
+Global Instance N_lexico_trichotomy: TrichotomyT (@lexico N _).
 Proof.
  red; refine (λ n1 n2,
   match N.compare n1 n2 as c return N.compare n1 n2 = c → _ with
@@ -106,9 +106,9 @@ Proof.
   end eq_refl).
 Defined.
 
-Instance Z_lexico_po : StrictOrder (@lexico Z _).
+Global Instance Z_lexico_po : StrictOrder (@lexico Z _).
 Proof. unfold lexico, Z_lexico. apply _. Qed.
-Instance Z_lexico_trichotomy: TrichotomyT (@lexico Z _).
+Global Instance Z_lexico_trichotomy: TrichotomyT (@lexico Z _).
 Proof.
  red; refine (λ n1 n2,
   match Z.compare n1 n2 as c return Z.compare n1 n2 = c → _ with
@@ -118,7 +118,7 @@ Proof.
   end eq_refl).
 Defined.
 
-Instance list_lexico_po `{Lexico A, !StrictOrder (@lexico A _)} :
+Global Instance list_lexico_po `{Lexico A, !StrictOrder (@lexico A _)} :
   StrictOrder (@lexico (list A) _).
 Proof.
   split.
@@ -126,7 +126,7 @@ Proof.
   - intros l1. induction l1 as [|x1 l1]; intros [|x2 l2] [|x3 l3] ??; try done.
     eapply prod_lexico_transitive; eauto.
 Qed.
-Instance list_lexico_trichotomy `{Lexico A, tA : !TrichotomyT (@lexico A _)} :
+Global Instance list_lexico_trichotomy `{Lexico A, tA : !TrichotomyT (@lexico A _)} :
   TrichotomyT (@lexico (list A) _).
 Proof.
  refine (
@@ -141,14 +141,14 @@ Proof.
     abstract (repeat (done || constructor || congruence || by inversion 1)).
 Defined.
 
-Instance sig_lexico_po `{Lexico A, !StrictOrder (@lexico A _)}
+Global Instance sig_lexico_po `{Lexico A, !StrictOrder (@lexico A _)}
   (P : A → Prop) `{∀ x, ProofIrrel (P x)} : StrictOrder (@lexico (sig P) _).
 Proof.
   unfold lexico, sig_lexico. split.
   - intros [x ?] ?. by apply (irreflexivity lexico x).
   - intros [x1 ?] [x2 ?] [x3 ?] ??. by trans x2.
 Qed.
-Instance sig_lexico_trichotomy `{Lexico A, tA : !TrichotomyT (@lexico A _)}
+Global Instance sig_lexico_trichotomy `{Lexico A, tA : !TrichotomyT (@lexico A _)}
   (P : A → Prop) `{∀ x, ProofIrrel (P x)} : TrichotomyT (@lexico (sig P) _).
 Proof.
  red; refine (λ x1 x2, cast_trichotomy (trichotomyT lexico (`x1) (`x2)));

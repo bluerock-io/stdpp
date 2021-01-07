@@ -3,10 +3,10 @@ From stdpp Require Import gmap.
 From stdpp Require Import options.
 
 Record gmultiset A `{Countable A} := GMultiSet { gmultiset_car : gmap A nat }.
-Arguments GMultiSet {_ _ _} _ : assert.
-Arguments gmultiset_car {_ _ _} _ : assert.
+Global Arguments GMultiSet {_ _ _} _ : assert.
+Global Arguments gmultiset_car {_ _ _} _ : assert.
 
-Instance gmultiset_eq_dec `{Countable A} : EqDecision (gmultiset A).
+Global Instance gmultiset_eq_dec `{Countable A} : EqDecision (gmultiset A).
 Proof. solve_decision. Defined.
 
 Program Instance gmultiset_countable `{Countable A} :
@@ -169,7 +169,7 @@ universally quantified hypotheses [H : ∀ x : A, P x] in two ways:
 *)
 Class MultisetUnfold `{Countable A} (x : A) (X : gmultiset A) (n : nat) :=
   { multiset_unfold : multiplicity x X = n }.
-Arguments multiset_unfold {_ _ _} _ _ _ {_} : assert.
+Global Arguments multiset_unfold {_ _ _} _ _ _ {_} : assert.
 Global Hint Mode MultisetUnfold + + + - + - : typeclass_instances.
 
 Section multiset_unfold.

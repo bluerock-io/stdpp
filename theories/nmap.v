@@ -7,41 +7,41 @@ From stdpp Require Import options.
 Local Open Scope N_scope.
 
 Record Nmap (A : Type) : Type := NMap { Nmap_0 : option A; Nmap_pos : Pmap A }.
-Arguments Nmap_0 {_} _ : assert.
-Arguments Nmap_pos {_} _ : assert.
-Arguments NMap {_} _ _ : assert.
+Global Arguments Nmap_0 {_} _ : assert.
+Global Arguments Nmap_pos {_} _ : assert.
+Global Arguments NMap {_} _ _ : assert.
 
-Instance Nmap_eq_dec `{EqDecision A} : EqDecision (Nmap A).
+Global Instance Nmap_eq_dec `{EqDecision A} : EqDecision (Nmap A).
 Proof.
  refine (λ t1 t2,
   match t1, t2 with
   | NMap x t1, NMap y t2 => cast_if_and (decide (x = y)) (decide (t1 = t2))
   end); abstract congruence.
 Defined.
-Instance Nempty {A} : Empty (Nmap A) := NMap None ∅.
+Global Instance Nempty {A} : Empty (Nmap A) := NMap None ∅.
 Global Opaque Nempty.
-Instance Nlookup {A} : Lookup N A (Nmap A) := λ i t,
+Global Instance Nlookup {A} : Lookup N A (Nmap A) := λ i t,
   match i with
   | N0 => Nmap_0 t
   | Npos p => Nmap_pos t !! p
   end.
-Instance Npartial_alter {A} : PartialAlter N A (Nmap A) := λ f i t,
+Global Instance Npartial_alter {A} : PartialAlter N A (Nmap A) := λ f i t,
   match i, t with
   | N0, NMap o t => NMap (f o) t
   | Npos p, NMap o t => NMap o (partial_alter f p t)
   end.
-Instance Nto_list {A} : FinMapToList N A (Nmap A) := λ t,
+Global Instance Nto_list {A} : FinMapToList N A (Nmap A) := λ t,
   match t with
   | NMap o t =>
      from_option (λ x, [(0,x)]) [] o ++ (prod_map Npos id <$> map_to_list t)
   end.
-Instance Nomap: OMap Nmap := λ A B f t,
+Global Instance Nomap: OMap Nmap := λ A B f t,
   match t with NMap o t => NMap (o ≫= f) (omap f t) end.
-Instance Nmerge: Merge Nmap := λ A B C f t1 t2,
+Global Instance Nmerge: Merge Nmap := λ A B C f t1 t2,
   match t1, t2 with
   | NMap o1 t1, NMap o2 t2 => NMap (f o1 o2) (merge f t1 t2)
   end.
-Instance Nfmap: FMap Nmap := λ A B f t,
+Global Instance Nfmap: FMap Nmap := λ A B f t,
   match t with NMap o t => NMap (f <$> o) (f <$> t) end.
 
 Instance: FinMap N Nmap.
@@ -80,5 +80,5 @@ Qed.
 (** * Finite sets *)
 (** We construct sets of [N]s satisfying extensional equality. *)
 Notation Nset := (mapset Nmap).
-Instance Nmap_dom {A} : Dom (Nmap A) Nset := mapset_dom.
+Global Instance Nmap_dom {A} : Dom (Nmap A) Nset := mapset_dom.
 Instance: FinMapDom N Nmap Nset := mapset_dom_spec.

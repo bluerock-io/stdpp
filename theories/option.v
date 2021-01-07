@@ -15,14 +15,14 @@ Lemma Some_ne_None {A} (x : A) : Some x ≠ None.
 Proof. congruence. Qed.
 Lemma eq_None_ne_Some {A} (mx : option A) x : mx = None → mx ≠ Some x.
 Proof. congruence. Qed.
-Instance Some_inj {A} : Inj (=) (=) (@Some A).
+Global Instance Some_inj {A} : Inj (=) (=) (@Some A).
 Proof. congruence. Qed.
 
 (** The [from_option] is the eliminator for option. *)
 Definition from_option {A B} (f : A → B) (y : B) (mx : option A) : B :=
   match mx with None => y | Some x => f x end.
 Instance: Params (@from_option) 3 := {}.
-Arguments from_option {_ _} _ _ !_ / : assert.
+Global Arguments from_option {_ _} _ _ !_ / : assert.
 
 (** The eliminator with the identity function. *)
 Notation default := (from_option id).
@@ -56,7 +56,7 @@ Proof. rewrite is_Some_alt; destruct mx; naive_solver. Qed.
 Lemma not_eq_None_Some {A} (mx : option A) : mx ≠ None ↔ is_Some mx.
 Proof. rewrite is_Some_alt; destruct mx; naive_solver. Qed.
 
-Instance is_Some_pi {A} (mx : option A) : ProofIrrel (is_Some mx).
+Global Instance is_Some_pi {A} (mx : option A) : ProofIrrel (is_Some mx).
 Proof.
   set (P (mx : option A) := match mx with Some _ => True | _ => False end).
   set (f mx := match mx return P mx → is_Some mx with
@@ -67,7 +67,7 @@ Proof.
   intros p1 p2. rewrite <-(f_g _ p1), <-(f_g _ p2). by destruct mx, p1.
 Qed.
 
-Instance is_Some_dec {A} (mx : option A) : Decision (is_Some mx) :=
+Global Instance is_Some_dec {A} (mx : option A) : Decision (is_Some mx) :=
   match mx with
   | Some x => left (ex_intro _ x eq_refl)
   | None => right is_Some_None
@@ -109,7 +109,7 @@ Section Forall2.
 End Forall2.
 
 (** Setoids *)
-Instance option_equiv `{Equiv A} : Equiv (option A) := option_Forall2 (≡).
+Global Instance option_equiv `{Equiv A} : Equiv (option A) := option_Forall2 (≡).
 
 Section setoids.
   Context `{Equiv A}.
@@ -152,11 +152,11 @@ End setoids.
 Typeclasses Opaque option_equiv.
 
 (** Equality on [option] is decidable. *)
-Instance option_eq_None_dec {A} (mx : option A) : Decision (mx = None) :=
+Global Instance option_eq_None_dec {A} (mx : option A) : Decision (mx = None) :=
   match mx with Some _ => right (Some_ne_None _) | None => left eq_refl end.
-Instance option_None_eq_dec {A} (mx : option A) : Decision (None = mx) :=
+Global Instance option_None_eq_dec {A} (mx : option A) : Decision (None = mx) :=
   match mx with Some _ => right (None_ne_Some _) | None => left eq_refl end.
-Instance option_eq_dec `{dec : EqDecision A} : EqDecision (option A).
+Global Instance option_eq_dec `{dec : EqDecision A} : EqDecision (option A).
 Proof.
  refine (λ mx my,
   match mx, my with
@@ -166,13 +166,13 @@ Proof.
 Defined.
 
 (** * Monadic operations *)
-Instance option_ret: MRet option := @Some.
-Instance option_bind: MBind option := λ A B f mx,
+Global Instance option_ret: MRet option := @Some.
+Global Instance option_bind: MBind option := λ A B f mx,
   match mx with Some x => f x | None => None end.
-Instance option_join: MJoin option := λ A mmx,
+Global Instance option_join: MJoin option := λ A mmx,
   match mmx with Some mx => mx | None => None end.
-Instance option_fmap: FMap option := @option_map.
-Instance option_guard: MGuard option := λ P dec A f,
+Global Instance option_fmap: FMap option := @option_map.
+Global Instance option_guard: MGuard option := λ P dec A f,
   match dec with left H => f H | _ => None end.
 
 Lemma fmap_is_Some {A B} (f : A → B) mx : is_Some (f <$> mx) ↔ is_Some mx.
@@ -234,13 +234,13 @@ Proof. destruct mx; naive_solver. Qed.
 Lemma bind_with_Some {A} (mx : option A) : mx ≫= Some = mx.
 Proof. by destruct mx. Qed.
 
-Instance option_fmap_proper `{Equiv A, Equiv B} :
+Global Instance option_fmap_proper `{Equiv A, Equiv B} :
   Proper (((≡) ==> (≡)) ==> (≡@{option A}) ==> (≡@{option B})) fmap.
 Proof. destruct 2; constructor; auto. Qed.
-Instance option_mbind_proper `{Equiv A, Equiv B} :
+Global Instance option_mbind_proper `{Equiv A, Equiv B} :
   Proper (((≡) ==> (≡)) ==> (≡@{option A}) ==> (≡@{option B})) mbind.
 Proof. destruct 2; simpl; try constructor; auto. Qed.
-Instance option_mjoin_proper `{Equiv A} :
+Global Instance option_mjoin_proper `{Equiv A} :
   Proper ((≡) ==> (≡@{option (option A)})) mjoin.
 Proof. destruct 1 as [?? []|]; simpl; by constructor. Qed.
 
@@ -249,45 +249,45 @@ Proof. destruct 1 as [?? []|]; simpl; by constructor. Qed.
 not particularly like type level reductions. *)
 Class Maybe {A B : Type} (c : A → B) :=
   maybe : B → option A.
-Arguments maybe {_ _} _ {_} !_ / : assert.
+Global Arguments maybe {_ _} _ {_} !_ / : assert.
 Class Maybe2 {A1 A2 B : Type} (c : A1 → A2 → B) :=
   maybe2 : B → option (A1 * A2).
-Arguments maybe2 {_ _ _} _ {_} !_ / : assert.
+Global Arguments maybe2 {_ _ _} _ {_} !_ / : assert.
 Class Maybe3 {A1 A2 A3 B : Type} (c : A1 → A2 → A3 → B) :=
   maybe3 : B → option (A1 * A2 * A3).
-Arguments maybe3 {_ _ _ _} _ {_} !_ / : assert.
+Global Arguments maybe3 {_ _ _ _} _ {_} !_ / : assert.
 Class Maybe4 {A1 A2 A3 A4 B : Type} (c : A1 → A2 → A3 → A4 → B) :=
   maybe4 : B → option (A1 * A2 * A3 * A4).
-Arguments maybe4 {_ _ _ _ _} _ {_} !_ / : assert.
+Global Arguments maybe4 {_ _ _ _ _} _ {_} !_ / : assert.
 
-Instance maybe_comp `{Maybe B C c1, Maybe A B c2} : Maybe (c1 ∘ c2) := λ x,
+Global Instance maybe_comp `{Maybe B C c1, Maybe A B c2} : Maybe (c1 ∘ c2) := λ x,
   maybe c1 x ≫= maybe c2.
-Arguments maybe_comp _ _ _ _ _ _ _ !_ / : assert.
+Global Arguments maybe_comp _ _ _ _ _ _ _ !_ / : assert.
 
-Instance maybe_inl {A B} : Maybe (@inl A B) := λ xy,
+Global Instance maybe_inl {A B} : Maybe (@inl A B) := λ xy,
   match xy with inl x => Some x | _ => None end.
-Instance maybe_inr {A B} : Maybe (@inr A B) := λ xy,
+Global Instance maybe_inr {A B} : Maybe (@inr A B) := λ xy,
   match xy with inr y => Some y | _ => None end.
-Instance maybe_Some {A} : Maybe (@Some A) := id.
-Arguments maybe_Some _ !_ / : assert.
+Global Instance maybe_Some {A} : Maybe (@Some A) := id.
+Global Arguments maybe_Some _ !_ / : assert.
 
 (** * Union, intersection and difference *)
-Instance option_union_with {A} : UnionWith A (option A) := λ f mx my,
+Global Instance option_union_with {A} : UnionWith A (option A) := λ f mx my,
   match mx, my with
   | Some x, Some y => f x y
   | Some x, None => Some x
   | None, Some y => Some y
   | None, None => None
   end.
-Instance option_intersection_with {A} : IntersectionWith A (option A) :=
+Global Instance option_intersection_with {A} : IntersectionWith A (option A) :=
   λ f mx my, match mx, my with Some x, Some y => f x y | _, _ => None end.
-Instance option_difference_with {A} : DifferenceWith A (option A) := λ f mx my,
+Global Instance option_difference_with {A} : DifferenceWith A (option A) := λ f mx my,
   match mx, my with
   | Some x, Some y => f x y
   | Some x, None => Some x
   | None, _ => None
   end.
-Instance option_union {A} : Union (option A) := union_with (λ x _, Some x).
+Global Instance option_union {A} : Union (option A) := union_with (λ x _, Some x).
 
 Lemma option_union_Some {A} (mx my : option A) z :
   mx ∪ my = Some z → mx = Some z ∨ my = Some z.

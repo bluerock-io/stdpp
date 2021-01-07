@@ -10,8 +10,8 @@ Record hashset {A} (hash : A → Z) := Hashset {
   hashset_prf :
     map_Forall (λ n l, Forall (λ x, hash x = n) l ∧ NoDup l) hashset_car
 }.
-Arguments Hashset {_ _} _ _ : assert.
-Arguments hashset_car {_ _} _ : assert.
+Global Arguments Hashset {_ _} _ _ : assert.
+Global Arguments hashset_car {_ _} _ : assert.
 
 Section hashset.
 Context `{EqDecision A} (hash : A → Z).

@@ -54,8 +54,8 @@ Section seal.
   Local Set Primitive Projections.
   Record seal {A} (f : A) := { unseal : A; seal_eq : unseal = f }.
 End seal.
-Arguments unseal {_ _} _ : assert.
-Arguments seal_eq {_ _} _ : assert.
+Global Arguments unseal {_ _} _ : assert.
+Global Arguments seal_eq {_ _} _ : assert.
 
 (** * Non-backtracking type classes *)
 (** The type class [TCNoBackTrack P] can be used to establish [P] without ever
@@ -92,7 +92,7 @@ Global Hint Extern 0 (TCIf _ _ _) =>
 class search. Note that [simpl] is set up to always unfold [tc_opaque]. *)
 Definition tc_opaque {A} (x : A) : A := x.
 Typeclasses Opaque tc_opaque.
-Arguments tc_opaque {_} _ /.
+Global Arguments tc_opaque {_} _ /.
 
 (** Below we define type class versions of the common logical operators. It is
 important to note that we duplicate the definitions, and do not declare the
@@ -282,7 +282,7 @@ Instance: Params (@equiv) 2 := {}.
 (** The following instance forces [setoid_replace] to use setoid equality
 (for types that have an [Equiv] instance) rather than the standard Leibniz
 equality. *)
-Instance equiv_default_relation `{Equiv A} : DefaultRelation (≡) | 3 := {}.
+Global Instance equiv_default_relation `{Equiv A} : DefaultRelation (≡) | 3 := {}.
 Global Hint Extern 0 (_ ≡ _) => reflexivity : core.
 Global Hint Extern 0 (_ ≡ _) => symmetry; assumption : core.
 
@@ -293,7 +293,7 @@ Global Hint Extern 0 (_ ≡ _) => symmetry; assumption : core.
 propositions. *)
 Class Decision (P : Prop) := decide : {P} + {¬P}.
 Global Hint Mode Decision ! : typeclass_instances.
-Arguments decide _ {_} : simpl never, assert.
+Global Arguments decide _ {_} : simpl never, assert.
 
 (** Although [RelDecision R] is just [∀ x y, Decision (R x y)], we make this
 an explicit class instead of a notation for two reasons:
@@ -312,14 +312,14 @@ an explicit class instead of a notation for two reasons:
 Class RelDecision {A B} (R : A → B → Prop) :=
   decide_rel x y :> Decision (R x y).
 Global Hint Mode RelDecision ! ! ! : typeclass_instances.
-Arguments decide_rel {_ _} _ {_} _ _ : simpl never, assert.
+Global Arguments decide_rel {_ _} _ {_} _ _ : simpl never, assert.
 Notation EqDecision A := (RelDecision (=@{A})).
 
 (** ** Inhabited types *)
 (** This type class collects types that are inhabited. *)
 Class Inhabited (A : Type) : Type := populate { inhabitant : A }.
 Global Hint Mode Inhabited ! : typeclass_instances.
-Arguments populate {_} _ : assert.
+Global Arguments populate {_} _ : assert.
 
 (** ** Proof irrelevant types *)
 (** This type class collects types that are proof irrelevant. That means, all
@@ -368,22 +368,22 @@ Lemma involutive {A} {R : relation A} (f : A → A) `{Involutive R f} x :
   R (f (f x)) x.
 Proof. auto. Qed.
 
-Arguments irreflexivity {_} _ {_} _ _ : assert.
-Arguments inj {_ _ _ _} _ {_} _ _ _ : assert.
-Arguments inj2 {_ _ _ _ _ _} _ {_} _ _ _ _ _: assert.
-Arguments cancel {_ _ _} _ _ {_} _ : assert.
-Arguments surj {_ _ _} _ {_} _ : assert.
-Arguments idemp {_ _} _ {_} _ : assert.
-Arguments comm {_ _ _} _ {_} _ _ : assert.
-Arguments left_id {_ _} _ _ {_} _ : assert.
-Arguments right_id {_ _} _ _ {_} _ : assert.
-Arguments assoc {_ _} _ {_} _ _ _ : assert.
-Arguments left_absorb {_ _} _ _ {_} _ : assert.
-Arguments right_absorb {_ _} _ _ {_} _ : assert.
-Arguments anti_symm {_ _} _ {_} _ _ _ _ : assert.
-Arguments total {_} _ {_} _ _ : assert.
-Arguments trichotomy {_} _ {_} _ _ : assert.
-Arguments trichotomyT {_} _ {_} _ _ : assert.
+Global Arguments irreflexivity {_} _ {_} _ _ : assert.
+Global Arguments inj {_ _ _ _} _ {_} _ _ _ : assert.
+Global Arguments inj2 {_ _ _ _ _ _} _ {_} _ _ _ _ _: assert.
+Global Arguments cancel {_ _ _} _ _ {_} _ : assert.
+Global Arguments surj {_ _ _} _ {_} _ : assert.
+Global Arguments idemp {_ _} _ {_} _ : assert.
+Global Arguments comm {_ _ _} _ {_} _ _ : assert.
+Global Arguments left_id {_ _} _ _ {_} _ : assert.
+Global Arguments right_id {_ _} _ _ {_} _ : assert.
+Global Arguments assoc {_ _} _ {_} _ _ _ : assert.
+Global Arguments left_absorb {_ _} _ _ {_} _ : assert.
+Global Arguments right_absorb {_ _} _ _ {_} _ : assert.
+Global Arguments anti_symm {_ _} _ {_} _ _ _ _ : assert.
+Global Arguments total {_} _ {_} _ _ : assert.
+Global Arguments trichotomy {_} _ {_} _ _ : assert.
+Global Arguments trichotomyT {_} _ {_} _ _ : assert.
 
 Lemma not_symmetry `{R : relation A, !Symmetric R} x y : ¬R x y → ¬R y x.
 Proof. intuition. Qed.
@@ -402,9 +402,9 @@ Proof. intros HR' HR''. destruct (inj2 f x1 y1 x2 y2); auto. Qed.
 Lemma inj_iff {A B} {R : relation A} {S : relation B} (f : A → B)
   `{!Inj R S f} `{!Proper (R ==> S) f} x y : S (f x) (f y) ↔ R x y.
 Proof. firstorder. Qed.
-Instance inj2_inj_1 `{Inj2 A B C R1 R2 R3 f} y : Inj R1 R3 (λ x, f x y).
+Global Instance inj2_inj_1 `{Inj2 A B C R1 R2 R3 f} y : Inj R1 R3 (λ x, f x y).
 Proof. repeat intro; edestruct (inj2 f); eauto. Qed.
-Instance inj2_inj_2 `{Inj2 A B C R1 R2 R3 f} x : Inj R2 R3 (f x).
+Global Instance inj2_inj_2 `{Inj2 A B C R1 R2 R3 f} x : Inj R2 R3 (f x).
 Proof. repeat intro; edestruct (inj2 f); eauto. Qed.
 
 Lemma cancel_inj `{Cancel A B R1 f g, !Equivalence R1, !Proper (R2 ==> R1) f} :
@@ -448,7 +448,7 @@ Class TotalOrder {A} (R : relation A) : Prop := {
 }.
 
 (** * Logic *)
-Instance prop_inhabited : Inhabited Prop := populate True.
+Global Instance prop_inhabited : Inhabited Prop := populate True.
 
 Notation "(∧)" := and (only parsing) : stdpp_scope.
 Notation "( A ∧.)" := (and A) (only parsing) : stdpp_scope.
@@ -482,43 +482,43 @@ Lemma exist_proper {A} (P Q : A → Prop) :
   (∀ x, P x ↔ Q x) → (∃ x, P x) ↔ (∃ x, Q x).
 Proof. firstorder. Qed.
 
-Instance eq_comm {A} : Comm (↔) (=@{A}).
+Global Instance eq_comm {A} : Comm (↔) (=@{A}).
 Proof. red; intuition. Qed.
-Instance flip_eq_comm {A} : Comm (↔) (λ x y, y =@{A} x).
+Global Instance flip_eq_comm {A} : Comm (↔) (λ x y, y =@{A} x).
 Proof. red; intuition. Qed.
-Instance iff_comm : Comm (↔) (↔).
+Global Instance iff_comm : Comm (↔) (↔).
 Proof. red; intuition. Qed.
-Instance and_comm : Comm (↔) (∧).
+Global Instance and_comm : Comm (↔) (∧).
 Proof. red; intuition. Qed.
-Instance and_assoc : Assoc (↔) (∧).
+Global Instance and_assoc : Assoc (↔) (∧).
 Proof. red; intuition. Qed.
-Instance and_idemp : IdemP (↔) (∧).
+Global Instance and_idemp : IdemP (↔) (∧).
 Proof. red; intuition. Qed.
-Instance or_comm : Comm (↔) (∨).
+Global Instance or_comm : Comm (↔) (∨).
 Proof. red; intuition. Qed.
-Instance or_assoc : Assoc (↔) (∨).
+Global Instance or_assoc : Assoc (↔) (∨).
 Proof. red; intuition. Qed.
-Instance or_idemp : IdemP (↔) (∨).
+Global Instance or_idemp : IdemP (↔) (∨).
 Proof. red; intuition. Qed.
-Instance True_and : LeftId (↔) True (∧).
+Global Instance True_and : LeftId (↔) True (∧).
 Proof. red; intuition. Qed.
-Instance and_True : RightId (↔) True (∧).
+Global Instance and_True : RightId (↔) True (∧).
 Proof. red; intuition. Qed.
-Instance False_and : LeftAbsorb (↔) False (∧).
+Global Instance False_and : LeftAbsorb (↔) False (∧).
 Proof. red; intuition. Qed.
-Instance and_False : RightAbsorb (↔) False (∧).
+Global Instance and_False : RightAbsorb (↔) False (∧).
 Proof. red; intuition. Qed.
-Instance False_or : LeftId (↔) False (∨).
+Global Instance False_or : LeftId (↔) False (∨).
 Proof. red; intuition. Qed.
-Instance or_False : RightId (↔) False (∨).
+Global Instance or_False : RightId (↔) False (∨).
 Proof. red; intuition. Qed.
-Instance True_or : LeftAbsorb (↔) True (∨).
+Global Instance True_or : LeftAbsorb (↔) True (∨).
 Proof. red; intuition. Qed.
-Instance or_True : RightAbsorb (↔) True (∨).
+Global Instance or_True : RightAbsorb (↔) True (∨).
 Proof. red; intuition. Qed.
-Instance True_impl : LeftId (↔) True impl.
+Global Instance True_impl : LeftId (↔) True impl.
 Proof. unfold impl. red; intuition. Qed.
-Instance impl_True : RightAbsorb (↔) True impl.
+Global Instance impl_True : RightAbsorb (↔) True impl.
 Proof. unfold impl. red; intuition. Qed.
 
 
@@ -538,54 +538,54 @@ Notation "(∘)" := compose (only parsing) : stdpp_scope.
 Notation "( f ∘.)" := (compose f) (only parsing) : stdpp_scope.
 Notation "(.∘ f )" := (λ g, compose g f) (only parsing) : stdpp_scope.
 
-Instance impl_inhabited {A} `{Inhabited B} : Inhabited (A → B) :=
+Global Instance impl_inhabited {A} `{Inhabited B} : Inhabited (A → B) :=
   populate (λ _, inhabitant).
 
 (** Ensure that [simpl] unfolds [id], [compose], and [flip] when fully
 applied. *)
-Arguments id _ _ / : assert.
-Arguments compose _ _ _ _ _ _ / : assert.
-Arguments flip _ _ _ _ _ _ / : assert.
-Arguments const _ _ _ _ / : assert.
+Global Arguments id _ _ / : assert.
+Global Arguments compose _ _ _ _ _ _ / : assert.
+Global Arguments flip _ _ _ _ _ _ / : assert.
+Global Arguments const _ _ _ _ / : assert.
 Typeclasses Transparent id compose flip const.
 
 Definition fun_map {A A' B B'} (f: A' → A) (g: B → B') (h : A → B) : A' → B' :=
   g ∘ h ∘ f.
 
-Instance const_proper `{R1 : relation A, R2 : relation B} (x : B) :
+Global Instance const_proper `{R1 : relation A, R2 : relation B} (x : B) :
   Reflexive R2 → Proper (R1 ==> R2) (λ _, x).
 Proof. intros ? y1 y2; reflexivity. Qed.
 
-Instance id_inj {A} : Inj (=) (=) (@id A).
+Global Instance id_inj {A} : Inj (=) (=) (@id A).
 Proof. intros ??; auto. Qed.
-Instance compose_inj {A B C} R1 R2 R3 (f : A → B) (g : B → C) :
+Global Instance compose_inj {A B C} R1 R2 R3 (f : A → B) (g : B → C) :
   Inj R1 R2 f → Inj R2 R3 g → Inj R1 R3 (g ∘ f).
 Proof. red; intuition. Qed.
 
-Instance id_surj {A} : Surj (=) (@id A).
+Global Instance id_surj {A} : Surj (=) (@id A).
 Proof. intros y; exists y; reflexivity. Qed.
-Instance compose_surj {A B C} R (f : A → B) (g : B → C) :
+Global Instance compose_surj {A B C} R (f : A → B) (g : B → C) :
   Surj (=) f → Surj R g → Surj R (g ∘ f).
 Proof.
   intros ?? x. unfold compose. destruct (surj g x) as [y ?].
   destruct (surj f y) as [z ?]. exists z. congruence.
 Qed.
 
-Instance id_comm {A B} (x : B) : Comm (=) (λ _ _ : A, x).
+Global Instance id_comm {A B} (x : B) : Comm (=) (λ _ _ : A, x).
 Proof. intros ?; reflexivity. Qed.
-Instance id_assoc {A} (x : A) : Assoc (=) (λ _ _ : A, x).
+Global Instance id_assoc {A} (x : A) : Assoc (=) (λ _ _ : A, x).
 Proof. intros ???; reflexivity. Qed.
-Instance const1_assoc {A} : Assoc (=) (λ x _ : A, x).
+Global Instance const1_assoc {A} : Assoc (=) (λ x _ : A, x).
 Proof. intros ???; reflexivity. Qed.
-Instance const2_assoc {A} : Assoc (=) (λ _ x : A, x).
+Global Instance const2_assoc {A} : Assoc (=) (λ _ x : A, x).
 Proof. intros ???; reflexivity. Qed.
-Instance const1_idemp {A} : IdemP (=) (λ x _ : A, x).
+Global Instance const1_idemp {A} : IdemP (=) (λ x _ : A, x).
 Proof. intros ?; reflexivity. Qed.
-Instance const2_idemp {A} : IdemP (=) (λ _ x : A, x).
+Global Instance const2_idemp {A} : IdemP (=) (λ _ x : A, x).
 Proof. intros ?; reflexivity. Qed.
 
 (** ** Lists *)
-Instance list_inhabited {A} : Inhabited (list A) := populate [].
+Global Instance list_inhabited {A} : Inhabited (list A) := populate [].
 
 Definition zip_with {A B C} (f : A → B → C) : list A → list B → list C :=
   fix go l1 l2 :=
@@ -603,7 +603,7 @@ Notation "(||)" := orb (only parsing).
 Infix "&&*" := (zip_with (&&)) (at level 40).
 Infix "||*" := (zip_with (||)) (at level 50).
 
-Instance bool_inhabated : Inhabited bool := populate true.
+Global Instance bool_inhabated : Inhabited bool := populate true.
 
 Definition bool_le (β1 β2 : bool) : Prop := negb β1 || β2.
 Infix "=.>" := bool_le (at level 70).
@@ -621,18 +621,18 @@ Lemma Is_true_false (b : bool) : b = false → ¬b.
 Proof. now intros -> ?. Qed.
 
 (** ** Unit *)
-Instance unit_equiv : Equiv unit := λ _ _, True.
-Instance unit_equivalence : Equivalence (≡@{unit}).
+Global Instance unit_equiv : Equiv unit := λ _ _, True.
+Global Instance unit_equivalence : Equivalence (≡@{unit}).
 Proof. repeat split. Qed.
-Instance unit_leibniz : LeibnizEquiv unit.
+Global Instance unit_leibniz : LeibnizEquiv unit.
 Proof. intros [] []; reflexivity. Qed.
-Instance unit_inhabited: Inhabited unit := populate ().
+Global Instance unit_inhabited: Inhabited unit := populate ().
 
 (** ** Empty *)
-Instance Empty_set_equiv : Equiv Empty_set := λ _ _, True.
-Instance Empty_set_equivalence : Equivalence (≡@{Empty_set}).
+Global Instance Empty_set_equiv : Equiv Empty_set := λ _ _, True.
+Global Instance Empty_set_equivalence : Equivalence (≡@{Empty_set}).
 Proof. repeat split. Qed.
-Instance Empty_set_leibniz : LeibnizEquiv Empty_set.
+Global Instance Empty_set_leibniz : LeibnizEquiv Empty_set.
 Proof. intros [] []; reflexivity. Qed.
 
 (** ** Products *)
@@ -660,19 +660,19 @@ Definition uncurry4 {A B C D E} (f : A * B * C * D → E)
 
 Definition prod_map {A A' B B'} (f: A → A') (g: B → B') (p : A * B) : A' * B' :=
   (f (p.1), g (p.2)).
-Arguments prod_map {_ _ _ _} _ _ !_ / : assert.
+Global Arguments prod_map {_ _ _ _} _ _ !_ / : assert.
 
 Definition prod_zip {A A' A'' B B' B''} (f : A → A' → A'') (g : B → B' → B'')
     (p : A * B) (q : A' * B') : A'' * B'' := (f (p.1) (q.1), g (p.2) (q.2)).
-Arguments prod_zip {_ _ _ _ _ _} _ _ !_ !_ / : assert.
+Global Arguments prod_zip {_ _ _ _ _ _} _ _ !_ !_ / : assert.
 
-Instance prod_inhabited {A B} (iA : Inhabited A)
+Global Instance prod_inhabited {A B} (iA : Inhabited A)
     (iB : Inhabited B) : Inhabited (A * B) :=
   match iA, iB with populate x, populate y => populate (x,y) end.
 
-Instance pair_inj {A B} : Inj2 (=) (=) (=) (@pair A B).
+Global Instance pair_inj {A B} : Inj2 (=) (=) (=) (@pair A B).
 Proof. injection 1; auto. Qed.
-Instance prod_map_inj {A A' B B'} (f : A → A') (g : B → B') :
+Global Instance prod_map_inj {A A' B B'} (f : A → A') (g : B → B') :
   Inj (=) (=) f → Inj (=) (=) g → Inj (=) (=) (prod_map f g).
 Proof.
   intros ?? [??] [??] ?; simpl in *; f_equal;
@@ -706,33 +706,33 @@ Section prod_relation.
   Proof. firstorder eauto. Qed.
 End prod_relation.
 
-Instance prod_equiv `{Equiv A,Equiv B} : Equiv (A * B) := prod_relation (≡) (≡).
-Instance pair_proper `{Equiv A, Equiv B} :
+Global Instance prod_equiv `{Equiv A,Equiv B} : Equiv (A * B) := prod_relation (≡) (≡).
+Global Instance pair_proper `{Equiv A, Equiv B} :
   Proper ((≡) ==> (≡) ==> (≡)) (@pair A B) := _.
-Instance pair_equiv_inj `{Equiv A, Equiv B} : Inj2 (≡) (≡) (≡) (@pair A B) := _.
-Instance fst_proper `{Equiv A, Equiv B} : Proper ((≡) ==> (≡)) (@fst A B) := _.
-Instance snd_proper `{Equiv A, Equiv B} : Proper ((≡) ==> (≡)) (@snd A B) := _.
+Global Instance pair_equiv_inj `{Equiv A, Equiv B} : Inj2 (≡) (≡) (≡) (@pair A B) := _.
+Global Instance fst_proper `{Equiv A, Equiv B} : Proper ((≡) ==> (≡)) (@fst A B) := _.
+Global Instance snd_proper `{Equiv A, Equiv B} : Proper ((≡) ==> (≡)) (@snd A B) := _.
 Typeclasses Opaque prod_equiv.
 
-Instance prod_leibniz `{LeibnizEquiv A, LeibnizEquiv B} : LeibnizEquiv (A * B).
+Global Instance prod_leibniz `{LeibnizEquiv A, LeibnizEquiv B} : LeibnizEquiv (A * B).
 Proof. intros [??] [??] [??]; f_equal; apply leibniz_equiv; auto. Qed.
 
 (** ** Sums *)
 Definition sum_map {A A' B B'} (f: A → A') (g: B → B') (xy : A + B) : A' + B' :=
   match xy with inl x => inl (f x) | inr y => inr (g y) end.
-Arguments sum_map {_ _ _ _} _ _ !_ / : assert.
+Global Arguments sum_map {_ _ _ _} _ _ !_ / : assert.
 
-Instance sum_inhabited_l {A B} (iA : Inhabited A) : Inhabited (A + B) :=
+Global Instance sum_inhabited_l {A B} (iA : Inhabited A) : Inhabited (A + B) :=
   match iA with populate x => populate (inl x) end.
-Instance sum_inhabited_r {A B} (iB : Inhabited A) : Inhabited (A + B) :=
+Global Instance sum_inhabited_r {A B} (iB : Inhabited A) : Inhabited (A + B) :=
   match iB with populate y => populate (inl y) end.
 
-Instance inl_inj {A B} : Inj (=) (=) (@inl A B).
+Global Instance inl_inj {A B} : Inj (=) (=) (@inl A B).
 Proof. injection 1; auto. Qed.
-Instance inr_inj {A B} : Inj (=) (=) (@inr A B).
+Global Instance inr_inj {A B} : Inj (=) (=) (@inr A B).
 Proof. injection 1; auto. Qed.
 
-Instance sum_map_inj {A A' B B'} (f : A → A') (g : B → B') :
+Global Instance sum_map_inj {A A' B B'} (f : A → A') (g : B → B') :
   Inj (=) (=) f → Inj (=) (=) g → Inj (=) (=) (sum_map f g).
 Proof. intros ?? [?|?] [?|?] [=]; f_equal; apply (inj _); auto. Qed.
 
@@ -765,24 +765,24 @@ Section sum_relation.
   Proof. inversion_clear 1; auto. Qed.
 End sum_relation.
 
-Instance sum_equiv `{Equiv A, Equiv B} : Equiv (A + B) := sum_relation (≡) (≡).
-Instance inl_proper `{Equiv A, Equiv B} : Proper ((≡) ==> (≡)) (@inl A B) := _.
-Instance inr_proper `{Equiv A, Equiv B} : Proper ((≡) ==> (≡)) (@inr A B) := _.
-Instance inl_equiv_inj `{Equiv A, Equiv B} : Inj (≡) (≡) (@inl A B) := _.
-Instance inr_equiv_inj `{Equiv A, Equiv B} : Inj (≡) (≡) (@inr A B) := _.
+Global Instance sum_equiv `{Equiv A, Equiv B} : Equiv (A + B) := sum_relation (≡) (≡).
+Global Instance inl_proper `{Equiv A, Equiv B} : Proper ((≡) ==> (≡)) (@inl A B) := _.
+Global Instance inr_proper `{Equiv A, Equiv B} : Proper ((≡) ==> (≡)) (@inr A B) := _.
+Global Instance inl_equiv_inj `{Equiv A, Equiv B} : Inj (≡) (≡) (@inl A B) := _.
+Global Instance inr_equiv_inj `{Equiv A, Equiv B} : Inj (≡) (≡) (@inr A B) := _.
 Typeclasses Opaque sum_equiv.
 
 (** ** Option *)
-Instance option_inhabited {A} : Inhabited (option A) := populate None.
+Global Instance option_inhabited {A} : Inhabited (option A) := populate None.
 
 (** ** Sigma types *)
-Arguments existT {_ _} _ _ : assert.
-Arguments projT1 {_ _} _ : assert.
-Arguments projT2 {_ _} _ : assert.
+Global Arguments existT {_ _} _ _ : assert.
+Global Arguments projT1 {_ _} _ : assert.
+Global Arguments projT2 {_ _} _ : assert.
 
-Arguments exist {_} _ _ _ : assert.
-Arguments proj1_sig {_ _} _ : assert.
-Arguments proj2_sig {_ _} _ : assert.
+Global Arguments exist {_} _ _ _ : assert.
+Global Arguments proj1_sig {_ _} _ : assert.
+Global Arguments proj2_sig {_ _} _ : assert.
 Notation "x ↾ p" := (exist _ x p) (at level 20) : stdpp_scope.
 Notation "` x" := (proj1_sig x) (at level 10, format "` x") : stdpp_scope.
 
@@ -800,7 +800,7 @@ Section sig_map.
     apply (inj f) in Hxy; subst. rewrite (proof_irrel _ Hy). auto.
   Qed.
 End sig_map.
-Arguments sig_map _ _ _ _ _ _ !_ / : assert.
+Global Arguments sig_map _ _ _ _ _ _ !_ / : assert.
 
 Definition proj1_ex {P : Prop} {Q : P → Prop} (p : ∃ x, Q x) : P :=
   let '(ex_intro _ x _) := p in x.
@@ -816,7 +816,7 @@ Class Empty A := empty: A.
 Global Hint Mode Empty ! : typeclass_instances.
 Notation "∅" := empty (format "∅") : stdpp_scope.
 
-Instance empty_inhabited `(Empty A) : Inhabited A := populate ∅.
+Global Instance empty_inhabited `(Empty A) : Inhabited A := populate ∅.
 
 Class Union A := union: A → A → A.
 Global Hint Mode Union ! : typeclass_instances.
@@ -829,7 +829,7 @@ Infix "∪*" := (zip_with (∪)) (at level 50, left associativity) : stdpp_scope
 Notation "(∪*)" := (zip_with (∪)) (only parsing) : stdpp_scope.
 
 Definition union_list `{Empty A} `{Union A} : list A → A := fold_right (∪) ∅.
-Arguments union_list _ _ _ !_ / : assert.
+Global Arguments union_list _ _ _ !_ / : assert.
 Notation "⋃ l" := (union_list l) (at level 20, format "⋃  l") : stdpp_scope.
 
 Class DisjUnion A := disj_union: A → A → A.
@@ -969,19 +969,19 @@ and fmap. We use these type classes merely for convenient overloading of
 notations and do not formalize any theory on monads (we do not even define a
 class with the monad laws). *)
 Class MRet (M : Type → Type) := mret: ∀ {A}, A → M A.
-Arguments mret {_ _ _} _ : assert.
+Global Arguments mret {_ _ _} _ : assert.
 Instance: Params (@mret) 3 := {}.
 Class MBind (M : Type → Type) := mbind : ∀ {A B}, (A → M B) → M A → M B.
-Arguments mbind {_ _ _ _} _ !_ / : assert.
+Global Arguments mbind {_ _ _ _} _ !_ / : assert.
 Instance: Params (@mbind) 4 := {}.
 Class MJoin (M : Type → Type) := mjoin: ∀ {A}, M (M A) → M A.
-Arguments mjoin {_ _ _} !_ / : assert.
+Global Arguments mjoin {_ _ _} !_ / : assert.
 Instance: Params (@mjoin) 3 := {}.
 Class FMap (M : Type → Type) := fmap : ∀ {A B}, (A → B) → M A → M B.
-Arguments fmap {_ _ _ _} _ !_ / : assert.
+Global Arguments fmap {_ _ _ _} _ !_ / : assert.
 Instance: Params (@fmap) 4 := {}.
 Class OMap (M : Type → Type) := omap: ∀ {A B}, (A → option B) → M A → M B.
-Arguments omap {_ _ _ _} _ !_ / : assert.
+Global Arguments omap {_ _ _ _} _ !_ / : assert.
 Instance: Params (@omap) 4 := {}.
 
 Notation "m ≫= f" := (mbind f m) (at level 60, right associativity) : stdpp_scope.
@@ -1007,7 +1007,7 @@ Notation "ps .*2" := (fmap (M:=list) snd ps)
 
 Class MGuard (M : Type → Type) :=
   mguard: ∀ P {dec : Decision P} {A}, (P → M A) → M A.
-Arguments mguard _ _ _ !_ _ _ / : assert.
+Global Arguments mguard _ _ _ !_ _ _ / : assert.
 Notation "'guard' P ; z" := (mguard P (λ _, z))
   (at level 20, z at level 200, only parsing, right associativity) : stdpp_scope.
 Notation "'guard' P 'as' H ; z" := (mguard P (λ H, z))
@@ -1024,7 +1024,7 @@ Notation "m !! i" := (lookup i m) (at level 20) : stdpp_scope.
 Notation "(!!)" := lookup (only parsing) : stdpp_scope.
 Notation "( m !!.)" := (λ i, m !! i) (only parsing) : stdpp_scope.
 Notation "(.!! i )" := (lookup i) (only parsing) : stdpp_scope.
-Arguments lookup _ _ _ _ !_ !_ / : simpl nomatch, assert.
+Global Arguments lookup _ _ _ _ !_ !_ / : simpl nomatch, assert.
 
 (** The function [lookup_total] should be the total over-approximation
 of the partial [lookup] function. *)
@@ -1035,7 +1035,7 @@ Notation "m !!! i" := (lookup_total i m) (at level 20) : stdpp_scope.
 Notation "(!!!)" := lookup_total (only parsing) : stdpp_scope.
 Notation "( m !!!.)" := (λ i, m !!! i) (only parsing) : stdpp_scope.
 Notation "(.!!! i )" := (lookup_total i) (only parsing) : stdpp_scope.
-Arguments lookup_total _ _ _ _ !_ !_ / : simpl nomatch, assert.
+Global Arguments lookup_total _ _ _ _ !_ !_ / : simpl nomatch, assert.
 
 (** The singleton map *)
 Class SingletonM K A M := singletonM: K → A → M.
@@ -1050,7 +1050,7 @@ Global Hint Mode Insert - - ! : typeclass_instances.
 Instance: Params (@insert) 5 := {}.
 Notation "<[ k := a ]>" := (insert k a)
   (at level 5, right associativity, format "<[ k := a ]>") : stdpp_scope.
-Arguments insert _ _ _ _ !_ _ !_ / : simpl nomatch, assert.
+Global Arguments insert _ _ _ _ !_ _ !_ / : simpl nomatch, assert.
 
 (** The function delete [delete k m] should delete the value at key [k] in
 [m]. If the key [k] is not a member of [m], the original map should be
@@ -1058,14 +1058,14 @@ returned. *)
 Class Delete (K M : Type) := delete: K → M → M.
 Global Hint Mode Delete - ! : typeclass_instances.
 Instance: Params (@delete) 4 := {}.
-Arguments delete _ _ _ !_ !_ / : simpl nomatch, assert.
+Global Arguments delete _ _ _ !_ !_ / : simpl nomatch, assert.
 
 (** The function [alter f k m] should update the value at key [k] using the
 function [f], which is called with the original value. *)
 Class Alter (K A M : Type) := alter: (A → A) → K → M → M.
 Global Hint Mode Alter - - ! : typeclass_instances.
 Instance: Params (@alter) 5 := {}.
-Arguments alter {_ _ _ _} _ !_ !_ / : simpl nomatch, assert.
+Global Arguments alter {_ _ _ _} _ !_ !_ / : simpl nomatch, assert.
 
 (** The function [partial_alter f k m] should update the value at key [k] using the
 function [f], which is called with the original value at key [k] or [None]
@@ -1075,15 +1075,15 @@ Class PartialAlter (K A M : Type) :=
   partial_alter: (option A → option A) → K → M → M.
 Global Hint Mode PartialAlter - - ! : typeclass_instances.
 Instance: Params (@partial_alter) 4 := {}.
-Arguments partial_alter _ _ _ _ _ !_ !_ / : simpl nomatch, assert.
+Global Arguments partial_alter _ _ _ _ _ !_ !_ / : simpl nomatch, assert.
 
 (** The function [dom C m] should yield the domain of [m]. That is a finite
 set of type [C] that contains the keys that are a member of [m]. *)
 Class Dom (M C : Type) := dom: M → C.
 Global Hint Mode Dom ! ! : typeclass_instances.
 Instance: Params (@dom) 3 := {}.
-Arguments dom : clear implicits.
-Arguments dom {_} _ {_} !_ / : simpl nomatch, assert.
+Global Arguments dom : clear implicits.
+Global Arguments dom {_} _ {_} !_ / : simpl nomatch, assert.
 
 (** The function [merge f m1 m2] should merge the maps [m1] and [m2] by
 constructing a new map whose value at key [k] is [f (m1 !! k) (m2 !! k)].*)
@@ -1091,7 +1091,7 @@ Class Merge (M : Type → Type) :=
   merge: ∀ {A B C}, (option A → option B → option C) → M A → M B → M C.
 Global Hint Mode Merge ! : typeclass_instances.
 Instance: Params (@merge) 4 := {}.
-Arguments merge _ _ _ _ _ _ !_ !_ / : simpl nomatch, assert.
+Global Arguments merge _ _ _ _ _ _ !_ !_ / : simpl nomatch, assert.
 
 (** The function [union_with f m1 m2] is supposed to yield the union of [m1]
 and [m2] using the function [f] to combine values of members that are in
@@ -1100,24 +1100,24 @@ Class UnionWith (A M : Type) :=
   union_with: (A → A → option A) → M → M → M.
 Global Hint Mode UnionWith - ! : typeclass_instances.
 Instance: Params (@union_with) 3 := {}.
-Arguments union_with {_ _ _} _ !_ !_ / : simpl nomatch, assert.
+Global Arguments union_with {_ _ _} _ !_ !_ / : simpl nomatch, assert.
 
 (** Similarly for intersection and difference. *)
 Class IntersectionWith (A M : Type) :=
   intersection_with: (A → A → option A) → M → M → M.
 Global Hint Mode IntersectionWith - ! : typeclass_instances.
 Instance: Params (@intersection_with) 3 := {}.
-Arguments intersection_with {_ _ _} _ !_ !_ / : simpl nomatch, assert.
+Global Arguments intersection_with {_ _ _} _ !_ !_ / : simpl nomatch, assert.
 
 Class DifferenceWith (A M : Type) :=
   difference_with: (A → A → option A) → M → M → M.
 Global Hint Mode DifferenceWith - ! : typeclass_instances.
 Instance: Params (@difference_with) 3 := {}.
-Arguments difference_with {_ _ _} _ !_ !_ / : simpl nomatch, assert.
+Global Arguments difference_with {_ _ _} _ !_ !_ / : simpl nomatch, assert.
 
 Definition intersection_with_list `{IntersectionWith A M}
   (f : A → A → option A) : M → list M → M := fold_right (intersection_with f).
-Arguments intersection_with_list _ _ _ _ _ !_ / : assert.
+Global Arguments intersection_with_list _ _ _ _ _ !_ / : assert.
 
 (** * Notations for lattices. *)
 (** SqSubsetEq registers the "canonical" partial order for a type, and is used
@@ -1133,7 +1133,7 @@ Notation "(.⊑ y )" := (λ x, sqsubseteq x y) (only parsing) : stdpp_scope.
 Infix "⊑@{ A }" := (@sqsubseteq A _) (at level 70, only parsing) : stdpp_scope.
 Notation "(⊑@{ A } )" := (@sqsubseteq A _) (only parsing) : stdpp_scope.
 
-Instance sqsubseteq_rewrite `{SqSubsetEq A} : RewriteRelation (⊑@{A}) := {}.
+Global Instance sqsubseteq_rewrite `{SqSubsetEq A} : RewriteRelation (⊑@{A}) := {}.
 
 Global Hint Extern 0 (_ ⊑ _) => reflexivity : core.
 
@@ -1232,7 +1232,7 @@ Class FinSet A C `{ElemOf A C, Empty C, Singleton A C, Union C,
 }.
 Class Size C := size: C → nat.
 Global Hint Mode Size ! : typeclass_instances.
-Arguments size {_ _} !_ / : simpl nomatch, assert.
+Global Arguments size {_ _} !_ / : simpl nomatch, assert.
 Instance: Params (@size) 2 := {}.
 
 (** The class [MonadSet M] axiomatizes a type constructor [M] that can be
@@ -1274,14 +1274,14 @@ Instead of instantiating [Infinite] directly, consider using [max_infinite] or
 Class Fresh A C := fresh: C → A.
 Global Hint Mode Fresh - ! : typeclass_instances.
 Instance: Params (@fresh) 3 := {}.
-Arguments fresh : simpl never.
+Global Arguments fresh : simpl never.
 
 Class Infinite A := {
   infinite_fresh :> Fresh A (list A);
   infinite_is_fresh (xs : list A) : fresh xs ∉ xs;
   infinite_fresh_Permutation :> Proper (@Permutation A ==> (=)) fresh;
 }.
-Arguments infinite_fresh : simpl never.
+Global Arguments infinite_fresh : simpl never.
 
 (** * Miscellaneous *)
 Class Half A := half: A → A.

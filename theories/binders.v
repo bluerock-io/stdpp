@@ -19,10 +19,10 @@ Inductive binder := BAnon | BNamed :> string → binder.
 Bind Scope binder_scope with binder.
 Notation "<>" := BAnon : binder_scope.
 
-Instance binder_dec_eq : EqDecision binder.
+Global Instance binder_dec_eq : EqDecision binder.
 Proof. solve_decision. Defined.
-Instance binder_inhabited : Inhabited binder := populate BAnon.
-Instance binder_countable : Countable binder.
+Global Instance binder_inhabited : Inhabited binder := populate BAnon.
+Global Instance binder_countable : Countable binder.
 Proof.
  refine (inj_countable'
    (λ b, match b with BAnon => None | BNamed s => Some s end)
@@ -40,13 +40,13 @@ Fixpoint app_binder (bs : list binder) (ss : list string) : list string :=
   match bs with [] => ss | b :: bs => b :b: app_binder bs ss end.
 Infix "+b+" := app_binder (at level 60, right associativity).
 
-Instance set_unfold_cons_binder s b ss P :
+Global Instance set_unfold_cons_binder s b ss P :
   SetUnfoldElemOf s ss P → SetUnfoldElemOf s (b :b: ss) (BNamed s = b ∨ P).
 Proof.
   constructor. rewrite <-(set_unfold (s ∈ ss) P).
   destruct b; simpl; rewrite ?elem_of_cons; naive_solver.
 Qed.
-Instance set_unfold_app_binder s bs ss P Q :
+Global Instance set_unfold_app_binder s bs ss P Q :
   SetUnfoldElemOf (BNamed s) bs P → SetUnfoldElemOf s ss Q →
   SetUnfoldElemOf s (bs +b+ ss) (P ∨ Q).
 Proof.
@@ -62,10 +62,10 @@ Proof. induction ss1; by f_equal/=. Qed.
 Lemma app_binder_snoc bs s ss : bs +b+ (s :: ss) = (bs ++ [BNamed s]) +b+ ss.
 Proof. induction bs; by f_equal/=. Qed.
 
-Instance cons_binder_Permutation b : Proper ((≡ₚ) ==> (≡ₚ)) (cons_binder b).
+Global Instance cons_binder_Permutation b : Proper ((≡ₚ) ==> (≡ₚ)) (cons_binder b).
 Proof. intros ss1 ss2 Hss. destruct b; csimpl; by rewrite Hss. Qed.
 
-Instance app_binder_Permutation : Proper ((≡ₚ) ==> (≡ₚ) ==> (≡ₚ)) app_binder.
+Global Instance app_binder_Permutation : Proper ((≡ₚ) ==> (≡ₚ) ==> (≡ₚ)) app_binder.
 Proof.
   assert (∀ bs, Proper ((≡ₚ) ==> (≡ₚ)) (app_binder bs)).
   { intros bs. induction bs as [|[]]; intros ss1 ss2; simpl; by intros ->. }

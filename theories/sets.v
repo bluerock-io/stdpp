@@ -11,11 +11,11 @@ Unset Default Proof Using.
 
 (* Higher precedence to make sure these instances are not used for other types
 with an [ElemOf] instance, such as lists. *)
-Instance set_equiv `{ElemOf A C} : Equiv C | 20 := λ X Y,
+Global Instance set_equiv `{ElemOf A C} : Equiv C | 20 := λ X Y,
   ∀ x, x ∈ X ↔ x ∈ Y.
-Instance set_subseteq `{ElemOf A C} : SubsetEq C | 20 := λ X Y,
+Global Instance set_subseteq `{ElemOf A C} : SubsetEq C | 20 := λ X Y,
   ∀ x, x ∈ X → x ∈ Y.
-Instance set_disjoint `{ElemOf A C} : Disjoint C | 20 := λ X Y,
+Global Instance set_disjoint `{ElemOf A C} : Disjoint C | 20 := λ X Y,
   ∀ x, x ∈ X → x ∈ Y → False.
 Typeclasses Opaque set_equiv set_subseteq set_disjoint.
 
@@ -95,27 +95,27 @@ This transformation is implemented using type classes instead of setoid
 rewriting to ensure that we traverse each term at most once and to be able to
 deal with occurences of the set operations under binders. *)
 Class SetUnfold (P Q : Prop) := { set_unfold : P ↔ Q }.
-Arguments set_unfold _ _ {_} : assert.
+Global Arguments set_unfold _ _ {_} : assert.
 Global Hint Mode SetUnfold + - : typeclass_instances.
 
 (** The class [SetUnfoldElemOf] is a more specialized version of [SetUnfold]
 for propositions of the shape [x ∈ X] to improve performance. *)
 Class SetUnfoldElemOf `{ElemOf A C} (x : A) (X : C) (Q : Prop) :=
   { set_unfold_elem_of : x ∈ X ↔ Q }.
-Arguments set_unfold_elem_of {_ _ _} _ _ _ {_} : assert.
+Global Arguments set_unfold_elem_of {_ _ _} _ _ _ {_} : assert.
 Global Hint Mode SetUnfoldElemOf + + + - + - : typeclass_instances.
 
-Instance set_unfold_elem_of_default `{ElemOf A C} (x : A) (X : C) :
+Global Instance set_unfold_elem_of_default `{ElemOf A C} (x : A) (X : C) :
   SetUnfoldElemOf x X (x ∈ X) | 1000.
 Proof. done. Qed.
-Instance set_unfold_elem_of_set_unfold `{ElemOf A C} (x : A) (X : C) Q :
+Global Instance set_unfold_elem_of_set_unfold `{ElemOf A C} (x : A) (X : C) Q :
   SetUnfoldElemOf x X Q → SetUnfold (x ∈ X) Q.
 Proof. by destruct 1; constructor. Qed.
 
 Class SetUnfoldSimpl (P Q : Prop) := { set_unfold_simpl : SetUnfold P Q }.
 Global Hint Extern 0 (SetUnfoldSimpl _ _) => csimpl; constructor : typeclass_instances.
 
-Instance set_unfold_default P : SetUnfold P P | 1000. done. Qed.
+Global Instance set_unfold_default P : SetUnfold P P | 1000. done. Qed.
 Definition set_unfold_1 `{SetUnfold P Q} : P → Q := proj1 (set_unfold P Q).
 Definition set_unfold_2 `{SetUnfold P Q} : Q → P := proj2 (set_unfold P Q).
 
@@ -244,7 +244,7 @@ Section set_unfold.
   Qed.
 End set_unfold.
 
-Instance set_unfold_top `{TopSet A C} (x : A) :
+Global Instance set_unfold_top `{TopSet A C} (x : A) :
   SetUnfoldElemOf x (⊤ : C) True.
 Proof. constructor. split; [done|intros; apply elem_of_top']. Qed.
 

@@ -13,10 +13,10 @@ used for lists, we use slightly different notations so it becomes easier to use
 lists and vectors together. *)
 Notation vec := Vector.t.
 Notation vnil := Vector.nil.
-Arguments vnil {_}.
+Global Arguments vnil {_}.
 Notation vcons := Vector.cons.
 Notation vapp := Vector.append.
-Arguments vcons {_} _ {_} _.
+Global Arguments vcons {_} _ {_} _.
 
 Infix ":::" := vcons (at level 60, right associativity) : vector_scope.
 Notation "(:::)" := vcons (only parsing) : vector_scope.
@@ -41,7 +41,7 @@ Proof.
   refine match v with [#] => tt | x ::: v => λ P Hcons, Hcons x v end.
 Defined.
 
-Instance vector_lookup_total A : ∀ m, LookupTotal (fin m) A (vec A m) :=
+Global Instance vector_lookup_total A : ∀ m, LookupTotal (fin m) A (vec A m) :=
   fix go m i {struct i} := let _ : ∀ m, LookupTotal _ _ _ := @go in
   match i in fin m return vec A m → A with
   | 0%fin => vec_S_inv (λ _, A) (λ x _, x)
@@ -74,7 +74,7 @@ Proof.
   - apply IH. intros i. apply (Hi (FS i)).
 Qed.
 
-Instance vec_dec {A} {dec : EqDecision A} {n} : EqDecision (vec A n).
+Global Instance vec_dec {A} {dec : EqDecision A} {n} : EqDecision (vec A n).
 Proof.
  refine (vec_rect2
   (λ n (v w : vec A n), { v = w } + { v ≠ w })
@@ -330,7 +330,7 @@ Global Instance vec_0_inhabited T : Inhabited (vec T 0) := populate [#].
 Global Instance vec_inhabited `{Inhabited T} n : Inhabited (vec T n) :=
   populate (vreplicate n inhabitant).
 
-Instance vec_countable `{Countable A} n : Countable (vec A n).
+Global Instance vec_countable `{Countable A} n : Countable (vec A n).
 Proof.
   apply (inj_countable vec_to_list (λ l,
     guard (n = length l) as H; Some (eq_rect _ _ (list_to_vec l) _ (eq_sym H)))).

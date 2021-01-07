@@ -14,16 +14,16 @@ Open Scope string_scope.
    the "++" notation designates list concatenation. *)
 Open Scope list_scope.
 Infix "+:+" := String.append (at level 60, right associativity) : stdpp_scope.
-Arguments String.append : simpl never.
+Global Arguments String.append : simpl never.
 
 (** * Decision of equality *)
-Instance ascii_eq_dec : EqDecision ascii := ascii_dec.
-Instance string_eq_dec : EqDecision string.
+Global Instance ascii_eq_dec : EqDecision ascii := ascii_dec.
+Global Instance string_eq_dec : EqDecision string.
 Proof. solve_decision. Defined.
-Instance string_app_inj s1 : Inj (=) (=) (String.append s1).
+Global Instance string_app_inj s1 : Inj (=) (=) (String.append s1).
 Proof. intros ???. induction s1; simplify_eq/=; f_equal/=; auto. Qed.
 
-Instance string_inhabited : Inhabited string := populate "".
+Global Instance string_inhabited : Inhabited string := populate "".
 
 (* Reverse *)
 Fixpoint string_rev_app (s1 s2 : string) : string :=
@@ -117,5 +117,5 @@ Program Instance string_countable : Countable string := {|
 Solve Obligations with naive_solver eauto using string_of_to_pos with f_equal.
 Lemma ascii_of_to_digits a : ascii_of_digits (ascii_to_digits a) = a.
 Proof. by destruct a as [[][][][][][][][]]. Qed.
-Instance ascii_countable : Countable ascii :=
+Global Instance ascii_countable : Countable ascii :=
   inj_countable' ascii_to_digits ascii_of_digits ascii_of_to_digits.

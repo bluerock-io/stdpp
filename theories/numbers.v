@@ -8,12 +8,12 @@ From stdpp Require Import options.
 Local Open Scope nat_scope.
 
 Coercion Z.of_nat : nat >-> Z.
-Instance comparison_eq_dec : EqDecision comparison.
+Global Instance comparison_eq_dec : EqDecision comparison.
 Proof. solve_decision. Defined.
 
 (** * Notations and properties of [nat] *)
-Arguments minus !_ !_ / : assert.
-Arguments Nat.max : simpl nomatch.
+Global Arguments minus !_ !_ / : assert.
+Global Arguments Nat.max : simpl nomatch.
 
 Typeclasses Opaque lt.
 
@@ -37,18 +37,18 @@ Infix "`mod`" := Nat.modulo (at level 35) : nat_scope.
 Infix "`max`" := Nat.max (at level 35) : nat_scope.
 Infix "`min`" := Nat.min (at level 35) : nat_scope.
 
-Instance nat_eq_dec: EqDecision nat := eq_nat_dec.
-Instance nat_le_dec: RelDecision le := le_dec.
-Instance nat_lt_dec: RelDecision lt := lt_dec.
-Instance nat_inhabited: Inhabited nat := populate 0%nat.
-Instance S_inj: Inj (=) (=) S.
+Global Instance nat_eq_dec: EqDecision nat := eq_nat_dec.
+Global Instance nat_le_dec: RelDecision le := le_dec.
+Global Instance nat_lt_dec: RelDecision lt := lt_dec.
+Global Instance nat_inhabited: Inhabited nat := populate 0%nat.
+Global Instance S_inj: Inj (=) (=) S.
 Proof. by injection 1. Qed.
-Instance nat_le_po: PartialOrder (≤).
+Global Instance nat_le_po: PartialOrder (≤).
 Proof. repeat split; repeat intro; auto with lia. Qed.
-Instance nat_le_total: Total (≤).
+Global Instance nat_le_total: Total (≤).
 Proof. repeat intro; lia. Qed.
 
-Instance nat_le_pi: ∀ x y : nat, ProofIrrel (x ≤ y).
+Global Instance nat_le_pi: ∀ x y : nat, ProofIrrel (x ≤ y).
 Proof.
   assert (∀ x y (p : x ≤ y) y' (q : x ≤ y'),
     y = y' → eq_dep nat (le x) y p y' q) as aux.
@@ -60,7 +60,7 @@ Proof.
   intros x y p q.
   by apply (Eqdep_dec.eq_dep_eq_dec (λ x y, decide (x = y))), aux.
 Qed.
-Instance nat_lt_pi: ∀ x y : nat, ProofIrrel (x < y).
+Global Instance nat_lt_pi: ∀ x y : nat, ProofIrrel (x < y).
 Proof. unfold lt. apply _. Qed.
 
 Lemma nat_le_sum (x y : nat) : x ≤ y ↔ ∃ z, y = x + z.
@@ -81,7 +81,7 @@ Proof. intros. destruct (Nat_mul_split_l n x2 x1 y2 y1); auto with lia. Qed.
 Notation lcm := Nat.lcm.
 Notation divide := Nat.divide.
 Notation "( x | y )" := (divide x y) : nat_scope.
-Instance Nat_divide_dec : RelDecision Nat.divide.
+Global Instance Nat_divide_dec : RelDecision Nat.divide.
 Proof.
   refine (λ x y, cast_if (decide (lcm x y = y))); by rewrite Nat.divide_lcm_iff.
 Defined.
@@ -122,24 +122,24 @@ Notation "(<)" := Pos.lt (only parsing) : positive_scope.
 Notation "(~0)" := xO (only parsing) : positive_scope.
 Notation "(~1)" := xI (only parsing) : positive_scope.
 
-Arguments Pos.of_nat : simpl never.
-Arguments Pmult : simpl never.
+Global Arguments Pos.of_nat : simpl never.
+Global Arguments Pmult : simpl never.
 
-Instance positive_eq_dec: EqDecision positive := Pos.eq_dec.
-Instance positive_le_dec: RelDecision Pos.le.
+Global Instance positive_eq_dec: EqDecision positive := Pos.eq_dec.
+Global Instance positive_le_dec: RelDecision Pos.le.
 Proof. refine (λ x y, decide ((x ?= y) ≠ Gt)). Defined.
-Instance positive_lt_dec: RelDecision Pos.lt.
+Global Instance positive_lt_dec: RelDecision Pos.lt.
 Proof. refine (λ x y, decide ((x ?= y) = Lt)). Defined.
-Instance positive_le_total: Total Pos.le.
+Global Instance positive_le_total: Total Pos.le.
 Proof. repeat intro; lia. Qed.
 
-Instance positive_inhabited: Inhabited positive := populate 1.
+Global Instance positive_inhabited: Inhabited positive := populate 1.
 
-Instance maybe_xO : Maybe xO := λ p, match p with p~0 => Some p | _ => None end.
-Instance maybe_xI : Maybe xI := λ p, match p with p~1 => Some p | _ => None end.
-Instance xO_inj : Inj (=) (=) (~0).
+Global Instance maybe_xO : Maybe xO := λ p, match p with p~0 => Some p | _ => None end.
+Global Instance maybe_xI : Maybe xI := λ p, match p with p~1 => Some p | _ => None end.
+Global Instance xO_inj : Inj (=) (=) (~0).
 Proof. by injection 1. Qed.
-Instance xI_inj : Inj (=) (=) (~1).
+Global Instance xI_inj : Inj (=) (=) (~1).
 Proof. by injection 1. Qed.
 
 (** Since [positive] represents lists of bits, we define list operations
@@ -199,7 +199,7 @@ Proof.
   - reflexivity.
 Qed.
 
-Instance Preverse_inj : Inj (=) (=) Preverse.
+Global Instance Preverse_inj : Inj (=) (=) Preverse.
 Proof.
   intros p q eq.
   rewrite <- (Preverse_involutive p).
@@ -248,7 +248,7 @@ Proof.
   - reflexivity.
 Qed.
 
-Instance Pdup_inj : Inj (=) (=) Pdup.
+Global Instance Pdup_inj : Inj (=) (=) Pdup.
 Proof.
   intros p q eq.
   apply (Pdup_suffix_eq _ _ 1 1).
@@ -291,27 +291,27 @@ Infix "`mod`" := N.modulo (at level 35) : N_scope.
 Infix "`max`" := N.max (at level 35) : N_scope.
 Infix "`min`" := N.min (at level 35) : N_scope.
 
-Arguments N.add : simpl never.
+Global Arguments N.add : simpl never.
 
-Instance Npos_inj : Inj (=) (=) Npos.
+Global Instance Npos_inj : Inj (=) (=) Npos.
 Proof. by injection 1. Qed.
 
-Instance N_eq_dec: EqDecision N := N.eq_dec.
+Global Instance N_eq_dec: EqDecision N := N.eq_dec.
 Program Instance N_le_dec : RelDecision N.le := λ x y,
   match N.compare x y with Gt => right _ | _ => left _ end.
 Solve Obligations with naive_solver.
 Program Instance N_lt_dec : RelDecision N.lt := λ x y,
   match N.compare x y with Lt => left _ | _ => right _ end.
 Solve Obligations with naive_solver.
-Instance N_inhabited: Inhabited N := populate 1%N.
-Instance N_lt_pi x y : ProofIrrel (x < y)%N.
+Global Instance N_inhabited: Inhabited N := populate 1%N.
+Global Instance N_lt_pi x y : ProofIrrel (x < y)%N.
 Proof. unfold N.lt. apply _. Qed.
 
-Instance N_le_po: PartialOrder (≤)%N.
+Global Instance N_le_po: PartialOrder (≤)%N.
 Proof.
   repeat split; red; [apply N.le_refl | apply N.le_trans | apply N.le_antisymm].
 Qed.
-Instance N_le_total: Total (≤)%N.
+Global Instance N_le_total: Total (≤)%N.
 Proof. repeat intro; lia. Qed.
 
 Global Hint Extern 0 (_ ≤ _)%N => reflexivity : core.
@@ -340,28 +340,28 @@ Infix "≫" := Z.shiftr (at level 35) : Z_scope.
 Infix "`max`" := Z.max (at level 35) : Z_scope.
 Infix "`min`" := Z.min (at level 35) : Z_scope.
 
-Instance Zpos_inj : Inj (=) (=) Zpos.
+Global Instance Zpos_inj : Inj (=) (=) Zpos.
 Proof. by injection 1. Qed.
-Instance Zneg_inj : Inj (=) (=) Zneg.
+Global Instance Zneg_inj : Inj (=) (=) Zneg.
 Proof. by injection 1. Qed.
 
-Instance Z_of_nat_inj : Inj (=) (=) Z.of_nat.
+Global Instance Z_of_nat_inj : Inj (=) (=) Z.of_nat.
 Proof. intros n1 n2. apply Nat2Z.inj. Qed.
 
-Instance Z_eq_dec: EqDecision Z := Z.eq_dec.
-Instance Z_le_dec: RelDecision Z.le := Z_le_dec.
-Instance Z_lt_dec: RelDecision Z.lt := Z_lt_dec.
-Instance Z_ge_dec: RelDecision Z.ge := Z_ge_dec.
-Instance Z_gt_dec: RelDecision Z.gt := Z_gt_dec.
-Instance Z_inhabited: Inhabited Z := populate 1.
-Instance Z_lt_pi x y : ProofIrrel (x < y).
+Global Instance Z_eq_dec: EqDecision Z := Z.eq_dec.
+Global Instance Z_le_dec: RelDecision Z.le := Z_le_dec.
+Global Instance Z_lt_dec: RelDecision Z.lt := Z_lt_dec.
+Global Instance Z_ge_dec: RelDecision Z.ge := Z_ge_dec.
+Global Instance Z_gt_dec: RelDecision Z.gt := Z_gt_dec.
+Global Instance Z_inhabited: Inhabited Z := populate 1.
+Global Instance Z_lt_pi x y : ProofIrrel (x < y).
 Proof. unfold Z.lt. apply _. Qed.
 
-Instance Z_le_po : PartialOrder (≤).
+Global Instance Z_le_po : PartialOrder (≤).
 Proof.
   repeat split; red; [apply Z.le_refl | apply Z.le_trans | apply Z.le_antisymm].
 Qed.
-Instance Z_le_total: Total Z.le.
+Global Instance Z_le_total: Total Z.le.
 Proof. repeat intro; lia. Qed.
 
 Lemma Z_pow_pred_r n m : 0 < m → n * n ^ (Z.pred m) = n ^ m.
@@ -377,31 +377,31 @@ Proof.
   trans x; auto. apply Z.quot_lt; lia.
 Qed.
 
-Arguments Z.pred : simpl never.
-Arguments Z.succ : simpl never.
-Arguments Z.of_nat : simpl never.
-Arguments Z.to_nat : simpl never.
-Arguments Z.mul : simpl never.
-Arguments Z.add : simpl never.
-Arguments Z.sub : simpl never.
-Arguments Z.opp : simpl never.
-Arguments Z.pow : simpl never.
-Arguments Z.div : simpl never.
-Arguments Z.modulo : simpl never.
-Arguments Z.quot : simpl never.
-Arguments Z.rem : simpl never.
-Arguments Z.shiftl : simpl never.
-Arguments Z.shiftr : simpl never.
-Arguments Z.gcd : simpl never.
-Arguments Z.lcm : simpl never.
-Arguments Z.min : simpl never.
-Arguments Z.max : simpl never.
-Arguments Z.lor : simpl never.
-Arguments Z.land : simpl never.
-Arguments Z.lxor : simpl never.
-Arguments Z.lnot : simpl never.
-Arguments Z.square : simpl never.
-Arguments Z.abs : simpl never.
+Global Arguments Z.pred : simpl never.
+Global Arguments Z.succ : simpl never.
+Global Arguments Z.of_nat : simpl never.
+Global Arguments Z.to_nat : simpl never.
+Global Arguments Z.mul : simpl never.
+Global Arguments Z.add : simpl never.
+Global Arguments Z.sub : simpl never.
+Global Arguments Z.opp : simpl never.
+Global Arguments Z.pow : simpl never.
+Global Arguments Z.div : simpl never.
+Global Arguments Z.modulo : simpl never.
+Global Arguments Z.quot : simpl never.
+Global Arguments Z.rem : simpl never.
+Global Arguments Z.shiftl : simpl never.
+Global Arguments Z.shiftr : simpl never.
+Global Arguments Z.gcd : simpl never.
+Global Arguments Z.lcm : simpl never.
+Global Arguments Z.min : simpl never.
+Global Arguments Z.max : simpl never.
+Global Arguments Z.lor : simpl never.
+Global Arguments Z.land : simpl never.
+Global Arguments Z.lxor : simpl never.
+Global Arguments Z.lnot : simpl never.
+Global Arguments Z.square : simpl never.
+Global Arguments Z.abs : simpl never.
 
 Lemma Z_to_nat_neq_0_pos x : Z.to_nat x ≠ 0%nat → 0 < x.
 Proof. by destruct x. Qed.
@@ -483,11 +483,11 @@ Proof. intros ?. symmetry. apply Z.mod_unique_pos with q; lia. Qed.
 Local Close Scope Z_scope.
 
 (** * Injectivity of casts *)
-Instance N_of_nat_inj: Inj (=) (=) N.of_nat := Nat2N.inj.
-Instance nat_of_N_inj: Inj (=) (=) N.to_nat := N2Nat.inj.
-Instance nat_of_pos_inj: Inj (=) (=) Pos.to_nat := Pos2Nat.inj.
-Instance pos_of_Snat_inj: Inj (=) (=) Pos.of_succ_nat := SuccNat2Pos.inj.
-Instance Z_of_N_inj: Inj (=) (=) Z.of_N := N2Z.inj.
+Global Instance N_of_nat_inj: Inj (=) (=) N.of_nat := Nat2N.inj.
+Global Instance nat_of_N_inj: Inj (=) (=) N.to_nat := N2Nat.inj.
+Global Instance nat_of_pos_inj: Inj (=) (=) Pos.to_nat := Pos2Nat.inj.
+Global Instance pos_of_Snat_inj: Inj (=) (=) Pos.of_succ_nat := SuccNat2Pos.inj.
+Global Instance Z_of_N_inj: Inj (=) (=) Z.of_N := N2Z.inj.
 (* Add others here. *)
 
 (** * Notations and properties of [Qc] *)
@@ -510,9 +510,9 @@ Notation "(≤)" := Qcle (only parsing) : Qc_scope.
 Notation "(<)" := Qclt (only parsing) : Qc_scope.
 
 Global Hint Extern 1 (_ ≤ _) => reflexivity || discriminate : core.
-Arguments Qred : simpl never.
+Global Arguments Qred : simpl never.
 
-Instance Qc_eq_dec: EqDecision Qc := Qc_eq_dec.
+Global Instance Qc_eq_dec: EqDecision Qc := Qc_eq_dec.
 Program Instance Qc_le_dec: RelDecision Qcle := λ x y,
   if Qclt_le_dec y x then right _ else left _.
 Next Obligation. intros x y; apply Qclt_not_le. Qed.
@@ -521,19 +521,19 @@ Program Instance Qc_lt_dec: RelDecision Qclt := λ x y,
   if Qclt_le_dec x y then left _ else right _.
 Next Obligation. done. Qed.
 Next Obligation. intros x y; apply Qcle_not_lt. Qed.
-Instance Qc_lt_pi x y : ProofIrrel (x < y).
+Global Instance Qc_lt_pi x y : ProofIrrel (x < y).
 Proof. unfold Qclt. apply _. Qed.
 
-Instance Qc_le_po: PartialOrder (≤).
+Global Instance Qc_le_po: PartialOrder (≤).
 Proof.
   repeat split; red; [apply Qcle_refl | apply Qcle_trans | apply Qcle_antisym].
 Qed.
-Instance Qc_lt_strict: StrictOrder (<).
+Global Instance Qc_lt_strict: StrictOrder (<).
 Proof.
   split; red; [|apply Qclt_trans].
   intros x Hx. by destruct (Qclt_not_eq x x).
 Qed.
-Instance Qc_le_total: Total Qcle.
+Global Instance Qc_le_total: Total Qcle.
 Proof. intros x y. destruct (Qclt_le_dec x y); auto using Qclt_le_weak. Qed.
 
 Lemma Qcmult_0_l x : 0 * x = 0.
@@ -560,15 +560,15 @@ Lemma Qcplus_lt_mono_l (x y z : Qc) : x < y ↔ z + x < z + y.
 Proof. by rewrite !Qclt_nge, <-Qcplus_le_mono_l. Qed.
 Lemma Qcplus_lt_mono_r (x y z : Qc) : x < y ↔ x + z < y + z.
 Proof. by rewrite !Qclt_nge, <-Qcplus_le_mono_r. Qed.
-Instance Qcopp_inj : Inj (=) (=) Qcopp.
+Global Instance Qcopp_inj : Inj (=) (=) Qcopp.
 Proof.
   intros x y H. by rewrite <-(Qcopp_involutive x), H, Qcopp_involutive.
 Qed.
-Instance Qcplus_inj_r z : Inj (=) (=) (Qcplus z).
+Global Instance Qcplus_inj_r z : Inj (=) (=) (Qcplus z).
 Proof.
   intros x y H. by apply (anti_symm (≤));rewrite (Qcplus_le_mono_l _ _ z), H.
 Qed.
-Instance Qcplus_inj_l z : Inj (=) (=) (λ x, x + z).
+Global Instance Qcplus_inj_l z : Inj (=) (=) (λ x, x + z).
 Proof.
   intros x y H. by apply (anti_symm (≤)); rewrite (Qcplus_le_mono_r _ _ z), H.
 Qed.
@@ -670,7 +670,7 @@ Delimit Scope Qp_scope with Qp.
 Record Qp := mk_Qp { Qp_to_Qc : Qc ; Qp_prf : (0 < Qp_to_Qc)%Qc }.
 Add Printing Constructor Qp.
 Bind Scope Qp_scope with Qp.
-Arguments Qp_to_Qc _%Qp : assert.
+Global Arguments Qp_to_Qc _%Qp : assert.
 
 Local Open Scope Qp_scope.
 
@@ -679,7 +679,7 @@ Proof.
   split; [|by intros ->].
   destruct p, q; intros; simplify_eq/=; f_equal; apply (proof_irrel _).
 Qed.
-Instance Qp_eq_dec : EqDecision Qp.
+Global Instance Qp_eq_dec : EqDecision Qp.
 Proof.
   refine (λ p q, cast_if (decide (Qp_to_Qc p = Qp_to_Qc q)));
     by rewrite <-Qp_to_Qc_inj_iff.
@@ -688,27 +688,27 @@ Defined.
 Definition Qp_add (p q : Qp) : Qp :=
   let 'mk_Qp p Hp := p in let 'mk_Qp q Hq := q in
   mk_Qp (p + q) (Qcplus_pos_pos _ _ Hp Hq).
-Arguments Qp_add : simpl never.
+Global Arguments Qp_add : simpl never.
 
 Definition Qp_sub (p q : Qp) : option Qp :=
   let 'mk_Qp p Hp := p in let 'mk_Qp q Hq := q in
   let pq := (p - q)%Qc in
   guard (0 < pq)%Qc as Hpq; Some (mk_Qp pq Hpq).
-Arguments Qp_sub : simpl never.
+Global Arguments Qp_sub : simpl never.
 
 Definition Qp_mul (p q : Qp) : Qp :=
   let 'mk_Qp p Hp := p in let 'mk_Qp q Hq := q in
   mk_Qp (p * q) (Qcmult_pos_pos _ _ Hp Hq).
-Arguments Qp_mul : simpl never.
+Global Arguments Qp_mul : simpl never.
 
 Definition Qp_inv (q : Qp) : Qp :=
   let 'mk_Qp q Hq := q return _ in
   mk_Qp (/ q)%Qc (Qcinv_pos _ Hq).
-Arguments Qp_inv : simpl never.
+Global Arguments Qp_inv : simpl never.
 
 Definition Qp_div (p q : Qp) : Qp := Qp_mul p (Qp_inv q).
 Typeclasses Opaque Qp_div.
-Arguments Qp_div : simpl never.
+Global Arguments Qp_div : simpl never.
 
 Infix "+" := Qp_add : Qp_scope.
 Infix "-" := Qp_sub : Qp_scope.
@@ -718,7 +718,7 @@ Infix "/" := Qp_div : Qp_scope.
 
 Program Definition pos_to_Qp (n : positive) : Qp := mk_Qp (Z.pos n) _.
 Next Obligation. intros n. by rewrite <-Z2Qc_inj_0, <-Z2Qc_inj_lt. Qed.
-Arguments pos_to_Qp : simpl never.
+Global Arguments pos_to_Qp : simpl never.
 
 Notation "1" := (pos_to_Qp 1) : Qp_scope.
 Notation "2" := (pos_to_Qp 2) : Qp_scope.
@@ -747,17 +747,17 @@ Proof. by destruct p, q. Qed.
 Lemma Qp_to_Qc_inj_lt p q : p < q ↔ (Qp_to_Qc p < Qp_to_Qc q)%Qc.
 Proof. by destruct p, q. Qed.
 
-Instance Qp_le_dec : RelDecision (≤).
+Global Instance Qp_le_dec : RelDecision (≤).
 Proof.
   refine (λ p q, cast_if (decide (Qp_to_Qc p ≤ Qp_to_Qc q)%Qc));
     by rewrite Qp_to_Qc_inj_le.
 Qed.
-Instance Qp_lt_dec : RelDecision (<).
+Global Instance Qp_lt_dec : RelDecision (<).
 Proof.
   refine (λ p q, cast_if (decide (Qp_to_Qc p < Qp_to_Qc q)%Qc));
     by rewrite Qp_to_Qc_inj_lt.
 Qed.
-Instance Qp_lt_pi p q : ProofIrrel (p < q).
+Global Instance Qp_lt_pi p q : ProofIrrel (p < q).
 Proof. destruct p, q; apply _. Qed.
 
 Definition Qp_max (q p : Qp) : Qp := if decide (q ≤ p) then p else q.
@@ -766,34 +766,34 @@ Definition Qp_min (q p : Qp) : Qp := if decide (q ≤ p) then q else p.
 Infix "`max`" := Qp_max : Qp_scope.
 Infix "`min`" := Qp_min : Qp_scope.
 
-Instance Qp_inhabited : Inhabited Qp := populate 1.
+Global Instance Qp_inhabited : Inhabited Qp := populate 1.
 
-Instance Qp_add_assoc : Assoc (=) Qp_add.
+Global Instance Qp_add_assoc : Assoc (=) Qp_add.
 Proof. intros [p ?] [q ?] [r ?]; apply Qp_to_Qc_inj_iff, Qcplus_assoc. Qed.
-Instance Qp_add_comm : Comm (=) Qp_add.
+Global Instance Qp_add_comm : Comm (=) Qp_add.
 Proof. intros [p ?] [q ?]; apply Qp_to_Qc_inj_iff, Qcplus_comm. Qed.
-Instance Qp_add_inj_r p : Inj (=) (=) (Qp_add p).
+Global Instance Qp_add_inj_r p : Inj (=) (=) (Qp_add p).
 Proof.
   destruct p as [p ?].
   intros [q1 ?] [q2 ?]. rewrite <-!Qp_to_Qc_inj_iff; simpl. apply (inj (Qcplus p)).
 Qed.
-Instance Qp_add_inj_l p : Inj (=) (=) (λ q, q + p).
+Global Instance Qp_add_inj_l p : Inj (=) (=) (λ q, q + p).
 Proof.
   destruct p as [p ?].
   intros [q1 ?] [q2 ?]. rewrite <-!Qp_to_Qc_inj_iff; simpl. apply (inj (λ q, q + p)%Qc).
 Qed.
 
-Instance Qp_mul_assoc : Assoc (=) Qp_mul.
+Global Instance Qp_mul_assoc : Assoc (=) Qp_mul.
 Proof. intros [p ?] [q ?] [r ?]. apply Qp_to_Qc_inj_iff, Qcmult_assoc. Qed.
-Instance Qp_mul_comm : Comm (=) Qp_mul.
+Global Instance Qp_mul_comm : Comm (=) Qp_mul.
 Proof. intros [p ?] [q ?]; apply Qp_to_Qc_inj_iff, Qcmult_comm. Qed.
-Instance Qp_mul_inj_r p : Inj (=) (=) (Qp_mul p).
+Global Instance Qp_mul_inj_r p : Inj (=) (=) (Qp_mul p).
 Proof.
   destruct p as [p ?]. intros [q1 ?] [q2 ?]. rewrite <-!Qp_to_Qc_inj_iff; simpl.
   intros Hpq.
   apply (anti_symm _); apply (Qcmult_le_mono_pos_l _ _ p); by rewrite ?Hpq.
 Qed.
-Instance Qp_mul_inj_l p : Inj (=) (=) (λ q, q * p).
+Global Instance Qp_mul_inj_l p : Inj (=) (=) (λ q, q * p).
 Proof.
   intros q1 q2 Hpq. apply (inj (Qp_mul p)). by rewrite !(comm_L Qp_mul p).
 Qed.
@@ -830,7 +830,7 @@ Proof.
   rewrite <-(Qp_mul_1_l (/ /p)), <-(Qp_mul_inv_r p), <-(assoc_L _).
   by rewrite Qp_mul_inv_r, Qp_mul_1_r.
 Qed.
-Instance Qp_inv_inj : Inj (=) (=) Qp_inv.
+Global Instance Qp_inv_inj : Inj (=) (=) Qp_inv.
 Proof.
   intros p1 p2 Hp. apply (inj (Qp_mul (/p1))).
   by rewrite Qp_mul_inv_l, Hp, Qp_mul_inv_l.
@@ -876,25 +876,25 @@ Lemma Qp_quarter_three_quarter : 1 / 4 + 3 / 4 = 1.
 Proof. apply (bool_decide_unpack _); by compute. Qed.
 Lemma Qp_three_quarter_quarter : 3 / 4 + 1 / 4 = 1.
 Proof. apply (bool_decide_unpack _); by compute. Qed.
-Instance Qp_div_inj_r p : Inj (=) (=) (Qp_div p).
+Global Instance Qp_div_inj_r p : Inj (=) (=) (Qp_div p).
 Proof. unfold Qp_div; apply _. Qed.
-Instance Qp_div_inj_l p : Inj (=) (=) (λ q, q / p)%Qp.
+Global Instance Qp_div_inj_l p : Inj (=) (=) (λ q, q / p)%Qp.
 Proof. unfold Qp_div; apply _. Qed.
 
-Instance Qp_le_po : PartialOrder (≤)%Qp.
+Global Instance Qp_le_po : PartialOrder (≤)%Qp.
 Proof.
   split; [split|].
   - intros p. by apply Qp_to_Qc_inj_le.
   - intros p q r. rewrite !Qp_to_Qc_inj_le. by etrans.
   - intros p q. rewrite !Qp_to_Qc_inj_le, <-Qp_to_Qc_inj_iff. apply Qcle_antisym.
 Qed.
-Instance Qp_lt_strict : StrictOrder (<)%Qp.
+Global Instance Qp_lt_strict : StrictOrder (<)%Qp.
 Proof.
   split.
   - intros p ?%Qp_to_Qc_inj_lt. by apply (irreflexivity (<)%Qc (Qp_to_Qc p)).
   - intros p q r. rewrite !Qp_to_Qc_inj_lt. by etrans.
 Qed.
-Instance Qp_le_total: Total (≤)%Qp.
+Global Instance Qp_le_total: Total (≤)%Qp.
 Proof. intros p q. rewrite !Qp_to_Qc_inj_le. apply (total Qcle). Qed.
 
 Lemma Qp_lt_le_incl p q : p < q → p ≤ q.
@@ -1096,14 +1096,14 @@ Qed.
 Lemma Qp_max_spec_le q p : (q ≤ p ∧ q `max` p = p) ∨ (p ≤ q ∧ q `max` p = q).
 Proof. destruct (Qp_max_spec q p) as [[?%Qp_lt_le_incl?]|]; [left|right]; done. Qed.
 
-Instance Qp_max_assoc : Assoc (=) Qp_max.
+Global Instance Qp_max_assoc : Assoc (=) Qp_max.
 Proof.
   intros q p o. unfold Qp_max. destruct (decide (q ≤ p)), (decide (p ≤ o));
     try by rewrite ?decide_True by (by etrans).
   rewrite decide_False by done.
   by rewrite decide_False by (apply Qp_lt_nge; etrans; by apply Qp_lt_nge).
 Qed.
-Instance Qp_max_comm : Comm (=) Qp_max.
+Global Instance Qp_max_comm : Comm (=) Qp_max.
 Proof.
   intros q p.
   destruct (Qp_max_spec_le q p) as [[?->]|[?->]],
@@ -1139,14 +1139,14 @@ Qed.
 Lemma Qp_min_spec_le q p : (q ≤ p ∧ q `min` p = q) ∨ (p ≤ q ∧ q `min` p = p).
 Proof. destruct (Qp_min_spec q p) as [[?%Qp_lt_le_incl ?]|]; [left|right]; done. Qed.
 
-Instance Qp_min_assoc : Assoc (=) Qp_min.
+Global Instance Qp_min_assoc : Assoc (=) Qp_min.
 Proof.
   intros q p o. unfold Qp_min.
   destruct (decide (q ≤ p)), (decide (p ≤ o)); eauto using decide_False.
   - by rewrite !decide_True by (by etrans).
   - by rewrite decide_False by (apply Qp_lt_nge; etrans; by apply Qp_lt_nge).
 Qed.
-Instance Qp_min_comm : Comm (=) Qp_min.
+Global Instance Qp_min_comm : Comm (=) Qp_min.
 Proof.
   intros q p.
   destruct (Qp_min_spec_le q p) as [[?->]|[?->]],

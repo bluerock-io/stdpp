@@ -14,11 +14,11 @@ Set Default Proof Using "Type*".
 Inductive coGset `{Countable A} :=
   | FinGSet (X : gset A)
   | CoFinGset (X : gset A).
-Arguments coGset _ {_ _} : assert.
+Global Arguments coGset _ {_ _} : assert.
 
-Instance coGset_eq_dec `{Countable A} : EqDecision (coGset A).
+Global Instance coGset_eq_dec `{Countable A} : EqDecision (coGset A).
 Proof. solve_decision. Defined.
-Instance coGset_countable `{Countable A} : Countable (coGset A).
+Global Instance coGset_countable `{Countable A} : Countable (coGset A).
 Proof.
   apply (inj_countable'
     (λ X, match X with FinGSet X => inl X | CoFinGset X => inr X end)
@@ -80,7 +80,7 @@ Section coGset.
   Qed.
 End coGset.
 
-Instance coGset_elem_of_dec `{Countable A} : RelDecision (∈@{coGset A}) :=
+Global Instance coGset_elem_of_dec `{Countable A} : RelDecision (∈@{coGset A}) :=
   λ x X,
   match X with
   | FinGSet X => decide_rel elem_of x X
@@ -193,9 +193,9 @@ Lemma elem_of_coGset_to_top_set `{Countable A, TopSet A C} X x :
 Proof. destruct X; set_solver. Qed.
 
 (** * Domain of finite maps *)
-Instance coGset_dom `{Countable K} {A} : Dom (gmap K A) (coGset K) := λ m,
+Global Instance coGset_dom `{Countable K} {A} : Dom (gmap K A) (coGset K) := λ m,
   gset_to_coGset (dom _ m).
-Instance coGset_dom_spec `{Countable K} : FinMapDom K (gmap K) (coGset K).
+Global Instance coGset_dom_spec `{Countable K} : FinMapDom K (gmap K) (coGset K).
 Proof.
   split; try apply _. intros B m i. unfold dom, coGset_dom.
   by rewrite elem_of_gset_to_coGset, elem_of_dom.

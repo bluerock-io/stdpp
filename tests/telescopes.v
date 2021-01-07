@@ -30,3 +30,4 @@ Proof.
   left. done.
 Qed.
 End tests.
+End accessor.

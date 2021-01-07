@@ -4,8 +4,8 @@ From stdpp Require Export sets list.
 From stdpp Require Import options.
 
 Record listset A := Listset { listset_car: list A }.
-Arguments listset_car {_} _ : assert.
-Arguments Listset {_} _ : assert.
+Global Arguments listset_car {_} _ : assert.
+Global Arguments Listset {_} _ : assert.
 
 Section listset.
 Context {A : Type}.
@@ -48,7 +48,7 @@ Global Instance listset_intersection: Intersection (listset A) :=
 Global Instance listset_difference: Difference (listset A) :=
   λ '(Listset l) '(Listset k), Listset (list_difference l k).
 
-Instance listset_set: Set_ A (listset A).
+Local Instance listset_set: Set_ A (listset A).
 Proof.
   split.
   - apply _.
@@ -66,14 +66,14 @@ Proof.
 Qed.
 End listset.
 
-Instance listset_ret: MRet listset := λ A x, {[ x ]}.
-Instance listset_fmap: FMap listset := λ A B f '(Listset l),
+Global Instance listset_ret: MRet listset := λ A x, {[ x ]}.
+Global Instance listset_fmap: FMap listset := λ A B f '(Listset l),
   Listset (f <$> l).
-Instance listset_bind: MBind listset := λ A B f '(Listset l),
+Global Instance listset_bind: MBind listset := λ A B f '(Listset l),
   Listset (mbind (listset_car ∘ f) l).
-Instance listset_join: MJoin listset := λ A, mbind id.
+Global Instance listset_join: MJoin listset := λ A, mbind id.
 
-Instance listset_set_monad : MonadSet listset.
+Global Instance listset_set_monad : MonadSet listset.
 Proof.
   split.
   - intros. apply _.

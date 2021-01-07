@@ -123,17 +123,17 @@ Program Instance Z_infinite: Infinite Z :=
 Solve Obligations with (intros; simpl; lia).
 
 (** Instances for option, sum, products *)
-Instance option_infinite `{Infinite A} : Infinite (option A) :=
+Global Instance option_infinite `{Infinite A} : Infinite (option A) :=
   inj_infinite Some id (λ _, eq_refl).
 
-Instance sum_infinite_l `{Infinite A} {B} : Infinite (A + B) :=
+Global Instance sum_infinite_l `{Infinite A} {B} : Infinite (A + B) :=
   inj_infinite inl (maybe inl) (λ _, eq_refl).
-Instance sum_infinite_r {A} `{Infinite B} : Infinite (A + B) :=
+Global Instance sum_infinite_r {A} `{Infinite B} : Infinite (A + B) :=
   inj_infinite inr (maybe inr)  (λ _, eq_refl).
 
-Instance prod_infinite_l `{Infinite A, Inhabited B} : Infinite (A * B) :=
+Global Instance prod_infinite_l `{Infinite A, Inhabited B} : Infinite (A * B) :=
   inj_infinite (., inhabitant) (Some ∘ fst) (λ _, eq_refl).
-Instance prod_infinite_r `{Inhabited A, Infinite B} : Infinite (A * B) :=
+Global Instance prod_infinite_r `{Inhabited A, Infinite B} : Infinite (A * B) :=
   inj_infinite (inhabitant ,.) (Some ∘ snd) (λ _, eq_refl).
 
 (** Instance for lists *)

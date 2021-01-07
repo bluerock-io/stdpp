@@ -9,10 +9,10 @@ Class Countable A `{EqDecision A} := {
   decode_encode x : decode (encode x) = Some x
 }.
 Global Hint Mode Countable ! - : typeclass_instances.
-Arguments encode : simpl never.
-Arguments decode : simpl never.
+Global Arguments encode : simpl never.
+Global Arguments decode : simpl never.
 
-Instance encode_inj `{Countable A} : Inj (=) (=) (encode (A:=A)).
+Global Instance encode_inj `{Countable A} : Inj (=) (=) (encode (A:=A)).
 Proof.
   intros x y Hxy; apply (inj Some).
   by rewrite <-(decode_encode x), Hxy, decode_encode.
@@ -22,7 +22,7 @@ Definition encode_nat `{Countable A} (x : A) : nat :=
   pred (Pos.to_nat (encode x)).
 Definition decode_nat `{Countable A} (i : nat) : option A :=
   decode (Pos.of_nat (S i)).
-Instance encode_nat_inj `{Countable A} : Inj (=) (=) (encode_nat (A:=A)).
+Global Instance encode_nat_inj `{Countable A} : Inj (=) (=) (encode_nat (A:=A)).
 Proof. unfold encode_nat; intros x y Hxy; apply (inj encode); lia. Qed.
 Lemma decode_encode_nat `{Countable A} (x : A) : decode_nat (encode_nat x) = Some x.
 Proof.
@@ -35,7 +35,7 @@ Definition encode_Z `{Countable A} (x : A) : Z :=
   Zpos (encode x).
 Definition decode_Z `{Countable A} (i : Z) : option A :=
   match i with Zpos i => decode i | _ => None end.
-Instance encode_Z_inj `{Countable A} : Inj (=) (=) (encode_Z (A:=A)).
+Global Instance encode_Z_inj `{Countable A} : Inj (=) (=) (encode_Z (A:=A)).
 Proof. unfold encode_Z; intros x y Hxy; apply (inj encode); lia. Qed.
 Lemma decode_encode_Z `{Countable A} (x : A) : decode_Z (encode_Z x) = Some x.
 Proof. apply decode_encode. Qed.
@@ -238,7 +238,7 @@ Next Obligation.
 Qed.
 
 (** ** Numbers *)
-Instance pos_countable : Countable positive :=
+Global Instance pos_countable : Countable positive :=
   {| encode := id; decode := Some; decode_encode x := eq_refl |}.
 Program Instance N_countable : Countable N := {|
   encode x := match x with N0 => 1 | Npos p => Pos.succ p end;
@@ -292,10 +292,10 @@ Local Close Scope positive.
 Inductive gen_tree (T : Type) : Type :=
   | GenLeaf : T → gen_tree T
   | GenNode : nat → list (gen_tree T) → gen_tree T.
-Arguments GenLeaf {_} _ : assert.
-Arguments GenNode {_} _ _ : assert.
+Global Arguments GenLeaf {_} _ : assert.
+Global Arguments GenNode {_} _ _ : assert.
 
-Instance gen_tree_dec `{EqDecision T} : EqDecision (gen_tree T).
+Global Instance gen_tree_dec `{EqDecision T} : EqDecision (gen_tree T).
 Proof.
  refine (
   fix go t1 t2 := let _ : EqDecision _ := @go in

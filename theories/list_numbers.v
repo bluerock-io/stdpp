@@ -8,7 +8,7 @@ From stdpp Require Import options.
 over integers, provided [0 ≤ n]. If [n < 0], then the range is empty. **)
 Definition seqZ (m len: Z) : list Z :=
   (λ i: nat, Z.add i m) <$> (seq 0 (Z.to_nat len)).
-Arguments seqZ : simpl never.
+Global Arguments seqZ : simpl never.
 
 Definition sum_list_with {A} (f : A → nat) : list A → nat :=
   fix go l :=

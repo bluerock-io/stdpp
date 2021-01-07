@@ -271,6 +271,6 @@ Lemma dom_seq_L `{FinMapDom nat M D, !LeibnizEquiv D} {A} start (xs : list A) :
   dom D (map_seq (M:=M A) start xs) = set_seq start (length xs).
 Proof. unfold_leibniz. apply dom_seq. Qed.
 
-Instance set_unfold_dom_seq `{FinMapDom nat M D} {A} start (xs : list A) i :
+Global Instance set_unfold_dom_seq `{FinMapDom nat M D} {A} start (xs : list A) i :
   SetUnfoldElemOf i (dom D (map_seq start (M:=M A) xs)) (start ≤ i < start + length xs).
 Proof. constructor. by rewrite dom_seq, elem_of_set_seq. Qed.

@@ -81,7 +81,7 @@ Global Hint Unfold nf red : core.
 Section closure.
   Context `{R : relation A}.
 
-  Hint Constructors rtc nsteps bsteps tc : core.
+  Local Hint Constructors rtc nsteps bsteps tc : core.
 
   Lemma rtc_transitive x y z : rtc R x y → rtc R y z → rtc R x z.
   Proof. induction 1; eauto. Qed.
@@ -271,7 +271,7 @@ End more_closure.
 Section properties.
   Context `{R : relation A}.
 
-  Hint Constructors rtc nsteps bsteps tc : core.
+  Local Hint Constructors rtc nsteps bsteps tc : core.
 
   Lemma nf_wn x : nf R x → wn R x.
   Proof. intros. exists x; eauto. Qed.

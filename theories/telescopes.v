@@ -8,7 +8,7 @@ Inductive tele : Type :=
   | TeleO : tele
   | TeleS {X} (binder : X → tele) : tele.
 
-Arguments TeleS {_} _.
+Global Arguments TeleS {_} _.
 
 (** The telescope version of Coq's function type *)
 Fixpoint tele_fun (TT : tele) (T : Type) : Type :=
@@ -30,7 +30,7 @@ Definition tele_fold {X Y} {TT : tele} (step : ∀ {A : Type}, (A → Y) → Y) 
      | TeleO => λ x : X, base x
      | TeleS b => λ f, step (λ x, rec (f x))
      end) TT.
-Arguments tele_fold {_ _ !_} _ _ _ /.
+Global Arguments tele_fold {_ _ !_} _ _ _ /.
 
 (** A sigma-like type for an "element" of a telescope, i.e. the data it
   takes to get a [T] from a [TT -t> T]. *)
@@ -45,7 +45,7 @@ Definition tele_app {TT : tele} {T} (f : TT -t> T) : tele_arg TT → T :=
      | TargO => λ t : T, t
      | TargS x a => λ f, rec a (f x)
      end) TT a f.
-Arguments tele_app {!_ _} _ !_ /.
+Global Arguments tele_app {!_ _} _ !_ /.
 
 Coercion tele_arg : tele >-> Sortclass.
 (* This is a local coercion because otherwise, the "λ.." notation stops working. *)
@@ -71,7 +71,7 @@ Fixpoint tele_map {T U} {TT : tele} : (T → U) → (TT -t> T) → TT -t> U :=
   | @TeleS X b => λ (F : T → U) (f : TeleS b -t> T) (x : X),
                   tele_map F (f x)
   end.
-Arguments tele_map {_ _ !_} _ _ /.
+Global Arguments tele_map {_ _ !_} _ _ /.
 
 Lemma tele_map_app {T U} {TT : tele} (F : T → U) (t : TT -t> T) (x : TT) :
   (tele_map F t) x = F (t x).
@@ -95,7 +95,7 @@ Fixpoint tele_bind {U} {TT : tele} : (TT → U) → TT -t> U :=
   | @TeleS X b => λ (F : TeleS b → U) (x : X), (* b x -t> U *)
                   tele_bind (λ a, F (TargS x a))
   end.
-Arguments tele_bind {_ !_} _ /.
+Global Arguments tele_bind {_ !_} _ /.
 
 (* Show that tele_app ∘ tele_bind is the identity. *)
 Lemma tele_app_bind {U} {TT : tele} (f : TT → U) x :
@@ -148,10 +148,10 @@ Notation "'λ..' x .. y , e" :=
 (** Telescopic quantifiers *)
 Definition tforall {TT : tele} (Ψ : TT → Prop) : Prop :=
   tele_fold (λ (T : Type) (b : T → Prop), ∀ x : T, b x) (λ x, x) (tele_bind Ψ).
-Arguments tforall {!_} _ /.
+Global Arguments tforall {!_} _ /.
 Definition texist {TT : tele} (Ψ : TT → Prop) : Prop :=
   tele_fold ex (λ x, x) (tele_bind Ψ).
-Arguments texist {!_} _ /.
+Global Arguments texist {!_} _ /.
 
 Notation "'∀..' x .. y , P" := (tforall (λ x, .. (tforall (λ y, P)) .. ))
   (at level 200, x binder, y binder, right associativity,

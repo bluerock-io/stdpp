@@ -2,8 +2,8 @@ From stdpp Require Export countable coPset.
 From stdpp Require Import options.
 
 Definition namespace := list positive.
-Instance namespace_eq_dec : EqDecision namespace := _.
-Instance namespace_countable : Countable namespace := _.
+Global Instance namespace_eq_dec : EqDecision namespace := _.
+Global Instance namespace_countable : Countable namespace := _.
 Typeclasses Opaque namespace.
 
 Definition nroot : namespace := nil.
@@ -17,14 +17,14 @@ Definition ndot_eq : @ndot = @ndot_def := seal_eq ndot_aux.
 Definition nclose_def (N : namespace) : coPset :=
   coPset_suffixes (positives_flatten N).
 Definition nclose_aux : seal (@nclose_def). by eexists. Qed.
-Instance nclose : UpClose namespace coPset := unseal nclose_aux.
+Global Instance nclose : UpClose namespace coPset := unseal nclose_aux.
 Definition nclose_eq : @nclose = @nclose_def := seal_eq nclose_aux.
 
 Notation "N .@ x" := (ndot N x)
   (at level 19, left associativity, format "N .@ x") : stdpp_scope.
 Notation "(.@)" := ndot (only parsing) : stdpp_scope.
 
-Instance ndisjoint : Disjoint namespace := λ N1 N2, nclose N1 ## nclose N2.
+Global Instance ndisjoint : Disjoint namespace := λ N1 N2, nclose N1 ## nclose N2.
 
 Section namespace.
   Context `{Countable A}.

@@ -160,9 +160,9 @@ Proof. apply dsig_eq; reflexivity. Qed.
 
 (** * Instances of [Decision] *)
 (** Instances of [Decision] for operators of propositional logic. *)
-Instance True_dec: Decision True := left I.
-Instance False_dec: Decision False := right (False_rect False).
-Instance Is_true_dec b : Decision (Is_true b).
+Global Instance True_dec: Decision True := left I.
+Global Instance False_dec: Decision False := right (False_rect False).
+Global Instance Is_true_dec b : Decision (Is_true b).
 Proof. destruct b; simpl; apply _. Defined.
 
 Section prop_dec.
@@ -177,28 +177,28 @@ Section prop_dec.
   Global Instance impl_dec: Decision (P → Q).
   Proof. refine (if P_dec then cast_if Q_dec else left _); intuition. Defined.
 End prop_dec.
-Instance iff_dec `(P_dec : Decision P) `(Q_dec : Decision Q) :
+Global Instance iff_dec `(P_dec : Decision P) `(Q_dec : Decision Q) :
   Decision (P ↔ Q) := and_dec _ _.
 
 (** Instances of [Decision] for common data types. *)
-Instance bool_eq_dec : EqDecision bool.
+Global Instance bool_eq_dec : EqDecision bool.
 Proof. solve_decision. Defined.
-Instance unit_eq_dec : EqDecision unit.
+Global Instance unit_eq_dec : EqDecision unit.
 Proof. solve_decision. Defined.
-Instance Empty_set_eq_dec : EqDecision Empty_set.
+Global Instance Empty_set_eq_dec : EqDecision Empty_set.
 Proof. solve_decision. Defined.
-Instance prod_eq_dec `{EqDecision A, EqDecision B} : EqDecision (A * B).
+Global Instance prod_eq_dec `{EqDecision A, EqDecision B} : EqDecision (A * B).
 Proof. solve_decision. Defined.
-Instance sum_eq_dec `{EqDecision A, EqDecision B} : EqDecision (A + B).
+Global Instance sum_eq_dec `{EqDecision A, EqDecision B} : EqDecision (A + B).
 Proof. solve_decision. Defined.
 
-Instance curry_dec `(P_dec : ∀ (x : A) (y : B), Decision (P x y)) p :
+Global Instance curry_dec `(P_dec : ∀ (x : A) (y : B), Decision (P x y)) p :
     Decision (curry P p) :=
   match p as p return Decision (curry P p) with
   | (x,y) => P_dec x y
   end.
 
-Instance sig_eq_dec `(P : A → Prop) `{∀ x, ProofIrrel (P x), EqDecision A} :
+Global Instance sig_eq_dec `(P : A → Prop) `{∀ x, ProofIrrel (P x), EqDecision A} :
   EqDecision (sig P).
 Proof.
  refine (λ x y, cast_if (decide (`x = `y))); rewrite sig_eq_pi; trivial.

@@ -1026,14 +1026,16 @@ Lemma map_size_insert {A} i x (m : M A) :
   m !! i = None → size (<[i:=x]> m) = S (size m).
 Proof. intros. unfold size, map_size. by rewrite map_to_list_insert. Qed.
 Lemma map_size_delete {A} i (m : M A) :
-  is_Some (m !! i) → size m = S (size (delete i m)).
-Proof. intros [??]. unfold size, map_size. by rewrite <-map_to_list_delete. Qed.
+  is_Some (m !! i) → size (delete i m) = pred (size m).
+Proof. intros [??]. unfold size, map_size. by rewrite <-(map_to_list_delete m). Qed.
 Lemma map_size_insert_Some {A} i x (m : M A) :
   is_Some (m !! i) → size (<[i:=x]> m) = size m.
 Proof.
-  intros.
-  rewrite <-insert_delete, map_size_insert, <-map_size_delete; [done..|].
-  rewrite lookup_delete. done.
+  intros [? Hmi]. rewrite <-insert_delete, map_size_insert, map_size_delete.
+  - assert (size m ≠ 0); [|by lia]. apply map_size_non_empty_iff.
+    intros ->. rewrite lookup_empty in Hmi. done.
+  - eauto.
+  - rewrite lookup_delete. done.
 Qed.
 Lemma map_size_fmap {A B} (f : A -> B) (m : M A) : size (f <$> m) = size m.
 Proof. intros. unfold size, map_size. by rewrite map_to_list_fmap, fmap_length. Qed.

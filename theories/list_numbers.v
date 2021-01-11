@@ -67,9 +67,10 @@ Section seq.
   Qed.
   Lemma NoDup_seq j n : NoDup (seq j n).
   Proof. apply NoDup_ListNoDup, seq_NoDup. Qed.
-  Lemma seq_S_snoc j n : seq j (S n) = seq j n ++ [j + n].
+  (* FIXME: This lemma is in the stdlib since Coq 8.12 *)
+  Lemma seq_S n j : seq j (S n) = seq j n ++ [j + n].
   Proof.
-    revert j. induction n as [|n IH]; intros j; simpl in *; f_equal; [done |].
+    revert j. induction n as [|n IH]; intros j; f_equal/=; [done |].
     by rewrite IH, Nat.add_succ_r.
   Qed.
 
@@ -147,7 +148,8 @@ Section seqZ.
   Proof.
     intros. unfold seqZ. rewrite Z2Nat.inj_add, seq_app, fmap_app by done.
     f_equal. rewrite Nat.add_comm, <-!fmap_add_seq, <-list_fmap_compose.
-    apply list_fmap_ext; naive_solver auto with lia.
+    apply list_fmap_ext; [|done]; intros j; simpl.
+    rewrite Nat2Z.inj_add, Z2Nat.id by done. lia.
   Qed.
 
   Lemma seqZ_S m i : seqZ m (S i) = seqZ m i ++ [m + i].
@@ -161,7 +163,7 @@ Section seqZ.
   Proof.
     rewrite elem_of_list_lookup.
     setoid_rewrite lookup_seqZ. split; [naive_solver lia|].
-    exists (Z.to_nat (k - m)). lia.
+    exists (Z.to_nat (k - m)). rewrite Z2Nat.id by lia. lia.
   Qed.
 
   Lemma Forall_seqZ (P : Z → Prop) m n :

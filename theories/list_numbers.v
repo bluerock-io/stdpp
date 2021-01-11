@@ -152,30 +152,21 @@ Section seqZ.
 
   Lemma seqZ_S m i : seqZ m (S i) = seqZ m i ++ [m + i].
   Proof.
-    intros.
-    replace (Z.of_nat (S i)) with (Z.of_nat i + 1)%Z by lia.
-    rewrite seqZ_app; [|lia..].
-    unfold seqZ; simpl.
-    replace (0%nat + (m+i))%Z with (m + i)%Z by lia. done.
+    unfold seqZ. rewrite !Nat2Z.id, seq_S, fmap_app.
+    simpl. by rewrite Z.add_comm.
   Qed.
 
   Lemma elem_of_seqZ m n k :
     k ∈ seqZ m n ↔ m ≤ k < m + n.
   Proof.
     rewrite elem_of_list_lookup.
-    setoid_rewrite lookup_seqZ. split; intros.
-    - destruct H as [??]. lia.
-    - exists (Z.to_nat (k - m)). lia.
+    setoid_rewrite lookup_seqZ. split; [naive_solver lia|].
+    exists (Z.to_nat (k - m)). lia.
   Qed.
 
   Lemma Forall_seqZ (P : Z → Prop) m n :
     Forall P (seqZ m n) ↔ ∀ m', m ≤ m' < m + n → P m'.
-  Proof.
-    rewrite Forall_lookup. split.
-    - intros H j [??]. apply (H (Z.to_nat (j - m))), lookup_seqZ.
-      rewrite !Z2Nat.id by lia. lia.
-    - intros H j x [-> ?]%lookup_seqZ. auto with lia.
-  Qed.
+  Proof. rewrite Forall_forall. setoid_rewrite elem_of_seqZ. auto with lia. Qed.
 End seqZ.
 
 (** ** Properties of the [sum_list] and [max_list] functions *)

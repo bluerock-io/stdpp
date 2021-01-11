@@ -67,11 +67,15 @@ Section seq.
   Qed.
   Lemma NoDup_seq j n : NoDup (seq j n).
   Proof. apply NoDup_ListNoDup, seq_NoDup. Qed.
-  Lemma seq_S_end_app j n : seq j (S n) = seq j n ++ [j + n].
+  Lemma seq_S_snoc j n : seq j (S n) = seq j n ++ [j + n].
   Proof.
     revert j. induction n as [|n IH]; intros j; simpl in *; f_equal; [done |].
     by rewrite IH, Nat.add_succ_r.
   Qed.
+
+  Lemma elem_of_seq j n k :
+    k ∈ seq j n ↔ j ≤ k < j + n.
+  Proof. rewrite elem_of_list_In, in_seq. done. Qed.
 
   Lemma Forall_seq (P : nat → Prop) i n :
     Forall P (seq i n) ↔ ∀ j, i ≤ j < i + n → P j.
@@ -136,14 +140,33 @@ Section seqZ.
   Lemma NoDup_seqZ m n : NoDup (seqZ m n).
   Proof. apply NoDup_fmap_2, NoDup_seq. intros ???; lia. Qed.
 
+  Lemma seqZ_app m n1 n2 :
+    0 ≤ n1 →
+    0 ≤ n2 →
+    seqZ m (n1 + n2) = seqZ m n1 ++ seqZ (m + n1) n2.
+  Proof.
+    intros. unfold seqZ. rewrite Z2Nat.inj_add, seq_app, fmap_app by done.
+    f_equal. rewrite Nat.add_comm, <-!fmap_add_seq, <-list_fmap_compose.
+    apply list_fmap_ext; naive_solver auto with lia.
+  Qed.
+
+  Lemma seqZ_S m i : seqZ m (S i) = seqZ m i ++ [m + i].
+  Proof.
+    unfold seqZ. rewrite !Nat2Z.id, seq_S, fmap_app.
+    simpl. by rewrite Z.add_comm.
+  Qed.
+
+  Lemma elem_of_seqZ m n k :
+    k ∈ seqZ m n ↔ m ≤ k < m + n.
+  Proof.
+    rewrite elem_of_list_lookup.
+    setoid_rewrite lookup_seqZ. split; [naive_solver lia|].
+    exists (Z.to_nat (k - m)). lia.
+  Qed.
+
   Lemma Forall_seqZ (P : Z → Prop) m n :
     Forall P (seqZ m n) ↔ ∀ m', m ≤ m' < m + n → P m'.
-  Proof.
-    rewrite Forall_lookup. split.
-    - intros H j [??]. apply (H (Z.to_nat (j - m))), lookup_seqZ.
-      rewrite !Z2Nat.id by lia. lia.
-    - intros H j x [-> ?]%lookup_seqZ. auto with lia.
-  Qed.
+  Proof. rewrite Forall_forall. setoid_rewrite elem_of_seqZ. auto with lia. Qed.
 End seqZ.
 
 (** ** Properties of the [sum_list] and [max_list] functions *)

@@ -40,6 +40,7 @@ Coq 8.8 and 8.9 are no longer supported.
   returns `"0"` for `N`, `Z`, and `nat`.
 - Remove duplicate `map_fmap_empty` of `fmap_empty`, and rename
   `map_fmap_empty_inv` into `fmap_empty_inv` for consistency's sake.
+- Rename `seq_S_end_app` to `seq_S_snoc`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`):
@@ -56,6 +57,7 @@ s/\bQp_mult_plus_distr_l\b/Qp_mul_add_distr_r/g
 s/\bQp_mult_plus_distr_r\b/Qp_mul_add_distr_l/g
 s/\bmap_fmap_empty\b/fmap_empty/g
 s/\bmap_fmap_empty_inv\b/fmap_empty_inv/g
+s/\bseq_S_end_app\b/seq_S_snoc/g
 ' $(find theories -name "*.v")
 ```
 

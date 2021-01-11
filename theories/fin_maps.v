@@ -881,12 +881,8 @@ Qed.
 Lemma map_to_list_delete {A} (m : M A) i x :
   m !! i = Some x → (i,x) :: map_to_list (delete i m) ≡ₚ map_to_list m.
 Proof.
-  intros Hmi. apply list_to_map_inj; csimpl.
-  - constructor; [|by auto using NoDup_fst_map_to_list].
-    rewrite elem_of_list_fmap. intros [[??] [? Hlookup]]; subst; simpl in *.
-    rewrite elem_of_map_to_list, lookup_delete in Hlookup. congruence.
-  - apply NoDup_fst_map_to_list.
-  - rewrite !list_to_map_to_list. rewrite insert_delete, insert_id; done.
+  intros. rewrite <-map_to_list_insert by (by rewrite lookup_delete).
+  by rewrite insert_delete, insert_id.
 Qed.
 
 Lemma map_to_list_submseteq {A} (m1 m2 : M A) :

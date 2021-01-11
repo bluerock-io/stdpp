@@ -1067,6 +1067,8 @@ Lemma take_drop_middle l i x :
 Proof.
   revert i x. induction l; intros [|?] ??; simplify_eq/=; f_equal; auto.
 Qed.
+Lemma take_0 l : take 0 l = [].
+Proof. reflexivity. Qed.
 Lemma take_nil n : take n [] =@{list A} [].
 Proof. by destruct n. Qed.
 Lemma take_S_r l n x : l !! n = Some x → take (S n) l = take n l ++ [x].

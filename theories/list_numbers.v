@@ -156,6 +156,15 @@ Section seqZ.
     intros. simpl. lia.
   Qed.
 
+  Lemma seqZ_S m i : seqZ m (S i) = seqZ m i ++ [m + i].
+  Proof.
+    intros.
+    replace (Z.of_nat (S i)) with (Z.of_nat i + 1)%Z by lia.
+    rewrite seqZ_app; [|lia..].
+    unfold seqZ; simpl.
+    replace (0%nat + (m+i))%Z with (m + i)%Z by lia. done.
+  Qed.
+
   Lemma elem_of_seqZ m n k :
     k ∈ seqZ m n ↔ m ≤ k < m + n.
   Proof.

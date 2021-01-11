@@ -73,8 +73,8 @@ Section seq.
     by rewrite IH, Nat.add_succ_r.
   Qed.
 
-  Lemma elem_of_seq start sz x :
-    x ∈ seq start sz ↔ (start ≤ x < start + sz)%nat.
+  Lemma elem_of_seq j n k :
+    k ∈ seq j n ↔ j ≤ k < j + n.
   Proof. rewrite elem_of_list_In, in_seq. done. Qed.
 
   Lemma Forall_seq (P : nat → Prop) i n :
@@ -156,13 +156,13 @@ Section seqZ.
     intros. simpl. lia.
   Qed.
 
-  Lemma elem_of_seqZ start sz x :
-    x ∈ seqZ start sz ↔ start ≤ x < start + sz.
+  Lemma elem_of_seqZ m n k :
+    k ∈ seqZ m n ↔ m ≤ k < m + n.
   Proof.
     rewrite elem_of_list_lookup.
     setoid_rewrite lookup_seqZ. split; intros.
-    - destruct H as [i ?]. lia.
-    - exists (Z.to_nat (x - start)). lia.
+    - destruct H as [??]. lia.
+    - exists (Z.to_nat (k - m)). lia.
   Qed.
 
   Lemma Forall_seqZ (P : Z → Prop) m n :

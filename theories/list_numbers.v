@@ -80,11 +80,7 @@ Section seq.
 
   Lemma Forall_seq (P : nat → Prop) i n :
     Forall P (seq i n) ↔ ∀ j, i ≤ j < i + n → P j.
-  Proof.
-    rewrite Forall_lookup. split.
-    - intros H j [??]. apply (H (j - i)), lookup_seq. lia.
-    - intros H j x [-> ?]%lookup_seq. auto with lia.
-  Qed.
+  Proof. rewrite Forall_forall. setoid_rewrite elem_of_seq. auto with lia. Qed.
 End seq.
 
 (** ** Properties of the [seqZ] function *)

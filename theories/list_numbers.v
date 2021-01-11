@@ -145,15 +145,9 @@ Section seqZ.
     0 ≤ n2 →
     seqZ m (n1 + n2) = seqZ m n1 ++ seqZ (m + n1) n2.
   Proof.
-    intros. unfold seqZ.
-    replace (Z.to_nat (n1 + n2)) with (Z.to_nat n1 + Z.to_nat n2)%nat by lia.
-    rewrite seq_app, fmap_app.
-    f_equal.
-    replace (0 + Z.to_nat n1)%nat with (Z.to_nat n1 + 0)%nat by lia.
-    rewrite <- fmap_add_seq.
-    rewrite <- list_fmap_compose.
-    apply list_fmap_ext; auto.
-    intros. simpl. lia.
+    intros. unfold seqZ. rewrite Z2Nat.inj_add, seq_app, fmap_app by done.
+    f_equal. rewrite Nat.add_comm, <-!fmap_add_seq, <-list_fmap_compose.
+    apply list_fmap_ext; naive_solver auto with lia.
   Qed.
 
   Lemma seqZ_S m i : seqZ m (S i) = seqZ m i ++ [m + i].

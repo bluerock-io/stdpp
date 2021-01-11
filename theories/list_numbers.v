@@ -73,6 +73,10 @@ Section seq.
     by rewrite IH, Nat.add_succ_r.
   Qed.
 
+  Lemma elem_of_seq start sz x :
+    x ∈ seq start sz ↔ (start ≤ x < start + sz)%nat.
+  Proof. rewrite elem_of_list_In, in_seq. done. Qed.
+
   Lemma Forall_seq (P : nat → Prop) i n :
     Forall P (seq i n) ↔ ∀ j, i ≤ j < i + n → P j.
   Proof.
@@ -135,6 +139,31 @@ Section seqZ.
   Qed.
   Lemma NoDup_seqZ m n : NoDup (seqZ m n).
   Proof. apply NoDup_fmap_2, NoDup_seq. intros ???; lia. Qed.
+
+  Lemma seqZ_app m n1 n2 :
+    0 ≤ n1 →
+    0 ≤ n2 →
+    seqZ m (n1 + n2) = seqZ m n1 ++ seqZ (m + n1) n2.
+  Proof.
+    intros. unfold seqZ.
+    replace (Z.to_nat (n1 + n2)) with (Z.to_nat n1 + Z.to_nat n2)%nat by lia.
+    rewrite seq_app, fmap_app.
+    f_equal.
+    replace (0 + Z.to_nat n1)%nat with (Z.to_nat n1 + 0)%nat by lia.
+    rewrite <- fmap_add_seq.
+    rewrite <- list_fmap_compose.
+    apply list_fmap_ext; auto.
+    intros. simpl. lia.
+  Qed.
+
+  Lemma elem_of_seqZ start sz x :
+    x ∈ seqZ start sz ↔ start ≤ x < start + sz.
+  Proof.
+    rewrite elem_of_list_lookup.
+    setoid_rewrite lookup_seqZ. split; intros.
+    - destruct H as [i ?]. lia.
+    - exists (Z.to_nat (x - start)). lia.
+  Qed.
 
   Lemma Forall_seqZ (P : Z → Prop) m n :
     Forall P (seqZ m n) ↔ ∀ m', m ≤ m' < m + n → P m'.

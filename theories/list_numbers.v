@@ -67,9 +67,10 @@ Section seq.
   Qed.
   Lemma NoDup_seq j n : NoDup (seq j n).
   Proof. apply NoDup_ListNoDup, seq_NoDup. Qed.
-  Lemma seq_S_snoc j n : seq j (S n) = seq j n ++ [j + n].
+  (* FIXME: This lemma is in the stdlib since Coq 8.12 *)
+  Lemma seq_S n j : seq j (S n) = seq j n ++ [j + n].
   Proof.
-    revert j. induction n as [|n IH]; intros j; simpl in *; f_equal; [done |].
+    revert j. induction n as [|n IH]; intros j; f_equal/=; [done |].
     by rewrite IH, Nat.add_succ_r.
   Qed.
 

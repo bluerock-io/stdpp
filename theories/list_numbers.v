@@ -67,7 +67,7 @@ Section seq.
   Qed.
   Lemma NoDup_seq j n : NoDup (seq j n).
   Proof. apply NoDup_ListNoDup, seq_NoDup. Qed.
-  Lemma seq_S_end_app j n : seq j (S n) = seq j n ++ [j + n].
+  Lemma seq_S_snoc j n : seq j (S n) = seq j n ++ [j + n].
   Proof.
     revert j. induction n as [|n IH]; intros j; simpl in *; f_equal; [done |].
     by rewrite IH, Nat.add_succ_r.

@@ -188,7 +188,7 @@ Global Hint Resolve coPset_top_subseteq : core.
 
 Global Instance coPset_leibniz : LeibnizEquiv coPset.
 Proof.
-  intros X Y; rewrite elem_of_equiv; intros HXY.
+  intros X Y; rewrite set_equiv; intros HXY.
   apply (sig_eq_pi _), coPset_eq; try apply @proj2_sig.
   intros p; apply eq_bool_prop_intro, (HXY p).
 Qed.
@@ -410,7 +410,7 @@ Proof.
 Qed.
 Lemma coPset_lr_union X : coPset_l X ∪ coPset_r X = X.
 Proof.
-  apply elem_of_equiv_L; intros p; apply eq_bool_prop_elim.
+  apply set_eq; intros p; apply eq_bool_prop_elim.
   destruct X as [t Ht]; simpl; clear Ht; rewrite coPset_elem_of_union.
   revert p; induction t as [[]|[]]; intros [?|?|]; simpl;
     rewrite ?coPset_elem_of_node; simpl;

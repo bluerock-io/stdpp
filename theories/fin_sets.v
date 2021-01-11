@@ -159,7 +159,7 @@ Qed.
 Lemma size_1_elem_of X : size X = 1 → ∃ x, X ≡ {[ x ]}.
 Proof.
   intros E. destruct (size_pos_elem_of X) as [x ?]; auto with lia.
-  exists x. apply elem_of_equiv. split.
+  exists x. apply set_equiv. split.
   - rewrite elem_of_singleton. eauto using size_singleton_inv.
   - set_solver.
 Qed.

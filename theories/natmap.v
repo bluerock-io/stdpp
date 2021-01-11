@@ -282,7 +282,7 @@ Lemma bools_to_natset_union βs1 βs2 :
   bools_to_natset (βs1 ||* βs2) = bools_to_natset βs1 ∪ bools_to_natset βs2.
 Proof.
   rewrite <-Forall2_same_length; intros Hβs.
-  apply elem_of_equiv_L. intros i. rewrite elem_of_union, !elem_of_bools_to_natset.
+  apply set_eq. intros i. rewrite elem_of_union, !elem_of_bools_to_natset.
   revert i. induction Hβs as [|[] []]; intros [|?]; naive_solver.
 Qed.
 Lemma natset_to_bools_length (X : natset) sz : length (natset_to_bools sz X) = sz.

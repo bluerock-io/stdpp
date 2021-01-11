@@ -878,6 +878,16 @@ Proof.
   apply Permutation_singleton. unfold singletonM, map_singleton.
   by rewrite map_to_list_insert, map_to_list_empty by eauto using lookup_empty.
 Qed.
+Lemma map_to_list_delete {A} (m : M A) i x :
+  m !! i = Some x → (i,x) :: map_to_list (delete i m) ≡ₚ map_to_list m.
+Proof.
+  intros Hmi. apply list_to_map_inj; csimpl.
+  - constructor; [|by auto using NoDup_fst_map_to_list].
+    rewrite elem_of_list_fmap. intros [[??] [? Hlookup]]; subst; simpl in *.
+    rewrite elem_of_map_to_list, lookup_delete in Hlookup. congruence.
+  - apply NoDup_fst_map_to_list.
+  - rewrite !list_to_map_to_list. rewrite insert_delete, insert_id; done.
+Qed.
 
 Lemma map_to_list_submseteq {A} (m1 m2 : M A) :
   m1 ⊆ m2 → map_to_list m1 ⊆+ map_to_list m2.
@@ -1019,6 +1029,16 @@ Proof. unfold size, map_size. by rewrite map_to_list_singleton. Qed.
 Lemma map_size_insert {A} i x (m : M A) :
   m !! i = None → size (<[i:=x]> m) = S (size m).
 Proof. intros. unfold size, map_size. by rewrite map_to_list_insert. Qed.
+Lemma map_size_delete {A} i (m : M A) :
+  is_Some (m !! i) → size m = S (size (delete i m)).
+Proof. intros [??]. unfold size, map_size. by rewrite <-map_to_list_delete. Qed.
+Lemma map_size_insert_Some {A} i x (m : M A) :
+  is_Some (m !! i) → size (<[i:=x]> m) = size m.
+Proof.
+  intros.
+  rewrite <-insert_delete, map_size_insert, <-map_size_delete; [done..|].
+  rewrite lookup_delete. done.
+Qed.
 Lemma map_size_fmap {A B} (f : A -> B) (m : M A) : size (f <$> m) = size m.
 Proof. intros. unfold size, map_size. by rewrite map_to_list_fmap, fmap_length. Qed.
 

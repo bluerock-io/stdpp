@@ -342,6 +342,20 @@ Section map.
   Lemma elem_of_map_2_alt (f : A → B) (X : C) (x : A) (y : B) :
     x ∈ X → y = f x → y ∈ set_map (D:=D) f X.
   Proof. set_solver. Qed.
+
+  Lemma set_map_union (f : A → B) (X Y : C) :
+    set_map (D:=D) f (X ∪ Y) ≡ set_map (D:=D) f X ∪ set_map (D:=D) f Y.
+  Proof. set_solver. Qed.
+  Lemma set_map_singleton (f : A → B) (x : A) :
+    set_map (C:=C) (D:=D) f {[x]} ≡ {[f x]}.
+  Proof. set_solver. Qed.
+
+  Lemma set_map_union_L `{!LeibnizEquiv D} (f : A → B) (X Y : C) :
+    set_map (D:=D) f (X ∪ Y) = set_map (D:=D) f X ∪ set_map (D:=D) f Y.
+  Proof. unfold_leibniz. apply set_map_union. Qed.
+  Lemma set_map_singleton_L `{!LeibnizEquiv D} (f : A → B) (x : A) :
+    set_map (C:=C) (D:=D) f {[x]} = {[f x]}.
+  Proof. unfold_leibniz. apply set_map_singleton. Qed.
 End map.
 
 (** * Decision procedures *)

@@ -864,6 +864,10 @@ Section option_and_list_to_set.
   Proof. done. Qed.
   Lemma list_to_set_app l1 l2 : list_to_set (l1 ++ l2) ≡@{C} list_to_set l1 ∪ list_to_set l2.
   Proof. set_solver. Qed.
+  Lemma list_to_set_singleton x : list_to_set [x] ≡@{C} {[ x ]}.
+  Proof. set_solver. Qed.
+  Lemma list_to_set_snoc l x : list_to_set (l ++ [x]) ≡@{C} list_to_set l ∪ {[ x ]}.
+  Proof. set_solver. Qed.
   Global Instance list_to_set_perm : Proper ((≡ₚ) ==> (≡)) (list_to_set (C:=C)).
   Proof. induction 1; set_solver. Qed.
 

@@ -350,6 +350,7 @@ Section map.
   Lemma set_map_union (f : A → B) (X Y : C) :
     set_map (D:=D) f (X ∪ Y) ≡ set_map (D:=D) f X ∪ set_map (D:=D) f Y.
   Proof. set_solver. Qed.
+  (** This cannot be using [=] because list_to_set_singleton does not hold for [=]. *)
   Lemma set_map_singleton (f : A → B) (x : A) :
     set_map (C:=C) (D:=D) f {[x]} ≡ {[f x]}.
   Proof. set_solver. Qed.

@@ -3442,8 +3442,12 @@ Section fmap.
   Definition fmap_nil : f <$> [] = [] := eq_refl.
   Definition fmap_cons x l : f <$> x :: l = f x :: (f <$> l) := eq_refl.
 
+  Lemma list_fmap_singleton x : f <$> [x] = [f x].
+  Proof. reflexivity. Qed.
   Lemma fmap_app l1 l2 : f <$> l1 ++ l2 = (f <$> l1) ++ (f <$> l2).
   Proof. by induction l1; f_equal/=. Qed.
+  Lemma fmap_snoc l x : f <$> l ++ [x] = (f <$> l) ++ [f x].
+  Proof. rewrite fmap_app, list_fmap_singleton. done. Qed.
   Lemma fmap_nil_inv k :  f <$> k = [] → k = [].
   Proof. by destruct k. Qed.
   Lemma fmap_cons_inv y l k :

@@ -343,6 +343,10 @@ Section map.
     x ∈ X → y = f x → y ∈ set_map (D:=D) f X.
   Proof. set_solver. Qed.
 
+  Lemma set_map_empty (f : A → B) :
+    set_map (C:=C) (D:=D) f ∅ = ∅.
+  Proof. unfold set_map. rewrite elements_empty. done. Qed.
+
   Lemma set_map_union (f : A → B) (X Y : C) :
     set_map (D:=D) f (X ∪ Y) ≡ set_map (D:=D) f X ∪ set_map (D:=D) f Y.
   Proof. set_solver. Qed.

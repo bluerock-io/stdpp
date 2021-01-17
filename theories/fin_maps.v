@@ -1564,6 +1564,27 @@ Proof.
   by rewrite !lookup_fmap; destruct (m !! i) as [[x1 x2]|].
 Qed.
 
+Lemma map_fmap_zip_with_l
+    {A B C} (f : A → B → C) (g : C → A) (m1 : M A) (m2 : M B) :
+  (∀ x y, g (f x y) = x) →
+  (∀ k, is_Some (m1 !! k) → is_Some (m2 !! k)) →
+  g <$> map_zip_with f m1 m2 = m1.
+Proof.
+  intros ? Hm. apply map_eq; intros k. rewrite lookup_fmap, map_lookup_zip_with.
+  destruct (m1 !! _) as [x|] eqn:?; simpl; [|done].
+  destruct (Hm k) as [y ->]; [by eauto|]. by f_equal/=.
+Qed.
+Lemma map_fmap_zip_with_r
+    {A B C} (f : A → B → C) (g : C → B) (m1 : M A) (m2 : M B) :
+  (∀ x y, g (f x y) = y) →
+  (∀ k, is_Some (m2 !! k) → is_Some (m1 !! k)) →
+  g <$> map_zip_with f m1 m2 = m2.
+Proof.
+  intros ? Hm. apply map_eq; intros k. rewrite lookup_fmap, map_lookup_zip_with.
+  destruct (m2 !! _) as [x|] eqn:?; simpl; [|by destruct (m1 !! _)].
+  destruct (Hm k) as [y ->]; [by eauto|]. by f_equal/=.
+Qed.
+
 (** ** Properties on the [map_relation] relation *)
 Section Forall2.
   Context {A B} (R : A → B → Prop) (P : A → Prop) (Q : B → Prop).

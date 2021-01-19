@@ -31,7 +31,7 @@ Instance: Params (@drop) 1 := {}.
 
 Global Arguments Permutation {_} _ _ : assert.
 Global Arguments Forall_cons {_} _ _ _ _ _ : assert.
-Remove Hints Permutation_cons : typeclass_instances.
+Global Remove Hints Permutation_cons : typeclass_instances.
 
 Notation "(::)" := cons (only parsing) : list_scope.
 Notation "( x ::.)" := (cons x) (only parsing) : list_scope.

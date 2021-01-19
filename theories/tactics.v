@@ -1,6 +1,5 @@
 (** This file collects general purpose tactics that are used throughout
 the development. *)
-From Coq Require Import Omega.
 From Coq Require Export Lia.
 From stdpp Require Export decidable.
 From stdpp Require Import options.
@@ -24,7 +23,6 @@ to be combined in combination with other hint database. *)
 Global Hint Extern 998 (_ = _) => f_equal : f_equal.
 Global Hint Extern 999 => congruence : congruence.
 Global Hint Extern 1000 => lia : lia.
-Global Hint Extern 1000 => omega : omega.
 Global Hint Extern 1001 => progress subst : subst. (** backtracking on this one will
 be very bad, so use with care! *)
 

@@ -4191,6 +4191,10 @@ Section zip_with.
 
 End zip_with.
 
+Lemma zip_with_diag {A C} (f : A → A → C) l :
+  zip_with f l l = (λ x, f x x) <$> l.
+Proof. induction l as [|?? IH]; [done|]. simpl. rewrite IH. done. Qed.
+
 Lemma zip_with_sublist_alter {A B} (f : A → B → A) g l k i n l' k' :
   length l = length k →
   sublist_lookup i n l = Some l' → sublist_lookup i n k = Some k' →
@@ -4236,6 +4240,10 @@ Section zip.
     (x1, x2) ∈ zip l k → x2 ∈ k.
   Proof. intros ?%elem_of_zip_with. naive_solver. Qed.
 End zip.
+
+Lemma zip_diag {A} (l : list A) :
+  zip l l = (λ x, (x, x)) <$> l.
+Proof. apply zip_with_diag. Qed.
 
 Lemma elem_of_zipped_map {A B} (f : list A → list A → A → B) l k x :
   x ∈ zipped_map f l k ↔

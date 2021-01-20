@@ -724,6 +724,13 @@ Proof.
   by destruct (m !! i) eqn:?; simpl; erewrite ?Hi by eauto.
 Qed.
 
+Lemma map_fmap_omap {A B C} (f : A → option B) (g : B → C) (m : M A) :
+  g <$> omap f m = omap (λ x, g <$> f x) m.
+Proof.
+  apply map_eq. intros i.
+  rewrite !lookup_fmap, !lookup_omap. destruct (m !! i); done.
+Qed.
+
 Lemma map_fmap_alt {A B} (f : A → B) (m : M A) :
   f <$> m = omap (λ x, Some (f x)) m.
 Proof.

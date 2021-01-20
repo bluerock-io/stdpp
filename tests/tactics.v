@@ -1,6 +1,6 @@
 From stdpp Require Import tactics.
 
-Goal forall P1 P2 P3 P4 (P: Prop),
+Goal ∀ P1 P2 P3 P4 (P: Prop),
   P1 ∨ (Is_true (P2 || P3)) ∨ P4 →
   (P1 → P) →
   (P2 → P) →
@@ -12,7 +12,7 @@ Proof.
   destruct_or? HH; [ exact (X1 HH) | exact (X2 HH) | exact (X3 HH) | exact (X4 HH) ].
 Qed.
 
-Goal forall P1 P2 P3 P4 (P: Prop),
+Goal ∀ P1 P2 P3 P4 (P: Prop),
   P1 ∨ P2 →
   P3 ∨ P4 →
   (P1 → P3 → P) →
@@ -25,7 +25,7 @@ Proof.
   destruct_or?; [ exact (X1 HH1 HH2) | exact (X3 HH1 HH2) | exact (X2 HH1 HH2) | exact (X4 HH1 HH2) ].
 Qed.
 
-Goal forall P1 P2 P3 P4 (P: Prop),
+Goal ∀ P1 P2 P3 P4 (P: Prop),
   id (P1 ∨ P2) →
   id (P3 ∨ P4) →
   (P1 → P3 → P) →
@@ -41,7 +41,7 @@ Proof.
   [ exact (X1 HH1 HH2) | exact (X2 HH1 HH2) | exact (X3 HH1 HH2) | exact (X4 HH1 HH2) ].
 Qed.
 
-Goal forall P1 P2 P3 P4,
+Goal ∀ P1 P2 P3 P4,
   P1 ∧ (Is_true (P2 && P3)) ∧ P4 →
   P1 ∧ P2 ∧ P3.
 Proof.
@@ -49,5 +49,5 @@ Proof.
   destruct_and?. Fail destruct_and!. assumption.
 Qed.
 
-Goal forall (n : nat), ∃ m : nat, True.
+Goal ∀ (n : nat), ∃ m : nat, True.
 Proof. intros ?. rename select nat into m. exists m. done. Qed.

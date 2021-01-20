@@ -724,6 +724,20 @@ Proof.
   by destruct (m !! i) eqn:?; simpl; erewrite ?Hi by eauto.
 Qed.
 
+Lemma map_fmap_omap {A B C} (f : A → option B) (g : B → C) (m : M A) :
+  g <$> omap f m = omap (λ x, g <$> f x) m.
+Proof.
+  apply map_eq. intros i.
+  rewrite !lookup_fmap, !lookup_omap. destruct (m !! i); done.
+Qed.
+
+Lemma map_fmap_alt {A B} (f : A → B) (m : M A) :
+  f <$> m = omap (λ x, Some (f x)) m.
+Proof.
+  apply map_eq. intros i.
+  rewrite lookup_fmap, lookup_omap. destruct (m !! i); done.
+Qed.
+
 Lemma map_fmap_mono {A B} (f : A → B) (m1 m2 : M A) :
   m1 ⊆ m2 → f <$> m1 ⊆ f <$> m2.
 Proof.
@@ -1487,7 +1501,15 @@ Section more_merge.
   Proof. by intros; apply partial_alter_merge_r. Qed.
 End more_merge.
 
-(** Properties of the zip_with function *)
+Lemma merge_diag {A C} (f : option A → option A → option C) `{!DiagNone f} (m : M A) :
+  merge f m m = omap (λ x, f (Some x) (Some x)) m.
+Proof.
+  apply map_eq. intros i.
+  rewrite lookup_merge by done.
+  rewrite lookup_omap. destruct (m !! i); done.
+Qed.
+
+(** Properties of the [zip_with] and [zip] functions *)
 Lemma map_lookup_zip_with {A B C} (f : A → B → C) (m1 : M A) (m2 : M B) i :
   map_zip_with f m1 m2 !! i = (x ← m1 !! i; y ← m2 !! i; Some (f x y)).
 Proof.
@@ -1584,6 +1606,17 @@ Proof.
   destruct (m2 !! _) as [x|] eqn:?; simpl; [|by destruct (m1 !! _)].
   destruct (Hm k) as [y ->]; [by eauto|]. by f_equal/=.
 Qed.
+
+Lemma map_zip_with_diag {A C} (f : A → A → C) m :
+  map_zip_with f m m = (λ x, f x x) <$> m.
+Proof.
+  unfold map_zip_with. rewrite merge_diag by naive_solver.
+  rewrite map_fmap_alt. done.
+Qed.
+
+Lemma map_zip_diag {A} (m : M A) :
+  map_zip m m = (λ x, (x, x)) <$> m.
+Proof. apply map_zip_with_diag. Qed.
 
 (** ** Properties on the [map_relation] relation *)
 Section Forall2.

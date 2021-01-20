@@ -3461,6 +3461,10 @@ Section fmap.
     destruct (IH l) as (l1&l2&->&->&->); [done|]. by exists (x :: l1), l2.
   Qed.
 
+  Lemma list_fmap_alt l :
+    f <$> l = omap (λ x, Some (f x)) l.
+  Proof. induction l; simplify_eq/=; done. Qed.
+
   Lemma fmap_length l : length (f <$> l) = length l.
   Proof. by induction l; f_equal/=. Qed.
   Lemma fmap_reverse l : f <$> reverse l = reverse (f <$> l).

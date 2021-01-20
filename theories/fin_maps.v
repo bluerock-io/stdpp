@@ -1607,7 +1607,7 @@ Proof.
   destruct (Hm k) as [y ->]; [by eauto|]. by f_equal/=.
 Qed.
 
-Lemma map_zip_with_diag {A C} (f : A → A → C) m :
+Lemma map_zip_with_diag {A C} (f : A → A → C) (m : M A) :
   map_zip_with f m m = (λ x, f x x) <$> m.
 Proof.
   unfold map_zip_with. rewrite merge_diag by naive_solver.

@@ -508,17 +508,6 @@ Ltac block_goal := match goal with [ |- ?T ] => change (block T) end.
 Ltac unblock_goal := unfold block in *.
 
 
-(** The following tactic can be used to add support for patterns to tactic notation:
-It will search for the first subterm of the goal matching [pat], and then call [tac]
-with that subterm. *)
-Ltac find_pat pat tac :=
-  match goal with
-  |- context [?x] =>
-      unify pat x with typeclass_instances;
-      tryif tac x then idtac else fail 2
-  end.
-
-
 (** [select] finds the first hypothesis matching [pat] and passes it
 to the continuation [tac]. Its main advantage over using [match goal
 with ] directly is that it is shorter. If [pat] matches multiple

@@ -45,6 +45,7 @@ Coq 8.8 and 8.9 are no longer supported.
 - Remove `omega` import and hint database in `tactics` file.
 - Add `rename select <pat> into <name>` tactic to find a hypothesis by pattern
   and give it a fixed name.
+- Remove unused `find_pat` tactic that was made mostly obsolete by `select`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`):

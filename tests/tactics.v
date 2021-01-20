@@ -48,3 +48,6 @@ Proof.
   intros * HH. split_and!; [ destruct_and? HH; assumption | destruct_and?; assumption | ].
   destruct_and?. Fail destruct_and!. assumption.
 Qed.
+
+Goal forall (n : nat), ∃ m : nat, True.
+Proof. intros ?. rename select nat into m. exists m. done. Qed.

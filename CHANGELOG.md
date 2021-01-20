@@ -43,6 +43,8 @@ Coq 8.8 and 8.9 are no longer supported.
 - Rename `seq_S_end_app` to `seq_S`. (The lemma `seq_S` is also in Coq's stdlib
   since Coq 8.12.)
 - Remove `omega` import and hint database in `tactics` file.
+- Add `rename select <pat> into <name>` tactic to find a hypothesis by pattern
+  and give it a fixed name.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`):

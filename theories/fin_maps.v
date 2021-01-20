@@ -145,9 +145,9 @@ Fixpoint map_seq `{Insert nat A M, Empty M} (start : nat) (xs : list A) : M :=
   | x :: xs => <[start:=x]> (map_seq (S start) xs)
   end.
 
-Global Instance finmap_lookup_total `{!Lookup K A (M A), !Inhabited A} :
+Global Instance map_lookup_total `{!Lookup K A (M A), !Inhabited A} :
   LookupTotal K A (M A) | 20 := λ i m, default inhabitant (m !! i).
-Typeclasses Opaque finmap_lookup_total.
+Typeclasses Opaque map_lookup_total.
 
 (** * Theorems *)
 Section theorems.
@@ -174,7 +174,7 @@ Section setoid.
     Proper (≡@{A}) inhabitant →
     Proper ((≡@{M A}) ==> (≡)) (lookup_total i).
   Proof.
-    intros ? m1 m2 Hm. unfold lookup_total, finmap_lookup_total.
+    intros ? m1 m2 Hm. unfold lookup_total, map_lookup_total.
     apply from_option_proper; auto. by intros ??.
   Qed.
   Global Instance partial_alter_proper :

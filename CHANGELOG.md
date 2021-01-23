@@ -46,6 +46,9 @@ Coq 8.8 and 8.9 are no longer supported.
 - Add `rename select <pat> into <name>` tactic to find a hypothesis by pattern
   and give it a fixed name.
 - Remove unused `find_pat` tactic that was made mostly obsolete by `select`.
+- Generalize `omap_insert`, `omap_singleton`, `map_size_insert`, and
+  `map_size_delete` to cover the `Some` and `None` case. Add `_Some` and `_None`
+  versions of the lemmas for the specific cases.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`):
@@ -63,6 +66,10 @@ s/\bQp_mult_plus_distr_r\b/Qp_mul_add_distr_l/g
 s/\bmap_fmap_empty\b/fmap_empty/g
 s/\bmap_fmap_empty_inv\b/fmap_empty_inv/g
 s/\bseq_S_end_app\b/seq_S/g
+s/\bomap_insert\b/omap_insert_Some/g
+s/\bomap_singleton\b/omap_singleton_Some/g
+s/\bomap_size_insert\b/map_size_insert_None/g
+s/\bomap_size_delete\b/map_size_delete_Some/g
 ' $(find theories -name "*.v")
 ```
 

@@ -652,6 +652,16 @@ Lemma delete_singleton_ne {A} i j (x : A) :
 Proof. intro. apply delete_notin. by apply lookup_singleton_ne. Qed.
 
 (** ** Properties of the map operations *)
+Lemma lookup_fmap_Some {A B} (f : A → B) (m : M A) i y :
+  (f <$> m) !! i = Some y ↔ ∃ x, f x = y ∧ m !! i = Some x.
+Proof. rewrite lookup_fmap, fmap_Some. naive_solver. Qed.
+Lemma lookup_omap_Some {A B} (f : A → option B) (m : M A) i y :
+  omap f m !! i = Some y ↔ ∃ x, f x = Some y ∧ m !! i = Some x.
+Proof. rewrite lookup_omap, bind_Some. naive_solver. Qed.
+Lemma lookup_omap_id_Some {A} (m : M (option A)) i x :
+  omap id m !! i = Some x ↔ m !! i = Some (Some x).
+Proof. rewrite lookup_omap_Some. naive_solver. Qed.
+
 Lemma fmap_empty {A B} (f : A → B) : f <$> ∅ = ∅.
 Proof. apply map_empty; intros i. by rewrite lookup_fmap, lookup_empty. Qed.
 Lemma omap_empty {A B} (f : A → option B) : omap f ∅ = ∅.
@@ -669,37 +679,58 @@ Proof.
   - by rewrite lookup_fmap, !lookup_insert.
   - by rewrite lookup_fmap, !lookup_insert_ne, lookup_fmap by done.
 Qed.
+Lemma omap_insert {A B} (f : A → option B) m i x :
+  omap f (<[i:=x]>m) =
+    (match f x with Some y => <[i:=y]> | None => delete i end) (omap f m).
+Proof.
+  intros; apply map_eq; intros i'; destruct (decide (i' = i)) as [->|].
+  - rewrite lookup_omap, !lookup_insert. destruct (f x) as [y|] eqn:Hx; simpl.
+    + by rewrite lookup_insert.
+    + by rewrite lookup_delete, Hx.
+  - rewrite lookup_omap, !lookup_insert_ne by done.
+    destruct (f x) as [y|] eqn:Hx; simpl.
+    + by rewrite lookup_insert_ne, lookup_omap by done.
+    + by rewrite lookup_delete_ne, lookup_omap by done.
+Qed.
+Lemma omap_insert_Some {A B} (f : A → option B) m i x y :
+  f x = Some y → omap f (<[i:=x]>m) = <[i:=y]>(omap f m).
+Proof. intros Hx. by rewrite omap_insert, Hx. Qed.
+Lemma omap_insert_None {A B} (f : A → option B) m i x :
+  f x = None → omap f (<[i:=x]>m) = delete i (omap f m).
+Proof. intros Hx. by rewrite omap_insert, Hx. Qed.
+
 Lemma fmap_delete {A B} (f: A → B) m i: f <$> delete i m = delete i (f <$> m).
 Proof.
   apply map_eq; intros i'; destruct (decide (i' = i)) as [->|].
   - by rewrite lookup_fmap, !lookup_delete.
   - by rewrite lookup_fmap, !lookup_delete_ne, lookup_fmap by done.
 Qed.
-Lemma omap_insert {A B} (f : A → option B) m i x y :
-  f x = Some y → omap f (<[i:=x]>m) = <[i:=y]>(omap f m).
+Lemma omap_delete {A B} (f: A → option B) m i :
+  omap f (delete i m) = delete i (omap f m).
 Proof.
-  intros; apply map_eq; intros i'; destruct (decide (i' = i)) as [->|].
-  - by rewrite lookup_omap, !lookup_insert.
-  - by rewrite lookup_omap, !lookup_insert_ne, lookup_omap by done.
+  apply map_eq; intros i'; destruct (decide (i' = i)) as [->|].
+  - by rewrite lookup_omap, !lookup_delete.
+  - by rewrite lookup_omap, !lookup_delete_ne, lookup_omap by done.
 Qed.
-Lemma omap_insert_None {A B} (f : A → option B) m i x :
-  f x = None → omap f (<[i:=x]>m) = delete i (omap f m).
-Proof.
-  intros; apply map_eq; intros i'; destruct (decide (i' = i)) as [->|].
-  - by rewrite lookup_omap, lookup_insert, lookup_delete.
-  - by rewrite lookup_omap, lookup_insert_ne,
-     lookup_delete_ne, lookup_omap by done.
-Qed.
+
 Lemma map_fmap_singleton {A B} (f : A → B) i x : f <$> {[i := x]} = {[i := f x]}.
 Proof.
   by unfold singletonM, map_singleton; rewrite fmap_insert, fmap_empty.
 Qed.
-Lemma omap_singleton {A B} (f : A → option B) i x y :
-  f x = Some y → omap f {[ i := x ]} = {[ i := y ]}.
+Lemma omap_singleton {A B} (f : A → option B) i x :
+  omap f {[ i := x ]} = match f x with Some y => {[ i:=y ]} | None => ∅ end.
 Proof.
-  intros. unfold singletonM, map_singleton.
-  by erewrite omap_insert, omap_empty by eauto.
+  rewrite <-insert_empty, omap_insert, omap_empty. destruct (f x) as [y|]; simpl.
+  - by rewrite insert_empty.
+  - by rewrite delete_empty.
 Qed.
+Lemma omap_singleton_Some {A B} (f : A → option B) i x y :
+  f x = Some y → omap f {[ i := x ]} = {[ i := y ]}.
+Proof. intros Hx. by rewrite omap_singleton, Hx. Qed.
+Lemma omap_singleton_None {A B} (f : A → option B) i x :
+  f x = None → omap f {[ i := x ]} = ∅.
+Proof. intros Hx. by rewrite omap_singleton, Hx. Qed.
+
 Lemma map_fmap_id {A} (m : M A) : id <$> m = m.
 Proof. apply map_eq; intros i; by rewrite lookup_fmap, option_fmap_id. Qed.
 Lemma map_fmap_compose {A B C} (f : A → B) (g : B → C) (m : M A) :
@@ -970,13 +1001,11 @@ Proof.
   apply map_eq. intros i. rewrite map_lookup_imap. by destruct (m !! i).
 Qed.
 
-Lemma map_imap_insert {A B} (f : K → A → option B) (i : K) (v : A) (m : M A) :
-  map_imap f (<[i:=v]> m) = match f i v with
-                            | None   => delete i (map_imap f m)
-                            | Some w => <[i:=w]> (map_imap f m)
-                            end.
+Lemma map_imap_insert {A B} (f : K → A → option B) i x (m : M A) :
+  map_imap f (<[i:=x]> m) =
+    (match f i x with Some y => <[i:=y]> | None => delete i end) (map_imap f m).
 Proof.
-  destruct (f i v) as [w|] eqn:Hw.
+  destruct (f i x) as [y|] eqn:Hw; simpl.
   - apply map_eq. intros k. rewrite map_lookup_imap.
     destruct (decide (k = i)) as [->|Hk_not_i].
     + by rewrite lookup_insert, lookup_insert.
@@ -988,6 +1017,12 @@ Proof.
     + rewrite lookup_insert_ne, lookup_delete_ne by done.
       by rewrite map_lookup_imap.
 Qed.
+Lemma map_imap_insert_Some {A B} (f : K → A → option B) i x (m : M A) y :
+  f i x = Some y → map_imap f (<[i:=x]> m) = <[i:=y]> (map_imap f m).
+Proof. intros Hi. by rewrite map_imap_insert, Hi. Qed.
+Lemma map_imap_insert_None {A B} (f : K → A → option B) i x (m : M A) :
+  f i x = None → map_imap f (<[i:=x]> m) = delete i (map_imap f m).
+Proof. intros Hi. by rewrite map_imap_insert, Hi. Qed.
 
 Lemma map_imap_delete {A B} (f : K → A → option B) (m : M A) (i : K) :
   map_imap f (delete i m) = delete i (map_imap f m).
@@ -1036,21 +1071,37 @@ Proof. by rewrite map_size_empty_iff. Qed.
 
 Lemma map_size_singleton {A} i (x : A) : size ({[ i := x ]} : M A) = 1.
 Proof. unfold size, map_size. by rewrite map_to_list_singleton. Qed.
+
 Lemma map_size_insert {A} i x (m : M A) :
-  m !! i = None → size (<[i:=x]> m) = S (size m).
-Proof. intros. unfold size, map_size. by rewrite map_to_list_insert. Qed.
-Lemma map_size_delete {A} i (m : M A) :
-  is_Some (m !! i) → size (delete i m) = pred (size m).
-Proof. intros [??]. unfold size, map_size. by rewrite <-(map_to_list_delete m). Qed.
+  size (<[i:=x]> m) = (match m !! i with Some _ => id | None => S end) (size m).
+Proof.
+  destruct (m !! i) as [y|] eqn:?; simpl.
+  - rewrite <-(insert_id m i y) at 2 by done. rewrite <-!(insert_delete m).
+    unfold size, map_size.
+    by rewrite !map_to_list_insert by (by rewrite lookup_delete).
+  - unfold size, map_size. by rewrite map_to_list_insert.
+Qed.
 Lemma map_size_insert_Some {A} i x (m : M A) :
   is_Some (m !! i) → size (<[i:=x]> m) = size m.
+Proof. intros [y Hi]. by rewrite map_size_insert, Hi. Qed.
+Lemma map_size_insert_None {A} i x (m : M A) :
+  m !! i = None → size (<[i:=x]> m) = S (size m).
+Proof. intros Hi. by rewrite map_size_insert, Hi. Qed.
+
+Lemma map_size_delete {A} i (m : M A) :
+  size (delete i m) = (match m !! i with Some _ => pred | None => id end) (size m).
 Proof.
-  intros [? Hmi]. rewrite <-insert_delete, map_size_insert, map_size_delete.
-  - assert (size m ≠ 0); [|by lia]. apply map_size_non_empty_iff.
-    intros ->. rewrite lookup_empty in Hmi. done.
-  - eauto.
-  - rewrite lookup_delete. done.
+  destruct (m !! i) as [y|] eqn:?; simpl.
+  - unfold size, map_size. by rewrite <-(map_to_list_delete m).
+  - by rewrite delete_notin.
 Qed.
+Lemma map_size_delete_Some {A} i (m : M A) :
+  is_Some (m !! i) → size (delete i m) = pred (size m).
+Proof. intros [y Hi]. by rewrite map_size_delete, Hi. Qed.
+Lemma map_size_delete_None {A} i (m : M A) :
+  m !! i = None → size (delete i m) = size m.
+Proof. intros Hi. by rewrite map_size_delete, Hi. Qed.
+
 Lemma map_size_fmap {A B} (f : A -> B) (m : M A) : size (f <$> m) = size m.
 Proof. intros. unfold size, map_size. by rewrite map_to_list_fmap, fmap_length. Qed.
 
@@ -1499,6 +1550,21 @@ Section more_merge.
     f (m1 !! i) (Some z) = Some x →
     <[i:=x]>(merge f m1 m2) = merge f m1 (<[i:=z]>m2).
   Proof. by intros; apply partial_alter_merge_r. Qed.
+
+  Lemma fmap_merge {D} (g : C → D) m1 m2 :
+    g <$> merge f m1 m2 = merge (λ mx1 mx2, g <$> f mx1 mx2) m1 m2.
+  Proof.
+    assert (DiagNone (λ mx1 mx2, g <$> f mx1 mx2)).
+    { unfold DiagNone. by rewrite diag_none. }
+    apply map_eq; intros i. by rewrite lookup_fmap, !lookup_merge by done.
+  Qed.
+  Lemma omap_merge {D} (g : C → option D) m1 m2 :
+    omap g (merge f m1 m2) = merge (λ mx1 mx2, f mx1 mx2 ≫= g) m1 m2.
+  Proof.
+    assert (DiagNone (λ mx1 mx2, f mx1 mx2 ≫= g)).
+    { unfold DiagNone. by rewrite diag_none. }
+    apply map_eq; intros i. by rewrite lookup_omap, !lookup_merge by done.
+  Qed.
 End more_merge.
 
 Lemma merge_diag {A C} (f : option A → option A → option C) `{!DiagNone f} (m : M A) :
@@ -1735,6 +1801,17 @@ Lemma map_disjoint_filter {A} (P : K * A → Prop) `{!∀ x, Decision (P x)} (m 
 Proof.
   apply map_disjoint_spec. intros i x y.
   rewrite !map_filter_lookup_Some. naive_solver.
+Qed.
+
+Lemma map_disjoint_fmap {A B} (f1 f2 : A → B) (m1 m2 : M A) :
+  m1 ##ₘ m2 ↔ f1 <$> m1 ##ₘ f2 <$> m2.
+Proof.
+  rewrite !map_disjoint_spec. setoid_rewrite lookup_fmap_Some. naive_solver.
+Qed.
+Lemma map_disjoint_omap {A B} (f1 f2 : A → option B) (m1 m2 : M A) :
+  m1 ##ₘ m2 → omap f1 m1 ##ₘ omap f2 m2.
+Proof.
+  rewrite !map_disjoint_spec. setoid_rewrite lookup_omap_Some. naive_solver.
 Qed.
 
 (** ** Properties of the [union_with] operation *)
@@ -2026,7 +2103,15 @@ Proof.
   rewrite lookup_fmap, !lookup_union, !lookup_fmap.
   destruct (m1 !! i), (m2 !! i); auto.
 Qed.
-
+Lemma map_omap_union {A B} (f : A → option B) (m1 m2 : M A) :
+  m1 ##ₘ m2 →
+  omap f (m1 ∪ m2) = omap f m1 ∪ omap f m2.
+Proof.
+  intros Hdisj. apply map_eq; intros i. specialize (Hdisj i).
+  apply option_eq; intros x.
+  rewrite lookup_omap, !lookup_union, !lookup_omap.
+  destruct (m1 !! i), (m2 !! i); simpl; repeat (destruct (f _)); naive_solver.
+Qed.
 
 (** ** Properties of the [union_list] operation *)
 Lemma map_disjoint_union_list_l {A} (ms : list (M A)) (m : M A) :

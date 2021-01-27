@@ -508,19 +508,22 @@ Ltac block_goal := match goal with [ |- ?T ] => change (block T) end.
 Ltac unblock_goal := unfold block in *.
 
 
-(** [select] finds the first hypothesis matching [pat] and passes it
-to the continuation [tac]. Its main advantage over using [match goal
-with ] directly is that it is shorter. If [pat] matches multiple
-hypotheses, then [tac] will only be called on the first matching
-hypothesis. If [tac] fails, [select] will not backtrack on subsequent
-matching hypotheses.
+(** The tactic [select pat tac] finds the last (i.e., bottommost) hypothesis
+matching [pat] and passes it to the continuation [tac]. Its main advantage over
+using [match goal with ] directly is that it is shorter. If [pat] matches
+multiple hypotheses and [tac] fails, then [select tac] will not backtrack on
+subsequent matching hypotheses.
 
-[select] is written in CPS and does not return the name of the
+The tactic [select] is written in CPS and does not return the name of the
 hypothesis due to limitations in the Ltac1 tactic runtime (see
 https://gitter.im/coq/coq?at=5e96c82f85b01628f04bbb89). *)
 Tactic Notation "select" open_constr(pat) tactic3(tac) :=
   lazymatch goal with
-  (* The [unify] is necessary, otherwise holes in [pat] stay as side-conditions *)
+  (** Before running [tac] on the hypothesis [H] we must first unify the
+      pattern [pat] with the term it matched against. This forces every evar
+      coming from [pat] (and in particular from the holes [_] it contains and
+      from the implicit arguments it uses) to be instantiated. If we do not do
+      so then shelved goals are produced for every such evar. *)
   | H : pat |- _ => let T := (type of H) in unify T pat; tac H
   end.
 (** [select_revert] reverts the first hypothesis matching [pat]. *)

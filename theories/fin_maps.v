@@ -1264,10 +1264,10 @@ Section map_filter.
       + rewrite Eq, Hm, lookup_insert. naive_solver.
       + by rewrite lookup_insert_ne.
   Qed.
-  Lemma map_filter_lookup_Some_11 m i x :
+  Lemma map_filter_lookup_Some_1_1 m i x :
     filter P m !! i = Some x → m !! i = Some x.
   Proof. apply map_filter_lookup_Some. Qed.
-  Lemma map_filter_lookup_Some_12 m i x :
+  Lemma map_filter_lookup_Some_1_2 m i x :
     filter P m !! i = Some x → P (i,x).
   Proof. apply map_filter_lookup_Some. Qed.
   Lemma map_filter_lookup_Some_2 m i x :
@@ -1393,9 +1393,9 @@ Section map_Forall.
   Lemma map_Forall_impl (Q : K → A → Prop) m :
     map_Forall P m → (∀ i x, P i x → Q i x) → map_Forall Q m.
   Proof. unfold map_Forall; naive_solver. Qed.
-  Lemma map_Forall_insert_11 m i x : map_Forall P (<[i:=x]>m) → P i x.
+  Lemma map_Forall_insert_1_1 m i x : map_Forall P (<[i:=x]>m) → P i x.
   Proof. intros Hm. by apply Hm; rewrite lookup_insert. Qed.
-  Lemma map_Forall_insert_12 m i x :
+  Lemma map_Forall_insert_1_2 m i x :
     m !! i = None → map_Forall P (<[i:=x]>m) → map_Forall P m.
   Proof.
     intros ? Hm j y ?; apply Hm. by rewrite lookup_insert_ne by congruence.
@@ -1406,8 +1406,8 @@ Section map_Forall.
   Lemma map_Forall_insert m i x :
     m !! i = None → map_Forall P (<[i:=x]>m) ↔ P i x ∧ map_Forall P m.
   Proof.
-    naive_solver eauto using map_Forall_insert_11,
-      map_Forall_insert_12, map_Forall_insert_2.
+    naive_solver eauto using map_Forall_insert_1_1,
+      map_Forall_insert_1_2, map_Forall_insert_2.
   Qed.
   Lemma map_Forall_delete m i : map_Forall P m → map_Forall P (delete i m).
   Proof. intros Hm j x; rewrite lookup_delete_Some. naive_solver. Qed.
@@ -2073,10 +2073,10 @@ Qed.
 Lemma delete_union {A} (m1 m2 : M A) i :
   delete i (m1 ∪ m2) = delete i m1 ∪ delete i m2.
 Proof. apply delete_union_with. Qed.
-Lemma map_Forall_union_11 {A} (m1 m2 : M A) P :
+Lemma map_Forall_union_1_1 {A} (m1 m2 : M A) P :
   map_Forall P (m1 ∪ m2) → map_Forall P m1.
 Proof. intros HP i x ?. apply HP, lookup_union_Some_raw; auto. Qed.
-Lemma map_Forall_union_12 {A} (m1 m2 : M A) P :
+Lemma map_Forall_union_1_2 {A} (m1 m2 : M A) P :
   m1 ##ₘ m2 → map_Forall P (m1 ∪ m2) → map_Forall P m2.
 Proof. intros ? HP i x ?. apply HP, lookup_union_Some; auto. Qed.
 Lemma map_Forall_union_2 {A} (m1 m2 : M A) P :
@@ -2086,8 +2086,8 @@ Lemma map_Forall_union {A} (m1 m2 : M A) P :
   m1 ##ₘ m2 →
   map_Forall P (m1 ∪ m2) ↔ map_Forall P m1 ∧ map_Forall P m2.
 Proof.
-  naive_solver eauto using map_Forall_union_11,
-    map_Forall_union_12, map_Forall_union_2.
+  naive_solver eauto using map_Forall_union_1_1,
+    map_Forall_union_1_2, map_Forall_union_2.
 Qed.
 Lemma map_union_filter {A} (P : K * A → Prop) `{!∀ x, Decision (P x)} (m : M A) :
   filter P m ∪ filter (λ v, ¬ P v) m = m.

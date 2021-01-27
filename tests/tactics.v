@@ -53,4 +53,4 @@ Goal ∀ (n : nat), ∃ m : nat, True.
 Proof. intros ?. rename select nat into m. exists m. done. Qed.
 
 Goal ∀ (P : nat → Prop), P 3 → P 4 → P 4.
-Proof. intros. rename select (P _) into HP4. apply HP4. Qed.
+Proof. intros P **. rename select (P _) into HP4. apply HP4. Qed.

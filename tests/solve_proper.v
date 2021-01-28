@@ -9,16 +9,16 @@ Section tests.
             !Proper ((≡) ==> (≡) ==> (≡)) baz}.
 
   Definition test1 (x : A) := baz (bar (foo x)) x.
-  Global Instance : Proper ((≡) ==> (≡)) test1.
+  Goal Proper ((≡) ==> (≡)) test1.
   Proof. solve_proper. Qed.
 
   Definition test2 (b : bool) (x : A) :=
     if b then bar (foo x) else bar x.
-  Global Instance : ∀ b, Proper ((≡) ==> (≡)) (test2 b).
+  Goal ∀ b, Proper ((≡) ==> (≡)) (test2 b).
   Proof. solve_proper. Qed.
 
   Definition test3 (f : nat → A) :=
     baz (bar (f 0)) (f 2).
-  Global Instance : Proper (pointwise_relation nat (≡) ==> (≡)) test3.
+  Goal Proper (pointwise_relation nat (≡) ==> (≡)) test3.
   Proof. solve_proper. Qed.
 End tests.

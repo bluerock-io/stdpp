@@ -2735,7 +2735,7 @@ Proof.
 Qed.
 
 (** ** Properties of the [Forall2] predicate *)
-Lemma Forall_Forall2 {A} (Q : A → A → Prop) l :
+Lemma Forall_Forall2_diag {A} (Q : A → A → Prop) l :
   Forall (λ x, Q x x) l → Forall2 Q l l.
 Proof. induction 1; constructor; auto. Qed.
 
@@ -4645,7 +4645,7 @@ Ltac decompose_Forall := repeat
   | |- Forall _ (_ ++ _) => apply Forall_app_2
   | |- Forall _ (_ <$> _) => apply Forall_fmap
   | |- Forall _ (_ ≫= _) => apply Forall_bind
-  | |- Forall2 _ _ _ => apply Forall_Forall2
+  | |- Forall2 _ _ _ => apply Forall_Forall2_diag
   | |- Forall2 _ [] [] => constructor
   | |- Forall2 _ (_ :: _) (_ :: _) => constructor
   | |- Forall2 _ (_ ++ _) (_ ++ _) => first

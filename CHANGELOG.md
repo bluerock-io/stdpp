@@ -51,6 +51,8 @@ Coq 8.8 and 8.9 are no longer supported.
   versions of the lemmas for the specific cases.
 - Rename `_11` and `_12` into `_1_1` and `_1_2`, respectively. These suffixes
   are used for `A → B1` and `A → B2` variants of `A ↔ B1 ∧ B2` lemmas.
+- Rename `Forall_Forall2` → `Forall_Forall2_diag` to be consistent with the
+  names for big operators in Iris.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`):
@@ -80,6 +82,7 @@ s/\bmap_Forall_insert_11\b/map_Forall_insert_1_1/g
 s/\bmap_Forall_insert_12\b/map_Forall_insert_1_2/g
 s/\bmap_Forall_union_11\b/map_Forall_union_1_1/g
 s/\bmap_Forall_union_12\b/map_Forall_union_1_2/g
+s/\bForall_Forall2\b/Forall_Forall2_diag/g
 ' $(find theories -name "*.v")
 ```
 

@@ -890,9 +890,9 @@ Lemma NoDup_nil : NoDup (@nil A) ↔ True.
 Proof. split; constructor. Qed.
 Lemma NoDup_cons x l : NoDup (x :: l) ↔ x ∉ l ∧ NoDup l.
 Proof. split; [by inversion 1|]. intros [??]. by constructor. Qed.
-Lemma NoDup_cons_11 x l : NoDup (x :: l) → x ∉ l.
+Lemma NoDup_cons_1_1 x l : NoDup (x :: l) → x ∉ l.
 Proof. rewrite NoDup_cons. by intros [??]. Qed.
-Lemma NoDup_cons_12 x l : NoDup (x :: l) → NoDup l.
+Lemma NoDup_cons_1_2 x l : NoDup (x :: l) → NoDup l.
 Proof. rewrite NoDup_cons. by intros [??]. Qed.
 Lemma NoDup_singleton x : NoDup [x].
 Proof. constructor; [apply not_elem_of_nil | constructor]. Qed.
@@ -937,11 +937,11 @@ Section no_dup_dec.
     | [] => left NoDup_nil_2
     | x :: l =>
       match decide_rel (∈) x l with
-      | left Hin => right (λ H, NoDup_cons_11 _ _ H Hin)
+      | left Hin => right (λ H, NoDup_cons_1_1 _ _ H Hin)
       | right Hin =>
         match NoDup_dec l with
         | left H => left (NoDup_cons_2 _ _ Hin H)
-        | right H => right (H ∘ NoDup_cons_12 _ _)
+        | right H => right (H ∘ NoDup_cons_1_2 _ _)
         end
       end
     end.

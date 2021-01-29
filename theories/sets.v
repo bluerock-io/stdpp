@@ -1046,7 +1046,7 @@ Section pred_finite_infinite.
 
   (** If [f] is surjective onto [P], then pre-composing with [f] preserves
   infinity. *)
-  Lemma pred_infinite_surj {A} (P : A → Prop) (f : A → A) :
+  Lemma pred_infinite_surj {A B} (P : B → Prop) (f : A → B) :
     (∀ x, P x → ∃ y, f y = x) →
     pred_infinite P → pred_infinite (P ∘ f).
   Proof.

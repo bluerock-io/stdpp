@@ -53,6 +53,7 @@ Coq 8.8 and 8.9 are no longer supported.
   are used for `A → B1` and `A → B2` variants of `A ↔ B1 ∧ B2` lemmas.
 - Rename `Forall_Forall2` → `Forall_Forall2_diag` to be consistent with the
   names for big operators in Iris.
+- Add `eunify` tactic that lifts Coq's `unify` tactic to `open_constr`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`):

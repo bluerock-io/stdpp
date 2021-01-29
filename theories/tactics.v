@@ -214,6 +214,16 @@ does the converse. *)
 Ltac var_eq x1 x2 := match x1 with x2 => idtac | _ => fail 1 end.
 Ltac var_neq x1 x2 := match x1 with x2 => fail 1 | _ => idtac end.
 
+(** The tactic [eunify x y] succeeds if [x] and [y] can be unified, and fails
+otherwise. If it succeeds, it will instantiate necessary evars in [x] and [y].
+
+Contrary to Coq's standard [unify] tactic, which uses [constr] for the arguments
+[x] and [y], [eunify] uses [open_constr] so that one can use holes (i.e., [_]s).
+For example, it allows one to write [eunify x (S _)], which will test if [x]
+unifies a successor. *)
+Tactic Notation "eunify" open_constr(x) open_constr(y) :=
+  unify x y.
+
 (** Operational type class projections in recursive calls are not folded back
 appropriately by [simpl]. The tactic [csimpl] uses the [fold_classes] tactics
 to refold recursive calls of [fmap], [mbind], [omap] and [alter]. A

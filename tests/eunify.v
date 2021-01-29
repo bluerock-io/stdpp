@@ -1,4 +1,5 @@
 From stdpp Require Import tactics strings.
+Unset Mangle Names.
 
 Check "eunify_test".
 Lemma eunify_test : ∀ x y, 0 < S x + y.

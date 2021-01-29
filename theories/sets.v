@@ -1044,6 +1044,18 @@ Section pred_finite_infinite.
     pred_infinite P → (∀ x, P x → Q x) → pred_infinite Q.
   Proof. unfold pred_infinite. set_solver. Qed.
 
+  (** If [f] is surjective onto [P], then pre-composing with [f] preserves
+  infinity. *)
+  Lemma pred_infinite_surj {A} (P : A → Prop) (f : A → A) :
+    (∀ x, P x → ∃ y, f y = x) →
+    pred_infinite P → pred_infinite (P ∘ f).
+  Proof.
+    intros Hf HP xs. destruct (HP (f <$> xs)) as [x [HPx Hx]].
+    destruct (Hf _ HPx) as [y Hf']. exists y. split.
+    - simpl. rewrite Hf'. done.
+    - intros Hy. apply Hx. apply elem_of_list_fmap. eauto.
+  Qed.
+
   Lemma pred_not_infinite_finite {A} (P : A → Prop) :
     pred_infinite P → pred_finite P → False.
   Proof. intros Hinf [xs ?]. destruct (Hinf xs). set_solver. Qed.

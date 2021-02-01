@@ -152,6 +152,6 @@ Definition listset_normalize (X : listset A) : listset A :=
   let (l) := X in Listset (remove_dups_fast l).
 Lemma listset_normalize_correct X : listset_normalize X ≡ X.
 Proof.
-  destruct X as [l]. apply elem_of_equiv; intro; apply elem_of_remove_dups_fast.
+  destruct X as [l]. apply set_equiv; intro; apply elem_of_remove_dups_fast.
 Qed.
 End remove_duplicates.

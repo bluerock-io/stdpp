@@ -258,6 +258,9 @@ Section gset.
   Global Instance gset_dom {A} : Dom (gmap K A) (gset K) := mapset_dom.
   Global Instance gset_dom_spec : FinMapDom K (gmap K) (gset K) := mapset_dom_spec.
 
+  (** If you are looking for a lemma showing that [gset] is extensional, see
+  [sets.set_eq]. *)
+
   Definition gset_to_gmap {A} (x : A) (X : gset K) : gmap K A :=
     (λ _, x) <$> mapset_car X.
 

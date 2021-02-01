@@ -92,7 +92,7 @@ Section infinite.
 
   Global Instance coGset_leibniz : LeibnizEquiv (coGset A).
   Proof.
-    intros [X|X] [Y|Y]; rewrite elem_of_equiv;
+    intros [X|X] [Y|Y]; rewrite set_equiv;
     unfold elem_of, coGset_elem_of; simpl; intros HXY.
     - f_equal. by apply leibniz_equiv.
     - by destruct (exist_fresh (X ∪ Y)) as [? [? ?%HXY]%not_elem_of_union].

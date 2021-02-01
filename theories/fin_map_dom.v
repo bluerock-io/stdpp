@@ -79,13 +79,13 @@ Proof.
 Qed.
 Lemma dom_alter {A} f (m : M A) i : dom D (alter f i m) ≡ dom D m.
 Proof.
-  apply elem_of_equiv; intros j; rewrite !elem_of_dom; unfold is_Some.
+  apply set_equiv; intros j; rewrite !elem_of_dom; unfold is_Some.
   destruct (decide (i = j)); simplify_map_eq/=; eauto.
   destruct (m !! j); naive_solver.
 Qed.
 Lemma dom_insert {A} (m : M A) i x : dom D (<[i:=x]>m) ≡ {[ i ]} ∪ dom D m.
 Proof.
-  apply elem_of_equiv. intros j. rewrite elem_of_union, !elem_of_dom.
+  apply set_equiv. intros j. rewrite elem_of_union, !elem_of_dom.
   unfold is_Some. setoid_rewrite lookup_insert_Some.
   destruct (decide (i = j)); set_solver.
 Qed.
@@ -104,7 +104,7 @@ Lemma dom_singleton {A} (i : K) (x : A) : dom D ({[i := x]} : M A) ≡ {[ i ]}.
 Proof. rewrite <-insert_empty, dom_insert, dom_empty; set_solver. Qed.
 Lemma dom_delete {A} (m : M A) i : dom D (delete i m) ≡ dom D m ∖ {[ i ]}.
 Proof.
-  apply elem_of_equiv. intros j. rewrite elem_of_difference, !elem_of_dom.
+  apply set_equiv. intros j. rewrite elem_of_difference, !elem_of_dom.
   unfold is_Some. setoid_rewrite lookup_delete_Some. set_solver.
 Qed.
 Lemma delete_partial_alter_dom {A} (m : M A) i f :
@@ -124,24 +124,24 @@ Lemma map_disjoint_dom_2 {A} (m1 m2 : M A) : dom D m1 ## dom D m2 → m1 ##ₘ m
 Proof. apply map_disjoint_dom. Qed.
 Lemma dom_union {A} (m1 m2 : M A) : dom D (m1 ∪ m2) ≡ dom D m1 ∪ dom D m2.
 Proof.
-  apply elem_of_equiv. intros i. rewrite elem_of_union, !elem_of_dom.
+  apply set_equiv. intros i. rewrite elem_of_union, !elem_of_dom.
   unfold is_Some. setoid_rewrite lookup_union_Some_raw.
   destruct (m1 !! i); naive_solver.
 Qed.
 Lemma dom_intersection {A} (m1 m2: M A) : dom D (m1 ∩ m2) ≡ dom D m1 ∩ dom D m2.
 Proof.
-  apply elem_of_equiv. intros i. rewrite elem_of_intersection, !elem_of_dom.
+  apply set_equiv. intros i. rewrite elem_of_intersection, !elem_of_dom.
   unfold is_Some. setoid_rewrite lookup_intersection_Some. naive_solver.
 Qed.
 Lemma dom_difference {A} (m1 m2 : M A) : dom D (m1 ∖ m2) ≡ dom D m1 ∖ dom D m2.
 Proof.
-  apply elem_of_equiv. intros i. rewrite elem_of_difference, !elem_of_dom.
+  apply set_equiv. intros i. rewrite elem_of_difference, !elem_of_dom.
   unfold is_Some. setoid_rewrite lookup_difference_Some.
   destruct (m2 !! i); naive_solver.
 Qed.
 Lemma dom_fmap {A B} (f : A → B) (m : M A) : dom D (f <$> m) ≡ dom D m.
 Proof.
-  apply elem_of_equiv. intros i.
+  apply set_equiv. intros i.
   rewrite !elem_of_dom, lookup_fmap, <-!not_eq_None_Some.
   destruct (m !! i); naive_solver.
 Qed.
@@ -153,7 +153,7 @@ Proof.
 Qed.
 Global Instance dom_proper `{!Equiv A} : Proper ((≡@{M A}) ==> (≡)) (dom D).
 Proof.
-  intros m1 m2 EQm. apply elem_of_equiv. intros i.
+  intros m1 m2 EQm. apply set_equiv. intros i.
   rewrite !elem_of_dom, EQm. done.
 Qed.
 Lemma dom_list_to_map {A} (l : list (K * A)) :

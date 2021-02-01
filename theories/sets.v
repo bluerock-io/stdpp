@@ -11,13 +11,13 @@ Unset Default Proof Using.
 
 (* Higher precedence to make sure these instances are not used for other types
 with an [ElemOf] instance, such as lists. *)
-Global Instance set_equiv `{ElemOf A C} : Equiv C | 20 := λ X Y,
+Global Instance set_equiv_instance `{ElemOf A C} : Equiv C | 20 := λ X Y,
   ∀ x, x ∈ X ↔ x ∈ Y.
-Global Instance set_subseteq `{ElemOf A C} : SubsetEq C | 20 := λ X Y,
+Global Instance set_subseteq_instance `{ElemOf A C} : SubsetEq C | 20 := λ X Y,
   ∀ x, x ∈ X → x ∈ Y.
-Global Instance set_disjoint `{ElemOf A C} : Disjoint C | 20 := λ X Y,
+Global Instance set_disjoint_instance `{ElemOf A C} : Disjoint C | 20 := λ X Y,
   ∀ x, x ∈ X → x ∈ Y → False.
-Typeclasses Opaque set_equiv set_subseteq set_disjoint.
+Typeclasses Opaque set_equiv_instance set_subseteq_instance set_disjoint_instance.
 
 (** * Setoids *)
 Section setoids_simple.
@@ -179,13 +179,13 @@ Section set_unfold_simple.
   Global Instance set_unfold_equiv_empty_l X (P : A → Prop) :
     (∀ x, SetUnfoldElemOf x X (P x)) → SetUnfold (∅ ≡ X) (∀ x, ¬P x) | 5.
   Proof.
-    intros ?; constructor. unfold equiv, set_equiv.
+    intros ?; constructor. unfold equiv, set_equiv_instance.
     pose proof (not_elem_of_empty (C:=C)); naive_solver.
   Qed.
   Global Instance set_unfold_equiv_empty_r (P : A → Prop) X :
     (∀ x, SetUnfoldElemOf x X (P x)) → SetUnfold (X ≡ ∅) (∀ x, ¬P x) | 5.
   Proof.
-    intros ?; constructor. unfold equiv, set_equiv.
+    intros ?; constructor. unfold equiv, set_equiv_instance.
     pose proof (not_elem_of_empty (C:=C)); naive_solver.
   Qed.
   Global Instance set_unfold_equiv (P Q : A → Prop) X Y :
@@ -206,7 +206,7 @@ Section set_unfold_simple.
   Global Instance set_unfold_disjoint (P Q : A → Prop) X Y :
     (∀ x, SetUnfoldElemOf x X (P x)) → (∀ x, SetUnfoldElemOf x Y (Q x)) →
     SetUnfold (X ## Y) (∀ x, P x → Q x → False).
-  Proof. constructor. unfold disjoint, set_disjoint. naive_solver. Qed.
+  Proof. constructor. unfold disjoint, set_disjoint_instance. naive_solver. Qed.
 
   Context `{!LeibnizEquiv C}.
   Global Instance set_unfold_equiv_same_L X : SetUnfold (X = X) True | 1.
@@ -360,9 +360,9 @@ Section semi_set.
   Implicit Types Xs Ys : list C.
 
   (** Equality *)
-  Lemma elem_of_equiv X Y : X ≡ Y ↔ ∀ x, x ∈ X ↔ x ∈ Y.
+  Lemma set_equiv X Y : X ≡ Y ↔ ∀ x, x ∈ X ↔ x ∈ Y.
   Proof. set_solver. Qed.
-  Lemma set_equiv_spec X Y : X ≡ Y ↔ X ⊆ Y ∧ Y ⊆ X.
+  Lemma set_equiv_subseteq X Y : X ≡ Y ↔ X ⊆ Y ∧ Y ⊆ X.
   Proof. set_solver. Qed.
 
   (** Subset relation *)
@@ -516,10 +516,10 @@ Section semi_set.
   Section leibniz.
     Context `{!LeibnizEquiv C}.
 
-    Lemma elem_of_equiv_L X Y : X = Y ↔ ∀ x, x ∈ X ↔ x ∈ Y.
-    Proof. unfold_leibniz. apply elem_of_equiv. Qed.
-    Lemma set_equiv_spec_L X Y : X = Y ↔ X ⊆ Y ∧ Y ⊆ X.
-    Proof. unfold_leibniz. apply set_equiv_spec. Qed.
+    Lemma set_eq X Y : X = Y ↔ ∀ x, x ∈ X ↔ x ∈ Y.
+    Proof. unfold_leibniz. apply set_equiv. Qed.
+    Lemma set_eq_subseteq X Y : X = Y ↔ X ⊆ Y ∧ Y ⊆ X.
+    Proof. unfold_leibniz. apply set_equiv_subseteq. Qed.
 
     (** Subset relation *)
     Global Instance set_subseteq_partialorder : PartialOrder (⊆@{C}).

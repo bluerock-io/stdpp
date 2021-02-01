@@ -54,6 +54,11 @@ Coq 8.8 and 8.9 are no longer supported.
 - Rename `Forall_Forall2` → `Forall_Forall2_diag` to be consistent with the
   names for big operators in Iris.
 - Add `eunify` tactic that lifts Coq's `unify` tactic to `open_constr`.
+- Rename set equality and equivalence lemmas:
+  `elem_of_equiv_L` → `set_eq`,
+  `set_equiv_spec_L` → `set_eq_subseteq`,
+  `elem_of_equiv` → `set_equiv`,
+  `set_equiv_spec` → `set_equiv_subseteq`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`):
@@ -84,6 +89,10 @@ s/\bmap_Forall_insert_12\b/map_Forall_insert_1_2/g
 s/\bmap_Forall_union_11\b/map_Forall_union_1_1/g
 s/\bmap_Forall_union_12\b/map_Forall_union_1_2/g
 s/\bForall_Forall2\b/Forall_Forall2_diag/g
+s/\belem_of_equiv_L\b/set_eq/g
+s/\bset_equiv_spec_L\b/set_eq_subseteq/g
+s/\belem_of_equiv\b/set_equiv/g
+s/\bset_equiv_spec\b/set_equiv_subseteq/g
 ' $(find theories -name "*.v")
 ```
 

@@ -100,6 +100,12 @@ Proof. induction n; by f_equal/=. Qed.
 Lemma Nat_iter_add {A} n1 n2 (f : A → A) x :
   Nat.iter (n1 + n2) f x = Nat.iter n1 f (Nat.iter n2 f x).
 Proof. induction n1; by f_equal/=. Qed.
+Lemma Nat_iter_mul {A} n1 n2 (f : A → A) x :
+  Nat.iter (n1 * n2) f x = Nat.iter n1 (Nat.iter n2 f) x.
+Proof.
+  intros. induction n1 as [|n1 IHn1]; [done|].
+  simpl. by rewrite Nat_iter_add, IHn1.
+Qed.
 
 Lemma Nat_iter_ind {A} (P : A → Prop) f x k :
   P x → (∀ y, P y → P (f y)) → P (Nat.iter k f x).

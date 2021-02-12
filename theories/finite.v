@@ -28,7 +28,7 @@ Next Obligation.
 Qed.
 Global Hint Immediate finite_countable : typeclass_instances.
 
-Definition find `{Finite A} P `{∀ x, Decision (P x)} : option A :=
+Definition find `{Finite A} (P : A → Prop) `{∀ x, Decision (P x)} : option A :=
   list_find P (enum A) ≫= decode_nat ∘ fst.
 
 Lemma encode_lt_card `{finA: Finite A} (x : A) : encode_nat x < card A.
@@ -51,7 +51,7 @@ Proof.
   split; [done|]; rewrite Hj; simpl.
   apply list_find_Some in Hj as (?&->&?). eauto using NoDup_lookup.
 Qed.
-Lemma find_Some `{finA: Finite A} P `{∀ x, Decision (P x)} (x : A) :
+Lemma find_Some `{finA: Finite A} (P : A → Prop) `{∀ x, Decision (P x)} (x : A) :
   find P = Some x → P x.
 Proof.
   destruct finA as [xs Hxs HA]; unfold find, decode_nat, decode; simpl.
@@ -59,7 +59,7 @@ Proof.
   rewrite !Nat2Pos.id in Hx by done.
   destruct (list_find_Some P xs i y); naive_solver.
 Qed.
-Lemma find_is_Some `{finA: Finite A} P `{∀ x, Decision (P x)} (x : A) :
+Lemma find_is_Some `{finA: Finite A} (P : A → Prop) `{∀ x, Decision (P x)} (x : A) :
   P x → ∃ y, find P = Some y ∧ P y.
 Proof.
   destruct finA as [xs Hxs HA]; unfold find, decode; simpl.

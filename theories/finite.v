@@ -64,8 +64,8 @@ Lemma find_is_Some `{finA: Finite A} P `{∀ x, Decision (P x)} (x : A) :
 Proof.
   destruct finA as [xs Hxs HA]; unfold find, decode; simpl.
   intros Hx. destruct (list_find_elem_of P xs x) as [[i y] Hi]; auto.
-  rewrite Hi; simpl. rewrite !Nat2Pos.id by done. simpl.
-  apply list_find_Some in Hi; naive_solver.
+  rewrite Hi; unfold decode_nat, decode; simpl. rewrite !Nat2Pos.id by done.
+  simpl. apply list_find_Some in Hi; naive_solver.
 Qed.
 
 Definition encode_fin `{Finite A} (x : A) : fin (card A) :=

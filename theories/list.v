@@ -1819,6 +1819,34 @@ Proof.
   - rewrite !filter_cons_False by naive_solver. by rewrite IH.
 Qed.
 
+Lemma list_filter_filter (P1 P2 : A → Prop)
+    `{!∀ x, Decision (P1 x), !∀ x, Decision (P2 x)} (l : list A) :
+  filter P1 (filter P2 l) = filter (λ a, P1 a ∧ P2 a) l.
+Proof.
+  induction l as [|x l IH]; [done|].
+  rewrite !filter_cons. case (decide (P2 x)) as [HP2|HP2].
+  - rewrite filter_cons, IH. apply decide_iff. naive_solver.
+  - rewrite IH. symmetry. apply decide_False. by intros [_ ?].
+Qed.
+
+Lemma list_filter_filter_l (P1 P2 : A → Prop)
+    `{!∀ x, Decision (P1 x), !∀ x, Decision (P2 x)} (l : list A) :
+  (∀ x, P1 x → P2 x) →
+  filter P1 (filter P2 l) = filter P1 l.
+Proof.
+  intros HPimp. rewrite list_filter_filter.
+  apply list_filter_iff. naive_solver.
+Qed.
+
+Lemma list_filter_filter_r (P1 P2 : A → Prop)
+    `{!∀ x, Decision (P1 x), !∀ x, Decision (P2 x)} (l : list A) :
+  (∀ x, P2 x → P1 x) →
+  filter P1 (filter P2 l) = filter P2 l.
+Proof.
+  intros HPimp. rewrite list_filter_filter.
+  apply list_filter_iff. naive_solver.
+Qed.
+
 (** ** Properties of the [prefix] and [suffix] predicates *)
 Global Instance: PreOrder (@prefix A).
 Proof.
@@ -2465,6 +2493,12 @@ Global Instance list_subseteq_po : PreOrder (⊆@{list A}).
 Proof. split; firstorder. Qed.
 Lemma list_subseteq_nil l : [] ⊆ l.
 Proof. intros x. by rewrite elem_of_nil. Qed.
+Lemma list_nil_subseteq l : l ⊆ [] → l = [].
+Proof.
+  intro Hl. destruct l as [|x l1]; [done|]. exfalso.
+  rewrite <-(elem_of_nil x).
+  apply Hl, elem_of_cons. by left.
+Qed.
 
 Global Instance list_subseteq_Permutation: Proper ((≡ₚ) ==> (≡ₚ) ==> (↔)) (⊆@{list A}) .
 Proof. intros l1 l2 Hl k1 k2 Hk. apply forall_proper; intros x. by rewrite Hl, Hk. Qed.

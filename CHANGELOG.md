@@ -59,6 +59,8 @@ Coq 8.8 and 8.9 are no longer supported.
   `set_equiv_spec_L` → `set_eq_subseteq`,
   `elem_of_equiv` → `set_equiv`,
   `set_equiv_spec` → `set_equiv_subseteq`.
+- Remove lemmas `map_filter_iff` and `map_filter_lookup_eq` in favor of the stronger
+  extensionality lemmas `map_filter_ext` and `map_filter_strong_ext`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`):

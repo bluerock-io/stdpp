@@ -116,6 +116,11 @@ Proof.
   intros x. rewrite !elem_of_elements; auto.
 Qed.
 
+Lemma list_to_set_elements X : list_to_set (elements X) ≡ X.
+Proof. intros ?. rewrite elem_of_list_to_set. apply elem_of_elements. Qed.
+Lemma list_to_set_elements_L `{!LeibnizEquiv C} X : list_to_set (elements X) = X.
+Proof. unfold_leibniz. apply list_to_set_elements. Qed.
+
 (** * The [size] operation *)
 Global Instance set_size_proper: Proper ((≡) ==> (=)) (@size C _).
 Proof. intros ?? E. apply Permutation_length. by rewrite E. Qed.

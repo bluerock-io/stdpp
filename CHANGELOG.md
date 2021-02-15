@@ -3,15 +3,9 @@ API-breaking change is listed.
 
 ## std++ master
 
-Coq 8.8 and 8.9 are no longer supported.
+Coq 8.13 is newly supported by this release, Coq 8.8 and 8.9 are no longer
+supported.
 
-- Rename `dom_map filter` → `dom_filter`, `dom_map_filter_L` → `dom_filter_L`,
-  and `dom_map_filter_subseteq` → `dom_filter_subseteq` for consistency's sake.
-- Remove unused notations `∪**`, `∪*∪**`, `∖**`, `∖*∖**`, `⊆**`, `⊆1*`, `⊆2*`,
-  `⊆1**`, `⊆2**"`, `##**`, `##1*`, `##2*`, `##1**`, `##2**` for nested
-  `zip_with` and `Forall2` versions of `∪`, `∖`, and `##`.
-- Remove unused type classes `DisjointE`, `DisjointList`, `LookupE`, and
-  `InsertE`.
 - Overhaul of the theory of positive rationals `Qp`:
   + Add `max` and `min` operations for `Qp`.
   + Add the orders `Qp_le` and `Qp_lt`.
@@ -36,6 +30,19 @@ Coq 8.8 and 8.9 are no longer supported.
     iterated addition.
   + Rename and restate many lemmas so as to be consistent with the conventions
     for Coq's number types `nat`, `N`, and `Z`.
+- Add `rename select <pat> into <name>` tactic to find a hypothesis by pattern
+  and give it a fixed name.
+- Add `eunify` tactic that lifts Coq's `unify` tactic to `open_constr`.
+- Generalize `omap_insert`, `omap_singleton`, `map_size_insert`, and
+  `map_size_delete` to cover the `Some` and `None` case. Add `_Some` and `_None`
+  versions of the lemmas for the specific cases.
+- Rename `dom_map filter` → `dom_filter`, `dom_map_filter_L` → `dom_filter_L`,
+  and `dom_map_filter_subseteq` → `dom_filter_subseteq` for consistency's sake.
+- Remove unused notations `∪**`, `∪*∪**`, `∖**`, `∖*∖**`, `⊆**`, `⊆1*`, `⊆2*`,
+  `⊆1**`, `⊆2**"`, `##**`, `##1*`, `##2*`, `##1**`, `##2**` for nested
+  `zip_with` and `Forall2` versions of `∪`, `∖`, and `##`.
+- Remove unused type classes `DisjointE`, `DisjointList`, `LookupE`, and
+  `InsertE`.
 - Fix a bug where `pretty 0` was defined as `""`, the empty string. It now
   returns `"0"` for `N`, `Z`, and `nat`.
 - Remove duplicate `map_fmap_empty` of `fmap_empty`, and rename
@@ -43,17 +50,11 @@ Coq 8.8 and 8.9 are no longer supported.
 - Rename `seq_S_end_app` to `seq_S`. (The lemma `seq_S` is also in Coq's stdlib
   since Coq 8.12.)
 - Remove `omega` import and hint database in `tactics` file.
-- Add `rename select <pat> into <name>` tactic to find a hypothesis by pattern
-  and give it a fixed name.
 - Remove unused `find_pat` tactic that was made mostly obsolete by `select`.
-- Generalize `omap_insert`, `omap_singleton`, `map_size_insert`, and
-  `map_size_delete` to cover the `Some` and `None` case. Add `_Some` and `_None`
-  versions of the lemmas for the specific cases.
 - Rename `_11` and `_12` into `_1_1` and `_1_2`, respectively. These suffixes
   are used for `A → B1` and `A → B2` variants of `A ↔ B1 ∧ B2` lemmas.
 - Rename `Forall_Forall2` → `Forall_Forall2_diag` to be consistent with the
   names for big operators in Iris.
-- Add `eunify` tactic that lifts Coq's `unify` tactic to `open_constr`.
 - Rename set equality and equivalence lemmas:
   `elem_of_equiv_L` → `set_eq`,
   `set_equiv_spec_L` → `set_eq_subseteq`,

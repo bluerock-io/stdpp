@@ -3,12 +3,12 @@ API-breaking change is listed.
 
 ## std++ 1.5.0
 
-This release of Iris received contributions by Alix Trieu, Dan Frumin, Hugo
-Herbelin, Paulo Emílio de Vilhena, Ralf Jung, Robbert Krebbers, Simon Friis
-Vindum, and Tej Chajed.  Thanks a lot to everyone involved!
-
 Coq 8.13 is newly supported by this release, Coq 8.8 and 8.9 are no longer
 supported.
+
+This release of std++ was managed by Ralf Jung and Robbert Krebbers, with
+contributions by Alix Trieu, Dan Frumin, Hugo Herbelin, Paulo Emílio de Vilhena,
+Simon Friis Vindum, and Tej Chajed.  Thanks a lot to everyone involved!
 
 - Overhaul of the theory of positive rationals `Qp`:
   + Add `max` and `min` operations for `Qp`.

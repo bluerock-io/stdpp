@@ -1,7 +1,11 @@
 This file lists "large-ish" changes to the std++ Coq library, but not every
 API-breaking change is listed.
 
-## std++ master
+## std++ 1.5.0
+
+This release of Iris received contributions by Alix Trieu, Dan Frumin, Hugo
+Herbelin, Paulo Emílio de Vilhena, Ralf Jung, Robbert Krebbers, Simon Friis
+Vindum, and Tej Chajed.  Thanks a lot to everyone involved!
 
 Coq 8.13 is newly supported by this release, Coq 8.8 and 8.9 are no longer
 supported.

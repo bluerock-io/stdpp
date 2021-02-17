@@ -15,10 +15,11 @@ Local Hint Extern 0 (_ =@{positive} _) => congruence : core.
 Local Hint Extern 0 (_ ≠@{positive} _) => congruence : core.
 
 (** * The tree data structure *)
-(** The data type [Pmap_raw] specifies radix-2 search trees. These trees do
-not ensure canonical representations of maps. For example the empty map can
-be represented as a binary tree of an arbitrary size that contains [None] at
-all nodes. *)
+(** The internal data type [Pmap_raw] specifies radix-2 search trees. These
+trees do not ensure canonical representations of maps. For example the empty map
+can be represented as a binary tree of an arbitrary size that contains [None] at
+all nodes.
+See below for [Pmap] which ensures canonical representation. *)
 Inductive Pmap_raw (A : Type) : Type :=
   | PLeaf: Pmap_raw A
   | PNode: option A → Pmap_raw A → Pmap_raw A → Pmap_raw A.

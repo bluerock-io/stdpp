@@ -1145,6 +1145,11 @@ Section more_finite.
   Proof. intros Hinf [xs ?] xs'. destruct (Hinf (xs ++ xs')). set_solver. Qed.
 End more_finite.
 
+Lemma top_infinite `{TopSet A C, Infinite A} : set_infinite (⊤ : C).
+Proof.
+  intros xs. exists (fresh xs). split; [set_solver|]. apply infinite_is_fresh.
+Qed.
+
 (** Sets of sequences of natural numbers *)
 (* The set [seq_seq start len] of natural numbers contains the sequence
 [start, start + 1, ..., start + (len-1)]. *)

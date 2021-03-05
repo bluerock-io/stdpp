@@ -341,6 +341,23 @@ Proof.
   apply coPset_finite_spec; destruct X as [[[t ?]]]; apply Pset_to_coPset_raw_finite.
 Qed.
 
+(** * Infinite sets *)
+Lemma coPset_infinite_finite (X : coPset) : set_infinite X ↔ ¬set_finite X.
+Proof.
+  split; [intros ??; by apply (set_not_infinite_finite X)|].
+  intros Hfin xs. exists (coPpick (X ∖ list_to_set xs)).
+  cut (coPpick (X ∖ list_to_set xs) ∈ X ∖ list_to_set xs); [set_solver|].
+  apply coPpick_elem_of; intros Hfin'.
+  apply Hfin, (difference_finite_inv _ (list_to_set xs)), Hfin'.
+  apply list_to_set_finite.
+Qed.
+Lemma coPset_finite_infinite (X : coPset) : set_finite X ↔ ¬set_infinite X.
+Proof. rewrite coPset_infinite_finite. split; [tauto|apply dec_stable]. Qed.
+Global Instance coPset_infinite_dec (X : coPset) : Decision (set_infinite X).
+Proof.
+  refine (cast_if (decide (¬set_finite X))); by rewrite coPset_infinite_finite.
+Defined.
+
 (** * Domain of finite maps *)
 Global Instance Pmap_dom_coPset {A} : Dom (Pmap A) coPset := λ m, Pset_to_coPset (dom _ m).
 Global Instance Pmap_dom_coPset_spec: FinMapDom positive Pmap coPset.

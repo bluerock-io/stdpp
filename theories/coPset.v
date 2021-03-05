@@ -453,3 +453,10 @@ Proof.
   exists (coPset_l X), (coPset_r X); eauto 10 using coPset_lr_union,
     coPset_lr_disjoint, coPset_l_finite, coPset_r_finite.
 Qed.
+Lemma coPset_split_infinite (X : coPset) :
+  set_infinite X →
+  ∃ X1 X2, X = X1 ∪ X2 ∧ X1 ∩ X2 = ∅ ∧ set_infinite X1 ∧ set_infinite X2.
+Proof.
+  setoid_rewrite coPset_infinite_finite.
+  eapply coPset_split.
+Qed.

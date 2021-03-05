@@ -1108,6 +1108,8 @@ Section set_finite_infinite.
   Proof. intros [l ?]; exists l; set_solver. Qed.
   Lemma union_finite_inv_r X Y : set_finite (X ∪ Y) → set_finite Y.
   Proof. intros [l ?]; exists l; set_solver. Qed.
+  Lemma list_to_set_finite l : set_finite (list_to_set (C:=C) l).
+  Proof. exists l. intros x. by rewrite elem_of_list_to_set. Qed.
 
   Global Instance set_infinite_subseteq :
     Proper ((⊆) ==> impl) (@set_infinite A C _).
@@ -1142,6 +1144,11 @@ Section more_finite.
     set_infinite X → set_finite Y → set_infinite (X ∖ Y).
   Proof. intros Hinf [xs ?] xs'. destruct (Hinf (xs ++ xs')). set_solver. Qed.
 End more_finite.
+
+Lemma top_infinite `{TopSet A C, Infinite A} : set_infinite (⊤ : C).
+Proof.
+  intros xs. exists (fresh xs). split; [set_solver|]. apply infinite_is_fresh.
+Qed.
 
 (** Sets of sequences of natural numbers *)
 (* The set [seq_seq start len] of natural numbers contains the sequence

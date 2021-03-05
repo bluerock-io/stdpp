@@ -238,8 +238,11 @@ Proof.
 Defined.
 
 (** * Pick element from infinite sets *)
-(* Implemented using depth-first search, which results in very unbalanced
-trees. *)
+(* The function [coPpick X] gives an element that is in the set [X], provided
+that the set [X] is infinite. Note that [coPpick] function is implemented by
+depth-first search, so using it repeatedly to obtain elements [x], and
+inserting these elements [x] into the set [X], will give rise to a very
+unbalanced tree. *)
 Fixpoint coPpick_raw (t : coPset_raw) : option positive :=
   match t with
   | coPLeaf true | coPNode true _ _ => Some 1
@@ -338,6 +341,23 @@ Proof.
   apply coPset_finite_spec; destruct X as [[[t ?]]]; apply Pset_to_coPset_raw_finite.
 Qed.
 
+(** * Infinite sets *)
+Lemma coPset_infinite_finite (X : coPset) : set_infinite X ↔ ¬set_finite X.
+Proof.
+  split; [intros ??; by apply (set_not_infinite_finite X)|].
+  intros Hfin xs. exists (coPpick (X ∖ list_to_set xs)).
+  cut (coPpick (X ∖ list_to_set xs) ∈ X ∖ list_to_set xs); [set_solver|].
+  apply coPpick_elem_of; intros Hfin'.
+  apply Hfin, (difference_finite_inv _ (list_to_set xs)), Hfin'.
+  apply list_to_set_finite.
+Qed.
+Lemma coPset_finite_infinite (X : coPset) : set_finite X ↔ ¬set_infinite X.
+Proof. rewrite coPset_infinite_finite. split; [tauto|apply dec_stable]. Qed.
+Global Instance coPset_infinite_dec (X : coPset) : Decision (set_infinite X).
+Proof.
+  refine (cast_if (decide (¬set_finite X))); by rewrite coPset_infinite_finite.
+Defined.
+
 (** * Domain of finite maps *)
 Global Instance Pmap_dom_coPset {A} : Dom (Pmap A) coPset := λ m, Pset_to_coPset (dom _ m).
 Global Instance Pmap_dom_coPset_spec: FinMapDom positive Pmap coPset.
@@ -432,4 +452,11 @@ Lemma coPset_split (X : coPset) :
 Proof.
   exists (coPset_l X), (coPset_r X); eauto 10 using coPset_lr_union,
     coPset_lr_disjoint, coPset_l_finite, coPset_r_finite.
+Qed.
+Lemma coPset_split_infinite (X : coPset) :
+  set_infinite X →
+  ∃ X1 X2, X = X1 ∪ X2 ∧ X1 ∩ X2 = ∅ ∧ set_infinite X1 ∧ set_infinite X2.
+Proof.
+  setoid_rewrite coPset_infinite_finite.
+  eapply coPset_split.
 Qed.

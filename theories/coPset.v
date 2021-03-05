@@ -238,8 +238,11 @@ Proof.
 Defined.
 
 (** * Pick element from infinite sets *)
-(* Implemented using depth-first search, which results in very unbalanced
-trees. *)
+(* The function [coPpick X] gives an element that is in the set [X], provided
+that the set [X] is infinite. Note that [coPpick] function is implemented by
+depth-first search, so using it repeatedly to obtain elements [x], and
+inserting these elements [x] into the set [X], will give rise to a very
+unbalanced tree. *)
 Fixpoint coPpick_raw (t : coPset_raw) : option positive :=
   match t with
   | coPLeaf true | coPNode true _ _ => Some 1

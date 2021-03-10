@@ -220,6 +220,14 @@ Section multiset_unfold.
     constructor. apply forall_proper; intros x.
     by rewrite (multiset_unfold x X (f x)), (multiset_unfold x Y (g x)).
   Qed.
+  Global Instance set_unfold_multiset_subset X Y f g :
+    (∀ x, MultisetUnfold x X (f x)) → (∀ x, MultisetUnfold x Y (g x)) →
+    SetUnfold (X ⊂ Y) ((∀ x, f x ≤ g x) ∧ (¬∀ x, g x ≤ f x)) | 0.
+  Proof.
+    constructor. unfold strict. f_equiv.
+    - by apply set_unfold_multiset_subseteq.
+    - f_equiv. by apply set_unfold_multiset_subseteq.
+  Qed.
   Global Instance set_unfold_multiset_elem_of X x n :
     MultisetUnfold x X n → SetUnfold (x ∈ X) (0 < n) | 0.
   Proof. constructor. by rewrite <-(multiset_unfold x X n). Qed.
@@ -484,8 +492,7 @@ Section more_lemmas.
   Defined.
 
   Lemma gmultiset_subset_subseteq X Y : X ⊂ Y → X ⊆ Y.
-  Proof. apply strict_include. Qed.
-  Local Hint Resolve gmultiset_subset_subseteq : core.
+  Proof. multiset_solver. Qed.
 
   Lemma gmultiset_empty_subseteq X : ∅ ⊆ X.
   Proof. multiset_solver. Qed.
@@ -515,13 +522,9 @@ Section more_lemmas.
   Lemma gmultiset_subset X Y : X ⊆ Y → size X < size Y → X ⊂ Y.
   Proof. intros. apply strict_spec_alt; split; naive_solver auto with lia. Qed.
   Lemma gmultiset_disj_union_subset_l X Y : Y ≠ ∅ → X ⊂ X ⊎ Y.
-  Proof.
-    intros HY%gmultiset_size_non_empty_iff.
-    apply gmultiset_subset; auto using gmultiset_disj_union_subseteq_l.
-    rewrite gmultiset_size_disj_union; lia.
-  Qed.
+  Proof. multiset_solver. Qed.
   Lemma gmultiset_union_subset_r X Y : X ≠ ∅ → Y ⊂ X ⊎ Y.
-  Proof. rewrite (comm_L (⊎)). apply gmultiset_disj_union_subset_l. Qed.
+  Proof. multiset_solver. Qed.
 
   Lemma gmultiset_elem_of_singleton_subseteq x X : x ∈ X ↔ {[ x ]} ⊆ X.
   Proof. multiset_solver. Qed.
@@ -532,10 +535,7 @@ Section more_lemmas.
   Lemma gmultiset_disj_union_difference X Y : X ⊆ Y → Y = X ⊎ Y ∖ X.
   Proof. multiset_solver. Qed.
   Lemma gmultiset_disj_union_difference' x Y : x ∈ Y → Y = {[ x ]} ⊎ Y ∖ {[ x ]}.
-  Proof.
-    intros. by apply gmultiset_disj_union_difference,
-      gmultiset_elem_of_singleton_subseteq.
-  Qed.
+  Proof. multiset_solver. Qed.
 
   Lemma gmultiset_size_difference X Y : Y ⊆ X → size (X ∖ Y) = size X - size Y.
   Proof.
@@ -547,20 +547,13 @@ Section more_lemmas.
   Proof. multiset_solver. Qed.
 
   Lemma gmultiset_non_empty_difference X Y : X ⊂ Y → Y ∖ X ≠ ∅.
-  Proof.
-    intros [_ HXY2] Hdiff; destruct HXY2; intros x.
-    generalize (f_equal (multiplicity x) Hdiff).
-    rewrite multiplicity_difference, multiplicity_empty; lia.
-  Qed.
+  Proof. multiset_solver. Qed.
 
   Lemma gmultiset_difference_diag X : X ∖ X = ∅.
   Proof. multiset_solver. Qed.
 
   Lemma gmultiset_difference_subset X Y : X ≠ ∅ → X ⊆ Y → Y ∖ X ⊂ Y.
-  Proof.
-    intros. eapply strict_transitive_l; [by apply gmultiset_union_subset_r|].
-    by rewrite <-(gmultiset_disj_union_difference X Y).
-  Qed.
+  Proof. multiset_solver. Qed.
 
   (** Mononicity *)
   Lemma gmultiset_elements_submseteq X Y : X ⊆ Y → elements X ⊆+ elements Y.
@@ -577,7 +570,7 @@ Section more_lemmas.
     intros HXY. assert (size (Y ∖ X) ≠ 0).
     { by apply gmultiset_size_non_empty_iff, gmultiset_non_empty_difference. }
     rewrite (gmultiset_disj_union_difference X Y),
-      gmultiset_size_disj_union by auto. lia.
+      gmultiset_size_disj_union by auto using gmultiset_subset_subseteq. lia.
   Qed.
 
   (** Well-foundedness *)
@@ -592,7 +585,6 @@ Section more_lemmas.
     intros Hemp Hinsert X. induction (gmultiset_wf X) as [X _ IH].
     destruct (gmultiset_choose_or_empty X) as [[x Hx]| ->]; auto.
     rewrite (gmultiset_disj_union_difference' x X) by done.
-    apply Hinsert, IH, gmultiset_difference_subset,
-      gmultiset_elem_of_singleton_subseteq; auto using gmultiset_non_empty_singleton.
+    apply Hinsert, IH; multiset_solver.
   Qed.
 End more_lemmas.

@@ -220,6 +220,9 @@ Section multiset_unfold.
     constructor. apply forall_proper; intros x.
     by rewrite (multiset_unfold x X (f x)), (multiset_unfold x Y (g x)).
   Qed.
+  Global Instance set_unfold_multiset_elem_of X x n :
+    MultisetUnfold x X n → SetUnfold (x ∈ X) (0 < n) | 0.
+  Proof. constructor. by rewrite <-(multiset_unfold x X n). Qed.
 End multiset_unfold.
 
 Ltac multiset_instantiate :=
@@ -510,14 +513,12 @@ Section more_lemmas.
 
   Lemma gmultiset_elem_of_singleton_subseteq x X : x ∈ X ↔ {[ x ]} ⊆ X.
   Proof.
-    rewrite elem_of_multiplicity. split.
-    - intros Hx y. rewrite multiplicity_singleton'.
-      destruct (decide (y = x)); naive_solver lia.
-    - intros Hx. generalize (Hx x). rewrite multiplicity_singleton. lia.
+    split; [|multiset_solver].
+    intros Hx y. destruct (decide (y = x)); multiset_solver.
   Qed.
 
   Lemma gmultiset_elem_of_subseteq X1 X2 x : x ∈ X1 → X1 ⊆ X2 → x ∈ X2.
-  Proof. rewrite !gmultiset_elem_of_singleton_subseteq. by intros ->. Qed.
+  Proof. multiset_solver. Qed.
 
   Lemma gmultiset_disj_union_difference X Y : X ⊆ Y → Y = X ⊎ Y ∖ X.
   Proof. multiset_solver. Qed.

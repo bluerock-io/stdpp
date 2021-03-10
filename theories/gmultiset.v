@@ -147,25 +147,35 @@ End basic_lemmas.
 (** We define a tactic [multiset_solver] that solves goals involving multisets.
 The strategy of this tactic is as follows:
 
-1. Unfold all equalities ([=]), equivalences ([≡]), and inclusions ([⊆]) using
-   the laws of [multiplicity] for the multiset operations. Note that strict
-   inclusion ([⊂]) is not supported.
-2. Use [naive_solver] to decompose the goal into smaller subgoals.
-3. Instantiate all universally quantified hypotheses in the subgoals generated
-   by [naive_solver] to obtain goals that can be solved using [lia].
+1. Turn all equalities ([=] and [≡]), equivalences ([≡]), inclusions ([⊆] and
+   [⊂]), and set membership relations ([∈]) into arithmetic (in)equalities
+   involving [multiplicity]. The multiplicities of [∅], [∪], [∩], [⊎] and [∖]
+   are turned into [0], [max], [min], [+], and [-], respectively.
+2. Decompose the goal into smaller subgoals through intuitionistic reasoning.
+3. Instantiate universally quantified hypotheses in hypotheses to obtain a
+   goal that can be solved using [lia].
+4. Simplify multiplicities of singletons [{[ x ]}].
 
-Step (1) is implemented using a type class [MultisetUnfold] that hooks into
-the [SetUnfold] mechanism of [set_solver]. Since [SetUnfold] already propagates
-through logical connectives, we obtain the same behavior for our multiset
-solver. Note that no [MultisetUnfold] instance is defined for the (non-trivial)
-singleton [{[ y ]}] since the singleton receives special treatment in step (3).
+Step (1) and (2) are implemented using the [set_solver] tactic, which internally
+calls [naive_solver] for step (2). Step (1) is implemented by extending the
+[SetUnfold] mechanism with a class [MultisetUnfold].
 
-Step (3) is achieved using the tactic [multiset_instantiate], which instantiates
-universally quantified hypotheses [H : ∀ x : A, P x] in two ways:
+Step (3) is implemented using the tactic [multiset_instantiate], which
+instantiates universally quantified hypotheses [H : ∀ x : A, P x] in two ways:
 
 - If [P] contains a multiset singleton [{[ y ]}] it adds the hypothesis [H y].
 - If the goal or some hypothesis contains [multiplicity y X] it adds the
   hypothesis [H y].
+
+Step (4) is implemented using the tactic [multiset_simplify_singletons], which
+simplifies occurences of [multiplicity x {[ y ]}] as follows:
+
+- First, we try to turn these occurencess into [1] or [0] if either [x = y] or
+  [x ≠ y] can be proved using [done], respectively.
+- Second, we try to turn these occurences into a fresh [z ≤ 1] if [y] does not
+  occur elsewhere in the hypotheses or goal.
+- Finally, we make a case distinction between [x = y] or [x ≠ y]. This step is
+  done last so as to avoid needless exponential blow-ups.
 *)
 Class MultisetUnfold `{Countable A} (x : A) (X : gmultiset A) (n : nat) :=
   { multiset_unfold : multiplicity x X = n }.

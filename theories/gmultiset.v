@@ -247,13 +247,15 @@ Ltac multiset_instantiate :=
      unless (P y) by assumption; pose proof (H y)
   end;
   (* Step 3.2: simplify singletons. *)
-  (* Note that we do not use [repeat case_decide] since that leads to an
-  exponential explosion in the number of singletons. *)
   repeat match goal with
-  | H : context [multiplicity _ {[ _ ]}] |- _ =>
-     progress (rewrite ?multiplicity_singleton, ?multiplicity_singleton_ne in H by done)
-  | |- context [multiplicity _ {[ _ ]}] =>
-     progress (rewrite ?multiplicity_singleton, ?multiplicity_singleton_ne by done)
+  | H : context [multiplicity ?x {[ ?y ]}] |- _ =>
+     first
+       [progress rewrite ?multiplicity_singleton, ?multiplicity_singleton_ne in H by done
+       |rewrite multiplicity_singleton' in H; destruct (decide (x = y)); simplify_eq/=]
+  | |- context [multiplicity ?x {[ ?y ]}] =>
+     first
+       [progress rewrite ?multiplicity_singleton, ?multiplicity_singleton_ne by done
+       |rewrite multiplicity_singleton'; destruct (decide (x = y)); simplify_eq/=]
   end.
 
 Ltac multiset_solver := set_solver by (multiset_instantiate; lia).
@@ -512,10 +514,7 @@ Section more_lemmas.
   Proof. rewrite (comm_L (⊎)). apply gmultiset_disj_union_subset_l. Qed.
 
   Lemma gmultiset_elem_of_singleton_subseteq x X : x ∈ X ↔ {[ x ]} ⊆ X.
-  Proof.
-    split; [|multiset_solver].
-    intros Hx y. destruct (decide (y = x)); multiset_solver.
-  Qed.
+  Proof. multiset_solver. Qed.
 
   Lemma gmultiset_elem_of_subseteq X1 X2 x : x ∈ X1 → X1 ⊆ X2 → x ∈ X2.
   Proof. multiset_solver. Qed.

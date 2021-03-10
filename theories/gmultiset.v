@@ -204,18 +204,18 @@ Section multiset_unfold.
 
   Global Instance set_unfold_multiset_equiv X Y f g :
     (∀ x, MultisetUnfold x X (f x)) → (∀ x, MultisetUnfold x Y (g x)) →
-    SetUnfold (X ≡ Y) (∀ x, f x = g x).
+    SetUnfold (X ≡ Y) (∀ x, f x = g x) | 0.
   Proof.
     constructor. apply forall_proper; intros x.
     by rewrite (multiset_unfold x X (f x)), (multiset_unfold x Y (g x)).
   Qed.
   Global Instance set_unfold_multiset_eq X Y f g :
     (∀ x, MultisetUnfold x X (f x)) → (∀ x, MultisetUnfold x Y (g x)) →
-    SetUnfold (X = Y) (∀ x, f x = g x).
+    SetUnfold (X = Y) (∀ x, f x = g x) | 0.
   Proof. constructor. unfold_leibniz. by apply set_unfold_multiset_equiv. Qed.
   Global Instance set_unfold_multiset_subseteq X Y f g :
     (∀ x, MultisetUnfold x X (f x)) → (∀ x, MultisetUnfold x Y (g x)) →
-    SetUnfold (X ⊆ Y) (∀ x, f x ≤ g x).
+    SetUnfold (X ⊆ Y) (∀ x, f x ≤ g x) | 0.
   Proof.
     constructor. apply forall_proper; intros x.
     by rewrite (multiset_unfold x X (f x)), (multiset_unfold x Y (g x)).

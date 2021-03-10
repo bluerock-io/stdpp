@@ -225,8 +225,8 @@ Section multiset_unfold.
   Proof. constructor. by rewrite <-(multiset_unfold x X n). Qed.
 End multiset_unfold.
 
+(** Step 3: instantiate hypotheses *)
 Ltac multiset_instantiate :=
-  (* Step 3.1: instantiate hypotheses *)
   repeat match goal with
   | H : (∀ x : ?A, @?P x) |- _ =>
      let e := fresh in evar (e:A);
@@ -245,20 +245,30 @@ Ltac multiset_instantiate :=
      (* Use [unless] to avoid creating a new hypothesis [H y : P y] if [P y]
      already exists. *)
      unless (P y) by assumption; pose proof (H y)
-  end;
-  (* Step 3.2: simplify singletons. *)
+  end.
+
+(** Step 4: simplify singletons *)
+Local Lemma multiplicity_singleton_forget `{Countable A} x y :
+  ∃ n, multiplicity (A:=A) x {[ y ]} = n ∧ n ≤ 1.
+Proof. rewrite multiplicity_singleton'. case_decide; eauto with lia. Qed.
+
+Ltac multiset_simplify_singletons :=
   repeat match goal with
   | H : context [multiplicity ?x {[ ?y ]}] |- _ =>
      first
        [progress rewrite ?multiplicity_singleton, ?multiplicity_singleton_ne in H by done
+       |destruct (multiplicity_singleton_forget x y) as (?&->&?); clear y
        |rewrite multiplicity_singleton' in H; destruct (decide (x = y)); simplify_eq/=]
   | |- context [multiplicity ?x {[ ?y ]}] =>
      first
        [progress rewrite ?multiplicity_singleton, ?multiplicity_singleton_ne by done
+       |destruct (multiplicity_singleton_forget x y) as (?&->&?); clear y
        |rewrite multiplicity_singleton'; destruct (decide (x = y)); simplify_eq/=]
   end.
 
-Ltac multiset_solver := set_solver by (multiset_instantiate; lia).
+(** Putting it all together *)
+Ltac multiset_solver :=
+  set_solver by (multiset_instantiate; multiset_simplify_singletons; lia).
 
 Section more_lemmas.
   Context `{Countable A}.

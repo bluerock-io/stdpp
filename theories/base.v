@@ -865,10 +865,6 @@ Notation "{[ x ]}" := (singleton x) (at level 1) : stdpp_scope.
 Notation "{[ x ; y ; .. ; z ]}" :=
   (union .. (union (singleton x) (singleton y)) .. (singleton z))
   (at level 1) : stdpp_scope.
-Notation "{[ x , y ]}" := (singleton (x,y))
-  (at level 1, y at next level) : stdpp_scope.
-Notation "{[ x , y , z ]}" := (singleton (x,y,z))
-  (at level 1, y at next level, z at next level) : stdpp_scope.
 
 Class SubsetEq A := subseteq: relation A.
 Global Hint Mode SubsetEq ! : typeclass_instances.

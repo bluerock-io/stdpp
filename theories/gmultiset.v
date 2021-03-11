@@ -147,8 +147,8 @@ End basic_lemmas.
 (** We define a tactic [multiset_solver] that solves goals involving multisets.
 The strategy of this tactic is as follows:
 
-1. Turn all equalities ([=] and [≡]), equivalences ([≡]), inclusions ([⊆] and
-   [⊂]), and set membership relations ([∈]) into arithmetic (in)equalities
+1. Turn all equalities ([=]), equivalences ([≡]), inclusions ([⊆] and [⊂]),
+   and set membership relations ([∈]) into arithmetic (in)equalities
    involving [multiplicity]. The multiplicities of [∅], [∪], [∩], [⊎] and [∖]
    are turned into [0], [max], [min], [+], and [-], respectively.
 2. Decompose the goal into smaller subgoals through intuitionistic reasoning.
@@ -163,9 +163,13 @@ calls [naive_solver] for step (2). Step (1) is implemented by extending the
 Step (3) is implemented using the tactic [multiset_instantiate], which
 instantiates universally quantified hypotheses [H : ∀ x : A, P x] in two ways:
 
-- If [P] contains a multiset singleton [{[ y ]}] it adds the hypothesis [H y].
 - If the goal or some hypothesis contains [multiplicity y X] it adds the
   hypothesis [H y].
+- If [P] contains a multiset singleton [{[ y ]}] it adds the hypothesis [H y].
+  This is needed, for example, to prove [¬ ({[ x ]} ⊆ ∅)], which is turned
+  into hypothesis [H : ∀ y, multiplicity y {[ x ]} ≤ 0] and goal [False]. The
+  only way to make progress is to instantiate [H] with the singleton appearing
+  in [H], so variable [x].
 
 Step (4) is implemented using the tactic [multiset_simplify_singletons], which
 simplifies occurences of [multiplicity x {[ y ]}] as follows:

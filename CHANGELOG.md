@@ -1,6 +1,12 @@
 This file lists "large-ish" changes to the std++ Coq library, but not every
 API-breaking change is listed.
 
+## std++ master
+
+- Remove singleton notations `{[ x,y ]}` and `{[ x,y,z ]}` for `{[ (x,y) ]}`
+  and `{[ (x,y,z) ]}`. They date back to the time we used the `singleton` class
+  with a product for maps (there's now the `singletonM` class).
+
 ## std++ 1.5.0
 
 Coq 8.13 is newly supported by this release, Coq 8.8 and 8.9 are no longer

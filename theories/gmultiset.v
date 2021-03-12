@@ -243,7 +243,7 @@ Section multiset_unfold.
     - f_equiv. by apply set_unfold_multiset_subseteq.
   Qed.
   Global Instance set_unfold_multiset_elem_of X x n :
-    MultisetUnfold x X n → SetUnfold (x ∈ X) (0 < n) | 0.
+    MultisetUnfold x X n → SetUnfoldElemOf x X (0 < n) | 100.
   Proof. constructor. by rewrite <-(multiset_unfold x X n). Qed.
 End multiset_unfold.
 

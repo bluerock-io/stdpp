@@ -66,4 +66,8 @@ Section test.
       {[ x1 ]} ⊎ {[ x1 ]} ⊎ {[ x2 ]} ⊎ {[ x3 ]} ⊎ {[ x4 ]} ⊎ {[ x4 ]} ⊎
       {[ x5 ]} ⊎ {[ x5 ]} ⊎ {[ x6 ]} ⊎ {[ x7 ]} ⊎ {[ x9 ]} ⊎ {[ x8 ]} ⊎ {[ x8 ]}.
   Proof. multiset_solver. Qed.
+
+  Lemma test_firstorder_1 (P : A → Prop) x X :
+    P x ∧ (∀ y, y ∈ X → P y) ↔ (∀ y, y ∈ {[x]} ⊎ X → P y).
+  Proof. multiset_solver. Qed.
 End test.

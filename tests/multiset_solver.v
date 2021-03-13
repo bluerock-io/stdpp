@@ -33,13 +33,17 @@ Section test.
     multiplicity x X < 3 → {[ x ]} ⊎ {[ x ]} ⊎ {[ x ]} ⊈ X.
   Proof. multiset_solver. Qed.
 
-  Lemma test_elem_of_1 x X : x ∈ X → {[x]} ⊆ X.
+  Lemma test_elem_of_1 x X : x ∈ X ↔ {[x]} ⊎ ∅ ⊆ X.
   Proof. multiset_solver. Qed.
-  Lemma test_elem_of_2 x y X : x ≠ y → x ∈ X → y ∈ X → {[x]} ⊎ {[y]} ⊆ X.
+  Lemma test_elem_of_2 x X : x ∈ X ↔ {[x]} ∪ ∅ ⊆ X.
   Proof. multiset_solver. Qed.
-  Lemma test_elem_of_3 x y X Y : x ≠ y → x ∈ X → y ∈ Y → {[x]} ⊎ {[y]} ⊆ X ∪ Y.
+  Lemma test_elem_of_3 x y X : x ≠ y → x ∈ X → y ∈ X → {[x]} ⊎ {[y]} ⊆ X.
   Proof. multiset_solver. Qed.
-  Lemma test_elem_of_4 x y X Y : x ≠ y → x ∈ X → y ∈ Y → {[x]} ⊆ (X ∪ Y) ∖ {[ y ]}.
+  Lemma test_elem_of_4 x y X Y : x ≠ y → x ∈ X → y ∈ Y → {[x]} ⊎ {[y]} ⊆ X ∪ Y.
+  Proof. multiset_solver. Qed.
+  Lemma test_elem_of_5 x y X Y : x ≠ y → x ∈ X → y ∈ Y → {[x]} ⊆ (X ∪ Y) ∖ {[ y ]}.
+  Proof. multiset_solver. Qed.
+  Lemma test_elem_of_6 x y X : {[x]} ⊎ {[y]} ⊆ X → x ∈ X ∧ y ∈ X.
   Proof. multiset_solver. Qed.
 
   Lemma test_big_1 x1 x2 x3 x4 :

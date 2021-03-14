@@ -795,10 +795,7 @@ Section set.
     Proof. set_solver. Qed.
     Lemma singleton_union_difference X Y x :
       {[x]} ∪ (X ∖ Y) ≡ ({[x]} ∪ X) ∖ (Y ∖ {[x]}).
-    Proof.
-      intro y; split; intros Hy; [ set_solver | ].
-      destruct (decide (y ∈ ({[x]} : C))); set_solver.
-    Qed.
+    Proof. intro y; destruct (decide (y ∈@{C} {[x]})); set_solver. Qed.
 
     Context `{!LeibnizEquiv C}.
     Lemma union_difference_L X Y : X ⊆ Y → Y = X ∪ Y ∖ X.

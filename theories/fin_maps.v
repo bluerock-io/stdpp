@@ -2104,6 +2104,13 @@ Qed.
 Lemma delete_union {A} (m1 m2 : M A) i :
   delete i (m1 ∪ m2) = delete i m1 ∪ delete i m2.
 Proof. apply delete_union_with. Qed.
+Lemma delete_insert_union {A} (m1 m2 : M A) i x :
+  m1 !! i = Some x ->
+  delete i m1 ∪ <[i := x]> m2 = m1 ∪ m2.
+Proof.
+  intros Hmi. rewrite <-insert_union_r by apply lookup_delete.
+  rewrite insert_union_l, insert_delete, insert_id; done.
+Qed.
 Lemma map_Forall_union_1_1 {A} (m1 m2 : M A) P :
   map_Forall P (m1 ∪ m2) → map_Forall P m1.
 Proof. intros HP i x ?. apply HP, lookup_union_Some_raw; auto. Qed.

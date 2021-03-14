@@ -779,6 +779,8 @@ Section set.
       intros ? x; split; rewrite !elem_of_union, elem_of_difference; [|intuition].
       destruct (decide (x ∈ X)); intuition.
     Qed.
+    Lemma union_difference_singleton x Y : x ∈ Y → Y ≡ {[x]} ∪ Y ∖ {[x]}.
+    Proof. intros ?. apply union_difference. set_solver. Qed.
     Lemma difference_union X Y : X ∖ Y ∪ Y ≡ X ∪ Y.
     Proof.
       intros x. rewrite !elem_of_union; rewrite elem_of_difference.
@@ -800,6 +802,8 @@ Section set.
     Context `{!LeibnizEquiv C}.
     Lemma union_difference_L X Y : X ⊆ Y → Y = X ∪ Y ∖ X.
     Proof. unfold_leibniz. apply union_difference. Qed.
+    Lemma union_difference_singleton_L x Y : x ∈ Y → Y = {[x]} ∪ Y ∖ {[x]}.
+    Proof. unfold_leibniz. apply union_difference_singleton. Qed.
     Lemma difference_union_L X Y : X ∖ Y ∪ Y = X ∪ Y.
     Proof. unfold_leibniz. apply difference_union. Qed.
     Lemma non_empty_difference_L X Y : X ⊂ Y → Y ∖ X ≠ ∅.

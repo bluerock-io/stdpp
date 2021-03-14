@@ -2387,12 +2387,9 @@ Proof.
   apply map_empty; intros i. rewrite lookup_difference_None.
   destruct (m !! i); eauto.
 Qed.
+Global Instance map_difference_right_id {A} : RightId (=) (∅:M A) (∖) := _.
 Lemma map_difference_empty {A} (m : M A) : m ∖ ∅ = m.
-Proof.
-  apply map_eq. intros i. apply option_eq. intros x.
-  rewrite lookup_difference_Some. rewrite lookup_empty.
-  naive_solver.
-Qed.
+Proof. by rewrite (right_id _ _). Qed.
 End theorems.
 
 (** ** The seq operation *)

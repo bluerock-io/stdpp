@@ -2390,15 +2390,12 @@ Qed.
 Global Instance map_difference_right_id {A} : RightId (=) (∅:M A) (∖) := _.
 Lemma map_difference_empty {A} (m : M A) : m ∖ ∅ = m.
 Proof. by rewrite (right_id _ _). Qed.
-Lemma map_difference_delete_insert {A} (m m0 : M A) k v :
-  delete k (m ∖ m0) = m ∖ <[k:=v]> m0.
+Lemma map_difference_delete_insert {A} (m1 m2 : M A) i x :
+  delete i (m1 ∖ m2) = m1 ∖ <[i:=x]> m2.
 Proof.
-  apply map_eq. intros i. apply option_eq. intros x.
-  rewrite lookup_delete_Some. rewrite !lookup_difference_Some. split.
-  - intros (Hne & Hm & Hm0). rewrite lookup_insert_ne by done. done.
-  - destruct (decide (k = i)) as [->|Hne].
-    + rewrite lookup_insert. naive_solver.
-    + rewrite lookup_insert_ne by done. done.
+  apply map_eq. intros j. apply option_eq. intros y.
+  rewrite lookup_delete_Some, !lookup_difference_Some, lookup_insert_None.
+  naive_solver.
 Qed.
 End theorems.
 

@@ -296,6 +296,8 @@ Lemma map_subset_empty {A} (m : M A) : m ⊄ ∅.
 Proof.
   intros [_ []]. rewrite map_subseteq_spec. intros ??. by rewrite lookup_empty.
 Qed.
+Lemma map_empty_subseteq {A} (m : M A) : ∅ ⊆ m.
+Proof. apply map_subseteq_spec. intros k v []%lookup_empty_Some. Qed.
 
 Lemma map_subset_alt {A} (m1 m2 : M A) :
   m1 ⊂ m2 ↔ m1 ⊆ m2 ∧ ∃ i, m1 !! i = None ∧ is_Some (m2 !! i).

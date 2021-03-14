@@ -163,6 +163,41 @@ Proof.
   - by rewrite dom_empty.
   - simpl. by rewrite dom_insert, IH.
 Qed.
+
+Lemma dom_singleton_inv {A} (m : M A) i :
+  dom D m ≡ {[i]} → ∃ x, m = {[i := x]}.
+Proof.
+  intros Hdom. assert (is_Some (m !! i)) as [x ?].
+  { apply (elem_of_dom (D:=D)); set_solver. }
+  exists x. apply map_eq; intros j.
+  destruct (decide (i = j)); simplify_map_eq; [done|].
+  apply not_elem_of_dom. set_solver.
+Qed.
+
+Lemma dom_union_inv `{!RelDecision (∈@{D})} {A} (m : M A) (X1 X2 : D) :
+  X1 ## X2 →
+  dom D m ≡ X1 ∪ X2 →
+  ∃ m1 m2, m = m1 ∪ m2 ∧ m1 ##ₘ m2 ∧ dom D m1 ≡ X1 ∧ dom D m2 ≡ X2.
+Proof.
+  intros.
+  exists (filter (λ '(k,x), k ∈ X1) m), (filter (λ '(k,x), k ∉ X1) m).
+  assert (filter (λ '(k, _), k ∈ X1) m ##ₘ filter (λ '(k, _), k ∉ X1) m).
+  { apply map_disjoint_filter. }
+  split_and!; [|done| |].
+  - apply map_eq; intros i. apply option_eq; intros x.
+    rewrite lookup_union_Some, !map_filter_lookup_Some by done.
+    destruct (decide (i ∈ X1)); naive_solver.
+  - apply dom_filter; intros i; split; [|naive_solver].
+    intros. assert (is_Some (m !! i)) as [x ?] by (apply (elem_of_dom (D:=D)); set_solver).
+    naive_solver.
+  - apply dom_filter; intros i; split.
+    + intros. assert (is_Some (m !! i)) as [x ?] by (apply (elem_of_dom (D:=D)); set_solver).
+      naive_solver.
+    + intros (x&?&?). apply dec_stable; intros ?.
+      assert (m !! i = None) by (apply not_elem_of_dom; set_solver).
+      naive_solver.
+Qed.
+
 (** If [D] has Leibniz equality, we can show an even stronger result.  This is a
 common case e.g. when having a [gmap K A] where the key [K] has Leibniz equality
 (and thus also [gset K], the usual domain) but the value type [A] does not. *)
@@ -207,6 +242,14 @@ Section leibniz.
   Lemma dom_list_to_map_L {A} (l : list (K * A)) :
     dom D (list_to_map l : M A) = list_to_set l.*1.
   Proof. unfold_leibniz. apply dom_list_to_map. Qed.
+  Lemma dom_singleton_inv_L {A} (m : M A) i :
+    dom D m = {[i]} → ∃ x, m = {[i := x]}.
+  Proof. unfold_leibniz. apply dom_singleton_inv. Qed.
+  Lemma dom_union_inv_L `{!RelDecision (∈@{D})} {A} (m : M A) (X1 X2 : D) :
+    X1 ## X2 →
+    dom D m = X1 ∪ X2 →
+    ∃ m1 m2, m = m1 ∪ m2 ∧ m1 ##ₘ m2 ∧ dom D m1 = X1 ∧ dom D m2 = X2.
+  Proof. unfold_leibniz. apply dom_union_inv. Qed.
 End leibniz.
 
 (** * Set solver instances *)

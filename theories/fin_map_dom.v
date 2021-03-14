@@ -165,59 +165,37 @@ Proof.
 Qed.
 
 Lemma dom_singleton_inv {A} (m : M A) i :
-  dom D m ≡ {[i]} → ∃ v, m = {[i := v]}.
+  dom D m ≡ {[i]} → ∃ x, m = {[i := x]}.
 Proof.
-  intros Hdom.
-  destruct (m !! i) as [x|] eqn:He.
-  - exists x. rewrite <-insert_empty.
-    apply map_eq; intros i'.
-    destruct (decide (i = i')); subst.
-    + rewrite lookup_insert; eauto.
-    + rewrite lookup_insert_ne; eauto.
-      rewrite lookup_empty.
-      apply not_elem_of_dom. set_solver.
-  - cut (i ∈ dom D m); [|set_solver].
-    rewrite elem_of_dom, He.
-    intros [x ?]; congruence.
+  intros Hdom. assert (is_Some (m !! i)) as [x ?].
+  { apply (elem_of_dom (D:=D)); set_solver. }
+  exists x. apply map_eq; intros j.
+  destruct (decide (i = j)); simplify_map_eq; [done|].
+  apply not_elem_of_dom. set_solver.
 Qed.
-Lemma dom_union_inv `{!RelDecision (∈@{D})} {A} (m : M A) (d1 d2 : D) :
-  d1 ## d2 →
-  dom D m ≡ d1 ∪ d2 →
-  ∃ m1 m2, m1 ##ₘ m2 ∧ m = m1 ∪ m2 ∧ dom D m1 ≡ d1 ∧ dom D m2 ≡ d2.
+
+Lemma dom_union_inv `{!RelDecision (∈@{D})} {A} (m : M A) (X1 X2 : D) :
+  X1 ## X2 →
+  dom D m ≡ X1 ∪ X2 →
+  ∃ m1 m2, m = m1 ∪ m2 ∧ m1 ##ₘ m2 ∧ dom D m1 ≡ X1 ∧ dom D m2 ≡ X2.
 Proof.
-  revert d1 d2.
-  induction m as [|a v m Hfresh IHm] using map_ind; intros d1 d2 Hdisj Hdom.
-  - eexists ∅, ∅.
-    rewrite dom_empty in Hdom. rewrite dom_empty.
-    rewrite (left_id_L _ (∪)).
-    split_and!; [ apply map_disjoint_empty_l | set_solver .. ].
-  - rename select (m !! a = None) into Hma.
-    apply not_elem_of_dom in Hma.
-    rewrite dom_insert in Hdom.
-    assert (a ∈ d1 ∨ a ∈ d2) as [Ha|Ha] by set_solver.
-    (* With ssreflect we could do a [wlog] proof here since these
-       two cases are symmetric. *)
-    + rewrite (union_difference_singleton a d1) in Hdom by done.
-      rewrite <-(assoc _) in Hdom.
-      apply union_cancel_l in Hdom; [ | set_solver.. ].
-      apply IHm in Hdom as (m1&m2&Hmdisj&Hmunion&Hm1&Hm2); [ | set_solver ].
-      exists (<[a:=v]> m1), m2.
-      split_and!; auto.
-      * apply map_disjoint_dom. rewrite dom_insert. set_solver -Hma Hmdisj Hmunion.
-      * rewrite <-insert_union_l. congruence.
-      * rewrite dom_insert, Hm1. by rewrite <-union_difference_singleton.
-    + rewrite (union_difference_singleton a d2) in Hdom by done.
-      rewrite (assoc _), (comm _ d1), <-(assoc _) in Hdom.
-      apply union_cancel_l in Hdom; [ | set_solver.. ].
-      apply IHm in Hdom as (m1&m2&Hmdisj&Hmunion&Hm1&Hm2); [ | set_solver ].
-      exists m1, (<[a:=v]>m2).
-      split_and!; auto.
-      * apply map_disjoint_dom. rewrite dom_insert. set_solver -Hma Hmdisj Hmunion.
-      * rewrite !insert_union_singleton_l, (assoc _).
-        rewrite (map_union_comm m1), <-(assoc _), Hmunion; [done|].
-        apply map_disjoint_dom. rewrite dom_singleton, Hm1.
-        set_solver -Hma Hmdisj Hmunion.
-      * rewrite dom_insert, Hm2. by rewrite <-union_difference_singleton.
+  intros.
+  exists (filter (λ '(k,x), k ∈ X1) m), (filter (λ '(k,x), k ∉ X1) m).
+  assert (filter (λ '(k, _), k ∈ X1) m ##ₘ filter (λ '(k, _), k ∉ X1) m).
+  { apply map_disjoint_filter. }
+  split_and!; [|done| |].
+  - apply map_eq; intros i. apply option_eq; intros x.
+    rewrite lookup_union_Some, !map_filter_lookup_Some by done.
+    destruct (decide (i ∈ X1)); naive_solver.
+  - apply dom_filter; intros i; split; [|naive_solver].
+    intros. assert (is_Some (m !! i)) as [x ?] by (apply (elem_of_dom (D:=D)); set_solver).
+    naive_solver.
+  - apply dom_filter; intros i; split.
+    + intros. assert (is_Some (m !! i)) as [x ?] by (apply (elem_of_dom (D:=D)); set_solver).
+      naive_solver.
+    + intros (x&?&?). apply dec_stable; intros ?.
+      assert (m !! i = None) by (apply not_elem_of_dom; set_solver).
+      naive_solver.
 Qed.
 
 (** If [D] has Leibniz equality, we can show an even stronger result.  This is a
@@ -265,12 +243,12 @@ Section leibniz.
     dom D (list_to_map l : M A) = list_to_set l.*1.
   Proof. unfold_leibniz. apply dom_list_to_map. Qed.
   Lemma dom_singleton_inv_L {A} (m : M A) i :
-  dom D m = {[i]} → ∃ v, m = {[i := v]}.
+    dom D m = {[i]} → ∃ x, m = {[i := x]}.
   Proof. unfold_leibniz. apply dom_singleton_inv. Qed.
-  Lemma dom_union_inv_L `{!RelDecision (∈@{D})} {A} (m : M A) (d1 d2 : D) :
-    d1 ## d2 →
-    dom D m = d1 ∪ d2 →
-    ∃ m1 m2, m1 ##ₘ m2 ∧ m = m1 ∪ m2 ∧ dom D m1 = d1 ∧ dom D m2 = d2.
+  Lemma dom_union_inv_L `{!RelDecision (∈@{D})} {A} (m : M A) (X1 X2 : D) :
+    X1 ## X2 →
+    dom D m = X1 ∪ X2 →
+    ∃ m1 m2, m = m1 ∪ m2 ∧ m1 ##ₘ m2 ∧ dom D m1 = X1 ∧ dom D m2 = X2.
   Proof. unfold_leibniz. apply dom_union_inv. Qed.
 End leibniz.
 

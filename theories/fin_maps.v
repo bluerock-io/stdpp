@@ -2380,6 +2380,12 @@ Proof.
   apply map_empty; intros i. rewrite lookup_difference_None.
   destruct (m !! i); eauto.
 Qed.
+Lemma map_difference_empty {A} (m : M A) : m ∖ ∅ = m.
+Proof.
+  apply map_eq. intros i. apply option_eq. intros x.
+  rewrite lookup_difference_Some. rewrite lookup_empty.
+  naive_solver.
+Qed.
 End theorems.
 
 (** ** The seq operation *)

@@ -2109,14 +2109,14 @@ Qed.
 Lemma delete_union {A} (m1 m2 : M A) i :
   delete i (m1 ∪ m2) = delete i m1 ∪ delete i m2.
 Proof. apply delete_union_with. Qed.
-Lemma delete_insert_union {A} (m1 m2 : M A) i x :
+Lemma union_delete_insert {A} (m1 m2 : M A) i x :
   m1 !! i = Some x →
   delete i m1 ∪ <[i:=x]> m2 = m1 ∪ m2.
 Proof.
   intros. rewrite <-insert_union_r by apply lookup_delete.
   by rewrite insert_union_l, insert_delete, insert_id by done.
 Qed.
-Lemma insert_delete_union {A} (m1 m2 : M A) i x :
+Lemma union_insert_delete {A} (m1 m2 : M A) i x :
   m1 !! i = None → m2 !! i = Some x →
   <[i:=x]> m1 ∪ delete i m2 = m1 ∪ m2.
 Proof.

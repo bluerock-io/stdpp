@@ -1477,6 +1477,9 @@ Section merge.
   Context {A} (f : option A → option A → option A) `{!DiagNone f}.
   Implicit Types m : M A.
 
+  (** These instances can in many cases not be applied automatically due to Coq
+  unification bug #6294. Hence there are many explicit derived instances for
+  specific operations such as union or difference in the rest of this file. *)
   Global Instance: LeftId (=) None f → LeftId (=) (∅ : M A) (merge f).
   Proof.
     intros ??. apply map_eq. intros.
@@ -2390,6 +2393,7 @@ Qed.
 Global Instance map_difference_right_id {A} : RightId (=) (∅:M A) (∖) := _.
 Lemma map_difference_empty {A} (m : M A) : m ∖ ∅ = m.
 Proof. by rewrite (right_id _ _). Qed.
+
 Lemma map_delete_difference {A} (m1 m2 : M A) i x :
   delete i (m1 ∖ m2) = m1 ∖ <[i:=x]> m2.
 Proof.

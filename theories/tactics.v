@@ -347,6 +347,7 @@ Ltac f_equiv :=
   | |- ?R (?f _ _) _ => simple apply (_ : Proper (R ==> R ==> R) f)
   | |- ?R (?f _ _ _) _ => simple apply (_ : Proper (R ==> R ==> R ==> R) f)
   | |- ?R (?f _ _ _ _) _ => simple apply (_ : Proper (R ==> R ==> R ==> R ==> R) f)
+  | |- ?R (?f _ _ _ _ _) _ => simple apply (_ : Proper (R ==> R ==> R ==> R ==> R ==> R) f)
   (* For the case in which R is polymorphic, or an operational type class,
   like equiv. *)
   | |- (?R _) (?f _) _ => simple apply (_ : Proper (R _ ==> _) f)
@@ -360,7 +361,10 @@ Ltac f_equiv :=
   | |- (?R _ _ _) (?f _ _ _) _ => simple apply (_ : Proper (R _ _ _ ==> R _ _ _ R _ _ _ ==> _) f)
   | |- (?R _) (?f _ _ _ _) _ => simple apply (_ : Proper (R _ ==> R _ ==> R _ ==> R _ ==> _) f)
   | |- (?R _ _) (?f _ _ _ _) _ => simple apply (_ : Proper (R _ _ ==> R _ _ ==> R _ _ ==> R _ _ ==> _) f)
-  | |- (?R _ _ _) (?f _ _ _ _) _ => simple apply (_ : Proper (R _ _ _ ==> R _ _ _ R _ _ _ ==> R _ _ _ ==> _) f)
+  | |- (?R _ _ _) (?f _ _ _ _) _ => simple apply (_ : Proper (R _ _ _ ==> R _ _ _ ==> R _ _ _ ==> R _ _ _ ==> _) f)
+  | |- (?R _) (?f _ _ _ _ _) _ => simple apply (_ : Proper (R _ ==> R _ ==> R _ ==> R _ ==> R _ ==> _) f)
+  | |- (?R _ _) (?f _ _ _ _ _) _ => simple apply (_ : Proper (R _ _ ==> R _ _ ==> R _ _ ==> R _ _ ==> R _ _ ==> _) f)
+  | |- (?R _ _ _) (?f _ _ _ _ _) _ => simple apply (_ : Proper (R _ _ _ ==> R _ _ _ ==> R _ _ _ ==> R _ _ _ ==> R _ _ _ ==> _) f)
   (* Next, try to infer the relation. Unfortunately, very often, it will turn
      the goal into a Leibniz equality so we get stuck. *)
   (* TODO: Can we exclude that instance? *)
@@ -368,6 +372,7 @@ Ltac f_equiv :=
   | |- ?R (?f _ _) _ => simple apply (_ : Proper (_ ==> _ ==> R) f)
   | |- ?R (?f _ _ _) _ => simple apply (_ : Proper (_ ==> _ ==> _ ==> R) f)
   | |- ?R (?f _ _ _ _) _ => simple apply (_ : Proper (_ ==> _ ==> _ ==> _ ==> R) f)
+  | |- ?R (?f _ _ _ _ _) _ => simple apply (_ : Proper (_ ==> _ ==> _ ==> _ ==> _ ==> R) f)
   (* In case the function symbol differs, but the arguments are the same,
      maybe we have a pointwise_relation in our context. *)
   (* TODO: If only some of the arguments are the same, we could also

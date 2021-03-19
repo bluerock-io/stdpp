@@ -220,15 +220,25 @@ Section enc_finite.
   Proof. unfold card. simpl. by rewrite fmap_length, seq_length. Qed.
 End enc_finite.
 
+Section surjective_finite.
+  Context `{Finite A, EqDecision B} (f : A → B).
+  Context `{!Surj (=) f}.
+
+  Program Instance surjective_finite: Finite B := {| enum := remove_dups (f <$> enum A) |}.
+  Next Obligation. apply NoDup_remove_dups. Qed.
+  Next Obligation.
+    intros y. rewrite elem_of_remove_dups, elem_of_list_fmap.
+    destruct (Surj0 y). eauto using elem_of_enum.
+  Qed.
+End surjective_finite.
+
 Section bijective_finite.
   Context `{Finite A, EqDecision B} (f : A → B) (g : B → A).
   Context `{!Inj (=) (=) f, !Cancel (=) f g}.
 
-  Program Instance bijective_finite: Finite B := {| enum := f <$> enum A |}.
-  Next Obligation. apply (NoDup_fmap_2 _), NoDup_enum. Qed.
-  Next Obligation.
-    intros y. rewrite elem_of_list_fmap. eauto using elem_of_enum.
-  Qed.
+  Program Instance bijective_finite: Finite B := _.
+  Next Obligation. eapply surjective_finite. eapply cancel_surj.
+                   Unshelve. all: eapply _. Qed.
 End bijective_finite.
 
 Program Instance option_finite `{Finite A} : Finite (option A) :=

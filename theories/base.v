@@ -1048,6 +1048,72 @@ Notation "<[ k := a ]>" := (insert k a)
   (at level 5, right associativity, format "<[ k := a ]>") : stdpp_scope.
 Global Arguments insert _ _ _ _ !_ _ !_ / : simpl nomatch, assert.
 
+(** Notation for more elements (up to 13) *)
+(* Defining a generic notation does not seem possible with Coq's
+   recursive notation system, so we define individual notations
+   for some cases relevant in practice. *)
+(* The "format" makes sure that linebreaks are placed after the separating semicola [;] when printing. *)
+Notation "{[ k1 := a1 ; k2 := a2 ]}" :=
+  (<[ k1 := a1 ]>{[ k2 := a2 ]})
+  (at level 1, format
+  "{[ '[hv' '[' k1  :=  a1 ; ']'  '/' '[' k2  :=  a2 ']' ']' ]}") : stdpp_scope.
+Notation "{[ k1 := a1 ; k2 := a2 ; k3 := a3 ]}" :=
+  (<[ k1 := a1 ]> $ <[ k2 := a2 ]>{[ k3 := a3 ]})
+  (at level 1, format
+  "{[ '[hv' '[' k1  :=  a1 ; ']'  '/' '[' k2  :=  a2 ; ']'  '/' '[' k3  :=  a3 ']' ']' ]}") : stdpp_scope.
+Notation "{[ k1 := a1 ; k2 := a2 ; k3 := a3 ; k4 := a4 ]}" :=
+  (<[ k1 := a1 ]> $ <[ k2 := a2 ]> $ <[ k3 := a3 ]>{[ k4 := a4 ]})
+  (at level 1, format
+  "{[ '[hv' '[' k1  :=  a1 ; ']'  '/' '[' k2  :=  a2 ; ']'  '/' '[' k3  :=  a3 ; ']'  '/' '[' k4  :=  a4 ']' ']' ]}") : stdpp_scope.
+Notation "{[ k1 := a1 ; k2 := a2 ; k3 := a3 ; k4 := a4 ; k5 := a5 ]}" :=
+  (<[ k1 := a1 ]> $ <[ k2 := a2 ]> $ <[ k3 := a3 ]> $ <[ k4 := a4 ]>{[ k5 := a5 ]})
+  (at level 1, format
+  "{[ '[hv' '[' k1  :=  a1 ; ']'  '/' '[' k2  :=  a2 ; ']'  '/' '[' k3  :=  a3 ; ']'  '/' '[' k4  :=  a4 ; ']'  '/' '[' k5  :=  a5 ']' ']' ]}") : stdpp_scope.
+Notation "{[ k1 := a1 ; k2 := a2 ; k3 := a3 ; k4 := a4 ; k5 := a5 ; k6 := a6 ]}" :=
+  (<[ k1 := a1 ]> $ <[ k2 := a2 ]> $ <[ k3 := a3 ]> $ <[ k4 := a4 ]> $
+    <[ k5 := a5 ]>{[ k6 := a6 ]})
+  (at level 1, format
+  "{[ '[hv' '[' k1  :=  a1 ; ']'  '/' '[' k2  :=  a2 ; ']'  '/' '[' k3  :=  a3 ; ']'  '/' '[' k4  :=  a4 ; ']'  '/' '[' k5  :=  a5 ; ']'  '/' '[' k6  :=  a6 ']' ']' ]}") : stdpp_scope.
+Notation "{[ k1 := a1 ; k2 := a2 ; k3 := a3 ; k4 := a4 ; k5 := a5 ; k6 := a6 ; k7 := a7 ]}" :=
+  (<[ k1 := a1 ]> $ <[ k2 := a2 ]> $ <[ k3 := a3 ]> $ <[ k4 := a4 ]> $
+    <[ k5 := a5 ]> $ <[ k6 := a6 ]>{[ k7 := a7 ]})
+  (at level 1, format
+  "{[ '[hv' '[' k1  :=  a1 ; ']'  '/' '[' k2  :=  a2 ; ']'  '/' '[' k3  :=  a3 ; ']'  '/' '[' k4  :=  a4 ; ']'  '/' '[' k5  :=  a5 ; ']'  '/' '[' k6  :=  a6 ; ']'  '/' '[' k7  :=  a7 ']' ']' ]}") : stdpp_scope.
+Notation "{[ k1 := a1 ; k2 := a2 ; k3 := a3 ; k4 := a4 ; k5 := a5 ; k6 := a6 ; k7 := a7 ; k8 := a8 ]}" :=
+  (<[ k1 := a1 ]> $ <[ k2 := a2 ]> $ <[ k3 := a3 ]> $ <[ k4 := a4 ]> $
+    <[ k5 := a5 ]> $ <[ k6 := a6 ]> $ <[ k7 := a7 ]>{[ k8 := a8 ]})
+  (at level 1, format
+  "{[ '[hv' '[' k1  :=  a1 ; ']'  '/' '[' k2  :=  a2 ; ']'  '/' '[' k3  :=  a3 ; ']'  '/' '[' k4  :=  a4 ; ']'  '/' '[' k5  :=  a5 ; ']'  '/' '[' k6  :=  a6 ; ']'  '/' '[' k7  :=  a7 ; ']'  '/' '[' k8  :=  a8 ']' ']' ]}") : stdpp_scope.
+Notation "{[ k1 := a1 ; k2 := a2 ; k3 := a3 ; k4 := a4 ; k5 := a5 ; k6 := a6 ; k7 := a7 ; k8 := a8 ; k9 := a9 ]}" :=
+  (<[ k1 := a1 ]> $ <[ k2 := a2 ]> $ <[ k3 := a3 ]> $ <[ k4 := a4 ]> $
+    <[ k5 := a5 ]> $ <[ k6 := a6 ]> $ <[ k7 := a7 ]> $ <[ k8 := a8 ]>{[ k9 := a9 ]})
+  (at level 1, format
+  "{[ '[hv' '[' k1  :=  a1 ; ']'  '/' '[' k2  :=  a2 ; ']'  '/' '[' k3  :=  a3 ; ']'  '/' '[' k4  :=  a4 ; ']'  '/' '[' k5  :=  a5 ; ']'  '/' '[' k6  :=  a6 ; ']'  '/' '[' k7  :=  a7 ; ']'  '/' '[' k8  :=  a8 ; ']'  '/' '[' k9  :=  a9 ']' ']' ]}") : stdpp_scope.
+Notation "{[ k1 := a1 ; k2 := a2 ; k3 := a3 ; k4 := a4 ; k5 := a5 ; k6 := a6 ; k7 := a7 ; k8 := a8 ; k9 := a9 ; k10 := a10 ]}" :=
+  (<[ k1 := a1 ]> $ <[ k2 := a2 ]> $ <[ k3 := a3 ]> $ <[ k4 := a4 ]> $
+    <[ k5 := a5 ]> $ <[ k6 := a6 ]> $ <[ k7 := a7 ]> $ <[ k8 := a8 ]> $
+    <[ k9 := a9 ]>{[ k10 := a10 ]})
+  (at level 1, format
+  "{[ '[hv' '[' k1  :=  a1 ; ']'  '/' '[' k2  :=  a2 ; ']'  '/' '[' k3  :=  a3 ; ']'  '/' '[' k4  :=  a4 ; ']'  '/' '[' k5  :=  a5 ; ']'  '/' '[' k6  :=  a6 ; ']'  '/' '[' k7  :=  a7 ; ']'  '/' '[' k8  :=  a8 ; ']'  '/' '[' k9  :=  a9 ; ']'  '/' '[' k10  :=  a10 ']' ']' ]}") : stdpp_scope.
+Notation "{[ k1 := a1 ; k2 := a2 ; k3 := a3 ; k4 := a4 ; k5 := a5 ; k6 := a6 ; k7 := a7 ; k8 := a8 ; k9 := a9 ; k10 := a10 ; k11 := a11 ]}" :=
+  (<[ k1 := a1 ]> $ <[ k2 := a2 ]> $ <[ k3 := a3 ]> $ <[ k4 := a4 ]> $
+    <[ k5 := a5 ]> $ <[ k6 := a6 ]> $ <[ k7 := a7 ]> $ <[ k8 := a8 ]> $
+    <[ k9 := a9 ]> $ <[ k10 := a10 ]>{[ k11 := a11 ]})
+  (at level 1, format
+  "{[ '[hv' '[' k1  :=  a1 ; ']'  '/' '[' k2  :=  a2 ; ']'  '/' '[' k3  :=  a3 ; ']'  '/' '[' k4  :=  a4 ; ']'  '/' '[' k5  :=  a5 ; ']'  '/' '[' k6  :=  a6 ; ']'  '/' '[' k7  :=  a7 ; ']'  '/' '[' k8  :=  a8 ; ']'  '/' '[' k9  :=  a9 ; ']'  '/' '[' k10  :=  a10 ; ']'  '/' '[' k11  :=  a11 ']' ']' ]}") : stdpp_scope.
+Notation "{[ k1 := a1 ; k2 := a2 ; k3 := a3 ; k4 := a4 ; k5 := a5 ; k6 := a6 ; k7 := a7 ; k8 := a8 ; k9 := a9 ; k10 := a10 ; k11 := a11 ; k12 := a12 ]}" :=
+  (<[ k1 := a1 ]> $ <[ k2 := a2 ]> $ <[ k3 := a3 ]> $ <[ k4 := a4 ]> $
+    <[ k5 := a5 ]> $ <[ k6 := a6 ]> $ <[ k7 := a7 ]> $ <[ k8 := a8 ]> $
+    <[ k9 := a9 ]> $ <[ k10 := a10 ]> $ <[ k11 := a11 ]>{[ k12 := a12 ]})
+  (at level 1, format
+  "{[ '[hv' '[' k1  :=  a1 ; ']'  '/' '[' k2  :=  a2 ; ']'  '/' '[' k3  :=  a3 ; ']'  '/' '[' k4  :=  a4 ; ']'  '/' '[' k5  :=  a5 ; ']'  '/' '[' k6  :=  a6 ; ']'  '/' '[' k7  :=  a7 ; ']'  '/' '[' k8  :=  a8 ; ']'  '/' '[' k9  :=  a9 ; ']'  '/' '[' k10  :=  a10 ; ']'  '/' '[' k11  :=  a11 ; ']'  '/' '[' k12  :=  a12 ']' ']' ]}") : stdpp_scope.
+Notation "{[ k1 := a1 ; k2 := a2 ; k3 := a3 ; k4 := a4 ; k5 := a5 ; k6 := a6 ; k7 := a7 ; k8 := a8 ; k9 := a9 ; k10 := a10 ; k11 := a11 ; k12 := a12 ; k13 := a13 ]}" :=
+  (<[ k1 := a1 ]> $ <[ k2 := a2 ]> $ <[ k3 := a3 ]> $ <[ k4 := a4 ]> $
+    <[ k5 := a5 ]> $ <[ k6 := a6 ]> $ <[ k7 := a7 ]> $ <[ k8 := a8 ]> $
+    <[ k9 := a9 ]> $ <[ k10 := a10 ]> $ <[ k11 := a11 ]> $ <[ k12 := a12 ]>{[ k13 := a13 ]})
+  (at level 1, format
+  "{[ '[hv' '[' k1  :=  a1 ; ']'  '/' '[' k2  :=  a2 ; ']'  '/' '[' k3  :=  a3 ; ']'  '/' '[' k4  :=  a4 ; ']'  '/' '[' k5  :=  a5 ; ']'  '/' '[' k6  :=  a6 ; ']'  '/' '[' k7  :=  a7 ; ']'  '/' '[' k8  :=  a8 ; ']'  '/' '[' k9  :=  a9 ; ']'  '/' '[' k10  :=  a10 ; ']'  '/' '[' k11  :=  a11 ; ']'  '/' '[' k12  :=  a12 ; ']'  '/' '[' k13  :=  a13 ']' ']' ]}") : stdpp_scope.
+
 (** The function delete [delete k m] should delete the value at key [k] in
 [m]. If the key [k] is not a member of [m], the original map should be
 returned. *)

@@ -6,6 +6,7 @@ API-breaking change is listed.
 - Remove singleton notations `{[ x,y ]}` and `{[ x,y,z ]}` for `{[ (x,y) ]}`
   and `{[ (x,y,z) ]}`. They date back to the time we used the `singleton` class
   with a product for maps (there's now the `singletonM` class).
+- Add map notations `{[ k1 := x1 ; .. ; kn := xn ]}` up to arity 13.
 
 ## std++ 1.5.0
 

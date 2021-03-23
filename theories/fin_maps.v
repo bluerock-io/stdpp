@@ -977,8 +977,8 @@ Qed.
 
 Global Instance map_eq_dec_empty {A} (m : M A) : Decision (m = ∅) | 20.
 Proof.
-  refine (cast_if (decide (elements m = [])));
-    [apply _|by rewrite <-?map_to_list_empty' ..].
+  refine (cast_if (decide (map_to_list m = [])));
+    by rewrite <-?map_to_list_empty'.
 Defined.
 
 (** Properties of the imap function *)

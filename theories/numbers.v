@@ -1212,8 +1212,10 @@ Lemma rotate_nat_add_add_mod base offset len:
   rotate_nat_add base offset len =
   rotate_nat_add (Z.to_nat (base `mod` len)%Z) offset len.
 Proof.
-  unfold rotate_nat_add. rewrite !Z2Nat.id; [by rewrite Zplus_mod_idemp_l|].
-  destruct len as [|i]; [rewrite Zmod_0_r|apply Z_mod_lt]; lia.
+  (* TODO: [Z_mod_nonneg_nonneg] once that's part of all supported Coq versions *)
+  unfold rotate_nat_add. assert (0 ≤ base `mod` len)%Z.
+  { destruct len as [|i]; [rewrite Zmod_0_r|apply Z_mod_lt]; lia. }
+  by rewrite Z2Nat.id, Zplus_mod_idemp_l.
 Qed.
 
 Lemma rotate_nat_add_alt base offset len:

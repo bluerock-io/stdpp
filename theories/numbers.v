@@ -1208,20 +1208,12 @@ on nat since otherwise we need the sidecondition [base < len] on
 Definition rotate_nat_sub (base offset len : nat) : nat :=
   Z.to_nat ((len + offset - base) `mod` len)%Z.
 
-Lemma rotate_nat_add_len_0 base offset:
-  rotate_nat_add base offset 0 = 0.
-Proof. unfold rotate_nat_add. by rewrite Zmod_0_r. Qed.
-Lemma rotate_nat_sub_len_0 base offset:
-  rotate_nat_sub base offset 0 = 0.
-Proof. unfold rotate_nat_sub. by rewrite Zmod_0_r. Qed.
-
 Lemma rotate_nat_add_add_mod base offset len:
   rotate_nat_add base offset len =
   rotate_nat_add (Z.to_nat (base `mod` len)%Z) offset len.
 Proof.
-  destruct len as [|i];[ by rewrite !rotate_nat_add_len_0|].
-  pose proof (Z_mod_lt base (S i)) as Hlt. unfold rotate_nat_add.
-  rewrite !Z2Nat.id by lia. by rewrite Zplus_mod_idemp_l.
+  unfold rotate_nat_add. rewrite !Z2Nat.id; [by rewrite Zplus_mod_idemp_l|].
+  destruct len as [|i]; [rewrite Zmod_0_r|apply Z_mod_lt]; lia.
 Qed.
 
 Lemma rotate_nat_add_alt base offset len:

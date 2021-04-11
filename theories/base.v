@@ -226,7 +226,8 @@ Proof. split; repeat intro; congruence. Qed.
 "canonical" equivalence for a type. The typeclass is tied to the \equiv
 symbol. This is based on (Spitters/van der Weegen, 2011). *)
 Class Equiv A := equiv: relation A.
-(* No Hint Mode set because of Coq bug #5735
+(* No Hint Mode set because of Coq bugs #5735 and #9058, only
+fixed in Coq >= 8.12.
 Global Hint Mode Equiv ! : typeclass_instances. *)
 
 Infix "≡" := equiv (at level 70, no associativity) : stdpp_scope.

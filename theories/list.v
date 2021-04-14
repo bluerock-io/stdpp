@@ -566,16 +566,20 @@ Proof.
     list_lookup_total_correct, lookup_lt_Some.
 Qed.
 
+Lemma lookup_app l1 l2 i :
+  (l1 ++ l2) !! i =
+    match l1 !! i with Some x => Some x | None => l2 !! (i - length l1) end.
+Proof. revert i. induction l1 as [|x l1 IH]; intros [|i]; naive_solver. Qed.
 Lemma lookup_app_l l1 l2 i : i < length l1 → (l1 ++ l2) !! i = l1 !! i.
-Proof. revert i. induction l1; intros [|?]; naive_solver auto with lia. Qed.
+Proof. rewrite lookup_app. by intros [? ->]%lookup_lt_is_Some. Qed.
 Lemma lookup_total_app_l `{!Inhabited A} l1 l2 i :
   i < length l1 → (l1 ++ l2) !!! i = l1 !!! i.
 Proof. intros. by rewrite !list_lookup_total_alt, lookup_app_l. Qed.
 Lemma lookup_app_l_Some l1 l2 i x : l1 !! i = Some x → (l1 ++ l2) !! i = Some x.
-Proof. intros. rewrite lookup_app_l; eauto using lookup_lt_Some. Qed.
+Proof. rewrite lookup_app. by intros ->. Qed.
 Lemma lookup_app_r l1 l2 i :
   length l1 ≤ i → (l1 ++ l2) !! i = l2 !! (i - length l1).
-Proof. revert i. induction l1; intros [|?]; simpl; auto with lia. Qed.
+Proof. rewrite lookup_app. by intros ->%lookup_ge_None. Qed.
 Lemma lookup_total_app_r `{!Inhabited A} l1 l2 i :
   length l1 ≤ i → (l1 ++ l2) !!! i = l2 !!! (i - length l1).
 Proof. intros. by rewrite !list_lookup_total_alt, lookup_app_r. Qed.
@@ -583,12 +587,11 @@ Lemma lookup_app_Some l1 l2 i x :
   (l1 ++ l2) !! i = Some x ↔
     l1 !! i = Some x ∨ length l1 ≤ i ∧ l2 !! (i - length l1) = Some x.
 Proof.
-  split.
-  - revert i. induction l1 as [|y l1 IH]; intros [|i] ?;
-      simplify_eq/=; auto with lia.
-    destruct (IH i) as [?|[??]]; auto with lia.
-  - intros [?|[??]]; auto using lookup_app_l_Some. by rewrite lookup_app_r.
+  rewrite lookup_app. destruct (l1 !! i) eqn:Hi.
+  - apply lookup_lt_Some in Hi. naive_solver lia.
+  - apply lookup_ge_None in Hi. naive_solver lia.
 Qed.
+
 Lemma list_lookup_middle l1 l2 x n :
   n = length l1 → (l1 ++ x :: l2) !! n = Some x.
 Proof. intros ->. by induction l1. Qed.

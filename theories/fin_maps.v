@@ -2417,38 +2417,35 @@ Section map_seq.
   Implicit Types x : A.
   Implicit Types xs : list A.
 
+  Lemma lookup_map_seq start xs i :
+    map_seq (M:=M A) start xs !! i = guard (start ≤ i); xs !! (i - start).
+  Proof.
+    revert start. induction xs as [|x' xs IH]; intros start; simpl.
+    { rewrite lookup_empty; simplify_option_eq; by rewrite ?lookup_nil. }
+    destruct (decide (start = i)) as [->|?].
+    - by rewrite lookup_insert, option_guard_True, Nat.sub_diag by lia.
+    - rewrite lookup_insert_ne, IH by done.
+      simplify_option_eq; try done || lia.
+      by replace (i - start) with (S (i - S start)) by lia.
+  Qed.
+  Lemma lookup_map_seq_0 xs i : map_seq (M:=M A) 0 xs !! i = xs !! i.
+  Proof. by rewrite lookup_map_seq, option_guard_True, Nat.sub_0_r by lia. Qed.
+
   Lemma lookup_map_seq_Some_inv start xs i x :
     xs !! i = Some x ↔ map_seq (M:=M A) start xs !! (start + i) = Some x.
   Proof.
-    revert start i. induction xs as [|x' xs IH]; intros start i; simpl.
-    { by rewrite lookup_empty, lookup_nil. }
-    destruct i as [|i]; simpl.
-    { by rewrite Nat.add_0_r, lookup_insert. }
-    rewrite lookup_insert_ne by lia. by rewrite (IH (S start)), Nat.add_succ_r.
+    rewrite lookup_map_seq, option_guard_True by lia.
+    by rewrite Nat.add_sub_swap, Nat.sub_diag.
   Qed.
   Lemma lookup_map_seq_Some start xs i x :
     map_seq (M:=M A) start xs !! i = Some x ↔ start ≤ i ∧ xs !! (i - start) = Some x.
-  Proof.
-    destruct (decide (start ≤ i)) as [|Hsi].
-    { rewrite (lookup_map_seq_Some_inv start).
-      replace (start + (i - start)) with i by lia. naive_solver. }
-    split; [|naive_solver]. intros Hi; destruct Hsi.
-    revert start i Hi. induction xs as [|x' xs IH]; intros start i; simpl.
-    { by rewrite lookup_empty. }
-    rewrite lookup_insert_Some; intros [[-> ->]|[? ?%IH]]; lia.
-  Qed.
-
+  Proof. rewrite lookup_map_seq. case_option_guard; naive_solver. Qed.
   Lemma lookup_map_seq_None start xs i :
     map_seq (M:=M A) start xs !! i = None ↔ i < start ∨ start + length xs ≤ i.
   Proof.
-    trans (¬start ≤ i ∨ ¬is_Some (xs !! (i - start))).
-    - rewrite eq_None_not_Some, <-not_and_l. unfold is_Some.
-      setoid_rewrite lookup_map_seq_Some. naive_solver.
-    - rewrite lookup_lt_is_Some. lia.
+    rewrite lookup_map_seq.
+    case_option_guard; rewrite ?lookup_ge_None; naive_solver lia.
   Qed.
-
-  Lemma lookup_map_seq_0 xs i : map_seq (M:=M A) 0 xs !! i = xs !! i.
-  Proof. apply option_eq; intros x. by rewrite (lookup_map_seq_Some_inv 0). Qed.
 
   Lemma map_seq_singleton start x :
     map_seq (M:=M A) start [x] = {[ start := x ]}.

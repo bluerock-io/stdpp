@@ -2227,7 +2227,14 @@ Lemma foldr_delete_union {A} (m1 m2 : M A) is :
   foldr delete (m1 ∪ m2) is = foldr delete m1 is ∪ foldr delete m2 is.
 Proof. apply foldr_delete_union_with. Qed.
 
-(** ** Properties on disjointness of conversion to lists *)
+(** ** Properties on conversion to lists that depend on [∪] and [##ₘ] *)
+Lemma list_to_map_app {A} (l1 l2 : list (K * A)):
+  list_to_map (l1 ++ l2) =@{M A} list_to_map l1 ∪ list_to_map l2.
+Proof.
+  induction l1 as [|[??] ? IH]; simpl.
+  { by rewrite (left_id _ _). }
+  by rewrite IH, insert_union_l.
+Qed.
 Lemma map_disjoint_list_to_map_l {A} (m : M A) ixs :
   list_to_map ixs ##ₘ m ↔ Forall (λ ix, m !! ix.1 = None) ixs.
 Proof.

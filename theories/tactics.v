@@ -525,6 +525,18 @@ Definition block {A : Type} (a : A) := a.
 Ltac block_goal := match goal with [ |- ?T ] => change (block T) end.
 Ltac unblock_goal := unfold block in *.
 
+(** [learn_hyp p as H] and [learn_hyp p], where [p] is a proof of [P],
+add [P] to the context and fail if [P] already exists in the context.
+This is a simple form of the learning pattern. These tactics are
+inspired by [Program.Tactics.add_hypothesis]. *)
+Tactic Notation "learn_hyp" constr(p) "as" ident(H') :=
+  let P := type of p in
+  match goal with
+  | H : P |- _ => fail 1
+  | _ => pose proof p as H'
+  end.
+Tactic Notation "learn_hyp" constr(p) :=
+  let H := fresh in learn_hyp p as H.
 
 (** The tactic [select pat tac] finds the last (i.e., bottommost) hypothesis
 matching [pat] and passes it to the continuation [tac]. Its main advantage over

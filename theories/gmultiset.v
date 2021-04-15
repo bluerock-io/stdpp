@@ -254,19 +254,10 @@ Ltac multiset_instantiate :=
      let e := fresh in evar (e:A);
      let e' := eval unfold e in e in clear e;
      lazymatch constr:(P e') with
-     | context [ {[ ?y ]} ] =>
-        (* Use [unless] to avoid creating a new hypothesis [H y : P y] if [P y]
-        already exists. *)
-        unify y e'; unless (P y) by assumption; pose proof (H y)
+     | context [ {[ ?y ]} ] => unify y e'; learn_hyp (H y)
      end
-  | H : (∀ x : ?A, @?P x), _ : context [multiplicity ?y _] |- _ =>
-     (* Use [unless] to avoid creating a new hypothesis [H y : P y] if [P y]
-     already exists. *)
-     unless (P y) by assumption; pose proof (H y)
-  | H : (∀ x : ?A, @?P x) |- context [multiplicity ?y _] =>
-     (* Use [unless] to avoid creating a new hypothesis [H y : P y] if [P y]
-     already exists. *)
-     unless (P y) by assumption; pose proof (H y)
+  | H : (∀ x : ?A, _), _ : context [multiplicity ?y _] |- _ => learn_hyp (H y)
+  | H : (∀ x : ?A, _) |- context [multiplicity ?y _] => learn_hyp (H y)
   end.
 
 (** Step 4: simplify singletons *)

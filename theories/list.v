@@ -4320,6 +4320,9 @@ Proof. rewrite !TCForall_Forall. apply Forall_app_2. Qed.
 Lemma TCForall2_Forall2 {A B} (P : A → B → Prop) xs ys : TCForall2 P xs ys ↔ Forall2 P xs ys.
 Proof. split; induction 1; constructor; auto. Qed.
 
+Lemma TCExists_Exists {A} (P : A → Prop) l : TCExists P l ↔ Exists P l.
+Proof. split; induction 1; constructor; solve [auto]. Qed.
+
 Section positives_flatten_unflatten.
   Local Open Scope positive_scope.
 

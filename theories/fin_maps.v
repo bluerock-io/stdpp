@@ -2417,6 +2417,15 @@ Section map_seq.
   Implicit Types x : A.
   Implicit Types xs : list A.
 
+  Global Instance map_seq_proper `{Equiv A} start :
+    Proper ((≡) ==> (≡)) (map_seq (M:=M A) start).
+  Proof.
+    intros l1 l2 Hl. revert start.
+    induction Hl as [|x1 x2 l1 l2 ?? IH]; intros start; simpl.
+    - intros ?. rewrite lookup_empty; constructor.
+    - repeat (done || f_equiv).
+  Qed.
+
   Lemma lookup_map_seq start xs i :
     map_seq (M:=M A) start xs !! i = guard (start ≤ i); xs !! (i - start).
   Proof.

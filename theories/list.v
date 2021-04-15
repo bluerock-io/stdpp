@@ -1853,15 +1853,13 @@ Proof.
   split; [split|].
   - intros ?. eexists []. by rewrite (right_id_L [] (++)).
   - intros ???[k1->] [k2->]. exists (k1 ++ k2). by rewrite (assoc_L (++)).
-  - intros x y [x1 H1] [y1 H2].
-    rewrite H2, <-(assoc_L (++)) in H1. rewrite <-(app_nil_r y) in H1 at 1.
-    simplify_eq. symmetry in H1. apply app_nil in H1 as [].
-    subst y1. by apply app_nil_r.
+  - intros l1 l2 [k1 ?] [[|x2 k2] ->]; [|discriminate_list].
+    by rewrite (right_id_L _ _).
 Qed.
 Lemma prefix_nil l : [] `prefix_of` l.
 Proof. by exists l. Qed.
 Lemma prefix_nil_inv l : l `prefix_of` [] → l = [].
-Proof. intros [[|?] Eq]; symmetry in Eq; by apply app_nil in Eq as []. Qed.
+Proof. intros [k ?]. by destruct l. Qed.
 Lemma prefix_nil_not x l : ¬x :: l `prefix_of` [].
 Proof. by intros [k ?]. Qed.
 Lemma prefix_cons x l1 l2 : l1 `prefix_of` l2 → x :: l1 `prefix_of` x :: l2.
@@ -1901,10 +1899,7 @@ Proof.
   split; [split|].
   - intros ?. by eexists [].
   - intros ???[k1->] [k2->]. exists (k2 ++ k1). by rewrite (assoc_L (++)).
-  - intros x y [x1 H1] [y1 H2].
-    rewrite H2, (assoc_L (++)) in H1. rewrite <-(app_nil_l y) in H1 at 1.
-    apply app_inv_tail in H1. symmetry in H1. apply app_nil in H1 as [].
-    simplify_eq. by apply app_nil_l.
+  - intros l1 l2 [k1 ?] [[|x2 k2] ->]; [done|discriminate_list].
 Qed.
 Global Instance prefix_dec `{!EqDecision A} : RelDecision prefix :=
   fix go l1 l2 :=

@@ -1851,14 +1851,18 @@ Proof.
 Qed.
 
 (** ** Properties of the [prefix] and [suffix] predicates *)
-Global Instance: PreOrder (@prefix A).
+Global Instance: PartialOrder (@prefix A).
 Proof.
-  split.
+  split; [split|].
   - intros ?. eexists []. by rewrite (right_id_L [] (++)).
   - intros ???[k1->] [k2->]. exists (k1 ++ k2). by rewrite (assoc_L (++)).
+  - intros l1 l2 [k1 ?] [[|x2 k2] ->]; [|discriminate_list].
+    by rewrite (right_id_L _ _).
 Qed.
 Lemma prefix_nil l : [] `prefix_of` l.
 Proof. by exists l. Qed.
+Lemma prefix_nil_inv l : l `prefix_of` [] → l = [].
+Proof. intros [k ?]. by destruct l. Qed.
 Lemma prefix_nil_not x l : ¬x :: l `prefix_of` [].
 Proof. by intros [k ?]. Qed.
 Lemma prefix_cons x l1 l2 : l1 `prefix_of` l2 → x :: l1 `prefix_of` x :: l2.
@@ -1887,11 +1891,20 @@ Lemma prefix_length l1 l2 : l1 `prefix_of` l2 → length l1 ≤ length l2.
 Proof. intros [? ->]. rewrite app_length. lia. Qed.
 Lemma prefix_snoc_not l x : ¬l ++ [x] `prefix_of` l.
 Proof. intros [??]. discriminate_list. Qed.
-Global Instance: PreOrder (@suffix A).
+(* [prefix] is not a total order, but [l1] and [l2] are always comparable if
+  they are both prefixes of some [l3]. *)
+Lemma prefix_weak_total l1 l2 l3 :
+  l1 `prefix_of` l3 → l2 `prefix_of` l3 → l1 `prefix_of` l2 ∨ l2 `prefix_of` l1.
 Proof.
-  split.
+  intros [k1 H1] [k2 H2]. rewrite H2 in H1.
+  apply app_eq_inv in H1 as [(k&?&?)|(k&?&?)]; [left|right]; exists k; eauto.
+Qed.
+Global Instance: PartialOrder (@suffix A).
+Proof.
+  split; [split|].
   - intros ?. by eexists [].
   - intros ???[k1->] [k2->]. exists (k2 ++ k1). by rewrite (assoc_L (++)).
+  - intros l1 l2 [k1 ?] [[|x2 k2] ->]; [done|discriminate_list].
 Qed.
 Global Instance prefix_dec `{!EqDecision A} : RelDecision prefix :=
   fix go l1 l2 :=
@@ -2027,6 +2040,14 @@ Lemma suffix_length l1 l2 : l1 `suffix_of` l2 → length l1 ≤ length l2.
 Proof. intros [? ->]. rewrite app_length. lia. Qed.
 Lemma suffix_cons_not x l : ¬x :: l `suffix_of` l.
 Proof. intros [??]. discriminate_list. Qed.
+(* [suffix] is not a total order, but [l1] and [l2] are always comparable if
+  they are both suffixes of some [l3]. *)
+Lemma suffix_weak_total l1 l2 l3 :
+  l1 `suffix_of` l3 → l2 `suffix_of` l3 → l1 `suffix_of` l2 ∨ l2 `suffix_of` l1.
+Proof.
+  intros [k1 Hl1] [k2 Hl2]. rewrite Hl1 in Hl2.
+  apply app_eq_inv in Hl2 as [(k&?&?)|(k&?&?)]; [left|right]; exists k; eauto.
+Qed.
 Global Instance suffix_dec `{!EqDecision A} : RelDecision (@suffix A).
 Proof.
   refine (λ l1 l2, cast_if (decide_rel prefix (reverse l1) (reverse l2)));

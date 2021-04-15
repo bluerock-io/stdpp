@@ -486,6 +486,48 @@ Lemma Zmod_in_range q a c :
   a `mod` c = a - q * c.
 Proof. intros ?. symmetry. apply Z.mod_unique_pos with q; lia. Qed.
 
+Lemma Z_bounded_iff_bits_nonneg k n :
+  0 ≤ k → 0 ≤ n →
+  n < 2^k ↔ ∀ l, k ≤ l → Z.testbit n l = false.
+Proof.
+  intros. destruct (decide (n = 0)) as [->|].
+  { naive_solver eauto using Z.bits_0, Z.pow_pos_nonneg with lia. }
+  split.
+  { intros Hb%Z.log2_lt_pow2 l Hl; [|lia]. apply Z.bits_above_log2; lia. }
+  intros Hl. apply Z.nle_gt; intros ?.
+  assert (Z.testbit n (Z.log2 n) = false) as Hbit.
+  { apply Hl, Z.log2_le_pow2; lia. }
+  by rewrite Z.bit_log2 in Hbit by lia.
+Qed.
+
+(* Goals of the form [0 ≤ n ≤ 2^k] appear often. So we also define the
+derived version [Z_bounded_iff_bits_nonneg'] that does not require
+proving [0 ≤ n] twice in that case. *)
+Lemma Z_bounded_iff_bits_nonneg' k n :
+  0 ≤ k → 0 ≤ n →
+  0 ≤ n < 2^k ↔ ∀ l, k ≤ l → Z.testbit n l = false.
+Proof. intros ??. rewrite <-Z_bounded_iff_bits_nonneg; lia. Qed.
+
+Lemma Z_bounded_iff_bits k n :
+  0 ≤ k →
+  -2^k ≤ n < 2^k ↔ ∀ l, k ≤ l → Z.testbit n l = bool_decide (n < 0).
+Proof.
+  intros Hk.
+  case_bool_decide; [ | rewrite <-Z_bounded_iff_bits_nonneg; lia].
+  assert(n = - Z.abs n)%Z as -> by lia.
+  split.
+  { intros [? _] l Hl.
+    rewrite Z.bits_opp, negb_true_iff by lia.
+    apply Z_bounded_iff_bits_nonneg with k; lia. }
+  intros Hbit. split.
+  - rewrite <-Z.opp_le_mono, <-Z.lt_pred_le.
+    apply Z_bounded_iff_bits_nonneg; [lia..|]. intros l Hl.
+    rewrite <-negb_true_iff, <-Z.bits_opp by lia.
+    by apply Hbit.
+  - etrans; [|apply Z.pow_pos_nonneg]; lia.
+Qed.
+
+
 Local Close Scope Z_scope.
 
 (** * Injectivity of casts *)

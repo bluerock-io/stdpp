@@ -127,6 +127,19 @@ Inductive TCTrue : Prop := TCTrue_intro : TCTrue.
 Existing Class TCTrue.
 Existing Instance TCTrue_intro.
 
+(** The class [TCFalse] is not stricly necessary as one could also use
+[False]. However, users might expect that TCFalse exists and if it
+does not, it can cause hard to diagnose bugs due to automatic
+generalization. *)
+Inductive TCFalse : Prop :=.
+Existing Class TCFalse.
+
+(** The class [TCUnless] can be used to check that search for [P]
+fails. This is useful as a guard for certain instances together with
+classes like [TCFastDone] (see [tactics.v]) to prevent infinite loops
+(e.g. when saturating the context). *)
+Notation TCUnless P := (TCIf P TCFalse TCTrue).
+
 Inductive TCForall {A} (P : A → Prop) : list A → Prop :=
   | TCForall_nil : TCForall P []
   | TCForall_cons x xs : P x → TCForall P xs → TCForall P (x :: xs).
@@ -147,6 +160,14 @@ Existing Instance TCForall2_nil.
 Existing Instance TCForall2_cons.
 Global Hint Mode TCForall2 ! ! ! ! - : typeclass_instances.
 Global Hint Mode TCForall2 ! ! ! - ! : typeclass_instances.
+
+Inductive TCExists {A} (P : A → Prop) : list A → Prop :=
+  | TCExists_cons_hd x l : P x → TCExists P (x :: l)
+  | TCExists_cons_tl x l: TCExists P l → TCExists P (x :: l).
+Existing Class TCExists.
+Existing Instance TCExists_cons_hd | 10.
+Existing Instance TCExists_cons_tl | 20.
+Global Hint Mode TCExists ! ! ! : typeclass_instances.
 
 Inductive TCElemOf {A} (x : A) : list A → Prop :=
   | TCElemOf_here xs : TCElemOf x (x :: xs)

@@ -44,6 +44,9 @@ Ltac fast_done :=
 Tactic Notation "fast_by" tactic(tac) :=
   tac; fast_done.
 
+Class TCFastDone (P : Prop) : Prop := tc_fast_done : P.
+Global Hint Extern 1 (TCFastDone ?P) => (change P; fast_done) : typeclass_instances.
+
 (** A slightly modified version of Ssreflect's finishing tactic [done]. It
 also performs [reflexivity] and uses symmetry of negated equalities. Compared
 to Ssreflect's [done], it does not compute the goal's [hnf] so as to avoid

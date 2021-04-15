@@ -1888,7 +1888,9 @@ Lemma prefix_length l1 l2 : l1 `prefix_of` l2 → length l1 ≤ length l2.
 Proof. intros [? ->]. rewrite app_length. lia. Qed.
 Lemma prefix_snoc_not l x : ¬l ++ [x] `prefix_of` l.
 Proof. intros [??]. discriminate_list. Qed.
-Lemma prefix_of_down_total l1 l2 l3 :
+(* [prefix] is not a total order, but [l1] and [l2] are always comparable if
+  they are both prefixes of some [l3]. *)
+Lemma prefix_weak_total l1 l2 l3 :
   l1 `prefix_of` l3 → l2 `prefix_of` l3 → l1 `prefix_of` l2 ∨ l2 `prefix_of` l1.
 Proof.
   intros [k1 H1] [k2 H2]. rewrite H2 in H1.
@@ -2035,6 +2037,14 @@ Lemma suffix_length l1 l2 : l1 `suffix_of` l2 → length l1 ≤ length l2.
 Proof. intros [? ->]. rewrite app_length. lia. Qed.
 Lemma suffix_cons_not x l : ¬x :: l `suffix_of` l.
 Proof. intros [??]. discriminate_list. Qed.
+(* [suffix] is not a total order, but [l1] and [l2] are always comparable if
+  they are both suffixes of some [l3]. *)
+Lemma suffix_weak_total l1 l2 l3 :
+  l1 `suffix_of` l3 → l2 `suffix_of` l3 → l1 `suffix_of` l2 ∨ l2 `suffix_of` l1.
+Proof.
+  intros [k1 Hl1] [k2 Hl2]. rewrite Hl1 in Hl2.
+  apply app_eq_inv in Hl2 as [(k&?&?)|(k&?&?)]; [left|right]; exists k; eauto.
+Qed.
 Global Instance suffix_dec `{!EqDecision A} : RelDecision (@suffix A).
 Proof.
   refine (λ l1 l2, cast_if (decide_rel prefix (reverse l1) (reverse l2)));

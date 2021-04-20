@@ -7,6 +7,16 @@ API-breaking change is listed.
   and `{[ (x,y,z) ]}`. They date back to the time we used the `singleton` class
   with a product for maps (there's now the `singletonM` class).
 - Add map notations `{[ k1 := x1 ; .. ; kn := xn ]}` up to arity 13.
+- Add multiset literal notation `{[+ x1; .. ; xn +]}`.
+  + Add a new type class `SingletonMS` (with projection `{[+ x +]}` for
+    multiset singletons.
+  + Define `{[+ x1; .. ; xn +]}` as notation for `{[+ x1 +]} ⊎ .. ⊎ {[+ xn +]}`.
+- Remove the `Singleton` and `Semiset` instances for multisets to avoid
+  accidental use.
+  + This means the notation `{[ x1; .. ; xn ]}` no longer works for multisets
+    (previously, its definition was wrong, since it used `∪` instead of `⊎`).
+  + Add lemmas for `∈` and `∉` specific for multisets, since the set lemmas no
+    longer work for multisets.
 
 ## std++ 1.5.0
 

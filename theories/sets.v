@@ -677,7 +677,7 @@ Section set.
   Proof. set_solver. Qed.
   Lemma difference_disjoint X Y : X ## Y → X ∖ Y ≡ X.
   Proof. set_solver. Qed.
-  Lemma subset_difference_elem_of {x: A} {s: C} (inx: x ∈ s): s ∖ {[ x ]} ⊂ s.
+  Lemma subset_difference_elem_of x X : x ∈ X → X ∖ {[ x ]} ⊂ X.
   Proof. set_solver. Qed.
   Lemma difference_difference X Y Z : (X ∖ Y) ∖ Z ≡ X ∖ (Y ∪ Z).
   Proof. set_solver. Qed.

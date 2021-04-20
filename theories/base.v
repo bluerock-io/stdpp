@@ -888,6 +888,14 @@ Notation "{[ x ; y ; .. ; z ]}" :=
   (union .. (union (singleton x) (singleton y)) .. (singleton z))
   (at level 1) : stdpp_scope.
 
+Class SingletonMS A B := singletonMS: A → B.
+Global Hint Mode SingletonMS - ! : typeclass_instances.
+Instance: Params (@singletonMS) 3 := {}.
+Notation "{[+ x +]}" := (singletonMS x) (at level 1) : stdpp_scope.
+Notation "{[+ x ; y ; .. ; z +]}" :=
+  (disj_union .. (disj_union (singletonMS x) (singletonMS y)) .. (singletonMS z))
+  (at level 1) : stdpp_scope.
+
 Class SubsetEq A := subseteq: relation A.
 Global Hint Mode SubsetEq ! : typeclass_instances.
 Instance: Params (@subseteq) 2 := {}.
@@ -930,8 +938,8 @@ Definition option_to_set `{Singleton A C, Empty C} (mx : option A) : C :=
   match mx with None => ∅ | Some x => {[ x ]} end.
 Fixpoint list_to_set `{Singleton A C, Empty C, Union C} (l : list A) : C :=
   match l with [] => ∅ | x :: l => {[ x ]} ∪ list_to_set l end.
-Fixpoint list_to_set_disj `{Singleton A C, Empty C, DisjUnion C} (l : list A) : C :=
-  match l with [] => ∅ | x :: l => {[ x ]} ⊎ list_to_set_disj l end.
+Fixpoint list_to_set_disj `{SingletonMS A C, Empty C, DisjUnion C} (l : list A) : C :=
+  match l with [] => ∅ | x :: l => {[+ x +]} ⊎ list_to_set_disj l end.
 
 (** The class [Lexico A] is used for the lexicographic order on [A]. This order
 is used to create finite maps, finite sets, etc, and is typically different from

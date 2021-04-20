@@ -32,7 +32,7 @@ Section definitions.
   Global Instance gmultiset_size : Size (gmultiset A) := length ∘ elements.
 
   Global Instance gmultiset_empty : Empty (gmultiset A) := GMultiSet ∅.
-  Global Instance gmultiset_singleton : Singleton A (gmultiset A) := λ x,
+  Global Instance gmultiset_singleton : SingletonMS A (gmultiset A) := λ x,
     GMultiSet {[ x := 0 ]}.
   Global Instance gmultiset_union : Union (gmultiset A) := λ X Y,
     let (X) := X in let (Y) := Y in
@@ -78,12 +78,12 @@ Section basic_lemmas.
   (* Multiplicity *)
   Lemma multiplicity_empty x : multiplicity x ∅ = 0.
   Proof. done. Qed.
-  Lemma multiplicity_singleton x : multiplicity x {[ x ]} = 1.
+  Lemma multiplicity_singleton x : multiplicity x {[+ x +]} = 1.
   Proof. unfold multiplicity; simpl. by rewrite lookup_singleton. Qed.
-  Lemma multiplicity_singleton_ne x y : x ≠ y → multiplicity x {[ y ]} = 0.
+  Lemma multiplicity_singleton_ne x y : x ≠ y → multiplicity x {[+ y +]} = 0.
   Proof. intros. unfold multiplicity; simpl. by rewrite lookup_singleton_ne. Qed.
   Lemma multiplicity_singleton' x y :
-    multiplicity x {[ y ]} = if decide (x = y) then 1 else 0.
+    multiplicity x {[+ y +]} = if decide (x = y) then 1 else 0.
   Proof.
     destruct (decide _) as [->|].
     - by rewrite multiplicity_singleton.
@@ -118,21 +118,22 @@ Section basic_lemmas.
   (* Set *)
   Lemma elem_of_multiplicity x X : x ∈ X ↔ 0 < multiplicity x X.
   Proof. done. Qed.
-
-  Global Instance gmultiset_simple_set : SemiSet A (gmultiset A).
+  Lemma gmultiset_elem_of_empty x : x ∈@{gmultiset A} ∅ ↔ False.
+  Proof. rewrite elem_of_multiplicity, multiplicity_empty. lia. Qed.
+  Lemma gmultiset_elem_of_singleton x y : x ∈@{gmultiset A} {[+ y +]} ↔ x = y.
   Proof.
-    split.
-    - intros x. rewrite elem_of_multiplicity, multiplicity_empty. lia.
-    - intros x y.
-      rewrite elem_of_multiplicity, multiplicity_singleton'.
-      destruct (decide (x = y)); intuition lia.
-    - intros X Y x. rewrite !elem_of_multiplicity, multiplicity_union. lia.
+    rewrite elem_of_multiplicity, multiplicity_singleton'.
+    case_decide; naive_solver lia.
   Qed.
-  Global Instance gmultiset_elem_of_dec : RelDecision (∈@{gmultiset A}).
-  Proof. refine (λ x X, cast_if (decide (0 < multiplicity x X))); done. Defined.
-
+  Lemma gmultiset_elem_of_union X Y x : x ∈ X ∪ Y ↔ x ∈ X ∨ x ∈ Y.
+  Proof. rewrite !elem_of_multiplicity, multiplicity_union. lia. Qed.
   Lemma gmultiset_elem_of_disj_union X Y x : x ∈ X ⊎ Y ↔ x ∈ X ∨ x ∈ Y.
   Proof. rewrite !elem_of_multiplicity, multiplicity_disj_union. lia. Qed.
+  Lemma gmultiset_elem_of_intersection X Y x : x ∈ X ∩ Y ↔ x ∈ X ∧ x ∈ Y.
+  Proof. rewrite !elem_of_multiplicity, multiplicity_intersection. lia. Qed.
+
+  Global Instance gmultiset_elem_of_dec : RelDecision (∈@{gmultiset A}).
+  Proof. refine (λ x X, cast_if (decide (0 < multiplicity x X))); done. Defined.
 End basic_lemmas.
 
 (** * A solver for multisets *)
@@ -189,7 +190,7 @@ Section multiset_unfold.
   Global Instance multiset_unfold_empty x : MultisetUnfold x ∅ 0.
   Proof. constructor. by rewrite multiplicity_empty. Qed.
   Global Instance multiset_unfold_singleton x y :
-    MultisetUnfold x {[ x ]} 1.
+    MultisetUnfold x {[+ x +]} 1.
   Proof. constructor. by rewrite multiplicity_singleton. Qed.
   Global Instance multiset_unfold_union x X Y n m :
     MultisetUnfold x X n → MultisetUnfold x Y m →
@@ -238,12 +239,33 @@ Section multiset_unfold.
   Global Instance set_unfold_multiset_elem_of X x n :
     MultisetUnfold x X n → SetUnfoldElemOf x X (0 < n) | 100.
   Proof. constructor. by rewrite <-(multiset_unfold x X n). Qed.
+
+  Global Instance set_unfold_gmultiset_empty x :
+    SetUnfoldElemOf x (∅ : gmultiset A) False.
+  Proof. constructor. apply gmultiset_elem_of_empty. Qed.
+  Global Instance set_unfold_gmultiset_singleton x y :
+    SetUnfoldElemOf x ({[+ y +]} : gmultiset A) (x = y).
+  Proof. constructor; apply gmultiset_elem_of_singleton. Qed.
+  Global Instance set_unfold_gmultiset_union x X Y P Q :
+    SetUnfoldElemOf x X P → SetUnfoldElemOf x Y Q →
+    SetUnfoldElemOf x (X ∪ Y) (P ∨ Q).
+  Proof.
+    intros ??; constructor. by rewrite gmultiset_elem_of_union,
+      (set_unfold_elem_of x X P), (set_unfold_elem_of x Y Q).
+  Qed.
   Global Instance set_unfold_gmultiset_disj_union x X Y P Q :
     SetUnfoldElemOf x X P → SetUnfoldElemOf x Y Q →
     SetUnfoldElemOf x (X ⊎ Y) (P ∨ Q).
   Proof.
     intros ??; constructor. rewrite gmultiset_elem_of_disj_union.
     by rewrite <-(set_unfold_elem_of x X P), <-(set_unfold_elem_of x Y Q).
+  Qed.
+  Global Instance set_unfold_gmultiset_intersection x X Y P Q :
+    SetUnfoldElemOf x X P → SetUnfoldElemOf x Y Q →
+    SetUnfoldElemOf x (X ∩ Y) (P ∧ Q).
+  Proof.
+    intros ??; constructor. rewrite gmultiset_elem_of_intersection.
+    by rewrite (set_unfold_elem_of x X P), (set_unfold_elem_of x Y Q).
   Qed.
 End multiset_unfold.
 
@@ -254,7 +276,7 @@ Ltac multiset_instantiate :=
      let e := fresh in evar (e:A);
      let e' := eval unfold e in e in clear e;
      lazymatch constr:(P e') with
-     | context [ {[ ?y ]} ] => unify y e'; learn_hyp (H y)
+     | context [ {[+ ?y +]} ] => unify y e'; learn_hyp (H y)
      end
   | H : (∀ x : ?A, _), _ : context [multiplicity ?y _] |- _ => learn_hyp (H y)
   | H : (∀ x : ?A, _) |- context [multiplicity ?y _] => learn_hyp (H y)
@@ -262,17 +284,17 @@ Ltac multiset_instantiate :=
 
 (** Step 4: simplify singletons *)
 Local Lemma multiplicity_singleton_forget `{Countable A} x y :
-  ∃ n, multiplicity (A:=A) x {[ y ]} = n ∧ n ≤ 1.
+  ∃ n, multiplicity (A:=A) x {[+ y +]} = n ∧ n ≤ 1.
 Proof. rewrite multiplicity_singleton'. case_decide; eauto with lia. Qed.
 
 Ltac multiset_simplify_singletons :=
   repeat match goal with
-  | H : context [multiplicity ?x {[ ?y ]}] |- _ =>
+  | H : context [multiplicity ?x {[+ ?y +]}] |- _ =>
      first
        [progress rewrite ?multiplicity_singleton, ?multiplicity_singleton_ne in H by done
        |destruct (multiplicity_singleton_forget x y) as (?&->&?); clear y
        |rewrite multiplicity_singleton' in H; destruct (decide (x = y)); simplify_eq/=]
-  | |- context [multiplicity ?x {[ ?y ]}] =>
+  | |- context [multiplicity ?x {[+ ?y +]}] =>
      first
        [progress rewrite ?multiplicity_singleton, ?multiplicity_singleton_ne by done
        |destruct (multiplicity_singleton_forget x y) as (?&->&?); clear y
@@ -347,15 +369,23 @@ Section more_lemmas.
   Lemma gmultiset_disj_union_union_r X Y Z : (X ∪ Y) ⊎ Z = (X ⊎ Z) ∪ (Y ⊎ Z).
   Proof. multiset_solver. Qed.
 
+  (** Element of operation *)
+  Lemma gmultiset_not_elem_of_singleton x y : x ∉@{gmultiset A} {[+ y +]} ↔ x ≠ y.
+  Proof. multiset_solver. Qed.
+  Lemma gmultiset_not_elem_of_union x X Y : x ∉ X ∪ Y ↔ x ∉ X ∧ x ∉ Y.
+  Proof. multiset_solver. Qed.
+  Lemma gmultiset_not_elem_of_intersection x X Y : x ∉ X ∩ Y ↔ x ∉ X ∨ x ∉ Y.
+  Proof. multiset_solver. Qed.
+
   (** Misc *)
-  Lemma gmultiset_non_empty_singleton x : {[ x ]} ≠@{gmultiset A} ∅.
+  Lemma gmultiset_non_empty_singleton x : {[+ x +]} ≠@{gmultiset A} ∅.
   Proof. multiset_solver. Qed.
 
   (** Conversion from lists *)
   Lemma list_to_set_disj_nil : list_to_set_disj [] =@{gmultiset A} ∅.
   Proof. done. Qed.
   Lemma list_to_set_disj_cons x l :
-    list_to_set_disj (x :: l) =@{gmultiset A} {[ x ]} ⊎ list_to_set_disj l.
+    list_to_set_disj (x :: l) =@{gmultiset A} {[+ x +]} ⊎ list_to_set_disj l.
   Proof. done. Qed.
   Lemma list_to_set_disj_app l1 l2 :
     list_to_set_disj (l1 ++ l2) =@{gmultiset A} list_to_set_disj l1 ⊎ list_to_set_disj l2.
@@ -381,7 +411,7 @@ Section more_lemmas.
     split; intros HX; [by apply gmultiset_elements_empty_inv|].
     by rewrite HX, gmultiset_elements_empty.
   Qed.
-  Lemma gmultiset_elements_singleton x : elements ({[ x ]} : gmultiset A) = [ x ].
+  Lemma gmultiset_elements_singleton x : elements ({[+ x +]} : gmultiset A) = [ x ].
   Proof.
     unfold elements, gmultiset_elements; simpl. by rewrite map_to_list_singleton.
   Qed.
@@ -427,7 +457,7 @@ Section more_lemmas.
     set_fold f b (∅ : gmultiset A) = b.
   Proof. by unfold set_fold; simpl; rewrite gmultiset_elements_empty. Qed.
   Lemma gmultiset_set_fold_singleton {B} (f : A → B → B) (b : B) (a : A) :
-    set_fold f b ({[a]} : gmultiset A) = f a b.
+    set_fold f b ({[+ a +]} : gmultiset A) = f a b.
   Proof. by unfold set_fold; simpl; rewrite gmultiset_elements_singleton. Qed.
   Lemma gmultiset_set_fold_disj_union (f : A → A → A) (b : A) X Y :
     Comm (=) f →
@@ -468,7 +498,7 @@ Section more_lemmas.
     contradict Hsz. rewrite HX, gmultiset_size_empty; lia.
   Qed.
 
-  Lemma gmultiset_size_singleton x : size ({[ x ]} : gmultiset A) = 1.
+  Lemma gmultiset_size_singleton x : size ({[+ x +]} : gmultiset A) = 1.
   Proof.
     unfold size, gmultiset_size; simpl. by rewrite gmultiset_elements_singleton.
   Qed.
@@ -531,7 +561,7 @@ Section more_lemmas.
   Lemma gmultiset_union_subset_r X Y : X ≠ ∅ → Y ⊂ X ⊎ Y.
   Proof. multiset_solver. Qed.
 
-  Lemma gmultiset_elem_of_singleton_subseteq x X : x ∈ X ↔ {[ x ]} ⊆ X.
+  Lemma gmultiset_elem_of_singleton_subseteq x X : x ∈ X ↔ {[+ x +]} ⊆ X.
   Proof. multiset_solver. Qed.
 
   Lemma gmultiset_elem_of_subseteq X1 X2 x : x ∈ X1 → X1 ⊆ X2 → x ∈ X2.
@@ -539,7 +569,8 @@ Section more_lemmas.
 
   Lemma gmultiset_disj_union_difference X Y : X ⊆ Y → Y = X ⊎ Y ∖ X.
   Proof. multiset_solver. Qed.
-  Lemma gmultiset_disj_union_difference' x Y : x ∈ Y → Y = {[ x ]} ⊎ Y ∖ {[ x ]}.
+  Lemma gmultiset_disj_union_difference' x Y :
+    x ∈ Y → Y = {[+ x +]} ⊎ Y ∖ {[+ x +]}.
   Proof. multiset_solver. Qed.
 
   Lemma gmultiset_size_difference X Y : Y ⊆ X → size (X ∖ Y) = size X - size Y.
@@ -585,7 +616,7 @@ Section more_lemmas.
   Qed.
 
   Lemma gmultiset_ind (P : gmultiset A → Prop) :
-    P ∅ → (∀ x X, P X → P ({[ x ]} ⊎ X)) → ∀ X, P X.
+    P ∅ → (∀ x X, P X → P ({[+ x +]} ⊎ X)) → ∀ X, P X.
   Proof.
     intros Hemp Hinsert X. induction (gmultiset_wf X) as [X _ IH].
     destruct (gmultiset_choose_or_empty X) as [[x Hx]| ->]; auto.

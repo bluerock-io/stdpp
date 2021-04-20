@@ -938,10 +938,11 @@ Notation "(.⊎ x )" := (λ y, disj_union y x) (only parsing) : stdpp_scope.
 Class SingletonMS A B := singletonMS: A → B.
 Global Hint Mode SingletonMS - ! : typeclass_instances.
 Instance: Params (@singletonMS) 3 := {}.
-Notation "{[+ x +]}" := (singletonMS x) (at level 1) : stdpp_scope.
+Notation "{[+ x +]}" := (singletonMS x)
+  (at level 1, format "{[+  x  +]}") : stdpp_scope.
 Notation "{[+ x ; y ; .. ; z +]}" :=
   (disj_union .. (disj_union (singletonMS x) (singletonMS y)) .. (singletonMS z))
-  (at level 1) : stdpp_scope.
+  (at level 1, format "{[+  x ;  y ;  .. ;  z  +]}") : stdpp_scope.
 
 Definition option_to_set `{Singleton A C, Empty C} (mx : option A) : C :=
   match mx with None => ∅ | Some x => {[ x ]} end.

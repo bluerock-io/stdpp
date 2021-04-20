@@ -370,6 +370,8 @@ Section more_lemmas.
   Proof. multiset_solver. Qed.
 
   (** Element of operation *)
+  Lemma gmultiset_not_elem_of_empty x : x ∉@{gmultiset A} ∅.
+  Proof. multiset_solver. Qed.
   Lemma gmultiset_not_elem_of_singleton x y : x ∉@{gmultiset A} {[+ y +]} ↔ x ≠ y.
   Proof. multiset_solver. Qed.
   Lemma gmultiset_not_elem_of_union x X Y : x ∉ X ∪ Y ↔ x ∉ X ∧ x ∉ Y.

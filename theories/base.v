@@ -854,14 +854,6 @@ Definition union_list `{Empty A} `{Union A} : list A → A := fold_right (∪) �
 Global Arguments union_list _ _ _ !_ / : assert.
 Notation "⋃ l" := (union_list l) (at level 20, format "⋃  l") : stdpp_scope.
 
-Class DisjUnion A := disj_union: A → A → A.
-Global Hint Mode DisjUnion ! : typeclass_instances.
-Instance: Params (@disj_union) 2 := {}.
-Infix "⊎" := disj_union (at level 50, left associativity) : stdpp_scope.
-Notation "(⊎)" := disj_union (only parsing) : stdpp_scope.
-Notation "( x ⊎.)" := (disj_union x) (only parsing) : stdpp_scope.
-Notation "(.⊎ x )" := (λ y, disj_union y x) (only parsing) : stdpp_scope.
-
 Class Intersection A := intersection: A → A → A.
 Global Hint Mode Intersection ! : typeclass_instances.
 Instance: Params (@intersection) 2 := {}.
@@ -886,14 +878,6 @@ Instance: Params (@singleton) 3 := {}.
 Notation "{[ x ]}" := (singleton x) (at level 1) : stdpp_scope.
 Notation "{[ x ; y ; .. ; z ]}" :=
   (union .. (union (singleton x) (singleton y)) .. (singleton z))
-  (at level 1) : stdpp_scope.
-
-Class SingletonMS A B := singletonMS: A → B.
-Global Hint Mode SingletonMS - ! : typeclass_instances.
-Instance: Params (@singletonMS) 3 := {}.
-Notation "{[+ x +]}" := (singletonMS x) (at level 1) : stdpp_scope.
-Notation "{[+ x ; y ; .. ; z +]}" :=
-  (disj_union .. (disj_union (singletonMS x) (singletonMS y)) .. (singletonMS z))
   (at level 1) : stdpp_scope.
 
 Class SubsetEq A := subseteq: relation A.
@@ -933,6 +917,31 @@ Notation "X ⊆ Y ⊆ Z" := (X ⊆ Y ∧ Y ⊆ Z) (at level 70, Y at next level)
 Notation "X ⊆ Y ⊂ Z" := (X ⊆ Y ∧ Y ⊂ Z) (at level 70, Y at next level) : stdpp_scope.
 Notation "X ⊂ Y ⊆ Z" := (X ⊂ Y ∧ Y ⊆ Z) (at level 70, Y at next level) : stdpp_scope.
 Notation "X ⊂ Y ⊂ Z" := (X ⊂ Y ∧ Y ⊂ Z) (at level 70, Y at next level) : stdpp_scope.
+
+(** We define type classes for multisets: disjoint union [⊎] and the multiset
+singleton [{[+ _ +]}]. Multiset literals [{[+ x1; ..; xn +]}] are defined in
+terms of iterated disjoint union [{[+ x1 +]} ⊎ .. ⊎ {[+ xn +]}], and are thus
+different from set literals [{[ x1; ..; xn ]}], which use [∪].
+
+Note that in principle we could reuse the set singleton [{[ _ ]}] for multisets,
+and define [{[+ x1; ..; xn +]}] as [{[ x1 ]} ⊎ .. ⊎ {[ xn ]}]. However, this
+would risk accidentally using [{[ x1; ..; xn ]}] for multisets (leading to
+unexpected results) and lead to ambigious pretty printing for [{[+ x +]}]. *)
+Class DisjUnion A := disj_union: A → A → A.
+Global Hint Mode DisjUnion ! : typeclass_instances.
+Instance: Params (@disj_union) 2 := {}.
+Infix "⊎" := disj_union (at level 50, left associativity) : stdpp_scope.
+Notation "(⊎)" := disj_union (only parsing) : stdpp_scope.
+Notation "( x ⊎.)" := (disj_union x) (only parsing) : stdpp_scope.
+Notation "(.⊎ x )" := (λ y, disj_union y x) (only parsing) : stdpp_scope.
+
+Class SingletonMS A B := singletonMS: A → B.
+Global Hint Mode SingletonMS - ! : typeclass_instances.
+Instance: Params (@singletonMS) 3 := {}.
+Notation "{[+ x +]}" := (singletonMS x) (at level 1) : stdpp_scope.
+Notation "{[+ x ; y ; .. ; z +]}" :=
+  (disj_union .. (disj_union (singletonMS x) (singletonMS y)) .. (singletonMS z))
+  (at level 1) : stdpp_scope.
 
 Definition option_to_set `{Singleton A C, Empty C} (mx : option A) : C :=
   match mx with None => ∅ | Some x => {[ x ]} end.

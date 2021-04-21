@@ -1,4 +1,4 @@
-From stdpp Require Import base tactics fin_maps.
+From stdpp Require Import base tactics fin_maps gmultiset.
 
 (** Test parsing of variants of [(≡)] notation. *)
 Lemma test_equiv_annot_sections `{!Equiv A, !Equivalence (≡@{A})} (x : A) :
@@ -35,3 +35,17 @@ Section map_notations.
   Print test_op_3.
   Print test_op_4.
 End map_notations.
+
+(** Test that notations for maps with multiple elements can be parsed and printed correctly. *)
+Section multiset_notations.
+  Definition test_gmultiset_1 : gmultiset nat := {[+ 10 +]}.
+  Definition test_gmultiset_2 : gmultiset nat := {[+ 10; 11 +]}.
+  Definition test_gmultiset_3 : gmultiset nat := {[+ 10; 11; 2 - 2 +]}.
+  Definition test_gmultiset_4 : gmultiset (gmultiset nat) :=
+    {[+ {[+ 10 +]}; ∅; {[+ 2 - 2; 10 +]} +]}.
+
+  Print test_gmultiset_1.
+  Print test_gmultiset_2.
+  Print test_gmultiset_3.
+  Print test_gmultiset_4.
+End multiset_notations.

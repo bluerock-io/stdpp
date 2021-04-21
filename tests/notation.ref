@@ -24,3 +24,12 @@ test_op_4 =
   4 := {[4 := [4]]};
   5 := {[5 := [5]]}]}
      : M (M (list nat))
+test_gmultiset_1 = {[+ 10 +]}
+     : gmultiset nat
+test_gmultiset_2 = {[+ 10; 11 +]}
+     : gmultiset nat
+test_gmultiset_3 = {[+ 10; 11; 2 - 2 +]}
+     : gmultiset nat
+test_gmultiset_4 = 
+{[+ {[+ 10 +]}; ∅; {[+ 2 - 2; 10 +]} +]}
+     : gmultiset (gmultiset nat)

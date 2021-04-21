@@ -364,6 +364,10 @@ Section semi_set.
   Proof. set_solver. Qed.
   Lemma set_equiv_subseteq X Y : X ≡ Y ↔ X ⊆ Y ∧ Y ⊆ X.
   Proof. set_solver. Qed.
+  Global Instance singleton_equiv_inj : Inj (=) (≡@{C}) singleton.
+  Proof. unfold Inj. set_solver. Qed.
+  Global Instance singleton_inj `{!LeibnizEquiv C} : Inj (=) (=@{C}) singleton.
+  Proof. unfold Inj. set_solver. Qed.
 
   (** Subset relation *)
   Global Instance set_subseteq_antisymm: AntiSymm (≡) (⊆@{C}).

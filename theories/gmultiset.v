@@ -380,6 +380,12 @@ Section more_lemmas.
   Proof. multiset_solver. Qed.
 
   (** Misc *)
+  Global Instance gmultiset_singleton_inj : Inj (=) (=@{gmultiset A}) singletonMS.
+  Proof.
+    intros x1 x2 Hx. rewrite gmultiset_eq in Hx. specialize (Hx x1).
+    rewrite multiplicity_singleton, multiplicity_singleton' in Hx.
+    case_decide; [done|lia].
+  Qed.
   Lemma gmultiset_non_empty_singleton x : {[+ x +]} ≠@{gmultiset A} ∅.
   Proof. multiset_solver. Qed.
 

@@ -622,6 +622,15 @@ Proof. by rewrite lookup_singleton_None. Qed.
 Lemma lookup_total_singleton_ne `{!Inhabited A} i j (x : A) :
   i ≠ j → ({[i := x]} : M A) !!! j = inhabitant.
 Proof. intros. by rewrite lookup_total_alt, lookup_singleton_ne. Qed.
+
+Global Instance map_singleton_inj {A} : Inj2 (=) (=) (=) (singletonM (M:=M A)).
+Proof.
+  intros i1 x1 i2 x2 Heq%(f_equal (lookup i1)).
+  rewrite lookup_singleton in Heq. destruct (decide (i1 = i2)) as [->|].
+  - rewrite lookup_singleton in Heq. naive_solver.
+  - rewrite lookup_singleton_ne in Heq by done. naive_solver.
+Qed.
+
 Lemma map_non_empty_singleton {A} i (x : A) : {[i := x]} ≠ (∅ : M A).
 Proof.
   intros Hix. apply (f_equal (.!! i)) in Hix.

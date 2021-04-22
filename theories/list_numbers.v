@@ -214,25 +214,27 @@ End sum_list.
 (** ** Properties of the [Z_to_little_endian] and [Z_of_little_endian] functions *)
 Section Z_little_endian.
   Local Open Scope Z_scope.
+  Implicit Types n m : nat.
+  Implicit Types z : Z.
+
   Lemma Z_to_of_little_endian m n bs:
     m = length bs → 0 ≤ n →
     Forall (λ b, 0 ≤ b < 2 ^ n) bs →
     Z_to_little_endian m n (Z_of_little_endian n bs) = bs.
   Proof.
-    intros -> ? Hall. induction Hall as [|b bs ? ? IH]; [done|]; csimpl.
+    intros -> ?. induction 1 as [|b bs ? ? IH]; [done|]; csimpl.
     f_equal.
-    - apply Z.bits_inj_iff'. intros n' ?.
+    - apply Z.bits_inj_iff'. intros z' ?.
       rewrite !Z.land_spec, Z.lor_spec, Z_ones_spec by lia.
-      case_decide.
+      case_bool_decide.
       + rewrite andb_true_r, Z.shiftl_spec_low, orb_false_r by lia. done.
-      + rewrite !andb_false_r by lia.
+      + rewrite andb_false_r.
         symmetry. eapply (Z_bounded_iff_bits_nonneg n); lia.
     - rewrite <-IH at 3. f_equal.
-      apply Z.bits_inj_iff'. intros n' ?.
+      apply Z.bits_inj_iff'. intros z' ?.
       rewrite Z.shiftr_spec, Z.lor_spec, Z.shiftl_spec by lia.
-      assert (Z.testbit b (n' + n) = false) as ->. {
-        eapply (Z_bounded_iff_bits_nonneg n); lia.
-      }
+      assert (Z.testbit b (z' + n) = false) as ->.
+      { apply (Z_bounded_iff_bits_nonneg n); lia. }
       rewrite orb_false_l. f_equal. lia.
   Qed.
 
@@ -240,28 +242,28 @@ Section Z_little_endian.
     0 ≤ n →
     Z_of_little_endian n (Z_to_little_endian m n z) = z `mod` 2 ^ (m * n).
   Proof.
-    intros. rewrite <-Z.land_ones by nia.
-    revert z. induction m as [|m IH]; simpl.
-    { intros. Z.bitwise. by rewrite andb_false_r. }
-    intros z. rewrite IH.
-    apply Z.bits_inj_iff'. intros n' ?.
+    intros. rewrite <-Z.land_ones by lia.
+    revert z. induction m as [|m IH]; intros z; simpl.
+    { Z.bitwise. by rewrite andb_false_r. }
+    rewrite IH.
+    apply Z.bits_inj_iff'. intros z' ?.
     rewrite Z.land_spec, Z.lor_spec, Z.shiftl_spec, !Z.land_spec by lia.
-    rewrite (Z_ones_spec n n') by lia. case_bool_decide.
-    - rewrite andb_true_r. rewrite (Z.testbit_neg_r _ (n' - n)), orb_false_r by lia. simpl.
-      rewrite Z_ones_spec by nia. case_bool_decide; [ by rewrite andb_true_r| nia].
+    rewrite (Z_ones_spec n z') by lia. case_bool_decide.
+    - rewrite andb_true_r, (Z.testbit_neg_r _ (z' - n)), orb_false_r by lia. simpl.
+      by rewrite Z_ones_spec, bool_decide_true, andb_true_r by lia.
     - rewrite andb_false_r, orb_false_l.
-      rewrite Z.shiftr_spec by lia. f_equal. { f_equal. lia. }
-      rewrite !Z_ones_spec by nia. apply bool_decide_iff. nia.
+      rewrite Z.shiftr_spec by lia. f_equal; [f_equal; lia|].
+      rewrite !Z_ones_spec by lia. apply bool_decide_iff. lia.
   Qed.
 
   Lemma Z_to_little_endian_bound m n z:
     0 ≤ n →
     Forall (λ b, 0 ≤ b < 2 ^ n) (Z_to_little_endian m n z).
   Proof.
-    intros ?. revert z. induction m as [|m IH]; simpl.
+    intros ?. revert z. induction m as [|m IH]; intros z; simpl.
     { by constructor. }
-    intros ?. constructor; [|by apply IH]. rewrite Z.land_ones by lia.
-    apply Z.mod_pos_bound. apply Z.pow_pos_nonneg; lia.
+    constructor; [|by apply IH]. rewrite Z.land_ones by lia.
+    apply Z.mod_pos_bound, Z.pow_pos_nonneg; lia.
   Qed.
 
   Lemma Z_of_little_endian_bound n bs:
@@ -269,18 +271,12 @@ Section Z_little_endian.
     Forall (λ b, 0 ≤ b < 2 ^ n) bs →
     0 ≤ Z_of_little_endian n bs < 2 ^ (length bs * n).
   Proof.
-    intros ? Hall.
-    induction Hall as [|b bs Hb ? IH]; [done|]; simpl.
-    apply Z_bounded_iff_bits_nonneg'; [ nia | |].
-    - apply Z.lor_nonneg. split; [lia|]. apply Z.shiftl_nonneg. lia.
-    - intros l ?. rewrite Z.lor_spec.
-      eapply Z_bounded_iff_bits_nonneg' in Hb.
-      + erewrite Hb, orb_false_l.
-        rewrite Z.shiftl_spec by nia.
-        eapply Z_bounded_iff_bits_nonneg'; [| | done |]; nia.
-      + lia.
-      + lia.
-      + nia.
+    intros ?. induction 1 as [|b bs Hb ? IH]; [done|]; simpl.
+    apply Z_bounded_iff_bits_nonneg'; [lia|..].
+    { apply Z.lor_nonneg. split; [lia|]. apply Z.shiftl_nonneg. lia. }
+    intros z' ?. rewrite Z.lor_spec.
+    rewrite Z_bounded_iff_bits_nonneg' in Hb by lia.
+    rewrite Hb, orb_false_l, Z.shiftl_spec by lia.
+    apply (Z_bounded_iff_bits_nonneg' (length bs * n)); lia.
   Qed.
-  Local Close Scope Z_scope.
 End Z_little_endian.

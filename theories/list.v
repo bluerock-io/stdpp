@@ -221,7 +221,7 @@ Definition mapM `{MBind M, MRet M} {A B} (f : A → M B) : list A → M (list B)
   fix go l :=
   match l with [] => mret [] | x :: l => y ← f x; k ← go l; mret (y :: k) end.
 
-(** We define stronger variants of map and fold that allow the mapped
+(** We define stronger variants of the map function that allow the mapped
 function to use the index of the elements. *)
 Fixpoint imap {A B} (f : nat → A → B) (l : list A) : list B :=
   match l with

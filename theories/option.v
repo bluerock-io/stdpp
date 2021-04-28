@@ -345,8 +345,8 @@ Lemma option_guard_True_pi {A} P `{Decision P, ProofIrrel P} (f : P → option A
     (HP : P) :
   mguard P f = f HP.
 Proof. intros. case_option_guard; [|done]. f_equal; apply proof_irrel. Qed.
-Lemma option_guard_False {A} P `{Decision P} (mx : option A) :
-  ¬P → (guard P; mx) = None.
+Lemma option_guard_False {A} P `{Decision P} (f : P → option A) :
+  ¬P → mguard P f = None.
 Proof. intros. by case_option_guard. Qed.
 Lemma option_guard_iff {A} P Q `{Decision P, Decision Q} (mx : option A) :
   (P ↔ Q) → (guard P; mx) = guard Q; mx.

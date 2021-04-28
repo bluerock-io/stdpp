@@ -30,15 +30,17 @@ Notation max_list := (max_list_with id).
 (** [Z_to_little_endian m n z] converts [z] into a list of [m] [n]-bit
 integers in the little endian format. A negative [z] is encoded using
 two's-complement. If [z] uses more than [m * n] bits, these additional
-bits are discarded (see [Z_of_to_little_endian]). [n] should be non-negative. *)
+bits are discarded (see [Z_of_to_little_endian]). [n] should be non-negative.
+*)
 Fixpoint Z_to_little_endian (m : nat) (n : Z) (z : Z) : list Z :=
   match m with
   | O => []
   | S m' => Z.land z (Z.ones n) :: Z_to_little_endian m' n (z ≫ n)
   end.
 
-(** [Z_of_little_endian n bs] converts the list [bs] of [n]-bit integers into
-a number by interpreting [bs] as the little endian encoding. *)
+(** [Z_of_little_endian n bs] converts the list [bs] of [n]-bit integers
+into a number by interpreting [bs] as the little endian encoding.
+The integers [b] in [bs] should be in the range [0 ≤ b < 2 ^ n]. *)
 Fixpoint Z_of_little_endian (n : Z) (bs : list Z) : Z :=
   match bs with
   | [] => 0

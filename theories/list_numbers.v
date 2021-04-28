@@ -28,7 +28,9 @@ Notation max_list := (max_list_with id).
 
 (** ** Conversion of integers to and from little endian *)
 (** [Z_to_little_endian m n z] converts [z] into a list of [m] [n]-bit
-integers in the little endian format. *)
+integers in the little endian format. A negative [z] is encoded using
+two's-complement. If [z] uses more than [m * n] bits, these additional
+bits are discarded (see [Z_of_to_little_endian]). [n] should be non-negative. *)
 Fixpoint Z_to_little_endian (m : nat) (n : Z) (z : Z) : list Z :=
   match m with
   | O => []
@@ -238,11 +240,12 @@ Section Z_little_endian.
       rewrite orb_false_l. f_equal. lia.
   Qed.
 
+  (* TODO: replace the calls to [nia] by [lia] after dropping support for Coq 8.10.2. *)
   Lemma Z_of_to_little_endian m n z:
     0 ≤ n →
     Z_of_little_endian n (Z_to_little_endian m n z) = z `mod` 2 ^ (m * n).
   Proof.
-    intros. rewrite <-Z.land_ones by lia.
+    intros. rewrite <-Z.land_ones by nia.
     revert z. induction m as [|m IH]; intros z; simpl.
     { Z.bitwise. by rewrite andb_false_r. }
     rewrite IH.
@@ -250,11 +253,14 @@ Section Z_little_endian.
     rewrite Z.land_spec, Z.lor_spec, Z.shiftl_spec, !Z.land_spec by lia.
     rewrite (Z_ones_spec n z') by lia. case_bool_decide.
     - rewrite andb_true_r, (Z.testbit_neg_r _ (z' - n)), orb_false_r by lia. simpl.
-      by rewrite Z_ones_spec, bool_decide_true, andb_true_r by lia.
+      by rewrite Z_ones_spec, bool_decide_true, andb_true_r by nia.
     - rewrite andb_false_r, orb_false_l.
       rewrite Z.shiftr_spec by lia. f_equal; [f_equal; lia|].
-      rewrite !Z_ones_spec by lia. apply bool_decide_iff. lia.
+      rewrite !Z_ones_spec by nia. apply bool_decide_iff. lia.
   Qed.
+
+  Lemma Z_to_little_endian_length m n z : length (Z_to_little_endian m n z) = m.
+  Proof. revert z. induction m; naive_solver. Qed.
 
   Lemma Z_to_little_endian_bound m n z:
     0 ≤ n →
@@ -272,11 +278,11 @@ Section Z_little_endian.
     0 ≤ Z_of_little_endian n bs < 2 ^ (length bs * n).
   Proof.
     intros ?. induction 1 as [|b bs Hb ? IH]; [done|]; simpl.
-    apply Z_bounded_iff_bits_nonneg'; [lia|..].
+    apply Z_bounded_iff_bits_nonneg'; [nia|..].
     { apply Z.lor_nonneg. split; [lia|]. apply Z.shiftl_nonneg. lia. }
     intros z' ?. rewrite Z.lor_spec.
     rewrite Z_bounded_iff_bits_nonneg' in Hb by lia.
-    rewrite Hb, orb_false_l, Z.shiftl_spec by lia.
-    apply (Z_bounded_iff_bits_nonneg' (length bs * n)); lia.
+    rewrite Hb, orb_false_l, Z.shiftl_spec by nia.
+    apply (Z_bounded_iff_bits_nonneg' (length bs * n)); nia.
   Qed.
 End Z_little_endian.

@@ -560,6 +560,10 @@ Notation "(<)" := Qclt (only parsing) : Qc_scope.
 Global Hint Extern 1 (_ ≤ _) => reflexivity || discriminate : core.
 Global Arguments Qred : simpl never.
 
+Lemma inject_Z_Qred n : Qred (inject_Z n) = inject_Z n.
+Proof. apply Qred_identity; auto using Z.gcd_1_r. Qed.
+Definition Qc_of_Z (n : Z) : Qc := Qcmake _ (inject_Z_Qred n).
+
 Global Instance Qc_eq_dec: EqDecision Qc := Qc_eq_dec.
 Program Instance Qc_le_dec: RelDecision Qcle := λ x y,
   if Qclt_le_dec y x then right _ else left _.
@@ -681,9 +685,6 @@ Proof.
   by rewrite (Qcmult_lt_mono_pos_r _ _ x), Qcmult_0_l, Qcmult_inv_l by done.
 Qed.
 
-Lemma inject_Z_Qred n : Qred (inject_Z n) = inject_Z n.
-Proof. apply Qred_identity; auto using Z.gcd_1_r. Qed.
-Coercion Qc_of_Z (n : Z) : Qc := Qcmake _ (inject_Z_Qred n).
 Lemma Z2Qc_inj_0 : Qc_of_Z 0 = 0.
 Proof. by apply Qc_is_canon. Qed.
 Lemma Z2Qc_inj_1 : Qc_of_Z 1 = 1.
@@ -764,7 +765,7 @@ Infix "*" := Qp_mul : Qp_scope.
 Notation "/ q" := (Qp_inv q) : Qp_scope.
 Infix "/" := Qp_div : Qp_scope.
 
-Program Definition pos_to_Qp (n : positive) : Qp := mk_Qp (Z.pos n) _.
+Program Definition pos_to_Qp (n : positive) : Qp := mk_Qp (Qc_of_Z $ Z.pos n) _.
 Next Obligation. intros n. by rewrite <-Z2Qc_inj_0, <-Z2Qc_inj_lt. Qed.
 Global Arguments pos_to_Qp : simpl never.
 

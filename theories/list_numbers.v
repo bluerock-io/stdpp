@@ -218,8 +218,8 @@ End sum_list.
 (** ** Properties of the [Z_to_little_endian] and [Z_of_little_endian] functions *)
 Section Z_little_endian.
   Local Open Scope Z_scope.
-  Implicit Types n m : nat.
-  Implicit Types z : Z.
+  Implicit Types m : nat.
+  Implicit Types n z : Z.
 
   Lemma Z_to_of_little_endian m n bs:
     m = length bs → 0 ≤ n →

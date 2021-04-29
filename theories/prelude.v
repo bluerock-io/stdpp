@@ -13,3 +13,7 @@ From stdpp Require Export
   list_numbers
   lexico.
 From stdpp Require Import options.
+
+(** We are phasing out this coercion inside std++, but currently
+keep it enabled for users to ensure backwards compatibility. *)
+Coercion Z.of_nat : nat >-> Z.

@@ -18,6 +18,7 @@ API-breaking change is listed.
   + Add lemmas for `∈` and `∉` specific for multisets, since the set lemmas no
     longer work for multisets.
 - Make `Qc_of_Z'` not an implicit coercion (from `Z` to `Qc`) any more.
+- Make `Z.of_nat'` not an implicit coercion (from `nat` to `Z`) any more.
 
 ## std++ 1.5.0
 

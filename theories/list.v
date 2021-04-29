@@ -150,7 +150,7 @@ Instance: Params (@replicate) 2 := {}.
 [x0; x1; ...; xm]] becomes [x1; ...; xm; x0]. Rotating by a multiple of
 [length l] is the identity function. **)
 Definition rotate {A} (n : nat) (l : list A) : list A :=
-  drop (Z.to_nat (n `mod` length l)%Z) l ++ take (Z.to_nat (n `mod` length l)%Z) l.
+  drop (n `mod` length l) l ++ take (n `mod` length l) l.
 Instance: Params (@rotate) 2 := {}.
 
 (** The function [rotate_take s e l] returns the range between the
@@ -1404,11 +1404,9 @@ Lemma lookup_rotate_r l n i:
   i < length l →
   rotate n l !! i = l !! rotate_nat_add n i (length l).
 Proof.
-  intros Hlen. destruct (Z_mod_lt n (length l)) as [??];[lia|].
-  assert (Z.to_nat (n `mod` length l) < length l) as Hr.
-  { apply Nat2Z.inj_lt. rewrite Z2Nat.id; lia. }
-  unfold rotate. rewrite rotate_nat_add_add_mod, rotate_nat_add_alt by done.
-  remember (Z.to_nat (n `mod` length l)) as n'.
+  intros Hlen. pose proof (Nat.mod_upper_bound n (length l)) as ?.
+  unfold rotate. rewrite rotate_nat_add_add_mod, rotate_nat_add_alt by lia.
+  remember (n `mod` length l) as n'.
   case_decide.
   - by rewrite lookup_app_l, lookup_drop by (rewrite drop_length; lia).
   - rewrite lookup_app_r, lookup_take, drop_length by (rewrite drop_length; lia).
@@ -1435,7 +1433,7 @@ Qed.
 Lemma elem_of_rotate l n x:
   x ∈ rotate n l ↔ x ∈ l.
 Proof.
-  unfold rotate. rewrite <-(take_drop (Z.to_nat (n `mod` length l)) l) at 5.
+  unfold rotate. rewrite <-(take_drop (n `mod` length l) l) at 5.
   rewrite !elem_of_app. naive_solver.
 Qed.
 
@@ -1443,11 +1441,9 @@ Lemma rotate_insert_l l n i x:
   i < length l →
   rotate n (<[rotate_nat_add n i (length l):=x]> l) = <[i:=x]> (rotate n l).
 Proof.
-  intros Hlen. destruct (Z_mod_lt n (length l)) as [Hn1 Hn2];[lia|].
-  assert (Z.to_nat (n `mod` length l) < length l) as Hr.
-  { apply Nat2Z.inj_lt. rewrite Z2Nat.id; lia. } unfold rotate.
-  rewrite insert_length, rotate_nat_add_add_mod, rotate_nat_add_alt by done.
-  remember (Z.to_nat (n `mod` length l)) as n'.
+  intros Hlen. pose proof (Nat.mod_upper_bound n (length l)) as ?. unfold rotate.
+  rewrite insert_length, rotate_nat_add_add_mod, rotate_nat_add_alt by lia.
+  remember (n `mod` length l) as n'.
   case_decide.
   - rewrite take_insert, drop_insert_le, insert_app_l
       by (rewrite ?drop_length; lia). do 2 f_equal. lia.

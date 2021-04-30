@@ -7,7 +7,6 @@ From stdpp Require Export base decidable option.
 From stdpp Require Import options.
 Local Open Scope nat_scope.
 
-Coercion Z.of_nat : nat >-> Z.
 Global Instance comparison_eq_dec : EqDecision comparison.
 Proof. solve_decision. Defined.
 
@@ -425,7 +424,7 @@ Global Hint Extern 1000 => lia : zpos.
 
 Lemma Z_to_nat_nonpos x : x ≤ 0 → Z.to_nat x = 0%nat.
 Proof. destruct x; simpl; auto using Z2Nat.inj_neg. by intros []. Qed.
-Lemma Z2Nat_inj_pow (x y : nat) : Z.of_nat (x ^ y) = x ^ y.
+Lemma Z2Nat_inj_pow (x y : nat) : Z.of_nat (x ^ y) = (Z.of_nat x) ^ (Z.of_nat y).
 Proof.
   induction y as [|y IH]; [by rewrite Z.pow_0_r, Nat.pow_0_r|].
   by rewrite Nat.pow_succ_r, Nat2Z.inj_succ, Z.pow_succ_r,
@@ -443,18 +442,18 @@ Qed.
 Lemma Z2Nat_divide n m :
   0 ≤ n → 0 ≤ m → (Z.to_nat n | Z.to_nat m)%nat ↔ (n | m).
 Proof. intros. by rewrite <-Nat2Z_divide, !Z2Nat.id by done. Qed.
-Lemma Nat2Z_inj_div x y : Z.of_nat (x `div` y) = x `div` y.
+Lemma Nat2Z_inj_div x y : Z.of_nat (x `div` y) = (Z.of_nat x) `div` (Z.of_nat y).
 Proof.
   destruct (decide (y = 0%nat)); [by subst; destruct x |].
-  apply Z.div_unique with (x `mod` y)%nat.
+  apply Z.div_unique with (Z.of_nat $ x `mod` y)%nat.
   { left. rewrite <-(Nat2Z.inj_le 0), <-Nat2Z.inj_lt.
     apply Nat.mod_bound_pos; lia. }
   by rewrite <-Nat2Z.inj_mul, <-Nat2Z.inj_add, <-Nat.div_mod.
 Qed.
-Lemma Nat2Z_inj_mod x y : Z.of_nat (x `mod` y) = x `mod` y.
+Lemma Nat2Z_inj_mod x y : Z.of_nat (x `mod` y) = (Z.of_nat x) `mod` (Z.of_nat y).
 Proof.
   destruct (decide (y = 0%nat)); [by subst; destruct x |].
-  apply Z.mod_unique with (x `div` y)%nat.
+  apply Z.mod_unique with (Z.of_nat $ x `div` y)%nat.
   { left. rewrite <-(Nat2Z.inj_le 0), <-Nat2Z.inj_lt.
     apply Nat.mod_bound_pos; lia. }
   by rewrite <-Nat2Z.inj_mul, <-Nat2Z.inj_add, <-Nat.div_mod.
@@ -463,7 +462,7 @@ Lemma Z2Nat_inj_div x y :
   0 ≤ x → 0 ≤ y →
   Z.to_nat (x `div` y) = (Z.to_nat x `div` Z.to_nat y)%nat.
 Proof.
-  intros. destruct (decide (y = 0%nat)); [by subst; destruct x|].
+  intros. destruct (decide (y = Z.of_nat 0%nat)); [by subst; destruct x|].
   pose proof (Z.div_pos x y).
   apply (inj Z.of_nat). by rewrite Nat2Z_inj_div, !Z2Nat.id by lia.
 Qed.
@@ -471,7 +470,7 @@ Lemma Z2Nat_inj_mod x y :
   0 ≤ x → 0 ≤ y →
   Z.to_nat (x `mod` y) = (Z.to_nat x `mod` Z.to_nat y)%nat.
 Proof.
-  intros. destruct (decide (y = 0%nat)); [by subst; destruct x|].
+  intros. destruct (decide (y = Z.of_nat 0%nat)); [by subst; destruct x|].
   pose proof (Z_mod_pos x y).
   apply (inj Z.of_nat). by rewrite Nat2Z_inj_mod, !Z2Nat.id by lia.
 Qed.
@@ -1243,13 +1242,13 @@ lists, since the index [i] of [rotate n l] corresponds to the index
 [rotate_nat_add n i (length i)] of the original list. The definition
 uses [Z] for consistency with [rotate_nat_sub]. **)
 Definition rotate_nat_add (base offset len : nat) : nat :=
-  Z.to_nat ((base + offset) `mod` len)%Z.
+  Z.to_nat ((Z.of_nat base + Z.of_nat offset) `mod` Z.of_nat len)%Z.
 (** [rotate_nat_sub base offset len] is the inverse of [rotate_nat_add
 base offset len]. The definition needs to use modulo on [Z] instead of
 on nat since otherwise we need the sidecondition [base < len] on
 [rotate_nat_sub_add]. **)
 Definition rotate_nat_sub (base offset len : nat) : nat :=
-  Z.to_nat ((len + offset - base) `mod` len)%Z.
+  Z.to_nat ((Z.of_nat len + Z.of_nat offset - Z.of_nat base) `mod` Z.of_nat len)%Z.
 
 Lemma rotate_nat_add_add_mod base offset len:
   rotate_nat_add base offset len =
@@ -1299,7 +1298,7 @@ Lemma rotate_nat_sub_lt base offset len :
   0 < len → rotate_nat_sub base offset len < len.
 Proof.
   unfold rotate_nat_sub. intros ?.
-  pose proof (Z_mod_lt (len + offset - base) len).
+  pose proof (Z_mod_lt (Z.of_nat len + Z.of_nat offset - Z.of_nat base) (Z.of_nat len)).
   apply Nat2Z.inj_lt. rewrite Z2Nat.id; lia.
 Qed.
 
@@ -1309,7 +1308,8 @@ Lemma rotate_nat_add_sub base len offset:
 Proof.
   intros ?. unfold rotate_nat_add, rotate_nat_sub.
   rewrite Z2Nat.id by (apply Z_mod_pos; lia). rewrite Zplus_mod_idemp_r.
-  replace (base + (len + offset - base))%Z with (len + offset)%Z by lia.
+  replace (Z.of_nat base + (Z.of_nat len + Z.of_nat offset - Z.of_nat base))%Z
+    with (Z.of_nat len + Z.of_nat offset)%Z by lia.
   rewrite (Zmod_in_range 1) by lia.
   rewrite Z.mul_1_l, <-Nat2Z.inj_add, <-!Nat2Z.inj_sub,Nat2Z.id; lia.
 Qed.
@@ -1320,9 +1320,11 @@ Lemma rotate_nat_sub_add base len offset:
 Proof.
   intros ?. unfold rotate_nat_add, rotate_nat_sub.
   rewrite Z2Nat.id by (apply Z_mod_pos; lia).
-  assert (∀ n, (len + n - base) = ((len - base) + n))%Z as -> by naive_solver lia.
+  assert (∀ n, (Z.of_nat len + n - Z.of_nat base) = ((Z.of_nat len - Z.of_nat base) + n))%Z
+    as -> by naive_solver lia.
   rewrite Zplus_mod_idemp_r.
-  replace (len - base + (base + offset))%Z with (len + offset)%Z by lia.
+  replace (Z.of_nat len - Z.of_nat base + (Z.of_nat base + Z.of_nat offset))%Z with
+    (Z.of_nat len + Z.of_nat offset)%Z by lia.
   rewrite (Zmod_in_range 1) by lia.
   rewrite Z.mul_1_l, <-Nat2Z.inj_add, <-!Nat2Z.inj_sub,Nat2Z.id; lia.
 Qed.

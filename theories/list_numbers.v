@@ -7,7 +7,7 @@ From stdpp Require Import options.
 (** [seqZ m n] generates the sequence [m], [m + 1], ..., [m + n - 1]
 over integers, provided [0 ≤ n]. If [n < 0], then the range is empty. **)
 Definition seqZ (m len: Z) : list Z :=
-  (λ i: nat, Z.add i m) <$> (seq 0 (Z.to_nat len)).
+  (λ i: nat, Z.add (Z.of_nat i) m) <$> (seq 0 (Z.to_nat len)).
 Global Arguments seqZ : simpl never.
 
 Definition sum_list_with {A} (f : A → nat) : list A → nat :=
@@ -107,7 +107,7 @@ Section seqZ.
       f_equal/=. rewrite Z.pred_succ, IH; simpl. f_equal; lia.
     - by rewrite !seqZ_nil by lia.
   Qed.
-  Lemma lookup_seqZ_lt m n i : i < n → seqZ m n !! i = Some (m + i).
+  Lemma lookup_seqZ_lt m n i : Z.of_nat i < n → seqZ m n !! i = Some (m + Z.of_nat i).
   Proof.
     revert m i. induction n as [|n ? IH|] using (Z_succ_pred_induction 0);
       intros m i Hi; [lia| |lia].
@@ -115,9 +115,9 @@ Section seqZ.
     - f_equal; lia.
     - rewrite Z.pred_succ, IH by lia. f_equal; lia.
   Qed.
-  Lemma lookup_total_seqZ_lt m n i : i < n → seqZ m n !!! i = m + i.
+  Lemma lookup_total_seqZ_lt m n i : Z.of_nat i < n → seqZ m n !!! i = m + Z.of_nat i.
   Proof. intros. by rewrite !list_lookup_total_alt, lookup_seqZ_lt. Qed.
-  Lemma lookup_seqZ_ge m n i : n ≤ i → seqZ m n !! i = None.
+  Lemma lookup_seqZ_ge m n i : n ≤ Z.of_nat i → seqZ m n !! i = None.
   Proof.
     revert m i.
     induction n as [|n ? IH|] using (Z_succ_pred_induction 0); intros m i Hi; try lia.
@@ -126,11 +126,11 @@ Section seqZ.
       destruct i as [|i]; simpl; [lia|]. by rewrite Z.pred_succ, IH by lia.
     - by rewrite seqZ_nil by lia.
   Qed.
-  Lemma lookup_total_seqZ_ge m n i : n ≤ i → seqZ m n !!! i = inhabitant.
+  Lemma lookup_total_seqZ_ge m n i : n ≤ Z.of_nat i → seqZ m n !!! i = inhabitant.
   Proof. intros. by rewrite !list_lookup_total_alt, lookup_seqZ_ge. Qed.
-  Lemma lookup_seqZ m n i m' : seqZ m n !! i = Some m' ↔ m' = m + i ∧ i < n.
+  Lemma lookup_seqZ m n i m' : seqZ m n !! i = Some m' ↔ m' = m + Z.of_nat i ∧ Z.of_nat i < n.
   Proof.
-    destruct (Z_le_gt_dec n i).
+    destruct (Z_le_gt_dec n (Z.of_nat i)).
     - rewrite lookup_seqZ_ge by lia. naive_solver lia.
     - rewrite lookup_seqZ_lt by lia. naive_solver lia.
   Qed.
@@ -148,7 +148,7 @@ Section seqZ.
     rewrite Nat2Z.inj_add, Z2Nat.id by done. lia.
   Qed.
 
-  Lemma seqZ_S m i : seqZ m (S i) = seqZ m i ++ [m + i].
+  Lemma seqZ_S m i : seqZ m (Z.of_nat (S i)) = seqZ m (Z.of_nat i) ++ [m + Z.of_nat i].
   Proof.
     unfold seqZ. rewrite !Nat2Z.id, seq_S, fmap_app.
     simpl. by rewrite Z.add_comm.

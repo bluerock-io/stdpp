@@ -30,7 +30,7 @@ Notation max_list := (max_list_with id).
 (** [Z_to_little_endian m n z] converts [z] into a list of [m] [n]-bit
 integers in the little endian format. A negative [z] is encoded using
 two's-complement. If [z] uses more than [m * n] bits, these additional
-bits are discarded (see [Z_of_to_little_endian]). [n] should be non-negative.
+bits are discarded (see [Z_to_little_endian_to_Z]). [n] should be non-negative.
 *)
 Fixpoint Z_to_little_endian (m : nat) (n : Z) (z : Z) : list Z :=
   match m with
@@ -38,13 +38,13 @@ Fixpoint Z_to_little_endian (m : nat) (n : Z) (z : Z) : list Z :=
   | S m' => Z.land z (Z.ones n) :: Z_to_little_endian m' n (z ≫ n)
   end.
 
-(** [Z_of_little_endian n bs] converts the list [bs] of [n]-bit integers
+(** [little_endian_to_Z n bs] converts the list [bs] of [n]-bit integers
 into a number by interpreting [bs] as the little endian encoding.
 The integers [b] in [bs] should be in the range [0 ≤ b < 2 ^ n]. *)
-Fixpoint Z_of_little_endian (n : Z) (bs : list Z) : Z :=
+Fixpoint little_endian_to_Z (n : Z) (bs : list Z) : Z :=
   match bs with
   | [] => 0
-  | b :: bs => Z.lor b (Z_of_little_endian n bs ≪ n)
+  | b :: bs => Z.lor b (little_endian_to_Z n bs ≪ n)
   end.
 
 
@@ -215,16 +215,16 @@ Section sum_list.
   Proof. induction 1; simpl; lia. Qed.
 End sum_list.
 
-(** ** Properties of the [Z_to_little_endian] and [Z_of_little_endian] functions *)
+(** ** Properties of the [Z_to_little_endian] and [little_endian_to_Z] functions *)
 Section Z_little_endian.
   Local Open Scope Z_scope.
   Implicit Types m : nat.
   Implicit Types n z : Z.
 
-  Lemma Z_to_of_little_endian m n bs:
+  Lemma little_endian_to_Z_to_little_endian m n bs:
     m = length bs → 0 ≤ n →
     Forall (λ b, 0 ≤ b < 2 ^ n) bs →
-    Z_to_little_endian m n (Z_of_little_endian n bs) = bs.
+    Z_to_little_endian m n (little_endian_to_Z n bs) = bs.
   Proof.
     intros -> ?. induction 1 as [|b bs ? ? IH]; [done|]; csimpl.
     f_equal.
@@ -243,9 +243,9 @@ Section Z_little_endian.
   Qed.
 
   (* TODO: replace the calls to [nia] by [lia] after dropping support for Coq 8.10.2. *)
-  Lemma Z_of_to_little_endian m n z:
+  Lemma Z_to_little_endian_to_Z m n z:
     0 ≤ n →
-    Z_of_little_endian n (Z_to_little_endian m n z) = z `mod` 2 ^ (m * n).
+    little_endian_to_Z n (Z_to_little_endian m n z) = z `mod` 2 ^ ((Z.of_nat m) * n).
   Proof.
     intros. rewrite <-Z.land_ones by nia.
     revert z. induction m as [|m IH]; intros z; simpl.
@@ -274,10 +274,10 @@ Section Z_little_endian.
     apply Z.mod_pos_bound, Z.pow_pos_nonneg; lia.
   Qed.
 
-  Lemma Z_of_little_endian_bound n bs:
+  Lemma little_endian_to_Z_bound n bs:
     0 ≤ n →
     Forall (λ b, 0 ≤ b < 2 ^ n) bs →
-    0 ≤ Z_of_little_endian n bs < 2 ^ (length bs * n).
+    0 ≤ little_endian_to_Z n bs < 2 ^ (Z.of_nat (length bs) * n).
   Proof.
     intros ?. induction 1 as [|b bs Hb ? IH]; [done|]; simpl.
     apply Z_bounded_iff_bits_nonneg'; [nia|..].
@@ -285,6 +285,6 @@ Section Z_little_endian.
     intros z' ?. rewrite Z.lor_spec.
     rewrite Z_bounded_iff_bits_nonneg' in Hb by lia.
     rewrite Hb, orb_false_l, Z.shiftl_spec by nia.
-    apply (Z_bounded_iff_bits_nonneg' (length bs * n)); nia.
+    apply (Z_bounded_iff_bits_nonneg' (Z.of_nat (length bs) * n)); nia.
   Qed.
 End Z_little_endian.

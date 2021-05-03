@@ -135,6 +135,11 @@ Proof. apply bool_decide_eq_false. Qed.
 Lemma bool_decide_eq_false_2 P `{!Decision P}: ¬P → bool_decide P = false.
 Proof. apply bool_decide_eq_false. Qed.
 
+(** The tactic [compute_done] solves a decidable goal by computing that it is
+true. *)
+Tactic Notation "compute_done" :=
+  apply (bool_decide_unpack _); vm_compute; exact I.
+
 (** Backwards compatibility notations. *)
 Notation bool_decide_true := bool_decide_eq_true_2.
 Notation bool_decide_false := bool_decide_eq_false_2.

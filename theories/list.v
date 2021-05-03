@@ -4537,7 +4537,7 @@ Ltac quote_Permutation :=
   end.
 Ltac solve_Permutation :=
   quote_Permutation; apply rlist.eval_Permutation;
-  apply (bool_decide_unpack _); by vm_compute.
+  compute_done.
 
 Ltac quote_submseteq :=
   match goal with
@@ -4549,7 +4549,7 @@ Ltac quote_submseteq :=
   end.
 Ltac solve_submseteq :=
   quote_submseteq; apply rlist.eval_submseteq;
-  apply (bool_decide_unpack _); by vm_compute.
+  compute_done.
 
 Ltac decompose_elem_of_list := repeat
   match goal with

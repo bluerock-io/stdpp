@@ -32,11 +32,9 @@ integers in the little endian format. A negative [z] is encoded using
 two's-complement. If [z] uses more than [m * n] bits, these additional
 bits are discarded (see [Z_to_little_endian_to_Z]). [n] should be non-negative.
 *)
-Fixpoint Z_to_little_endian (m : nat) (n : Z) (z : Z) : list Z :=
-  match m with
-  | O => []
-  | S m' => Z.land z (Z.ones n) :: Z_to_little_endian m' n (z ≫ n)
-  end.
+Definition Z_to_little_endian (m n : Z) : Z → list Z :=
+  Z.iter m (λ rec z, Z.land z (Z.ones n) :: rec (z ≫ n)%Z) (λ _, []).
+Global Arguments Z_to_little_endian : simpl never.
 
 (** [little_endian_to_Z n bs] converts the list [bs] of [n]-bit integers
 into a number by interpreting [bs] as the little endian encoding.
@@ -218,16 +216,24 @@ End sum_list.
 (** ** Properties of the [Z_to_little_endian] and [little_endian_to_Z] functions *)
 Section Z_little_endian.
   Local Open Scope Z_scope.
-  Implicit Types m : nat.
-  Implicit Types n z : Z.
+  Implicit Types m n z : Z.
+
+  Lemma Z_to_little_endian_succ m n z :
+    0 ≤ m →
+    Z_to_little_endian (Z.succ m) n z
+    = Z.land z (Z.ones n) :: Z_to_little_endian m n (z ≫ n).
+  Proof.
+    unfold Z_to_little_endian. intros.
+    by rewrite !iter_nat_of_Z, Zabs2Nat.inj_succ by lia.
+  Qed.
 
   Lemma little_endian_to_Z_to_little_endian m n bs:
-    m = length bs → 0 ≤ n →
+    m = Z.of_nat (length bs) → 0 ≤ n →
     Forall (λ b, 0 ≤ b < 2 ^ n) bs →
     Z_to_little_endian m n (little_endian_to_Z n bs) = bs.
   Proof.
-    intros -> ?. induction 1 as [|b bs ? ? IH]; [done|]; csimpl.
-    f_equal.
+    intros -> ?. induction 1 as [|b bs ? ? IH]; [done|]; simpl.
+    rewrite Nat2Z.inj_succ, Z_to_little_endian_succ by lia. f_equal.
     - apply Z.bits_inj_iff'. intros z' ?.
       rewrite !Z.land_spec, Z.lor_spec, Z_ones_spec by lia.
       case_bool_decide.
@@ -244,13 +250,14 @@ Section Z_little_endian.
 
   (* TODO: replace the calls to [nia] by [lia] after dropping support for Coq 8.10.2. *)
   Lemma Z_to_little_endian_to_Z m n z:
-    0 ≤ n →
-    little_endian_to_Z n (Z_to_little_endian m n z) = z `mod` 2 ^ ((Z.of_nat m) * n).
+    0 ≤ n → 0 ≤ m →
+    little_endian_to_Z n (Z_to_little_endian m n z) = z `mod` 2 ^ (m * n).
   Proof.
-    intros. rewrite <-Z.land_ones by nia.
-    revert z. induction m as [|m IH]; intros z; simpl.
+    intros ? Hm. rewrite <-Z.land_ones by nia.
+    revert z.
+    induction m as [|m ? IH|] using (Z_succ_pred_induction 0); intros z; [..|lia].
     { Z.bitwise. by rewrite andb_false_r. }
-    rewrite IH.
+    rewrite Z_to_little_endian_succ by lia; simpl. rewrite IH by lia.
     apply Z.bits_inj_iff'. intros z' ?.
     rewrite Z.land_spec, Z.lor_spec, Z.shiftl_spec, !Z.land_spec by lia.
     rewrite (Z_ones_spec n z') by lia. case_bool_decide.
@@ -261,15 +268,23 @@ Section Z_little_endian.
       rewrite !Z_ones_spec by nia. apply bool_decide_iff. lia.
   Qed.
 
-  Lemma Z_to_little_endian_length m n z : length (Z_to_little_endian m n z) = m.
-  Proof. revert z. induction m; naive_solver. Qed.
+  Lemma Z_to_little_endian_length m n z :
+    0 ≤ m →
+    Z.of_nat (length (Z_to_little_endian m n z)) = m.
+  Proof.
+    intros. revert z. induction m as [|m ? IH|]
+      using (Z_succ_pred_induction 0); intros z; [done| |lia].
+    rewrite Z_to_little_endian_succ by lia. simpl. by rewrite Nat2Z.inj_succ, IH.
+  Qed.
 
   Lemma Z_to_little_endian_bound m n z:
-    0 ≤ n →
+    0 ≤ n → 0 ≤ m →
     Forall (λ b, 0 ≤ b < 2 ^ n) (Z_to_little_endian m n z).
   Proof.
-    intros ?. revert z. induction m as [|m IH]; intros z; simpl.
+    intros. revert z.
+    induction m as [|m ? IH|] using (Z_succ_pred_induction 0); intros z; [..|lia].
     { by constructor. }
+    rewrite Z_to_little_endian_succ by lia.
     constructor; [|by apply IH]. rewrite Z.land_ones by lia.
     apply Z.mod_pos_bound, Z.pow_pos_nonneg; lia.
   Qed.

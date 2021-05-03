@@ -339,7 +339,7 @@ Tactic Notation "case_option_guard" :=
   let H := fresh in case_option_guard as H.
 
 Lemma option_guard_True {A} P `{Decision P} (mx : option A) :
-  P → (guard P; mx) = mx.
+  P → mguard P (λ _, mx) = mx.
 Proof. intros. by case_option_guard. Qed.
 Lemma option_guard_True_pi {A} P `{Decision P, ProofIrrel P} (f : P → option A)
     (HP : P) :

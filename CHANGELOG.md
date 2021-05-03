@@ -19,6 +19,16 @@ API-breaking change is listed.
     longer work for multisets.
 - Make `Qc_of_Z'` not an implicit coercion (from `Z` to `Qc`) any more.
 - Make `Z.of_nat'` not an implicit coercion (from `nat` to `Z`) any more.
+- Rename `decide_left` → `decide_True_pi` and `decide_right` → `decide_False_pi`.
+
+The following `sed` script should perform most of the renaming
+(on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`):
+```
+sed -i -E '
+s/\bdecide_left\b/decide_True_pi/g
+s/\bdecide_right\b/decide_False_pi/g
+' $(find theories -name "*.v")
+```
 
 ## std++ 1.5.0
 

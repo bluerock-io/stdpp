@@ -227,7 +227,7 @@ Section Z_little_endian.
     by rewrite !iter_nat_of_Z, Zabs2Nat.inj_succ by lia.
   Qed.
 
-  Lemma little_endian_to_Z_to_little_endian m n bs:
+  Lemma Z_to_little_endian_to_Z m n bs:
     m = Z.of_nat (length bs) → 0 ≤ n →
     Forall (λ b, 0 ≤ b < 2 ^ n) bs →
     Z_to_little_endian m n (little_endian_to_Z n bs) = bs.
@@ -249,7 +249,7 @@ Section Z_little_endian.
   Qed.
 
   (* TODO: replace the calls to [nia] by [lia] after dropping support for Coq 8.10.2. *)
-  Lemma Z_to_little_endian_to_Z m n z:
+  Lemma little_endian_to_Z_to_little_endian m n z:
     0 ≤ n → 0 ≤ m →
     little_endian_to_Z n (Z_to_little_endian m n z) = z `mod` 2 ^ (m * n).
   Proof.

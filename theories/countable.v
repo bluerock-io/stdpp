@@ -340,3 +340,12 @@ Next Obligation.
   intros T ?? t.
   by rewrite <-(right_id_L [] _ (gen_tree_to_list _)), gen_tree_of_to_list.
 Qed.
+
+(** ** Sigma *)
+Program Instance countable_sig `{Countable A} (P : A → Prop)
+        `{!∀ x, Decision (P x), !∀ x, ProofIrrel (P x)} :
+  Countable { x : A | P x } :=
+  inj_countable proj1_sig (λ x, guard (P x) as Hx; Some (x ↾ Hx)) _.
+Next Obligation.
+  intros A ?? P ?? [x Hx]. by erewrite (option_guard_True_pi (P x)).
+Qed.

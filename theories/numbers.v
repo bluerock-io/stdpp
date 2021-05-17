@@ -485,6 +485,15 @@ Lemma Zmod_in_range q a c :
   a `mod` c = a - q * c.
 Proof. intros ?. symmetry. apply Z.mod_unique_pos with q; lia. Qed.
 
+Lemma Z_ones_spec n m:
+  0 ≤ m → 0 ≤ n →
+  Z.testbit (Z.ones n) m = bool_decide (m < n).
+Proof.
+  intros. case_bool_decide.
+  - by rewrite Z.ones_spec_low by lia.
+  - by rewrite Z.ones_spec_high by lia.
+Qed.
+
 Lemma Z_bounded_iff_bits_nonneg k n :
   0 ≤ k → 0 ≤ n →
   n < 2^k ↔ ∀ l, k ≤ l → Z.testbit n l = false.

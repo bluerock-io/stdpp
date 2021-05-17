@@ -30,8 +30,8 @@ Notation max_list := (max_list_with id).
 (** [Z_to_little_endian m n z] converts [z] into a list of [m] [n]-bit
 integers in the little endian format. A negative [z] is encoded using
 two's-complement. If [z] uses more than [m * n] bits, these additional
-bits are discarded (see [Z_to_little_endian_to_Z]). [n] should be non-negative.
-*)
+bits are discarded (see [Z_to_little_endian_to_Z]). [m] and [n] should be
+non-negative. *)
 Definition Z_to_little_endian (m n : Z) : Z → list Z :=
   Z.iter m (λ rec z, Z.land z (Z.ones n) :: rec (z ≫ n)%Z) (λ _, []).
 Global Arguments Z_to_little_endian : simpl never.

@@ -865,7 +865,7 @@ Lemma Qp_mul_1_r p : p * 1 = p.
 Proof. destruct p; apply Qp_to_Qc_inj_iff, Qcmult_1_r. Qed.
 
 Lemma Qp_1_1 : 1 + 1 = 2.
-Proof. apply (bool_decide_unpack _); by compute. Qed.
+Proof. compute_done. Qed.
 Lemma Qp_add_diag p : p + p = 2 * p.
 Proof. by rewrite <-Qp_1_1, Qp_mul_add_distr_r, !Qp_mul_1_l. Qed.
 
@@ -893,11 +893,11 @@ Proof.
   by rewrite Qp_mul_inv_l, Hp, Qp_mul_inv_l.
 Qed.
 Lemma Qp_inv_1 : /1 = 1.
-Proof. apply (bool_decide_unpack _); by compute. Qed.
+Proof. compute_done. Qed.
 Lemma Qp_inv_half_half : /2 + /2 = 1.
-Proof. apply (bool_decide_unpack _); by compute. Qed.
+Proof. compute_done. Qed.
 Lemma Qp_inv_quarter_quarter : /4 + /4 = /2.
-Proof. apply (bool_decide_unpack _); by compute. Qed.
+Proof. compute_done. Qed.
 
 Lemma Qp_div_diag p : p / p = 1.
 Proof. apply Qp_mul_inv_r. Qed.
@@ -926,13 +926,13 @@ Qed.
 Lemma Qp_div_2_mul p q : p / (2 * q) + p / (2 * q) = p / q.
 Proof. by rewrite <-Qp_div_add_distr, Qp_add_diag, Qp_div_mul_cancel_l. Qed.
 Lemma Qp_half_half : 1 / 2 + 1 / 2 = 1.
-Proof. apply (bool_decide_unpack _); by compute. Qed.
+Proof. compute_done. Qed.
 Lemma Qp_quarter_quarter : 1 / 4 + 1 / 4 = 1 / 2.
-Proof. apply (bool_decide_unpack _); by compute. Qed.
+Proof. compute_done. Qed.
 Lemma Qp_quarter_three_quarter : 1 / 4 + 3 / 4 = 1.
-Proof. apply (bool_decide_unpack _); by compute. Qed.
+Proof. compute_done. Qed.
 Lemma Qp_three_quarter_quarter : 3 / 4 + 1 / 4 = 1.
-Proof. apply (bool_decide_unpack _); by compute. Qed.
+Proof. compute_done. Qed.
 Global Instance Qp_div_inj_r p : Inj (=) (=) (Qp_div p).
 Proof. unfold Qp_div; apply _. Qed.
 Global Instance Qp_div_inj_l p : Inj (=) (=) (λ q, q / p)%Qp.
@@ -1227,7 +1227,7 @@ Lemma Qp_min_r_iff q p : q `min` p = p ↔ p ≤ q.
 Proof. rewrite (comm_L Qp_min q). apply Qp_min_l_iff. Qed.
 
 Lemma pos_to_Qp_1 : pos_to_Qp 1 = 1.
-Proof. apply (bool_decide_unpack _); by compute. Qed.
+Proof. compute_done. Qed.
 Lemma pos_to_Qp_inj n m : pos_to_Qp n = pos_to_Qp m → n = m.
 Proof. by injection 1. Qed.
 Lemma pos_to_Qp_inj_iff n m : pos_to_Qp n = pos_to_Qp m ↔ n = m.

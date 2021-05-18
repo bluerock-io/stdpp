@@ -135,6 +135,20 @@ Proof. apply bool_decide_eq_false. Qed.
 Lemma bool_decide_eq_false_2 P `{!Decision P}: ¬P → bool_decide P = false.
 Proof. apply bool_decide_eq_false. Qed.
 
+(** The tactic [compute_done] solves the following kinds of goals:
+- Goals [P] where [Decidable P] can be derived.
+- Goals that compute to [True] or [x = x].
+
+The goal must be a ground term for this, i.e., not contain variables (that do
+not compute away). The goal is solved by using [vm_compute] and then using a
+trivial proof term ([I]/[eq_refl]). *)
+Tactic Notation "compute_done" :=
+  try apply (bool_decide_unpack _);
+  vm_compute;
+  first [ exact I | exact eq_refl ].
+Tactic Notation "compute_by" tactic(tac) :=
+  tac; compute_done.
+
 (** Backwards compatibility notations. *)
 Notation bool_decide_true := bool_decide_eq_true_2.
 Notation bool_decide_false := bool_decide_eq_false_2.

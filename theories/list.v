@@ -1192,6 +1192,17 @@ Proof.
   revert n m. induction l; intros [|?] [|?] ?;
     f_equal/=; auto using take_drop with lia.
 Qed.
+Lemma insert_take_drop l i x :
+  i < length l →
+  <[i:=x]> l = take i l ++ x :: drop (S i) l.
+Proof.
+  intros Hi.
+  rewrite <-(take_drop_middle (<[i:=x]> l) i x).
+  2:{ by rewrite list_lookup_insert. }
+  rewrite take_insert by done.
+  rewrite drop_insert_gt by lia.
+  done.
+Qed.
 
 Lemma app_eq_inv l1 l2 k1 k2 :
   l1 ++ l2 = k1 ++ k2 →

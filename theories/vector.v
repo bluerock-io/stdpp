@@ -5,7 +5,7 @@ naming conventions in this development. *)
 From stdpp Require Import countable.
 From stdpp Require Export fin list.
 From stdpp Require Import options.
-Open Scope vector_scope.
+Global Open Scope vector_scope.
 
 (** The type [vec n] represents lists of consisting of exactly [n] elements.
 Whereas the standard library declares exactly the same notations for vectors as

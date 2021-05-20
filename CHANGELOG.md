@@ -32,7 +32,7 @@ s/\bdecide_right\b/decide_False_pi/g
 ' $(find theories -name "*.v")
 ```
 
-## std++ 1.5.0
+## std++ 1.5.0 (2021-02-16)
 
 Coq 8.13 is newly supported by this release, Coq 8.8 and 8.9 are no longer
 supported.

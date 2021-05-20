@@ -3,7 +3,7 @@ From stdpp Require Import options.
 
 Declare Scope stream_scope.
 Delimit Scope stream_scope with stream.
-Open Scope stream_scope.
+Global Open Scope stream_scope.
 
 CoInductive stream (A : Type) : Type := scons : A → stream A → stream A.
 Global Arguments scons {_} _ _ : assert.

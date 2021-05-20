@@ -44,7 +44,7 @@ Global Instance Nmerge: Merge Nmap := λ A B C f t1 t2,
 Global Instance Nfmap: FMap Nmap := λ A B f t,
   match t with NMap o t => NMap (f <$> o) (f <$> t) end.
 
-Instance: FinMap N Nmap.
+Global Instance: FinMap N Nmap.
 Proof.
   split.
   - intros ? [??] [??] H. f_equal; [apply (H 0)|].
@@ -81,4 +81,4 @@ Qed.
 (** We construct sets of [N]s satisfying extensional equality. *)
 Notation Nset := (mapset Nmap).
 Global Instance Nmap_dom {A} : Dom (Nmap A) Nset := mapset_dom.
-Instance: FinMapDom N Nmap Nset := mapset_dom_spec.
+Global Instance: FinMapDom N Nmap Nset := mapset_dom_spec.

@@ -36,7 +36,7 @@ Fixpoint fresh_list `{Fresh A C, Union C, Singleton A C}
   | 0 => []
   | S n => let x := fresh X in x :: fresh_list n ({[ x ]} ∪ X)
   end.
-Instance: Params (@fresh_list) 6 := {}.
+Global Instance: Params (@fresh_list) 6 := {}.
 
 (** The following inductive predicate classifies that a list of elements is
 in fact fresh w.r.t. a set [X]. *)

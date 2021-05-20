@@ -9,7 +9,7 @@ Global Arguments gmultiset_car {_ _ _} _ : assert.
 Global Instance gmultiset_eq_dec `{Countable A} : EqDecision (gmultiset A).
 Proof. solve_decision. Defined.
 
-Program Instance gmultiset_countable `{Countable A} :
+Global Program Instance gmultiset_countable `{Countable A} :
     Countable (gmultiset A) := {|
   encode X := encode (gmultiset_car X); decode p := GMultiSet <$> decode p
 |}.

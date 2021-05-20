@@ -21,7 +21,7 @@ Proof. congruence. Qed.
 (** The [from_option] is the eliminator for option. *)
 Definition from_option {A B} (f : A → B) (y : B) (mx : option A) : B :=
   match mx with None => y | Some x => f x end.
-Instance: Params (@from_option) 3 := {}.
+Global Instance: Params (@from_option) 3 := {}.
 Global Arguments from_option {_ _} _ _ !_ / : assert.
 
 (** The eliminator with the identity function. *)
@@ -38,7 +38,7 @@ Lemma option_eq_1_alt {A} (mx my : option A) x :
 Proof. congruence. Qed.
 
 Definition is_Some {A} (mx : option A) := ∃ x, mx = Some x.
-Instance: Params (@is_Some) 1 := {}.
+Global Instance: Params (@is_Some) 1 := {}.
 
 Lemma is_Some_alt {A} (mx : option A) :
   is_Some mx ↔ match mx with Some _ => True | None => False end.

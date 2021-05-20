@@ -134,7 +134,7 @@ Proof.
     by rewrite lookup_merge by done; destruct (m1 !! _), (m2 !! _).
 Qed.
 
-Program Instance gmap_countable
+Global Program Instance gmap_countable
     `{Countable K, Countable A} : Countable (gmap K A) := {
   encode m := encode (map_to_list m : list (K * A));
   decode p := list_to_map <$> decode p

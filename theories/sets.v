@@ -1242,7 +1242,7 @@ End set_seq.
 (** Mimimal elements *)
 Definition minimal `{ElemOf A C} (R : relation A) (x : A) (X : C) : Prop :=
   ∀ y, y ∈ X → R y x → R x y.
-Instance: Params (@minimal) 5 := {}.
+Global Instance: Params (@minimal) 5 := {}.
 Typeclasses Opaque minimal.
 
 Section minimal.

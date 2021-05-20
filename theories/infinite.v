@@ -106,19 +106,19 @@ Section max_infinite.
 End max_infinite.
 
 (** Instances for number types *)
-Program Instance nat_infinite : Infinite nat :=
+Global Program Instance nat_infinite : Infinite nat :=
   max_infinite (Nat.max ∘ S) 0 (<) _ _ _ _.
 Solve Obligations with (intros; simpl; lia).
 
-Program Instance N_infinite : Infinite N :=
+Global Program Instance N_infinite : Infinite N :=
   max_infinite (N.max ∘ N.succ) 0%N N.lt _ _ _ _.
 Solve Obligations with (intros; simpl; lia).
 
-Program Instance positive_infinite : Infinite positive :=
+Global Program Instance positive_infinite : Infinite positive :=
   max_infinite (Pos.max ∘ Pos.succ) 1%positive Pos.lt _ _ _ _.
 Solve Obligations with (intros; simpl; lia).
 
-Program Instance Z_infinite: Infinite Z :=
+Global Program Instance Z_infinite: Infinite Z :=
   max_infinite (Z.max ∘ Z.succ) 0%Z Z.lt _ _ _ _.
 Solve Obligations with (intros; simpl; lia).
 
@@ -137,7 +137,7 @@ Global Instance prod_infinite_r `{Inhabited A, Infinite B} : Infinite (A * B) :=
   inj_infinite (inhabitant ,.) (Some ∘ snd) (λ _, eq_refl).
 
 (** Instance for lists *)
-Program Instance list_infinite `{Inhabited A} : Infinite (list A) := {|
+Global Program Instance list_infinite `{Inhabited A} : Infinite (list A) := {|
   infinite_fresh xxs := replicate (fresh (length <$> xxs)) inhabitant
 |}.
 Next Obligation.
@@ -148,5 +148,5 @@ Qed.
 Next Obligation. unfold fresh. by intros A ? xs1 xs2 ->. Qed.
 
 (** Instance for strings *)
-Program Instance string_infinite : Infinite string :=
+Global Program Instance string_infinite : Infinite string :=
   search_infinite pretty.

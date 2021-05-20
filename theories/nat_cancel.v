@@ -45,7 +45,7 @@ Module nat_cancel.
   Global Hint Mode NatCancelL ! ! - - : typeclass_instances.
   Class NatCancelR (m n m' n' : nat) := nat_cancel_r : NatCancelL m n m' n'.
   Global Hint Mode NatCancelR ! ! - - : typeclass_instances.
-  Existing Instance nat_cancel_r | 100.
+  Global Existing Instance nat_cancel_r | 100.
 
   (** The implementation of the canceler is highly non-deterministic, but since
   it will always succeed, no backtracking will ever be performed. In order to

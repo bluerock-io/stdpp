@@ -204,7 +204,7 @@ Section enc_finite.
   Context (to_nat_c : ∀ x, to_nat x < c).
   Context (to_of_nat : ∀ i, i < c → to_nat (of_nat i) = i).
 
-  Program Instance enc_finite : Finite A := {| enum := of_nat <$> seq 0 c |}.
+  Local Program Instance enc_finite : Finite A := {| enum := of_nat <$> seq 0 c |}.
   Next Obligation.
     apply NoDup_alt. intros i j x. rewrite !list_lookup_fmap. intros Hi Hj.
     destruct (seq _ _ !! i) as [i'|] eqn:Hi',
@@ -224,7 +224,7 @@ Section surjective_finite.
   Context `{Finite A, EqDecision B} (f : A → B).
   Context `{!Surj (=) f}.
 
-  Program Instance surjective_finite: Finite B :=
+  Program Definition surjective_finite: Finite B :=
     {| enum := remove_dups (f <$> enum A) |}.
   Next Obligation. apply NoDup_remove_dups. Qed.
   Next Obligation.
@@ -237,7 +237,7 @@ Section bijective_finite.
   Context `{Finite A, EqDecision B} (f : A → B) (g : B → A).
   Context `{!Inj (=) (=) f, !Cancel (=) f g}.
 
-  Global Instance bijective_finite: Finite B :=
+  Local Instance bijective_finite: Finite B :=
     let _ := cancel_surj (f:=f) (g:=g) in
     surjective_finite f.
 End bijective_finite.

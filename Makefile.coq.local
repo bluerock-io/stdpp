@@ -16,7 +16,7 @@ test: $(TESTFILES:.v=.vo)
 	$(SHOW)"Performing some style checks..."
 	$(HIDE)for FILE in $(VFILES); do \
 	  if ! fgrep -q 'From stdpp Require Import options.' "$$FILE"; then echo "ERROR: $$FILE does not import 'options'."; echo; exit 1; fi ; \
-	  if egrep '^\s*(Instance|Arguments|Remove|Hint\s+(Extern|Constructors|Resolve|Immediate|Mode|Opaque|Transparent|Unfold)|(Open|Close)\s+Scope)\s' "$$FILE"; then echo "ERROR: $$FILE contains unqualified 'Instance'/'Arguments'/'Hint'/'Scope' (see above)."; echo "Please add 'Global' or 'Local' as appropriate."; echo; exit 1; fi \
+	  if egrep '^\s*((Existing\s+|Program\s+)Instance|Arguments|Remove|Hint\s+(Extern|Constructors|Resolve|Immediate|Mode|Opaque|Transparent|Unfold)|(Open|Close)\s+Scope)\b' "$$FILE"; then echo "ERROR: $$FILE contains unqualified 'Instance'/'Arguments'/'Hint'/'Scope' (see above)."; echo "Please add 'Global' or 'Local' as appropriate."; echo; exit 1; fi \
 	done
 .PHONY: test
 

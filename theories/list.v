@@ -11,9 +11,9 @@ Global Arguments length {_} _ : assert.
 Global Arguments cons {_} _ _ : assert.
 Global Arguments app {_} _ _ : assert.
 
-Instance: Params (@length) 1 := {}.
-Instance: Params (@cons) 1 := {}.
-Instance: Params (@app) 1 := {}.
+Global Instance: Params (@length) 1 := {}.
+Global Instance: Params (@cons) 1 := {}.
+Global Instance: Params (@app) 1 := {}.
 
 Notation tail := tl.
 Notation take := firstn.
@@ -24,10 +24,10 @@ Global Arguments tail {_} _ : assert.
 Global Arguments take {_} !_ !_ / : assert.
 Global Arguments drop {_} !_ !_ / : assert.
 
-Instance: Params (@head) 1 := {}.
-Instance: Params (@tail) 1 := {}.
-Instance: Params (@take) 1 := {}.
-Instance: Params (@drop) 1 := {}.
+Global Instance: Params (@head) 1 := {}.
+Global Instance: Params (@tail) 1 := {}.
+Global Instance: Params (@take) 1 := {}.
+Global Instance: Params (@drop) 1 := {}.
 
 Global Arguments Permutation {_} _ _ : assert.
 Global Arguments Forall_cons {_} _ _ _ _ _ : assert.
@@ -61,7 +61,7 @@ Global Instance maybe_cons {A} : Maybe2 (@cons A) := λ l,
 Inductive list_equiv `{Equiv A} : Equiv (list A) :=
   | nil_equiv : [] ≡ []
   | cons_equiv x y l k : x ≡ y → l ≡ k → x :: l ≡ y :: k.
-Existing Instance list_equiv.
+Global Existing Instance list_equiv.
 
 (** The operation [l !! i] gives the [i]th element of the list [l], or [None]
 in case [i] is out of bounds. *)
@@ -102,7 +102,7 @@ Fixpoint list_inserts {A} (i : nat) (k l : list A) : list A :=
   | [] => l
   | y :: k => <[i:=y]>(list_inserts (S i) k l)
   end.
-Instance: Params (@list_inserts) 1 := {}.
+Global Instance: Params (@list_inserts) 1 := {}.
 
 (** The operation [delete i l] removes the [i]th element of [l] and moves
 all consecutive elements one position ahead. In case [i] is out of bounds,
@@ -117,7 +117,7 @@ Global Instance list_delete {A} : Delete nat (list A) :=
 (** The function [option_list o] converts an element [Some x] into the
 singleton list [[x]], and [None] into the empty list [[]]. *)
 Definition option_list {A} : option A → list A := option_rect _ (λ x, [x]) [].
-Instance: Params (@option_list) 1 := {}.
+Global Instance: Params (@option_list) 1 := {}.
 Global Instance maybe_list_singleton {A} : Maybe (λ x : A, [x]) := λ l,
   match l with [x] => Some x | _ => None end.
 
@@ -138,37 +138,37 @@ Definition list_find {A} P `{∀ x, Decision (P x)} : list A → option (nat * A
   | [] => None
   | x :: l => if decide (P x) then Some (0,x) else prod_map S id <$> go l
   end.
-Instance: Params (@list_find) 3 := {}.
+Global Instance: Params (@list_find) 3 := {}.
 
 (** The function [replicate n x] generates a list with length [n] of elements
 with value [x]. *)
 Fixpoint replicate {A} (n : nat) (x : A) : list A :=
   match n with 0 => [] | S n => x :: replicate n x end.
-Instance: Params (@replicate) 2 := {}.
+Global Instance: Params (@replicate) 2 := {}.
 
 (** The function [rotate n l] rotates the list [l] by [n], e.g., [rotate 1
 [x0; x1; ...; xm]] becomes [x1; ...; xm; x0]. Rotating by a multiple of
 [length l] is the identity function. **)
 Definition rotate {A} (n : nat) (l : list A) : list A :=
   drop (n `mod` length l) l ++ take (n `mod` length l) l.
-Instance: Params (@rotate) 2 := {}.
+Global Instance: Params (@rotate) 2 := {}.
 
 (** The function [rotate_take s e l] returns the range between the
 indices [s] (inclusive) and [e] (exclusive) of [l]. If [e ≤ s], all
 elements after [s] and before [e] are returned. *)
 Definition rotate_take {A} (s e : nat) (l : list A) : list A :=
   take (rotate_nat_sub s e (length l)) (rotate s l).
-Instance: Params (@rotate_take) 3 := {}.
+Global Instance: Params (@rotate_take) 3 := {}.
 
 (** The function [reverse l] returns the elements of [l] in reverse order. *)
 Definition reverse {A} (l : list A) : list A := rev_append l [].
-Instance: Params (@reverse) 1 := {}.
+Global Instance: Params (@reverse) 1 := {}.
 
 (** The function [last l] returns the last element of the list [l], or [None]
 if the list [l] is empty. *)
 Fixpoint last {A} (l : list A) : option A :=
   match l with [] => None | [x] => Some x | _ :: l => last l end.
-Instance: Params (@last) 1 := {}.
+Global Instance: Params (@last) 1 := {}.
 
 (** The function [resize n y l] takes the first [n] elements of [l] in case
 [length l ≤ n], and otherwise appends elements with value [x] to [l] to obtain
@@ -179,7 +179,7 @@ Fixpoint resize {A} (n : nat) (y : A) (l : list A) : list A :=
   | x :: l => match n with 0 => [] | S n => x :: resize n y l end
   end.
 Global Arguments resize {_} !_ _ !_ : assert.
-Instance: Params (@resize) 2 := {}.
+Global Instance: Params (@resize) 2 := {}.
 
 (** The function [reshape k l] transforms [l] into a list of lists whose sizes
 are specified by [k]. In case [l] is too short, the resulting list will be
@@ -188,7 +188,7 @@ Fixpoint reshape {A} (szs : list nat) (l : list A) : list (list A) :=
   match szs with
   | [] => [] | sz :: szs => take sz l :: reshape szs (drop sz l)
   end.
-Instance: Params (@reshape) 2 := {}.
+Global Instance: Params (@reshape) 2 := {}.
 
 Definition sublist_lookup {A} (i n : nat) (l : list A) : option (list A) :=
   guard (i + n ≤ length l); Some (take n (drop i l)).

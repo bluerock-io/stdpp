@@ -111,7 +111,7 @@ Lemma string_of_to_pos s : string_of_pos (string_to_pos s) = s.
 Proof.
   unfold string_of_pos. by induction s as [|[[][][][][][][][]]]; f_equal/=.
 Qed.
-Program Instance string_countable : Countable string := {|
+Global Program Instance string_countable : Countable string := {|
   encode := string_to_pos; decode p := Some (string_of_pos p)
 |}.
 Solve Obligations with naive_solver eauto using string_of_to_pos with f_equal.

@@ -84,7 +84,7 @@ Global Instance Nat_divide_dec : RelDecision Nat.divide.
 Proof.
   refine (λ x y, cast_if (decide (lcm x y = y))); by rewrite Nat.divide_lcm_iff.
 Defined.
-Instance: PartialOrder divide.
+Global Instance: PartialOrder divide.
 Proof.
   repeat split; try apply _. intros ??. apply Nat.divide_antisym_nonneg; lia.
 Qed.
@@ -302,10 +302,10 @@ Global Instance Npos_inj : Inj (=) (=) Npos.
 Proof. by injection 1. Qed.
 
 Global Instance N_eq_dec: EqDecision N := N.eq_dec.
-Program Instance N_le_dec : RelDecision N.le := λ x y,
+Global Program Instance N_le_dec : RelDecision N.le := λ x y,
   match N.compare x y with Gt => right _ | _ => left _ end.
 Solve Obligations with naive_solver.
-Program Instance N_lt_dec : RelDecision N.lt := λ x y,
+Global Program Instance N_lt_dec : RelDecision N.lt := λ x y,
   match N.compare x y with Lt => left _ | _ => right _ end.
 Solve Obligations with naive_solver.
 Global Instance N_inhabited: Inhabited N := populate 1%N.
@@ -573,11 +573,11 @@ Proof. apply Qred_identity; auto using Z.gcd_1_r. Qed.
 Definition Qc_of_Z (n : Z) : Qc := Qcmake _ (inject_Z_Qred n).
 
 Global Instance Qc_eq_dec: EqDecision Qc := Qc_eq_dec.
-Program Instance Qc_le_dec: RelDecision Qcle := λ x y,
+Global Program Instance Qc_le_dec: RelDecision Qcle := λ x y,
   if Qclt_le_dec y x then right _ else left _.
 Next Obligation. intros x y; apply Qclt_not_le. Qed.
 Next Obligation. done. Qed.
-Program Instance Qc_lt_dec: RelDecision Qclt := λ x y,
+Global Program Instance Qc_lt_dec: RelDecision Qclt := λ x y,
   if Qclt_le_dec x y then left _ else right _.
 Next Obligation. done. Qed.
 Next Obligation. intros x y; apply Qcle_not_lt. Qed.

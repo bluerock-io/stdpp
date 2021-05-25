@@ -47,7 +47,7 @@ Global Instance Zmerge: Merge Zmap := λ A B C f t1 t2,
 Global Instance Nfmap: FMap Zmap := λ A B f t,
   match t with ZMap o t t' => ZMap (f <$> o) (f <$> t) (f <$> t') end.
 
-Instance: FinMap Z Zmap.
+Global Instance: FinMap Z Zmap.
 Proof.
   split.
   - intros ? [??] [??] H. f_equal.
@@ -92,4 +92,4 @@ Qed.
 (** We construct sets of [Z]s satisfying extensional equality. *)
 Notation Zset := (mapset Zmap).
 Global Instance Zmap_dom {A} : Dom (Zmap A) Zset := mapset_dom.
-Instance: FinMapDom Z Zmap Zset := mapset_dom_spec.
+Global Instance: FinMapDom Z Zmap Zset := mapset_dom_spec.

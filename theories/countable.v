@@ -97,7 +97,7 @@ Section inj_countable.
   Context `{Countable A, EqDecision B}.
   Context (f : B → A) (g : A → option B) (fg : ∀ x, g (f x) = Some x).
 
-  Program Instance inj_countable : Countable B :=
+  Program Definition inj_countable : Countable B :=
     {| encode y := encode (f y); decode p := x ← decode p; g x |}.
   Next Obligation. intros y; simpl; rewrite decode_encode; eauto. Qed.
 End inj_countable.
@@ -106,29 +106,29 @@ Section inj_countable'.
   Context `{Countable A, EqDecision B}.
   Context (f : B → A) (g : A → B) (fg : ∀ x, g (f x) = x).
 
-  Program Instance inj_countable' : Countable B := inj_countable f (Some ∘ g) _.
+  Program Definition inj_countable' : Countable B := inj_countable f (Some ∘ g) _.
   Next Obligation. intros x. by f_equal/=. Qed.
 End inj_countable'.
 
 (** ** Empty *)
-Program Instance Empty_set_countable : Countable Empty_set :=
+Global Program Instance Empty_set_countable : Countable Empty_set :=
   {| encode u := 1; decode p := None |}.
 Next Obligation. by intros []. Qed.
 
 (** ** Unit *)
-Program Instance unit_countable : Countable unit :=
+Global Program Instance unit_countable : Countable unit :=
   {| encode u := 1; decode p := Some () |}.
 Next Obligation. by intros []. Qed.
 
 (** ** Bool *)
-Program Instance bool_countable : Countable bool := {|
+Global Program Instance bool_countable : Countable bool := {|
   encode b := if b then 1 else 2;
   decode p := Some match p return bool with 1 => true | _ => false end
 |}.
 Next Obligation. by intros []. Qed.
 
 (** ** Option *)
-Program Instance option_countable `{Countable A} : Countable (option A) := {|
+Global Program Instance option_countable `{Countable A} : Countable (option A) := {|
   encode o := match o with None => 1 | Some x => Pos.succ (encode x) end;
   decode p := if decide (p = 1) then Some None else Some <$> decode (Pos.pred p)
 |}.
@@ -138,7 +138,7 @@ Next Obligation.
 Qed.
 
 (** ** Sums *)
-Program Instance sum_countable `{Countable A} `{Countable B} :
+Global Program Instance sum_countable `{Countable A} `{Countable B} :
   Countable (A + B)%type := {|
     encode xy :=
       match xy with inl x => (encode x)~0 | inr y => (encode y)~1 end;
@@ -211,7 +211,7 @@ Proof.
   { intros p'. by induction p'; simplify_option_eq. }
   revert q. by induction p; intros [?|?|]; simplify_option_eq.
 Qed.
-Program Instance prod_countable `{Countable A} `{Countable B} :
+Global Program Instance prod_countable `{Countable A} `{Countable B} :
   Countable (A * B)%type := {|
     encode xy := prod_encode (encode (xy.1)) (encode (xy.2));
     decode p :=
@@ -240,7 +240,7 @@ Qed.
 (** ** Numbers *)
 Global Instance pos_countable : Countable positive :=
   {| encode := id; decode := Some; decode_encode x := eq_refl |}.
-Program Instance N_countable : Countable N := {|
+Global Program Instance N_countable : Countable N := {|
   encode x := match x with N0 => 1 | Npos p => Pos.succ p end;
   decode p := if decide (p = 1) then Some 0%N else Some (Npos (Pos.pred p))
 |}.
@@ -248,18 +248,18 @@ Next Obligation.
   intros [|p]; simpl; [done|].
   by rewrite decide_False, Pos.pred_succ by (by destruct p).
 Qed.
-Program Instance Z_countable : Countable Z := {|
+Global Program Instance Z_countable : Countable Z := {|
   encode x := match x with Z0 => 1 | Zpos p => p~0 | Zneg p => p~1 end;
   decode p := Some match p with 1 => Z0 | p~0 => Zpos p | p~1 => Zneg p end
 |}.
 Next Obligation. by intros [|p|p]. Qed.
-Program Instance nat_countable : Countable nat :=
+Global Program Instance nat_countable : Countable nat :=
   {| encode x := encode (N.of_nat x); decode p := N.to_nat <$> decode p |}.
 Next Obligation.
   by intros x; lazy beta; rewrite decode_encode; csimpl; rewrite Nat2N.id.
 Qed.
 
-Program Instance Qc_countable : Countable Qc :=
+Global Program Instance Qc_countable : Countable Qc :=
   inj_countable
     (λ p : Qc, let 'Qcmake (x # y) _ := p return _ in (x,y))
     (λ q : Z * positive, let '(x,y) := q return _ in Some (Q2Qc (x # y))) _.
@@ -267,7 +267,7 @@ Next Obligation.
   intros [[x y] Hcan]. f_equal. apply Qc_is_canon. simpl. by rewrite Hcan.
 Qed.
 
-Program Instance Qp_countable : Countable Qp :=
+Global Program Instance Qp_countable : Countable Qp :=
   inj_countable
     Qp_to_Qc
     (λ p : Qc, guard (0 < p)%Qc as Hp; Some (mk_Qp p Hp)) _.
@@ -276,7 +276,7 @@ Next Obligation.
   case_match; [|done]. f_equal. by apply Qp_to_Qc_inj_iff.
 Qed.
 
-Program Instance fin_countable n : Countable (fin n) :=
+Global Program Instance fin_countable n : Countable (fin n) :=
   inj_countable
     fin_to_nat
     (λ m : nat, guard (m < n)%nat as Hm; Some (nat_to_fin Hm)) _.
@@ -334,7 +334,7 @@ Proof.
       by (by rewrite reverse_length).
 Qed.
 
-Program Instance gen_tree_countable `{Countable T} : Countable (gen_tree T) :=
+Global Program Instance gen_tree_countable `{Countable T} : Countable (gen_tree T) :=
   inj_countable gen_tree_to_list (gen_tree_of_list []) _.
 Next Obligation.
   intros T ?? t.
@@ -342,7 +342,7 @@ Next Obligation.
 Qed.
 
 (** ** Sigma *)
-Program Instance countable_sig `{Countable A} (P : A → Prop)
+Global Program Instance countable_sig `{Countable A} (P : A → Prop)
         `{!∀ x, Decision (P x), !∀ x, ProofIrrel (P x)} :
   Countable { x : A | P x } :=
   inj_countable proj1_sig (λ x, guard (P x) as Hx; Some (x ↾ Hx)) _.

@@ -204,7 +204,7 @@ Section enc_finite.
   Context (to_nat_c : ∀ x, to_nat x < c).
   Context (to_of_nat : ∀ i, i < c → to_nat (of_nat i) = i).
 
-  Program Instance enc_finite : Finite A := {| enum := of_nat <$> seq 0 c |}.
+  Local Program Instance enc_finite : Finite A := {| enum := of_nat <$> seq 0 c |}.
   Next Obligation.
     apply NoDup_alt. intros i j x. rewrite !list_lookup_fmap. intros Hi Hj.
     destruct (seq _ _ !! i) as [i'|] eqn:Hi',
@@ -224,7 +224,7 @@ Section surjective_finite.
   Context `{Finite A, EqDecision B} (f : A → B).
   Context `{!Surj (=) f}.
 
-  Program Instance surjective_finite: Finite B :=
+  Program Definition surjective_finite: Finite B :=
     {| enum := remove_dups (f <$> enum A) |}.
   Next Obligation. apply NoDup_remove_dups. Qed.
   Next Obligation.
@@ -237,12 +237,12 @@ Section bijective_finite.
   Context `{Finite A, EqDecision B} (f : A → B) (g : B → A).
   Context `{!Inj (=) (=) f, !Cancel (=) f g}.
 
-  Global Instance bijective_finite: Finite B :=
+  Definition bijective_finite : Finite B :=
     let _ := cancel_surj (f:=f) (g:=g) in
     surjective_finite f.
 End bijective_finite.
 
-Program Instance option_finite `{Finite A} : Finite (option A) :=
+Global Program Instance option_finite `{Finite A} : Finite (option A) :=
   {| enum := None :: (Some <$> enum A) |}.
 Next Obligation.
   constructor.
@@ -256,19 +256,19 @@ Qed.
 Lemma option_cardinality `{Finite A} : card (option A) = S (card A).
 Proof. unfold card. simpl. by rewrite fmap_length. Qed.
 
-Program Instance Empty_set_finite : Finite Empty_set := {| enum := [] |}.
+Global Program Instance Empty_set_finite : Finite Empty_set := {| enum := [] |}.
 Next Obligation. by apply NoDup_nil. Qed.
 Next Obligation. intros []. Qed.
 Lemma Empty_set_card : card Empty_set = 0.
 Proof. done. Qed.
 
-Program Instance unit_finite : Finite () := {| enum := [tt] |}.
+Global Program Instance unit_finite : Finite () := {| enum := [tt] |}.
 Next Obligation. apply NoDup_singleton. Qed.
 Next Obligation. intros []. by apply elem_of_list_singleton. Qed.
 Lemma unit_card : card unit = 1.
 Proof. done. Qed.
 
-Program Instance bool_finite : Finite bool := {| enum := [true; false] |}.
+Global Program Instance bool_finite : Finite bool := {| enum := [true; false] |}.
 Next Obligation.
   constructor; [ by rewrite elem_of_list_singleton | apply NoDup_singleton ].
 Qed.
@@ -276,7 +276,7 @@ Next Obligation. intros [|]; [ left | right; left ]. Qed.
 Lemma bool_card : card bool = 2.
 Proof. done. Qed.
 
-Program Instance sum_finite `{Finite A, Finite B} : Finite (A + B)%type :=
+Global Program Instance sum_finite `{Finite A, Finite B} : Finite (A + B)%type :=
   {| enum := (inl <$> enum A) ++ (inr <$> enum B) |}.
 Next Obligation.
   intros. apply NoDup_app; split_and?.
@@ -291,7 +291,7 @@ Qed.
 Lemma sum_card `{Finite A, Finite B} : card (A + B) = card A + card B.
 Proof. unfold card. simpl. by rewrite app_length, !fmap_length. Qed.
 
-Program Instance prod_finite `{Finite A, Finite B} : Finite (A * B)%type :=
+Global Program Instance prod_finite `{Finite A, Finite B} : Finite (A * B)%type :=
   {| enum := foldr (λ x, (pair x <$> enum B ++.)) [] (enum A) |}.
 Next Obligation.
   intros A ?????. induction (NoDup_enum A) as [|x xs Hx Hxs IH]; simpl.
@@ -325,7 +325,7 @@ Definition list_enum {A} (l : list A) : ∀ n, list { l : list A | length l = n 
   | S n => foldr (λ x, (sig_map (x ::.) (λ _ H, f_equal S H) <$> (go n) ++.)) [] l
   end.
 
-Program Instance list_finite `{Finite A} n : Finite { l : list A | length l = n } :=
+Global Program Instance list_finite `{Finite A} n : Finite { l : list A | length l = n } :=
   {| enum := list_enum (enum A) n |}.
 Next Obligation.
   intros A ?? n. induction n as [|n IH]; simpl; [apply NoDup_singleton |].
@@ -361,7 +361,7 @@ Qed.
 
 Fixpoint fin_enum (n : nat) : list (fin n) :=
   match n with 0 => [] | S n => 0%fin :: (FS <$> fin_enum n) end.
-Program Instance fin_finite n : Finite (fin n) := {| enum := fin_enum n |}.
+Global Program Instance fin_finite n : Finite (fin n) := {| enum := fin_enum n |}.
 Next Obligation.
   intros n. induction n; simpl; constructor.
   - rewrite elem_of_list_fmap. by intros (?&?&?).

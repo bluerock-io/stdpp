@@ -302,7 +302,7 @@ Proof.
   - intros ??? ?? [??] [??] ?. by apply Pmerge_lookup.
 Qed.
 
-Program Instance Pmap_countable `{Countable A} : Countable (Pmap A) := {
+Global Program Instance Pmap_countable `{Countable A} : Countable (Pmap A) := {
   encode m := encode (map_to_list m : list (positive * A));
   decode p := list_to_map <$> decode p
 }.

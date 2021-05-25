@@ -114,18 +114,18 @@ Inductive TCOr (P1 P2 : Prop) : Prop :=
   | TCOr_l : P1 → TCOr P1 P2
   | TCOr_r : P2 → TCOr P1 P2.
 Existing Class TCOr.
-Existing Instance TCOr_l | 9.
-Existing Instance TCOr_r | 10.
+Global Existing Instance TCOr_l | 9.
+Global Existing Instance TCOr_r | 10.
 Global Hint Mode TCOr ! ! : typeclass_instances.
 
 Inductive TCAnd (P1 P2 : Prop) : Prop := TCAnd_intro : P1 → P2 → TCAnd P1 P2.
 Existing Class TCAnd.
-Existing Instance TCAnd_intro.
+Global Existing Instance TCAnd_intro.
 Global Hint Mode TCAnd ! ! : typeclass_instances.
 
 Inductive TCTrue : Prop := TCTrue_intro : TCTrue.
 Existing Class TCTrue.
-Existing Instance TCTrue_intro.
+Global Existing Instance TCTrue_intro.
 
 (** The class [TCFalse] is not stricly necessary as one could also use
 [False]. However, users might expect that TCFalse exists and if it
@@ -144,8 +144,8 @@ Inductive TCForall {A} (P : A → Prop) : list A → Prop :=
   | TCForall_nil : TCForall P []
   | TCForall_cons x xs : P x → TCForall P xs → TCForall P (x :: xs).
 Existing Class TCForall.
-Existing Instance TCForall_nil.
-Existing Instance TCForall_cons.
+Global Existing Instance TCForall_nil.
+Global Existing Instance TCForall_cons.
 Global Hint Mode TCForall ! ! ! : typeclass_instances.
 
 (** The class [TCForall2 P l k] is commonly used to transform an input list [l]
@@ -156,8 +156,8 @@ Inductive TCForall2 {A B} (P : A → B → Prop) : list A → list B → Prop :=
   | TCForall2_cons x y xs ys :
      P x y → TCForall2 P xs ys → TCForall2 P (x :: xs) (y :: ys).
 Existing Class TCForall2.
-Existing Instance TCForall2_nil.
-Existing Instance TCForall2_cons.
+Global Existing Instance TCForall2_nil.
+Global Existing Instance TCForall2_cons.
 Global Hint Mode TCForall2 ! ! ! ! - : typeclass_instances.
 Global Hint Mode TCForall2 ! ! ! - ! : typeclass_instances.
 
@@ -165,16 +165,16 @@ Inductive TCExists {A} (P : A → Prop) : list A → Prop :=
   | TCExists_cons_hd x l : P x → TCExists P (x :: l)
   | TCExists_cons_tl x l: TCExists P l → TCExists P (x :: l).
 Existing Class TCExists.
-Existing Instance TCExists_cons_hd | 10.
-Existing Instance TCExists_cons_tl | 20.
+Global Existing Instance TCExists_cons_hd | 10.
+Global Existing Instance TCExists_cons_tl | 20.
 Global Hint Mode TCExists ! ! ! : typeclass_instances.
 
 Inductive TCElemOf {A} (x : A) : list A → Prop :=
   | TCElemOf_here xs : TCElemOf x (x :: xs)
   | TCElemOf_further y xs : TCElemOf x xs → TCElemOf x (y :: xs).
 Existing Class TCElemOf.
-Existing Instance TCElemOf_here.
-Existing Instance TCElemOf_further.
+Global Existing Instance TCElemOf_here.
+Global Existing Instance TCElemOf_further.
 Global Hint Mode TCElemOf ! ! ! : typeclass_instances.
 
 (** We declare both arguments [x] and [y] of [TCEq x y] as outputs, which means
@@ -183,7 +183,7 @@ instance of [TCEq] is [TCEq_refl] below, it can never cause loops. See
 https://gitlab.mpi-sws.org/iris/iris/merge_requests/391 for a use case. *)
 Inductive TCEq {A} (x : A) : A → Prop := TCEq_refl : TCEq x x.
 Existing Class TCEq.
-Existing Instance TCEq_refl.
+Global Existing Instance TCEq_refl.
 Global Hint Mode TCEq ! - - : typeclass_instances.
 
 Lemma TCEq_eq {A} (x1 x2 : A) : TCEq x1 x2 ↔ x1 = x2.
@@ -192,7 +192,7 @@ Proof. split; destruct 1; reflexivity. Qed.
 Inductive TCDiag {A} (C : A → Prop) : A → A → Prop :=
   | TCDiag_diag x : C x → TCDiag C x x.
 Existing Class TCDiag.
-Existing Instance TCDiag_diag.
+Global Existing Instance TCDiag_diag.
 Global Hint Mode TCDiag ! ! ! - : typeclass_instances.
 Global Hint Mode TCDiag ! ! - ! : typeclass_instances.
 
@@ -239,7 +239,7 @@ Notation "X ≠@{ A } Y":= (¬X =@{ A } Y)
 Global Hint Extern 0 (_ = _) => reflexivity : core.
 Global Hint Extern 100 (_ ≠ _) => discriminate : core.
 
-Instance: ∀ A, PreOrder (=@{A}).
+Global Instance: ∀ A, PreOrder (=@{A}).
 Proof. split; repeat intro; congruence. Qed.
 
 (** ** Setoid equality *)
@@ -299,7 +299,7 @@ Definition equivL {A} : Equiv A := (=).
 (** A [Params f n] instance forces the setoid rewriting mechanism not to
 rewrite in the first [n] arguments of the function [f]. We will declare such
 instances for all operational type classes in this development. *)
-Instance: Params (@equiv) 2 := {}.
+Global Instance: Params (@equiv) 2 := {}.
 
 (** The following instance forces [setoid_replace] to use setoid equality
 (for types that have an [Equiv] instance) rather than the standard Leibniz
@@ -459,7 +459,7 @@ Proof. auto. Qed.
 (** The classes [PreOrder], [PartialOrder], and [TotalOrder] use an arbitrary
 relation [R] instead of [⊆] to support multiple orders on the same type. *)
 Definition strict {A} (R : relation A) : relation A := λ X Y, R X Y ∧ ¬R Y X.
-Instance: Params (@strict) 2 := {}.
+Global Instance: Params (@strict) 2 := {}.
 Class PartialOrder {A} (R : relation A) : Prop := {
   partial_order_pre :> PreOrder R;
   partial_order_anti_symm :> AntiSymm (=) R
@@ -630,7 +630,7 @@ Global Instance bool_inhabated : Inhabited bool := populate true.
 Definition bool_le (β1 β2 : bool) : Prop := negb β1 || β2.
 Infix "=.>" := bool_le (at level 70).
 Infix "=.>*" := (Forall2 bool_le) (at level 70).
-Instance: PartialOrder bool_le.
+Global Instance: PartialOrder bool_le.
 Proof. repeat split; repeat intros [|]; compute; tauto. Qed.
 
 Lemma andb_True b1 b2 : b1 && b2 ↔ b1 ∧ b2.
@@ -664,9 +664,9 @@ Notation "(., y )" := (λ x, (x,y)) (only parsing) : stdpp_scope.
 Notation "p .1" := (fst p) (at level 2, left associativity, format "p .1").
 Notation "p .2" := (snd p) (at level 2, left associativity, format "p .2").
 
-Instance: Params (@pair) 2 := {}.
-Instance: Params (@fst) 2 := {}.
-Instance: Params (@snd) 2 := {}.
+Global Instance: Params (@pair) 2 := {}.
+Global Instance: Params (@fst) 2 := {}.
+Global Instance: Params (@snd) 2 := {}.
 
 Notation curry := prod_curry.
 Notation uncurry := prod_uncurry.
@@ -842,7 +842,7 @@ Global Instance empty_inhabited `(Empty A) : Inhabited A := populate ∅.
 
 Class Union A := union: A → A → A.
 Global Hint Mode Union ! : typeclass_instances.
-Instance: Params (@union) 2 := {}.
+Global Instance: Params (@union) 2 := {}.
 Infix "∪" := union (at level 50, left associativity) : stdpp_scope.
 Notation "(∪)" := union (only parsing) : stdpp_scope.
 Notation "( x ∪.)" := (union x) (only parsing) : stdpp_scope.
@@ -856,7 +856,7 @@ Notation "⋃ l" := (union_list l) (at level 20, format "⋃  l") : stdpp_scope.
 
 Class Intersection A := intersection: A → A → A.
 Global Hint Mode Intersection ! : typeclass_instances.
-Instance: Params (@intersection) 2 := {}.
+Global Instance: Params (@intersection) 2 := {}.
 Infix "∩" := intersection (at level 40) : stdpp_scope.
 Notation "(∩)" := intersection (only parsing) : stdpp_scope.
 Notation "( x ∩.)" := (intersection x) (only parsing) : stdpp_scope.
@@ -864,7 +864,7 @@ Notation "(.∩ x )" := (λ y, intersection y x) (only parsing) : stdpp_scope.
 
 Class Difference A := difference: A → A → A.
 Global Hint Mode Difference ! : typeclass_instances.
-Instance: Params (@difference) 2 := {}.
+Global Instance: Params (@difference) 2 := {}.
 Infix "∖" := difference (at level 40, left associativity) : stdpp_scope.
 Notation "(∖)" := difference (only parsing) : stdpp_scope.
 Notation "( x ∖.)" := (difference x) (only parsing) : stdpp_scope.
@@ -874,7 +874,7 @@ Notation "(∖*)" := (zip_with (∖)) (only parsing) : stdpp_scope.
 
 Class Singleton A B := singleton: A → B.
 Global Hint Mode Singleton - ! : typeclass_instances.
-Instance: Params (@singleton) 3 := {}.
+Global Instance: Params (@singleton) 3 := {}.
 Notation "{[ x ]}" := (singleton x) (at level 1) : stdpp_scope.
 Notation "{[ x ; y ; .. ; z ]}" :=
   (union .. (union (singleton x) (singleton y)) .. (singleton z))
@@ -882,7 +882,7 @@ Notation "{[ x ; y ; .. ; z ]}" :=
 
 Class SubsetEq A := subseteq: relation A.
 Global Hint Mode SubsetEq ! : typeclass_instances.
-Instance: Params (@subseteq) 2 := {}.
+Global Instance: Params (@subseteq) 2 := {}.
 Infix "⊆" := subseteq (at level 70) : stdpp_scope.
 Notation "(⊆)" := subseteq (only parsing) : stdpp_scope.
 Notation "( X ⊆.)" := (subseteq X) (only parsing) : stdpp_scope.
@@ -929,7 +929,7 @@ would risk accidentally using [{[ x1; ..; xn ]}] for multisets (leading to
 unexpected results) and lead to ambigious pretty printing for [{[+ x +]}]. *)
 Class DisjUnion A := disj_union: A → A → A.
 Global Hint Mode DisjUnion ! : typeclass_instances.
-Instance: Params (@disj_union) 2 := {}.
+Global Instance: Params (@disj_union) 2 := {}.
 Infix "⊎" := disj_union (at level 50, left associativity) : stdpp_scope.
 Notation "(⊎)" := disj_union (only parsing) : stdpp_scope.
 Notation "( x ⊎.)" := (disj_union x) (only parsing) : stdpp_scope.
@@ -937,7 +937,7 @@ Notation "(.⊎ x )" := (λ y, disj_union y x) (only parsing) : stdpp_scope.
 
 Class SingletonMS A B := singletonMS: A → B.
 Global Hint Mode SingletonMS - ! : typeclass_instances.
-Instance: Params (@singletonMS) 3 := {}.
+Global Instance: Params (@singletonMS) 3 := {}.
 Notation "{[+ x +]}" := (singletonMS x)
   (at level 1, format "{[+  x  +]}") : stdpp_scope.
 Notation "{[+ x ; y ; .. ; z +]}" :=
@@ -959,7 +959,7 @@ Global Hint Mode Lexico ! : typeclass_instances.
 
 Class ElemOf A B := elem_of: A → B → Prop.
 Global Hint Mode ElemOf - ! : typeclass_instances.
-Instance: Params (@elem_of) 3 := {}.
+Global Instance: Params (@elem_of) 3 := {}.
 Infix "∈" := elem_of (at level 70) : stdpp_scope.
 Notation "(∈)" := elem_of (only parsing) : stdpp_scope.
 Notation "( x ∈.)" := (elem_of x) (only parsing) : stdpp_scope.
@@ -977,7 +977,7 @@ Notation "(∉@{ B } )" := (λ x X, x ∉@{B} X) (only parsing) : stdpp_scope.
 
 Class Disjoint A := disjoint : A → A → Prop.
 Global Hint Mode Disjoint ! : typeclass_instances.
-Instance: Params (@disjoint) 2 := {}.
+Global Instance: Params (@disjoint) 2 := {}.
 Infix "##" := disjoint (at level 70) : stdpp_scope.
 Notation "(##)" := disjoint (only parsing) : stdpp_scope.
 Notation "( X ##.)" := (disjoint X) (only parsing) : stdpp_scope.
@@ -1006,19 +1006,19 @@ notations and do not formalize any theory on monads (we do not even define a
 class with the monad laws). *)
 Class MRet (M : Type → Type) := mret: ∀ {A}, A → M A.
 Global Arguments mret {_ _ _} _ : assert.
-Instance: Params (@mret) 3 := {}.
+Global Instance: Params (@mret) 3 := {}.
 Class MBind (M : Type → Type) := mbind : ∀ {A B}, (A → M B) → M A → M B.
 Global Arguments mbind {_ _ _ _} _ !_ / : assert.
-Instance: Params (@mbind) 4 := {}.
+Global Instance: Params (@mbind) 4 := {}.
 Class MJoin (M : Type → Type) := mjoin: ∀ {A}, M (M A) → M A.
 Global Arguments mjoin {_ _ _} !_ / : assert.
-Instance: Params (@mjoin) 3 := {}.
+Global Instance: Params (@mjoin) 3 := {}.
 Class FMap (M : Type → Type) := fmap : ∀ {A B}, (A → B) → M A → M B.
 Global Arguments fmap {_ _ _ _} _ !_ / : assert.
-Instance: Params (@fmap) 4 := {}.
+Global Instance: Params (@fmap) 4 := {}.
 Class OMap (M : Type → Type) := omap: ∀ {A B}, (A → option B) → M A → M B.
 Global Arguments omap {_ _ _ _} _ !_ / : assert.
-Instance: Params (@omap) 4 := {}.
+Global Instance: Params (@omap) 4 := {}.
 
 Notation "m ≫= f" := (mbind f m) (at level 60, right associativity) : stdpp_scope.
 Notation "( m ≫=.)" := (λ f, mbind f m) (only parsing) : stdpp_scope.
@@ -1055,7 +1055,7 @@ on maps. In the file [fin_maps] we will axiomatize finite maps.
 The function look up [m !! k] should yield the element at key [k] in [m]. *)
 Class Lookup (K A M : Type) := lookup: K → M → option A.
 Global Hint Mode Lookup - - ! : typeclass_instances.
-Instance: Params (@lookup) 4 := {}.
+Global Instance: Params (@lookup) 4 := {}.
 Notation "m !! i" := (lookup i m) (at level 20) : stdpp_scope.
 Notation "(!!)" := lookup (only parsing) : stdpp_scope.
 Notation "( m !!.)" := (λ i, m !! i) (only parsing) : stdpp_scope.
@@ -1066,7 +1066,7 @@ Global Arguments lookup _ _ _ _ !_ !_ / : simpl nomatch, assert.
 of the partial [lookup] function. *)
 Class LookupTotal (K A M : Type) := lookup_total : K → M → A.
 Global Hint Mode LookupTotal - - ! : typeclass_instances.
-Instance: Params (@lookup_total) 4 := {}.
+Global Instance: Params (@lookup_total) 4 := {}.
 Notation "m !!! i" := (lookup_total i m) (at level 20) : stdpp_scope.
 Notation "(!!!)" := lookup_total (only parsing) : stdpp_scope.
 Notation "( m !!!.)" := (λ i, m !!! i) (only parsing) : stdpp_scope.
@@ -1076,14 +1076,14 @@ Global Arguments lookup_total _ _ _ _ !_ !_ / : simpl nomatch, assert.
 (** The singleton map *)
 Class SingletonM K A M := singletonM: K → A → M.
 Global Hint Mode SingletonM - - ! : typeclass_instances.
-Instance: Params (@singletonM) 5 := {}.
+Global Instance: Params (@singletonM) 5 := {}.
 Notation "{[ k := a ]}" := (singletonM k a) (at level 1) : stdpp_scope.
 
 (** The function insert [<[k:=a]>m] should update the element at key [k] with
 value [a] in [m]. *)
 Class Insert (K A M : Type) := insert: K → A → M → M.
 Global Hint Mode Insert - - ! : typeclass_instances.
-Instance: Params (@insert) 5 := {}.
+Global Instance: Params (@insert) 5 := {}.
 Notation "<[ k := a ]>" := (insert k a)
   (at level 5, right associativity, format "<[ k := a ]>") : stdpp_scope.
 Global Arguments insert _ _ _ _ !_ _ !_ / : simpl nomatch, assert.
@@ -1162,14 +1162,14 @@ Notation "{[ k1 := a1 ; k2 := a2 ; k3 := a3 ; k4 := a4 ; k5 := a5 ; k6 := a6 ; k
 returned. *)
 Class Delete (K M : Type) := delete: K → M → M.
 Global Hint Mode Delete - ! : typeclass_instances.
-Instance: Params (@delete) 4 := {}.
+Global Instance: Params (@delete) 4 := {}.
 Global Arguments delete _ _ _ !_ !_ / : simpl nomatch, assert.
 
 (** The function [alter f k m] should update the value at key [k] using the
 function [f], which is called with the original value. *)
 Class Alter (K A M : Type) := alter: (A → A) → K → M → M.
 Global Hint Mode Alter - - ! : typeclass_instances.
-Instance: Params (@alter) 5 := {}.
+Global Instance: Params (@alter) 5 := {}.
 Global Arguments alter {_ _ _ _} _ !_ !_ / : simpl nomatch, assert.
 
 (** The function [partial_alter f k m] should update the value at key [k] using the
@@ -1179,14 +1179,14 @@ yields [None]. *)
 Class PartialAlter (K A M : Type) :=
   partial_alter: (option A → option A) → K → M → M.
 Global Hint Mode PartialAlter - - ! : typeclass_instances.
-Instance: Params (@partial_alter) 4 := {}.
+Global Instance: Params (@partial_alter) 4 := {}.
 Global Arguments partial_alter _ _ _ _ _ !_ !_ / : simpl nomatch, assert.
 
 (** The function [dom C m] should yield the domain of [m]. That is a finite
 set of type [C] that contains the keys that are a member of [m]. *)
 Class Dom (M C : Type) := dom: M → C.
 Global Hint Mode Dom ! ! : typeclass_instances.
-Instance: Params (@dom) 3 := {}.
+Global Instance: Params (@dom) 3 := {}.
 Global Arguments dom : clear implicits.
 Global Arguments dom {_} _ {_} !_ / : simpl nomatch, assert.
 
@@ -1195,7 +1195,7 @@ constructing a new map whose value at key [k] is [f (m1 !! k) (m2 !! k)].*)
 Class Merge (M : Type → Type) :=
   merge: ∀ {A B C}, (option A → option B → option C) → M A → M B → M C.
 Global Hint Mode Merge ! : typeclass_instances.
-Instance: Params (@merge) 4 := {}.
+Global Instance: Params (@merge) 4 := {}.
 Global Arguments merge _ _ _ _ _ _ !_ !_ / : simpl nomatch, assert.
 
 (** The function [union_with f m1 m2] is supposed to yield the union of [m1]
@@ -1204,20 +1204,20 @@ both [m1] and [m2]. *)
 Class UnionWith (A M : Type) :=
   union_with: (A → A → option A) → M → M → M.
 Global Hint Mode UnionWith - ! : typeclass_instances.
-Instance: Params (@union_with) 3 := {}.
+Global Instance: Params (@union_with) 3 := {}.
 Global Arguments union_with {_ _ _} _ !_ !_ / : simpl nomatch, assert.
 
 (** Similarly for intersection and difference. *)
 Class IntersectionWith (A M : Type) :=
   intersection_with: (A → A → option A) → M → M → M.
 Global Hint Mode IntersectionWith - ! : typeclass_instances.
-Instance: Params (@intersection_with) 3 := {}.
+Global Instance: Params (@intersection_with) 3 := {}.
 Global Arguments intersection_with {_ _ _} _ !_ !_ / : simpl nomatch, assert.
 
 Class DifferenceWith (A M : Type) :=
   difference_with: (A → A → option A) → M → M → M.
 Global Hint Mode DifferenceWith - ! : typeclass_instances.
-Instance: Params (@difference_with) 3 := {}.
+Global Instance: Params (@difference_with) 3 := {}.
 Global Arguments difference_with {_ _ _} _ !_ !_ / : simpl nomatch, assert.
 
 Definition intersection_with_list `{IntersectionWith A M}
@@ -1229,7 +1229,7 @@ Global Arguments intersection_with_list _ _ _ _ _ !_ / : assert.
 for the \sqsubseteq symbol. *)
 Class SqSubsetEq A := sqsubseteq: relation A.
 Global Hint Mode SqSubsetEq ! : typeclass_instances.
-Instance: Params (@sqsubseteq) 2 := {}.
+Global Instance: Params (@sqsubseteq) 2 := {}.
 Infix "⊑" := sqsubseteq (at level 70) : stdpp_scope.
 Notation "(⊑)" := sqsubseteq (only parsing) : stdpp_scope.
 Notation "( x ⊑.)" := (sqsubseteq x) (only parsing) : stdpp_scope.
@@ -1244,7 +1244,7 @@ Global Hint Extern 0 (_ ⊑ _) => reflexivity : core.
 
 Class Meet A := meet: A → A → A.
 Global Hint Mode Meet ! : typeclass_instances.
-Instance: Params (@meet) 2 := {}.
+Global Instance: Params (@meet) 2 := {}.
 Infix "⊓" := meet (at level 40) : stdpp_scope.
 Notation "(⊓)" := meet (only parsing) : stdpp_scope.
 Notation "( x ⊓.)" := (meet x) (only parsing) : stdpp_scope.
@@ -1252,7 +1252,7 @@ Notation "(.⊓ y )" := (λ x, meet x y) (only parsing) : stdpp_scope.
 
 Class Join A := join: A → A → A.
 Global Hint Mode Join ! : typeclass_instances.
-Instance: Params (@join) 2 := {}.
+Global Instance: Params (@join) 2 := {}.
 Infix "⊔" := join (at level 50) : stdpp_scope.
 Notation "(⊔)" := join (only parsing) : stdpp_scope.
 Notation "( x ⊔.)" := (join x) (only parsing) : stdpp_scope.
@@ -1301,13 +1301,13 @@ enumerated as a list. These elements, given by the [elements] function, may be
 in any order and should not contain duplicates. *)
 Class Elements A C := elements: C → list A.
 Global Hint Mode Elements - ! : typeclass_instances.
-Instance: Params (@elements) 3 := {}.
+Global Instance: Params (@elements) 3 := {}.
 
 (** We redefine the standard library's [In] and [NoDup] using type classes. *)
 Inductive elem_of_list {A} : ElemOf A (list A) :=
   | elem_of_list_here (x : A) l : x ∈ x :: l
   | elem_of_list_further (x y : A) l : x ∈ l → x ∈ y :: l.
-Existing Instance elem_of_list.
+Global Existing Instance elem_of_list.
 
 Lemma elem_of_list_In {A} (l : list A) x : x ∈ l ↔ In x l.
 Proof.
@@ -1338,7 +1338,7 @@ Class FinSet A C `{ElemOf A C, Empty C, Singleton A C, Union C,
 Class Size C := size: C → nat.
 Global Hint Mode Size ! : typeclass_instances.
 Global Arguments size {_ _} !_ / : simpl nomatch, assert.
-Instance: Params (@size) 2 := {}.
+Global Instance: Params (@size) 2 := {}.
 
 (** The class [MonadSet M] axiomatizes a type constructor [M] that can be
 used to construct a set [M A] with elements of type [A]. The advantage
@@ -1378,7 +1378,7 @@ Instead of instantiating [Infinite] directly, consider using [max_infinite] or
 [inj_infinite] from the [infinite] module. *)
 Class Fresh A C := fresh: C → A.
 Global Hint Mode Fresh - ! : typeclass_instances.
-Instance: Params (@fresh) 3 := {}.
+Global Instance: Params (@fresh) 3 := {}.
 Global Arguments fresh : simpl never.
 
 Class Infinite A := {

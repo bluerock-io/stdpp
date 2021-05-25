@@ -205,7 +205,7 @@ Qed.
 Global Instance natmap_map: FMap natmap := λ A B f m,
   let (l,Hl) := m in NatMap (natmap_map_raw f l) (natmap_map_wf _ _ Hl).
 
-Instance: FinMap nat natmap.
+Global Instance: FinMap nat natmap.
 Proof.
   split.
   - unfold lookup, natmap_lookup. intros A [l1 Hl1] [l2 Hl2] E.
@@ -257,7 +257,7 @@ Qed.
 (** Finally, we can construct sets of [nat]s satisfying extensional equality. *)
 Notation natset := (mapset natmap).
 Global Instance natmap_dom {A} : Dom (natmap A) natset := mapset_dom.
-Instance: FinMapDom nat natmap natset := mapset_dom_spec.
+Global Instance: FinMapDom nat natmap natset := mapset_dom_spec.
 
 (* Fixpoint avoids this definition from being unfolded *)
 Definition bools_to_natset (βs : list bool) : natset :=

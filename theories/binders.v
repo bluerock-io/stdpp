@@ -77,7 +77,7 @@ Definition binder_delete `{Delete string M} (b : binder) (m : M) : M :=
   match b with BAnon => m | BNamed s => delete s m end.
 Definition binder_insert `{Insert string A M} (b : binder) (x : A) (m : M) : M :=
   match b with BAnon => m | BNamed s => <[s:=x]> m end.
-Instance: Params (@binder_insert) 4 := {}.
+Global Instance: Params (@binder_insert) 4 := {}.
 
 Section binder_delete_insert.
   Context `{FinMap string M}.

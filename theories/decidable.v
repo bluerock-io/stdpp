@@ -12,7 +12,7 @@ Proof. firstorder. Qed.
 
 Lemma Is_true_reflect (b : bool) : reflect b b.
 Proof. destruct b; [left; constructor | right; intros []]. Qed.
-Instance: Inj (=) (↔) Is_true.
+Global Instance: Inj (=) (↔) Is_true.
 Proof. intros [] []; simpl; intuition. Qed.
 
 Lemma decide_True {A} `{Decision P} (x y : A) :

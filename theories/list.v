@@ -592,6 +592,27 @@ Proof.
   - apply lookup_ge_None in Hi. naive_solver lia.
 Qed.
 
+Lemma lookup_cons x l i :
+  (x :: l) !! i =
+    match i with 0 => Some x | S i => l !! i end.
+Proof. reflexivity. Qed.
+Lemma lookup_cons_Some x l i y :
+  (x :: l) !! i = Some y ↔
+    (i = 0 ∧ x = y) ∨ (1 ≤ i ∧ l !! (i - 1) = Some y).
+Proof.
+  rewrite lookup_cons. destruct i as [|i].
+  - naive_solver lia.
+  - replace (S i - 1) with i by lia. naive_solver lia.
+Qed.
+
+Lemma list_lookup_singleton x i :
+  [x] !! i =
+    match i with 0 => Some x | S _ => None end.
+Proof. reflexivity. Qed.
+Lemma list_lookup_singleton_Some x i y :
+  [x] !! i = Some y ↔ i = 0 ∧ x = y.
+Proof. rewrite lookup_cons_Some. naive_solver. Qed.
+
 Lemma list_lookup_middle l1 l2 x n :
   n = length l1 → (l1 ++ x :: l2) !! n = Some x.
 Proof. intros ->. by induction l1. Qed.

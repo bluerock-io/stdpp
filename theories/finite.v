@@ -237,7 +237,7 @@ Section bijective_finite.
   Context `{Finite A, EqDecision B} (f : A → B) (g : B → A).
   Context `{!Inj (=) (=) f, !Cancel (=) f g}.
 
-  Local Instance bijective_finite: Finite B :=
+  Definition bijective_finite : Finite B :=
     let _ := cancel_surj (f:=f) (g:=g) in
     surjective_finite f.
 End bijective_finite.

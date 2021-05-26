@@ -2568,8 +2568,19 @@ Section map_kmap.
     map_kmap f m !!! f i = m !!! i.
   Proof. by rewrite !lookup_total_alt, lookup_map_kmap. Qed.
 
+  Global Instance map_kmap_inj {A} : Inj (=@{M1 A}) (=) (map_kmap f).
+  Proof.
+    intros m1 m2 Hm. apply map_eq. intros i. by rewrite <-!lookup_map_kmap, Hm.
+  Qed.
+
   Lemma map_kmap_empty {A} : map_kmap f ∅ =@{M2 A} ∅.
   Proof. unfold map_kmap. by rewrite map_to_list_empty. Qed.
+  Lemma map_kmap_empty_inv {A} (m : M1 A) : map_kmap f m = ∅ → m = ∅.
+  Proof.
+    intros Hm. apply map_empty; intros i.
+    apply (lookup_map_kmap_None _ (f i)); [|done]. by rewrite Hm, lookup_empty.
+  Qed.
+
   Lemma map_kmap_singleton {A} i (x : A) : map_kmap f {[ i := x ]} = {[ f i := x ]}.
   Proof. unfold map_kmap. by rewrite map_to_list_singleton. Qed.
 

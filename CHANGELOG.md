@@ -22,12 +22,12 @@ API-breaking change is listed.
 - Make `Z.of_nat'` not an implicit coercion (from `nat` to `Z`) any more.
 - Rename `decide_left` → `decide_True_pi` and `decide_right` → `decide_False_pi`.
 - Add `option_guard_True_pi`.
-- Add lemma `surjective_finite` (by Alix Trieu).
-- Add type classes `TCFalse`, `TCUnless`, `TCExists`, and `TCFastDone` (by
-  Michael Sammler).
-- Add various results about bit representations of `Z` (by Michael Sammler).
-- Add tactic `learn_hyp` (by Michael Sammler).
-- Add `Countable` instance for decidable Sigma types (by Simon Gregersen).
+- Add lemma `surjective_finite`. (by Alix Trieu)
+- Add type classes `TCFalse`, `TCUnless`, `TCExists`, and `TCFastDone`. (by
+  Michael Sammler)
+- Add various results about bit representations of `Z`. (by Michael Sammler)
+- Add tactic `learn_hyp`. (by Michael Sammler)
+- Add `Countable` instance for decidable Sigma types. (by Simon Gregersen)
 - Add tactics `compute_done` and `compute_by` for solving goals by computation.
 - Add `Inj` instances for `fmap` on option and maps.
 

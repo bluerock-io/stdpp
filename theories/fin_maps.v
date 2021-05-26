@@ -2666,6 +2666,20 @@ Section map_kmap.
   Lemma map_kmap_fmap {A B} (g : A → B) (m : M1 A) :
     map_kmap f (g <$> m) = g <$> (map_kmap f m).
   Proof. by rewrite !map_fmap_alt, map_kmap_omap. Qed.
+
+  Lemma map_disjoint_kmap {A} (m1 m2 : M1 A) :
+    map_kmap f m1 ##ₘ map_kmap f m2 ↔ m1 ##ₘ m2.
+  Proof.
+    rewrite !map_disjoint_spec. setoid_rewrite lookup_map_kmap_Some. naive_solver.
+  Qed.
+  Lemma map_disjoint_subseteq {A} (m1 m2 : M1 A) :
+    map_kmap f m1 ⊆ map_kmap f m2 ↔ m1 ⊆ m2.
+  Proof.
+    rewrite !map_subseteq_spec. setoid_rewrite lookup_map_kmap_Some. naive_solver.
+  Qed.
+  Lemma map_disjoint_subset {A} (m1 m2 : M1 A) :
+    map_kmap f m1 ⊂ map_kmap f m2 ↔ m1 ⊂ m2.
+  Proof. unfold strict. by rewrite !map_disjoint_subseteq. Qed.
 End map_kmap.
 
 (** * Tactics *)

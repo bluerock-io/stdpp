@@ -2595,6 +2595,49 @@ Section map_kmap.
     map_kmap f (alter g i m) = alter g (f i) (map_kmap f m).
   Proof. apply map_kmap_partial_alter. Qed.
 
+  Lemma map_kmap_merge {A B C} (g : option A → option B → option C)
+      `{!DiagNone g} (m1 : M1 A) (m2 : M1 B) :
+    map_kmap f (merge g m1 m2) = merge g (map_kmap f m1) (map_kmap f m2).
+  Proof.
+    apply map_eq; intros j. apply option_eq; intros y.
+    rewrite (lookup_merge g), lookup_map_kmap_Some.
+    setoid_rewrite (lookup_merge g). split.
+    { intros [i [-> ?]]. by rewrite !lookup_map_kmap. }
+    intros Hg. destruct (map_kmap f m1 !! j) as [x1|] eqn:Hm1.
+    { apply lookup_map_kmap_Some in Hm1 as (i&->&Hm1i).
+      exists i. split; [done|]. by rewrite Hm1i, <-lookup_map_kmap. }
+    destruct (map_kmap f m2 !! j) as [x2|] eqn:Hm2.
+    { apply lookup_map_kmap_Some in Hm2 as (i&->&Hm2i).
+      exists i. split; [done|]. by rewrite Hm2i, <-lookup_map_kmap, Hm1. }
+    unfold DiagNone in *. naive_solver.
+  Qed.
+  Lemma map_kmap_union_with {A} (g : A → A → option A) (m1 m2 : M1 A) :
+    map_kmap f (union_with g m1 m2)
+    = union_with g (map_kmap f m1) (map_kmap f m2).
+  Proof. apply (map_kmap_merge _). Qed.
+  Lemma map_kmap_intersection_with {A} (g : A → A → option A) (m1 m2 : M1 A) :
+    map_kmap f (intersection_with g m1 m2)
+    = intersection_with g (map_kmap f m1) (map_kmap f m2).
+  Proof. apply (map_kmap_merge _). Qed.
+  Lemma map_kmap_difference_with {A} (g : A → A → option A) (m1 m2 : M1 A) :
+    map_kmap f (difference_with g m1 m2)
+    = difference_with g (map_kmap f m1) (map_kmap f m2).
+  Proof. apply (map_kmap_merge _). Qed.
+
+  Lemma map_kmap_union {A} (m1 m2 : M1 A) :
+    map_kmap f (m1 ∪ m2) = map_kmap f m1 ∪ map_kmap f m2.
+  Proof. apply map_kmap_union_with. Qed.
+  Lemma map_kmap_intersection {A} (m1 m2 : M1 A) :
+    map_kmap f (m1 ∩ m2) = map_kmap f m1 ∩ map_kmap f m2.
+  Proof. apply map_kmap_intersection_with. Qed.
+  Lemma map_kmap_difference {A} (m1 m2 : M1 A) :
+    map_kmap f (m1 ∖ m2) = map_kmap f m1 ∖ map_kmap f m2.
+  Proof. apply (map_kmap_merge _). Qed.
+
+  Lemma map_kmap_zip_with {A B C} (g : A → B → C) (m1 : M1 A) (m2 : M1 B) :
+    map_kmap f (map_zip_with g m1 m2) = map_zip_with g (map_kmap f m1) (map_kmap f m2).
+  Proof. by apply map_kmap_merge. Qed.
+
   Lemma map_kmap_imap {A B} (g : K2 → A → option B) (m : M1 A) :
     map_kmap f (map_imap (g ∘ f) m) = map_imap g (map_kmap f m).
   Proof.

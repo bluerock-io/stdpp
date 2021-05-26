@@ -663,6 +663,13 @@ Lemma delete_singleton_ne {A} i j (x : A) :
 Proof. intro. apply delete_notin. by apply lookup_singleton_ne. Qed.
 
 (** ** Properties of the map operations *)
+Global Instance map_fmap_inj {A B} (f : A → B) :
+  Inj (=) (=) f → Inj (=@{M A}) (=@{M B}) (fmap f).
+Proof.
+  intros ? m1 m2 Hm. apply map_eq; intros i.
+  apply (inj (fmap (M:=option) f)). by rewrite <-!lookup_fmap, Hm.
+Qed.
+
 Lemma lookup_fmap_Some {A B} (f : A → B) (m : M A) i y :
   (f <$> m) !! i = Some y ↔ ∃ x, f x = y ∧ m !! i = Some x.
 Proof. rewrite lookup_fmap, fmap_Some. naive_solver. Qed.

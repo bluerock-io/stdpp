@@ -29,6 +29,7 @@ API-breaking change is listed.
 - Add tactic `learn_hyp` (by Michael Sammler).
 - Add `Countable` instance for decidable Sigma types (by Simon Gregersen).
 - Add tactics `compute_done` and `compute_by` for solving goals by computation.
+- Add `Inj` instances for `fmap` on option and maps.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`):

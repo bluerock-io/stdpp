@@ -2562,10 +2562,10 @@ Section kmap.
     rewrite lookup_kmap_is_Some. naive_solver.
   Qed.
   Lemma lookup_kmap {A} (m : M1 A) (i : K1) :
-    kmap f m !! f i = m !! i.
+    kmap f m !! (f i) = m !! i.
   Proof. apply option_eq. setoid_rewrite lookup_kmap_Some. naive_solver. Qed.
   Lemma lookup_total_kmap `{Inhabited A} (m : M1 A) (i : K1) :
-    kmap f m !!! f i = m !!! i.
+    kmap f m !!! (f i) = m !!! i.
   Proof. by rewrite !lookup_total_alt, lookup_kmap. Qed.
 
   Global Instance kmap_inj {A} : Inj (=@{M1 A}) (=) (kmap f).

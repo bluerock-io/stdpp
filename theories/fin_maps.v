@@ -2561,6 +2561,9 @@ Section kmap.
     setoid_rewrite eq_None_not_Some.
     rewrite lookup_kmap_is_Some. naive_solver.
   Qed.
+  (** Note that to state a lemma [map_kmap f m !! j = ...] we need to have a
+  partial inverse [f_inv] of [f] (which one cannot define constructively). Then
+  we could write [map_kmap f m !! j = (i ← f_inv j; m !! i)] *)
   Lemma lookup_kmap {A} (m : M1 A) (i : K1) :
     kmap f m !! (f i) = m !! i.
   Proof. apply option_eq. setoid_rewrite lookup_kmap_Some. naive_solver. Qed.

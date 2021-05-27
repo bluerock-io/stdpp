@@ -198,12 +198,12 @@ Proof.
       naive_solver.
 Qed.
 
-Lemma dom_map_kmap `{!Elements K D, !FinSet K D, FinMapDom K2 M2 D2}
+Lemma dom_kmap `{!Elements K D, !FinSet K D, FinMapDom K2 M2 D2}
     {A} (f : K → K2) `{!Inj (=) (=) f} (m : M A) :
-  dom D2 (map_kmap (M2:=M2) f m) ≡ set_map f (dom D m).
+  dom D2 (kmap (M2:=M2) f m) ≡ set_map f (dom D m).
 Proof.
   apply set_equiv. intros i.
-  rewrite !elem_of_dom, (lookup_map_kmap_is_Some _), elem_of_map.
+  rewrite !elem_of_dom, (lookup_kmap_is_Some _), elem_of_map.
   by setoid_rewrite elem_of_dom.
 Qed.
 
@@ -261,10 +261,10 @@ Section leibniz.
   Proof. unfold_leibniz. apply dom_union_inv. Qed.
 End leibniz.
 
-Lemma dom_map_kmap_L `{!Elements K D, !FinSet K D, FinMapDom K2 M2 D2}
+Lemma dom_kmap_L `{!Elements K D, !FinSet K D, FinMapDom K2 M2 D2}
     `{!LeibnizEquiv D2} {A} (f : K → K2) `{!Inj (=) (=) f} (m : M A) :
-  dom D2 (map_kmap (M2:=M2) f m) = set_map f (dom D m).
-Proof. unfold_leibniz. by apply dom_map_kmap. Qed.
+  dom D2 (kmap (M2:=M2) f m) = set_map f (dom D m).
+Proof. unfold_leibniz. by apply dom_kmap. Qed.
 
 (** * Set solver instances *)
 Global Instance set_unfold_dom_empty {A} i : SetUnfoldElemOf i (dom D (∅:M A)) False.

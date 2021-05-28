@@ -5,6 +5,7 @@ license: "BSD-3-Clause"
 homepage: "https://gitlab.mpi-sws.org/iris/stdpp"
 bug-reports: "https://gitlab.mpi-sws.org/iris/stdpp/issues"
 dev-repo: "git+https://gitlab.mpi-sws.org/iris/stdpp.git"
+version: "dev"
 
 synopsis: "std++ is an extended \"Standard Library\" for Coq"
 description: """

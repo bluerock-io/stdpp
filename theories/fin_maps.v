@@ -1332,6 +1332,13 @@ Section map_filter_ext.
     intros HPiff. apply map_eq. intros i. apply option_eq; intros x.
     rewrite !map_filter_lookup_Some. naive_solver.
   Qed.
+  Lemma map_filter_strong_ext_2 (m1 m2 : M A) i x :
+    filter P m1 = filter Q m2 →
+    (P (i, x) ∧ m1 !! i = Some x) ↔ (Q (i, x) ∧ m2 !! i = Some x).
+  Proof.
+    intros Hfilt. rewrite (comm _ (P (i, x))), (comm _ (Q (i, x))).
+    rewrite <- !map_filter_lookup_Some. by repeat f_equiv.
+  Qed.
   Lemma map_filter_ext (m : M A) :
     (∀ i x, m !! i = Some x → P (i, x) ↔ Q (i, x)) →
     filter P m = filter Q m.

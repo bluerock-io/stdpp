@@ -3,7 +3,7 @@ From stdpp Require Export list numbers list_numbers fin.
 From stdpp Require Import options.
 Local Open Scope positive.
 
-(* Note that [Countable A] gives rise to [EqDecision A] by checking equality of
+(** Note that [Countable A] gives rise to [EqDecision A] by checking equality of
 the results of [encode]. This instance of [EqDecision A] is very inefficient, so
 the native decider is typically preferred for actual computation. To avoid
 overlapping instances, we include [EqDecision A] explicitly as a parameter of

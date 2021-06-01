@@ -30,6 +30,13 @@ API-breaking change is listed.
 - Add `Countable` instance for decidable Sigma types. (by Simon Gregersen)
 - Add tactics `compute_done` and `compute_by` for solving goals by computation.
 - Add `Inj` instances for `fmap` on option and maps.
+- Various changes to `Permutation` lemmas:
+  + Rename `Permutation_nil` → `Permutation_nil_r` and
+    and `Permutation_singleton` → `Permutation_singleton_r`.
+  + Add lemmas `Permutation_nil_l` and `Permutation_singleton_l`.
+  + Add new instance `cons_Permutation_inj_l : Inj (=) (≡ₚ) (.:: k).`.
+  + Add lemma `Permutation_cross_split`.
+  + Make lemma `elem_of_Permutation` a biimplication
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`):
@@ -37,6 +44,9 @@ The following `sed` script should perform most of the renaming
 sed -i -E '
 s/\bdecide_left\b/decide_True_pi/g
 s/\bdecide_right\b/decide_False_pi/g
+# Permutation
+s/\bPermutation_nil\b/Permutation_nil_r/g
+s/\bPermutation_singleton\b/Permutation_singleton_r/g
 ' $(find theories -name "*.v")
 ```
 

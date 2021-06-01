@@ -1692,10 +1692,14 @@ Proof.
 Qed.
 
 (** ** Properties of the [Permutation] predicate *)
-Lemma Permutation_nil l : l ≡ₚ [] ↔ l = [].
+Lemma Permutation_nil_r l : l ≡ₚ [] ↔ l = [].
 Proof. split; [by intro; apply Permutation_nil | by intros ->]. Qed.
-Lemma Permutation_singleton l x : l ≡ₚ [x] ↔ l = [x].
+Lemma Permutation_singleton_r l x : l ≡ₚ [x] ↔ l = [x].
 Proof. split; [by intro; apply Permutation_length_1_inv | by intros ->]. Qed.
+Lemma Permutation_nil_l l : [] ≡ₚ l ↔ [] = l.
+Proof. by rewrite (symmetry_iff (≡ₚ)), Permutation_nil_r. Qed.
+Lemma Permutation_singleton_l l x : [x] ≡ₚ l ↔ [x] = l.
+Proof. by rewrite (symmetry_iff (≡ₚ)), Permutation_singleton_r. Qed.
 
 Lemma Permutation_skip x l l' : l ≡ₚ l' → x :: l ≡ₚ x :: l'.
 Proof. apply perm_skip. Qed.
@@ -1762,7 +1766,7 @@ Proof.
   - intros [k ->]. by left.
 Qed.
 
-Lemma Permutation_cons_inv l k x :
+Lemma Permutation_cons_inv_r l k x :
   k ≡ₚ x :: l → ∃ k1 k2, k = k1 ++ x :: k2 ∧ l ≡ₚ k1 ++ k2.
 Proof.
   intros Hk. assert (∃ i, k !! i = Some x) as [i Hi].
@@ -1772,6 +1776,9 @@ Proof.
   - rewrite <-delete_take_drop. apply (inj (x ::.)).
     by rewrite <-Hk, <-(delete_Permutation k) by done.
 Qed.
+Lemma Permutation_cons_inv_l l k x :
+  x :: l ≡ₚ k → ∃ k1 k2, k = k1 ++ x :: k2 ∧ l ≡ₚ k1 ++ k2.
+Proof. by intros ?%(symmetry_iff (≡ₚ))%Permutation_cons_inv_r. Qed.
 
 Lemma Permutation_cross_split l la lb lc ld :
   la ++ lb ≡ₚ l →

@@ -85,7 +85,7 @@ Qed.
 Lemma elements_empty' X : elements X = [] ↔ X ≡ ∅.
 Proof.
   split; intros HX; [by apply elements_empty_inv|].
-  by rewrite <-Permutation_nil, HX, elements_empty.
+  by rewrite <-Permutation_nil_r, HX, elements_empty.
 Qed.
 
 Lemma elements_union_singleton (X : C) x :
@@ -99,7 +99,7 @@ Proof.
 Qed.
 Lemma elements_singleton x : elements ({[ x ]} : C) = [x].
 Proof.
-  apply Permutation_singleton. by rewrite <-(right_id ∅ (∪) {[x]}),
+  apply Permutation_singleton_r. by rewrite <-(right_id ∅ (∪) {[x]}),
     elements_union_singleton, elements_empty by set_solver.
 Qed.
 Lemma elements_disj_union (X Y : C) :

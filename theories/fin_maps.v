@@ -938,7 +938,7 @@ Qed.
 Lemma map_to_list_singleton {A} i (x : A) :
   map_to_list ({[i:=x]} : M A) = [(i,x)].
 Proof.
-  apply Permutation_singleton. unfold singletonM, map_singleton.
+  apply Permutation_singleton_r. unfold singletonM, map_singleton.
   by rewrite map_to_list_insert, map_to_list_empty by eauto using lookup_empty.
 Qed.
 Lemma map_to_list_delete {A} (m : M A) i x :

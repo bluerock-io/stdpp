@@ -77,7 +77,7 @@ Section sorted.
     intros Hl1; revert l2. induction Hl1 as [|x1 l1 ? IH Hx1]; intros l2 Hl2 E.
     { symmetry. by apply Permutation_nil. }
     destruct Hl2 as [|x2 l2 ? Hx2].
-    { by apply Permutation_nil in E. }
+    { by apply Permutation_nil_r in E. }
     assert (x1 = x2); subst.
     { rewrite Forall_forall in Hx1, Hx2.
       assert (x2 ∈ x1 :: l1) as Hx2' by (by rewrite E; left).

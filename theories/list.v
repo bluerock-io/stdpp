@@ -858,8 +858,6 @@ Lemma not_elem_of_app l1 l2 x : x ∉ l1 ++ l2 ↔ x ∉ l1 ∧ x ∉ l2.
 Proof. rewrite elem_of_app. tauto. Qed.
 Lemma elem_of_list_singleton x y : x ∈ [y] ↔ x = y.
 Proof. rewrite elem_of_cons, elem_of_nil. tauto. Qed.
-Global Instance elem_of_list_permutation_proper x : Proper ((≡ₚ) ==> iff) (x ∈.).
-Proof. induction 1; rewrite ?elem_of_nil, ?elem_of_cons; intuition. Qed.
 Lemma elem_of_list_lookup_1 l x : x ∈ l → ∃ i, l !! i = Some x.
 Proof.
   induction 1 as [|???? IH]; [by exists 0 |].
@@ -944,14 +942,6 @@ Proof.
   - rewrite NoDup_nil. setoid_rewrite elem_of_nil. naive_solver.
   - rewrite !NoDup_cons.
     setoid_rewrite elem_of_cons. setoid_rewrite elem_of_app. naive_solver.
-Qed.
-Global Instance NoDup_proper: Proper ((≡ₚ) ==> iff) (@NoDup A).
-Proof.
-  induction 1 as [|x l k Hlk IH | |].
-  - by rewrite !NoDup_nil.
-  - by rewrite !NoDup_cons, IH, Hlk.
-  - rewrite !NoDup_cons, !elem_of_cons. intuition.
-  - intuition.
 Qed.
 Lemma NoDup_lookup l i j x :
   NoDup l → l !! i = Some x → l !! j = Some x → i = j.
@@ -1714,6 +1704,17 @@ Definition Permutation_singleton_inj := @Permutation_length_1 A.
 Global Instance Permutation_cons x : Proper ((≡ₚ) ==> (≡ₚ)) (@cons A x).
 Proof. by constructor. Qed.
 Global Existing Instance Permutation_app'.
+
+Global Instance elem_of_list_permutation_proper x : Proper ((≡ₚ) ==> iff) (x ∈.).
+Proof. induction 1; rewrite ?elem_of_nil, ?elem_of_cons; intuition. Qed.
+Global Instance NoDup_proper: Proper ((≡ₚ) ==> iff) (@NoDup A).
+Proof.
+  induction 1 as [|x l k Hlk IH | |].
+  - by rewrite !NoDup_nil.
+  - by rewrite !NoDup_cons, IH, Hlk.
+  - rewrite !NoDup_cons, !elem_of_cons. intuition.
+  - intuition.
+Qed.
 
 Global Instance: Proper ((≡ₚ) ==> (=)) (@length A).
 Proof. induction 1; simpl; auto with lia. Qed.

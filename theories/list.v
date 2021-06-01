@@ -1697,9 +1697,13 @@ Lemma Permutation_nil l : l ≡ₚ [] ↔ l = [].
 Proof. split; [by intro; apply Permutation_nil | by intros ->]. Qed.
 Lemma Permutation_singleton l x : l ≡ₚ [x] ↔ l = [x].
 Proof. split; [by intro; apply Permutation_length_1_inv | by intros ->]. Qed.
-Definition Permutation_skip := @perm_skip A.
-Definition Permutation_swap := @perm_swap A.
-Definition Permutation_singleton_inj := @Permutation_length_1 A.
+
+Lemma Permutation_skip x l l' : l ≡ₚ l' → x :: l ≡ₚ x :: l'.
+Proof. apply perm_skip. Qed.
+Lemma Permutation_swap x y l : y :: x :: l ≡ₚ x :: y :: l.
+Proof. apply perm_swap. Qed.
+Lemma Permutation_singleton_inj x y : [x] ≡ₚ [y] → x = y.
+Proof. apply Permutation_length_1. Qed.
 
 Global Instance Permutation_cons x : Proper ((≡ₚ) ==> (≡ₚ)) (@cons A x).
 Proof. by constructor. Qed.

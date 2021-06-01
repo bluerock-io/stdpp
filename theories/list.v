@@ -1753,8 +1753,12 @@ Proof.
   revert i; induction l as [|y l IH]; intros [|i] ?; simplify_eq/=; auto.
   by rewrite Permutation_swap, <-(IH i).
 Qed.
-Lemma elem_of_Permutation l x : x ∈ l → ∃ k, l ≡ₚ x :: k.
-Proof. intros [i ?]%elem_of_list_lookup. eauto using delete_Permutation. Qed.
+Lemma elem_of_Permutation l x : x ∈ l ↔ ∃ k, l ≡ₚ x :: k.
+Proof.
+  split.
+  - intros [i ?]%elem_of_list_lookup. eexists. by apply delete_Permutation.
+  - intros [k ->]. by left.
+Qed.
 
 Lemma Permutation_cons_inv l k x :
   k ≡ₚ x :: l → ∃ k1 k2, k = k1 ++ x :: k2 ∧ l ≡ₚ k1 ++ k2.

@@ -1704,9 +1704,11 @@ Proof. apply perm_swap. Qed.
 Lemma Permutation_singleton_inj x y : [x] ≡ₚ [y] → x = y.
 Proof. apply Permutation_length_1. Qed.
 
-Global Instance elem_of_list_permutation_proper x : Proper ((≡ₚ) ==> iff) (x ∈.).
+Global Instance length_Permutation_proper : Proper ((≡ₚ) ==> (=)) (@length A).
+Proof. induction 1; simpl; auto with lia. Qed.
+Global Instance elem_of_Permutation_proper x : Proper ((≡ₚ) ==> iff) (x ∈.).
 Proof. induction 1; rewrite ?elem_of_nil, ?elem_of_cons; intuition. Qed.
-Global Instance NoDup_proper: Proper ((≡ₚ) ==> iff) (@NoDup A).
+Global Instance NoDup_Permutation_proper: Proper ((≡ₚ) ==> iff) (@NoDup A).
 Proof.
   induction 1 as [|x l k Hlk IH | |].
   - by rewrite !NoDup_nil.
@@ -1715,23 +1717,28 @@ Proof.
   - intuition.
 Qed.
 
-Global Instance: Proper ((≡ₚ) ==> (=)) (@length A).
-Proof. induction 1; simpl; auto with lia. Qed.
-Global Instance: Comm (≡ₚ) (@app A).
+Global Instance app_Permutation_comm : Comm (≡ₚ) (@app A).
 Proof.
   intros l1. induction l1 as [|x l1 IH]; intros l2; simpl.
   - by rewrite (right_id_L [] (++)).
   - rewrite Permutation_middle, IH. simpl. by rewrite Permutation_middle.
 Qed.
-Global Instance: ∀ x : A, Inj (≡ₚ) (≡ₚ) (x ::.).
+
+Global Instance cons_Permutation_inj_r x : Inj (≡ₚ) (≡ₚ) (x ::.).
 Proof. red. eauto using Permutation_cons_inv. Qed.
-Global Instance: ∀ k : list A, Inj (≡ₚ) (≡ₚ) (k ++.).
+Global Instance app_Permutation_inj_r k : Inj (≡ₚ) (≡ₚ) (k ++.).
 Proof.
-  intros k. induction k as [|x k IH]; intros l1 l2; simpl; auto.
+  induction k as [|x k IH]; intros l1 l2; simpl; auto.
   intros. by apply IH, (inj (x ::.)).
 Qed.
-Global Instance: ∀ k : list A, Inj (≡ₚ) (≡ₚ) (.++ k).
-Proof. intros k l1 l2. rewrite !(comm (++) _ k). by apply (inj (k ++.)). Qed.
+Global Instance cons_Permutation_inj_l k : Inj (=) (≡ₚ) (.:: k).
+Proof.
+  intros x1 x2 Hperm. apply Permutation_singleton_inj.
+  apply (inj (k ++.)). by rewrite !(comm (++) k).
+Qed.
+Global Instance app_Permutation_inj_l k : Inj (≡ₚ) (≡ₚ) (.++ k).
+Proof. intros l1 l2. rewrite !(comm (++) _ k). by apply (inj (k ++.)). Qed.
+
 Lemma replicate_Permutation n x l : replicate n x ≡ₚ l → replicate n x = l.
 Proof.
   intros Hl. apply replicate_as_elem_of. split.

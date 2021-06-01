@@ -719,8 +719,26 @@ Proof.
   intros. assert (i = length l1 + (i - length l1)) as Hi by lia.
   rewrite Hi at 1. by apply insert_app_r.
 Qed.
+
 Lemma delete_middle l1 l2 x : delete (length l1) (l1 ++ x :: l2) = l1 ++ l2.
 Proof. induction l1; f_equal/=; auto. Qed.
+Lemma length_delete l i :
+  is_Some (l !! i) → length (delete i l) = length l - 1.
+Proof.
+  rewrite lookup_lt_is_Some. revert i.
+  induction l as [|x l IH]; intros [|i] ?; simpl in *; [lia..|].
+  rewrite IH by lia. lia.
+Qed.
+Lemma lookup_delete_lt l i j : j < i → delete i l !! j = l !! j.
+Proof. revert i j; induction l; intros [] []; naive_solver eauto with lia. Qed.
+Lemma lookup_total_delete_lt `{!Inhabited A} l i j :
+  j < i → delete i l !!! j = l !!! j.
+Proof. intros. by rewrite !list_lookup_total_alt, lookup_delete_lt. Qed.
+Lemma lookup_delete_ge l i j : i ≤ j → delete i l !! j = l !! S j.
+Proof. revert i j; induction l; intros [] []; naive_solver eauto with lia. Qed.
+Lemma lookup_total_delete_ge `{!Inhabited A} l i j :
+  i ≤ j → delete i l !!! j = l !!! S j.
+Proof. intros. by rewrite !list_lookup_total_alt, lookup_delete_ge. Qed.
 
 Lemma inserts_length l i k : length (list_inserts i k l) = length l.
 Proof.
@@ -1743,24 +1761,6 @@ Proof.
   - rewrite <-delete_take_drop. apply (inj (x ::.)).
     by rewrite <-Hk, <-(delete_Permutation k) by done.
 Qed.
-
-Lemma length_delete l i :
-  is_Some (l !! i) → length (delete i l) = length l - 1.
-Proof.
-  rewrite lookup_lt_is_Some. revert i.
-  induction l as [|x l IH]; intros [|i] ?; simpl in *; [lia..|].
-  rewrite IH by lia. lia.
-Qed.
-Lemma lookup_delete_lt l i j : j < i → delete i l !! j = l !! j.
-Proof. revert i j; induction l; intros [] []; naive_solver eauto with lia. Qed.
-Lemma lookup_total_delete_lt `{!Inhabited A} l i j :
-  j < i → delete i l !!! j = l !!! j.
-Proof. intros. by rewrite !list_lookup_total_alt, lookup_delete_lt. Qed.
-Lemma lookup_delete_ge l i j : i ≤ j → delete i l !! j = l !! S j.
-Proof. revert i j; induction l; intros [] []; naive_solver eauto with lia. Qed.
-Lemma lookup_total_delete_ge `{!Inhabited A} l i j :
-  i ≤ j → delete i l !!! j = l !!! S j.
-Proof. intros. by rewrite !list_lookup_total_alt, lookup_delete_ge. Qed.
 
 Lemma Permutation_inj l1 l2 :
   Permutation l1 l2 ↔

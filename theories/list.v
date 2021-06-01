@@ -31,7 +31,6 @@ Global Instance: Params (@drop) 1 := {}.
 
 Global Arguments Permutation {_} _ _ : assert.
 Global Arguments Forall_cons {_} _ _ _ _ _ : assert.
-Global Remove Hints Permutation_cons : typeclass_instances.
 
 Notation "(::)" := cons (only parsing) : list_scope.
 Notation "( x ::.)" := (cons x) (only parsing) : list_scope.
@@ -1705,10 +1704,6 @@ Proof. apply perm_swap. Qed.
 Lemma Permutation_singleton_inj x y : [x] ≡ₚ [y] → x = y.
 Proof. apply Permutation_length_1. Qed.
 
-Global Instance Permutation_cons x : Proper ((≡ₚ) ==> (≡ₚ)) (@cons A x).
-Proof. by constructor. Qed.
-Global Existing Instance Permutation_app'.
-
 Global Instance elem_of_list_permutation_proper x : Proper ((≡ₚ) ==> iff) (x ∈.).
 Proof. induction 1; rewrite ?elem_of_nil, ?elem_of_cons; intuition. Qed.
 Global Instance NoDup_proper: Proper ((≡ₚ) ==> iff) (@NoDup A).
@@ -1812,7 +1807,7 @@ Proof.
     induction l1 as [|x l1 IH]; intros l2 f Hlen Hf Hl; [by destruct l2|].
     rewrite (delete_Permutation l2 (f 0) x) by (by rewrite <-Hl).
     pose (g n := let m := f (S n) in if lt_eq_lt_dec m (f 0) then m else m - 1).
-    eapply Permutation_cons, (IH _ g).
+    apply Permutation_skip, (IH _ g).
     + rewrite length_delete by (rewrite <-Hl; eauto); simpl in *; lia.
     + unfold g. intros i j Hg.
       repeat destruct (lt_eq_lt_dec _ _) as [[?|?]|?]; simplify_eq/=; try lia.

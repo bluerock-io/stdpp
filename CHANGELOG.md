@@ -31,9 +31,11 @@ API-breaking change is listed.
 - Add tactics `compute_done` and `compute_by` for solving goals by computation.
 - Add `Inj` instances for `fmap` on option and maps.
 - Various changes to `Permutation` lemmas:
-  + Rename `Permutation_nil` → `Permutation_nil_r` and
-    and `Permutation_singleton` → `Permutation_singleton_r`.
-  + Add lemmas `Permutation_nil_l` and `Permutation_singleton_l`.
+  + Rename `Permutation_nil` → `Permutation_nil_r`,
+    `Permutation_singleton` → `Permutation_singleton_r`, and
+    `Permutation_cons_inv` → `Permutation_cons_inv_r`.
+  + Add lemmas `Permutation_nil_l`, `Permutation_singleton_l`, and
+    `Permutation_cons_inv_l`.
   + Add new instance `cons_Permutation_inj_l : Inj (=) (≡ₚ) (.:: k).`.
   + Add lemma `Permutation_cross_split`.
   + Make lemma `elem_of_Permutation` a biimplication
@@ -47,6 +49,7 @@ s/\bdecide_right\b/decide_False_pi/g
 # Permutation
 s/\bPermutation_nil\b/Permutation_nil_r/g
 s/\bPermutation_singleton\b/Permutation_singleton_r/g
+s/\Permutation_cons_inv\b/Permutation_cons_inv_r/g
 ' $(find theories -name "*.v")
 ```
 

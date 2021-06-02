@@ -31,7 +31,6 @@ Global Instance: Params (@drop) 1 := {}.
 
 Global Arguments Permutation {_} _ _ : assert.
 Global Arguments Forall_cons {_} _ _ _ _ _ : assert.
-Global Remove Hints Permutation_cons : typeclass_instances.
 
 Notation "(::)" := cons (only parsing) : list_scope.
 Notation "( x ::.)" := (cons x) (only parsing) : list_scope.
@@ -1693,10 +1692,14 @@ Proof.
 Qed.
 
 (** ** Properties of the [Permutation] predicate *)
-Lemma Permutation_nil l : l ≡ₚ [] ↔ l = [].
+Lemma Permutation_nil_r l : l ≡ₚ [] ↔ l = [].
 Proof. split; [by intro; apply Permutation_nil | by intros ->]. Qed.
-Lemma Permutation_singleton l x : l ≡ₚ [x] ↔ l = [x].
+Lemma Permutation_singleton_r l x : l ≡ₚ [x] ↔ l = [x].
 Proof. split; [by intro; apply Permutation_length_1_inv | by intros ->]. Qed.
+Lemma Permutation_nil_l l : [] ≡ₚ l ↔ [] = l.
+Proof. by rewrite (symmetry_iff (≡ₚ)), Permutation_nil_r. Qed.
+Lemma Permutation_singleton_l l x : [x] ≡ₚ l ↔ [x] = l.
+Proof. by rewrite (symmetry_iff (≡ₚ)), Permutation_singleton_r. Qed.
 
 Lemma Permutation_skip x l l' : l ≡ₚ l' → x :: l ≡ₚ x :: l'.
 Proof. apply perm_skip. Qed.
@@ -1705,13 +1708,11 @@ Proof. apply perm_swap. Qed.
 Lemma Permutation_singleton_inj x y : [x] ≡ₚ [y] → x = y.
 Proof. apply Permutation_length_1. Qed.
 
-Global Instance Permutation_cons x : Proper ((≡ₚ) ==> (≡ₚ)) (@cons A x).
-Proof. by constructor. Qed.
-Global Existing Instance Permutation_app'.
-
-Global Instance elem_of_list_permutation_proper x : Proper ((≡ₚ) ==> iff) (x ∈.).
+Global Instance length_Permutation_proper : Proper ((≡ₚ) ==> (=)) (@length A).
+Proof. induction 1; simpl; auto with lia. Qed.
+Global Instance elem_of_Permutation_proper x : Proper ((≡ₚ) ==> iff) (x ∈.).
 Proof. induction 1; rewrite ?elem_of_nil, ?elem_of_cons; intuition. Qed.
-Global Instance NoDup_proper: Proper ((≡ₚ) ==> iff) (@NoDup A).
+Global Instance NoDup_Permutation_proper: Proper ((≡ₚ) ==> iff) (@NoDup A).
 Proof.
   induction 1 as [|x l k Hlk IH | |].
   - by rewrite !NoDup_nil.
@@ -1720,23 +1721,28 @@ Proof.
   - intuition.
 Qed.
 
-Global Instance: Proper ((≡ₚ) ==> (=)) (@length A).
-Proof. induction 1; simpl; auto with lia. Qed.
-Global Instance: Comm (≡ₚ) (@app A).
+Global Instance app_Permutation_comm : Comm (≡ₚ) (@app A).
 Proof.
   intros l1. induction l1 as [|x l1 IH]; intros l2; simpl.
   - by rewrite (right_id_L [] (++)).
   - rewrite Permutation_middle, IH. simpl. by rewrite Permutation_middle.
 Qed.
-Global Instance: ∀ x : A, Inj (≡ₚ) (≡ₚ) (x ::.).
+
+Global Instance cons_Permutation_inj_r x : Inj (≡ₚ) (≡ₚ) (x ::.).
 Proof. red. eauto using Permutation_cons_inv. Qed.
-Global Instance: ∀ k : list A, Inj (≡ₚ) (≡ₚ) (k ++.).
+Global Instance app_Permutation_inj_r k : Inj (≡ₚ) (≡ₚ) (k ++.).
 Proof.
-  intros k. induction k as [|x k IH]; intros l1 l2; simpl; auto.
+  induction k as [|x k IH]; intros l1 l2; simpl; auto.
   intros. by apply IH, (inj (x ::.)).
 Qed.
-Global Instance: ∀ k : list A, Inj (≡ₚ) (≡ₚ) (.++ k).
-Proof. intros k l1 l2. rewrite !(comm (++) _ k). by apply (inj (k ++.)). Qed.
+Global Instance cons_Permutation_inj_l k : Inj (=) (≡ₚ) (.:: k).
+Proof.
+  intros x1 x2 Hperm. apply Permutation_singleton_inj.
+  apply (inj (k ++.)). by rewrite !(comm (++) k).
+Qed.
+Global Instance app_Permutation_inj_l k : Inj (≡ₚ) (≡ₚ) (.++ k).
+Proof. intros l1 l2. rewrite !(comm (++) _ k). by apply (inj (k ++.)). Qed.
+
 Lemma replicate_Permutation n x l : replicate n x ≡ₚ l → replicate n x = l.
 Proof.
   intros Hl. apply replicate_as_elem_of. split.
@@ -1753,10 +1759,14 @@ Proof.
   revert i; induction l as [|y l IH]; intros [|i] ?; simplify_eq/=; auto.
   by rewrite Permutation_swap, <-(IH i).
 Qed.
-Lemma elem_of_Permutation l x : x ∈ l → ∃ k, l ≡ₚ x :: k.
-Proof. intros [i ?]%elem_of_list_lookup. eauto using delete_Permutation. Qed.
+Lemma elem_of_Permutation l x : x ∈ l ↔ ∃ k, l ≡ₚ x :: k.
+Proof.
+  split.
+  - intros [i ?]%elem_of_list_lookup. eexists. by apply delete_Permutation.
+  - intros [k ->]. by left.
+Qed.
 
-Lemma Permutation_cons_inv l k x :
+Lemma Permutation_cons_inv_r l k x :
   k ≡ₚ x :: l → ∃ k1 k2, k = k1 ++ x :: k2 ∧ l ≡ₚ k1 ++ k2.
 Proof.
   intros Hk. assert (∃ i, k !! i = Some x) as [i Hi].
@@ -1765,6 +1775,30 @@ Proof.
   - by rewrite take_drop_middle.
   - rewrite <-delete_take_drop. apply (inj (x ::.)).
     by rewrite <-Hk, <-(delete_Permutation k) by done.
+Qed.
+Lemma Permutation_cons_inv_l l k x :
+  x :: l ≡ₚ k → ∃ k1 k2, k = k1 ++ x :: k2 ∧ l ≡ₚ k1 ++ k2.
+Proof. by intros ?%(symmetry_iff (≡ₚ))%Permutation_cons_inv_r. Qed.
+
+Lemma Permutation_cross_split l la lb lc ld :
+  la ++ lb ≡ₚ l →
+  lc ++ ld ≡ₚ l →
+  ∃ lac lad lbc lbd,
+    lac ++ lad ≡ₚ la ∧ lbc ++ lbd ≡ₚ lb ∧ lac ++ lbc ≡ₚ lc ∧ lad ++ lbd ≡ₚ ld.
+Proof.
+  intros <-. revert lc ld.
+  induction la as [|x la IH]; simpl; intros lc ld Hperm.
+  { exists [], [], lc, ld. by rewrite !(right_id_L [] (++)). }
+  assert (x ∈ lc ++ ld)
+    as [[lc' Hlc]%elem_of_Permutation|[ld' Hld]%elem_of_Permutation]%elem_of_app.
+  { rewrite Hperm, elem_of_cons. auto. }
+  - rewrite Hlc in Hperm. simpl in Hperm. apply (inj (x ::.)) in Hperm.
+    apply IH in Hperm as (lac&lad&lbc&lbd&Ha&Hb&Hc&Hd).
+    exists (x :: lac), lad, lbc, lbd; simpl. by rewrite Ha, Hb, Hc, Hd.
+  - rewrite Hld, <-Permutation_middle in Hperm. apply (inj (x ::.)) in Hperm.
+    apply IH in Hperm as (lac&lad&lbc&lbd&Ha&Hb&Hc&Hd).
+    exists lac, (x :: lad), lbc, lbd; simpl.
+    by rewrite <-Permutation_middle, Ha, Hb, Hc, Hd.
 Qed.
 
 Lemma Permutation_inj l1 l2 :
@@ -1787,7 +1821,7 @@ Proof.
     induction l1 as [|x l1 IH]; intros l2 f Hlen Hf Hl; [by destruct l2|].
     rewrite (delete_Permutation l2 (f 0) x) by (by rewrite <-Hl).
     pose (g n := let m := f (S n) in if lt_eq_lt_dec m (f 0) then m else m - 1).
-    eapply Permutation_cons, (IH _ g).
+    apply Permutation_skip, (IH _ g).
     + rewrite length_delete by (rewrite <-Hl; eauto); simpl in *; lia.
     + unfold g. intros i j Hg.
       repeat destruct (lt_eq_lt_dec _ _) as [[?|?]|?]; simplify_eq/=; try lia.

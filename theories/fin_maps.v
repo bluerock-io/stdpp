@@ -1458,6 +1458,11 @@ Section map_Forall.
     naive_solver eauto using map_Forall_insert_1_1,
       map_Forall_insert_1_2, map_Forall_insert_2.
   Qed.
+  Lemma map_Forall_singleton (i : K) (x : A) :
+    map_Forall P ({[i := x]} : M A) ↔ P i x.
+  Proof.
+    unfold map_Forall. setoid_rewrite lookup_singleton_Some. naive_solver.
+  Qed.
   Lemma map_Forall_delete m i : map_Forall P m → map_Forall P (delete i m).
   Proof. intros Hm j x; rewrite lookup_delete_Some. naive_solver. Qed.
   Lemma map_Forall_lookup m :
@@ -1637,6 +1642,9 @@ Qed.
 Lemma map_lookup_zip_with_Some {A B C} (f : A → B → C) (m1 : M A) (m2 : M B) i z :
   map_zip_with f m1 m2 !! i = Some z ↔
     ∃ x y, z = f x y ∧ m1 !! i = Some x ∧ m2 !! i = Some y.
+Proof. rewrite map_lookup_zip_with. destruct (m1 !! i), (m2 !! i); naive_solver. Qed.
+Lemma map_lookup_zip_with_None {A B C} (f : A → B → C) (m1 : M A) (m2 : M B) i :
+  map_zip_with f m1 m2 !! i = None ↔ m1 !! i = None ∨ m2 !! i = None.
 Proof. rewrite map_lookup_zip_with. destruct (m1 !! i), (m2 !! i); naive_solver. Qed.
 
 Lemma map_zip_with_empty {A B C} (f : A → B → C) :

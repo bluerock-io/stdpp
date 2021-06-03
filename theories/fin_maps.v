@@ -124,6 +124,15 @@ Definition map_imap `{∀ A, Insert K A (M A), ∀ A, Empty (M A),
     ∀ A, FinMapToList K A (M A)} {A B} (f : K → A → option B) (m : M A) : M B :=
   list_to_map (omap (λ ix, (fst ix ,.) <$> curry f ix) (map_to_list m)).
 
+(** Given a function [f : K1 → K2], the function [kmap f] turns a maps with
+keys of type [K1] into a map with keys of type [K2]. The function [kmap f]
+is only well-behaved if [f] is injective, as otherwise it could map multiple
+entries into the same entry. All lemmas about [kmap f] thus have the premise
+[Inj (=) (=) f]. *)
+Definition kmap `{∀ A, Insert K2 A (M2 A), ∀ A, Empty (M2 A),
+    ∀ A, FinMapToList K1 A (M1 A)} {A} (f : K1 → K2) (m : M1 A) : M2 A :=
+  list_to_map (fmap (prod_map f id) (map_to_list m)).
+
 (* The zip operation on maps combines two maps key-wise. The keys of resulting
 map correspond to the keys that are in both maps. *)
 Definition map_zip_with `{Merge M} {A B C} (f : A → B → C) : M A → M B → M C :=
@@ -1449,6 +1458,11 @@ Section map_Forall.
     naive_solver eauto using map_Forall_insert_1_1,
       map_Forall_insert_1_2, map_Forall_insert_2.
   Qed.
+  Lemma map_Forall_singleton (i : K) (x : A) :
+    map_Forall P ({[i := x]} : M A) ↔ P i x.
+  Proof.
+    unfold map_Forall. setoid_rewrite lookup_singleton_Some. naive_solver.
+  Qed.
   Lemma map_Forall_delete m i : map_Forall P m → map_Forall P (delete i m).
   Proof. intros Hm j x; rewrite lookup_delete_Some. naive_solver. Qed.
   Lemma map_Forall_lookup m :
@@ -1628,6 +1642,9 @@ Qed.
 Lemma map_lookup_zip_with_Some {A B C} (f : A → B → C) (m1 : M A) (m2 : M B) i z :
   map_zip_with f m1 m2 !! i = Some z ↔
     ∃ x y, z = f x y ∧ m1 !! i = Some x ∧ m2 !! i = Some y.
+Proof. rewrite map_lookup_zip_with. destruct (m1 !! i), (m2 !! i); naive_solver. Qed.
+Lemma map_lookup_zip_with_None {A B C} (f : A → B → C) (m1 : M A) (m2 : M B) i :
+  map_zip_with f m1 m2 !! i = None ↔ m1 !! i = None ∨ m2 !! i = None.
 Proof. rewrite map_lookup_zip_with. destruct (m1 !! i), (m2 !! i); naive_solver. Qed.
 
 Lemma map_zip_with_empty {A B C} (f : A → B → C) :
@@ -2523,6 +2540,158 @@ Section map_seq.
     by rewrite fmap_insert, IH.
   Qed.
 End map_seq.
+
+Section kmap.
+  Context `{FinMap K1 M1} `{FinMap K2 M2}.
+  Context (f : K1 → K2) `{!Inj (=) (=) f}.
+  Local Notation kmap := (kmap (M1:=M1) (M2:=M2)).
+
+  Lemma lookup_kmap_Some {A} (m : M1 A) (j : K2) x :
+    kmap f m !! j = Some x ↔ ∃ i, j = f i ∧ m !! i = Some x.
+  Proof.
+    assert (∀ x',
+      (j, x) ∈ prod_map f id <$> map_to_list m →
+      (j, x') ∈ prod_map f id <$> map_to_list m → x = x').
+    { intros x'. rewrite !elem_of_list_fmap.
+      intros [[j' y1] [??]] [[? y2] [??]]; simplify_eq/=.
+      by apply (map_to_list_unique m j'). }
+    unfold kmap. rewrite <-elem_of_list_to_map', elem_of_list_fmap by done.
+    setoid_rewrite elem_of_map_to_list'. split.
+    - intros [[??] [??]]; naive_solver.
+    - intros [? [??]]. eexists (_, _); naive_solver.
+  Qed.
+  Lemma lookup_kmap_is_Some {A} (m : M1 A) (j : K2) :
+    is_Some (kmap f m !! j) ↔ ∃ i, j = f i ∧ is_Some (m !! i).
+  Proof. unfold is_Some. setoid_rewrite lookup_kmap_Some. naive_solver. Qed.
+  Lemma lookup_kmap_None {A} (m : M1 A) (j : K2) :
+    kmap f m !! j = None ↔ ∀ i, j = f i → m !! i = None.
+  Proof.
+    setoid_rewrite eq_None_not_Some.
+    rewrite lookup_kmap_is_Some. naive_solver.
+  Qed.
+  (** Note that to state a lemma [map_kmap f m !! j = ...] we need to have a
+  partial inverse [f_inv] of [f] (which one cannot define constructively). Then
+  we could write [map_kmap f m !! j = (i ← f_inv j; m !! i)] *)
+  Lemma lookup_kmap {A} (m : M1 A) (i : K1) :
+    kmap f m !! (f i) = m !! i.
+  Proof. apply option_eq. setoid_rewrite lookup_kmap_Some. naive_solver. Qed.
+  Lemma lookup_total_kmap `{Inhabited A} (m : M1 A) (i : K1) :
+    kmap f m !!! (f i) = m !!! i.
+  Proof. by rewrite !lookup_total_alt, lookup_kmap. Qed.
+
+  Global Instance kmap_inj {A} : Inj (=@{M1 A}) (=) (kmap f).
+  Proof.
+    intros m1 m2 Hm. apply map_eq. intros i. by rewrite <-!lookup_kmap, Hm.
+  Qed.
+
+  Lemma kmap_empty {A} : kmap f ∅ =@{M2 A} ∅.
+  Proof. unfold kmap. by rewrite map_to_list_empty. Qed.
+  Lemma kmap_empty_inv {A} (m : M1 A) : kmap f m = ∅ → m = ∅.
+  Proof.
+    intros Hm. apply map_empty; intros i.
+    apply (lookup_kmap_None _ (f i)); [|done]. by rewrite Hm, lookup_empty.
+  Qed.
+
+  Lemma kmap_singleton {A} i (x : A) : kmap f {[ i := x ]} = {[ f i := x ]}.
+  Proof. unfold kmap. by rewrite map_to_list_singleton. Qed.
+
+  Lemma kmap_partial_alter {A} (g : option A → option A) (m : M1 A) i :
+    kmap f (partial_alter g i m) = partial_alter g (f i) (kmap f m).
+  Proof.
+    apply map_eq; intros j. apply option_eq; intros y.
+    destruct (decide (j = f i)) as [->|?].
+    { by rewrite lookup_partial_alter, !lookup_kmap, lookup_partial_alter. }
+    rewrite lookup_partial_alter_ne, !lookup_kmap_Some by done. split.
+    - intros [i' [? Hm]]; simplify_eq/=.
+      rewrite lookup_partial_alter_ne in Hm by naive_solver. naive_solver.
+    - intros [i' [? Hm]]; simplify_eq/=. exists i'.
+      rewrite lookup_partial_alter_ne by naive_solver. naive_solver.
+  Qed.
+  Lemma kmap_insert {A} (m : M1 A) i x :
+    kmap f (<[i:=x]> m) = <[f i:=x]> (kmap f m).
+  Proof. apply kmap_partial_alter. Qed.
+  Lemma kmap_delete {A} (m : M1 A) i :
+    kmap f (delete i m) = delete (f i) (kmap f m).
+  Proof. apply kmap_partial_alter. Qed.
+  Lemma kmap_alter {A} (g : A → A) (m : M1 A) i :
+    kmap f (alter g i m) = alter g (f i) (kmap f m).
+  Proof. apply kmap_partial_alter. Qed.
+
+  Lemma kmap_merge {A B C} (g : option A → option B → option C)
+      `{!DiagNone g} (m1 : M1 A) (m2 : M1 B) :
+    kmap f (merge g m1 m2) = merge g (kmap f m1) (kmap f m2).
+  Proof.
+    apply map_eq; intros j. apply option_eq; intros y.
+    rewrite (lookup_merge g), lookup_kmap_Some.
+    setoid_rewrite (lookup_merge g). split.
+    { intros [i [-> ?]]. by rewrite !lookup_kmap. }
+    intros Hg. destruct (kmap f m1 !! j) as [x1|] eqn:Hm1.
+    { apply lookup_kmap_Some in Hm1 as (i&->&Hm1i).
+      exists i. split; [done|]. by rewrite Hm1i, <-lookup_kmap. }
+    destruct (kmap f m2 !! j) as [x2|] eqn:Hm2.
+    { apply lookup_kmap_Some in Hm2 as (i&->&Hm2i).
+      exists i. split; [done|]. by rewrite Hm2i, <-lookup_kmap, Hm1. }
+    unfold DiagNone in *. naive_solver.
+  Qed.
+  Lemma kmap_union_with {A} (g : A → A → option A) (m1 m2 : M1 A) :
+    kmap f (union_with g m1 m2)
+    = union_with g (kmap f m1) (kmap f m2).
+  Proof. apply (kmap_merge _). Qed.
+  Lemma kmap_intersection_with {A} (g : A → A → option A) (m1 m2 : M1 A) :
+    kmap f (intersection_with g m1 m2)
+    = intersection_with g (kmap f m1) (kmap f m2).
+  Proof. apply (kmap_merge _). Qed.
+  Lemma kmap_difference_with {A} (g : A → A → option A) (m1 m2 : M1 A) :
+    kmap f (difference_with g m1 m2)
+    = difference_with g (kmap f m1) (kmap f m2).
+  Proof. apply (kmap_merge _). Qed.
+
+  Lemma kmap_union {A} (m1 m2 : M1 A) :
+    kmap f (m1 ∪ m2) = kmap f m1 ∪ kmap f m2.
+  Proof. apply kmap_union_with. Qed.
+  Lemma kmap_intersection {A} (m1 m2 : M1 A) :
+    kmap f (m1 ∩ m2) = kmap f m1 ∩ kmap f m2.
+  Proof. apply kmap_intersection_with. Qed.
+  Lemma kmap_difference {A} (m1 m2 : M1 A) :
+    kmap f (m1 ∖ m2) = kmap f m1 ∖ kmap f m2.
+  Proof. apply (kmap_merge _). Qed.
+
+  Lemma kmap_zip_with {A B C} (g : A → B → C) (m1 : M1 A) (m2 : M1 B) :
+    kmap f (map_zip_with g m1 m2) = map_zip_with g (kmap f m1) (kmap f m2).
+  Proof. by apply kmap_merge. Qed.
+
+  Lemma kmap_imap {A B} (g : K2 → A → option B) (m : M1 A) :
+    kmap f (map_imap (g ∘ f) m) = map_imap g (kmap f m).
+  Proof.
+    apply map_eq; intros j. apply option_eq; intros y.
+    rewrite map_lookup_imap, bind_Some. setoid_rewrite lookup_kmap_Some.
+    setoid_rewrite map_lookup_imap. setoid_rewrite bind_Some. naive_solver.
+  Qed.
+  Lemma kmap_omap {A B} (g : A → option B) (m : M1 A) :
+    kmap f (omap g m) = omap g (kmap f m).
+  Proof.
+    apply map_eq; intros j. apply option_eq; intros y.
+    rewrite lookup_omap, bind_Some. setoid_rewrite lookup_kmap_Some.
+    setoid_rewrite lookup_omap. setoid_rewrite bind_Some. naive_solver.
+  Qed.
+  Lemma kmap_fmap {A B} (g : A → B) (m : M1 A) :
+    kmap f (g <$> m) = g <$> (kmap f m).
+  Proof. by rewrite !map_fmap_alt, kmap_omap. Qed.
+
+  Lemma map_disjoint_kmap {A} (m1 m2 : M1 A) :
+    kmap f m1 ##ₘ kmap f m2 ↔ m1 ##ₘ m2.
+  Proof.
+    rewrite !map_disjoint_spec. setoid_rewrite lookup_kmap_Some. naive_solver.
+  Qed.
+  Lemma map_disjoint_subseteq {A} (m1 m2 : M1 A) :
+    kmap f m1 ⊆ kmap f m2 ↔ m1 ⊆ m2.
+  Proof.
+    rewrite !map_subseteq_spec. setoid_rewrite lookup_kmap_Some. naive_solver.
+  Qed.
+  Lemma map_disjoint_subset {A} (m1 m2 : M1 A) :
+    kmap f m1 ⊂ kmap f m2 ↔ m1 ⊂ m2.
+  Proof. unfold strict. by rewrite !map_disjoint_subseteq. Qed.
+End kmap.
 
 (** * Tactics *)
 (** The tactic [decompose_map_disjoint] simplifies occurrences of [disjoint]

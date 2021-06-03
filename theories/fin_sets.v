@@ -247,14 +247,36 @@ Proof. by unfold set_fold; simpl; rewrite elements_empty. Qed.
 Lemma set_fold_singleton {B} (f : A → B → B) (b : B) (a : A) :
   set_fold f b ({[a]} : C) = f a b.
 Proof. by unfold set_fold; simpl; rewrite elements_singleton. Qed.
+(** Generalization of [set_fold_disj_union] (below) with a.) a relation [R]
+instead of equality b.) a function [f : A → B → B] instead of [f : A → A → A],
+and c.) premises that ensure the elements are in [X ∪ Y]. *)
+Lemma set_fold_disj_union_strong {B} (R : relation B) `{!PreOrder R}
+    (f : A → B → B) (b : B) X Y :
+  (∀ x, Proper (R ==> R) (f x)) →
+  (∀ x1 x2 b',
+    (** This is morally commutativity + associativity for elements of [X ∪ Y] *)
+    x1 ∈ X ∪ Y → x2 ∈ X ∪ Y → x1 ≠ x2 →
+    R (f x1 (f x2 b')) (f x2 (f x1 b'))) →
+  X ## Y →
+  R (set_fold f b (X ∪ Y)) (set_fold f (set_fold f b X) Y).
+Proof.
+  intros ? Hf Hdisj. unfold set_fold; simpl.
+  rewrite <-foldr_app. apply (foldr_permutation R f b).
+  - intros j1 x1 j2 x2 b' Hj Hj1 Hj2. apply Hf.
+    + apply elem_of_list_lookup_2 in Hj1. set_solver.
+    + apply elem_of_list_lookup_2 in Hj2. set_solver.
+    + intros ->. pose proof (NoDup_elements (X ∪ Y)).
+      by eapply Hj, NoDup_lookup.
+  - by rewrite elements_disj_union, (comm (++)).
+Qed.
 Lemma set_fold_disj_union (f : A → A → A) (b : A) X Y :
   Comm (=) f →
   Assoc (=) f →
   X ## Y →
   set_fold f b (X ∪ Y) = set_fold f (set_fold f b X) Y.
 Proof.
-  intros Hcomm Hassoc Hdisj. unfold set_fold; simpl.
-  by rewrite elements_disj_union, <- foldr_app, (comm (++)).
+  intros. apply (set_fold_disj_union_strong _ _ _ _ _ _); [|done].
+  intros x1 x2 b' _ _ _. by rewrite !(assoc_L f), (comm_L f x1).
 Qed.
 
 (** * Minimal elements *)

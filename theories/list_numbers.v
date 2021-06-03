@@ -187,7 +187,7 @@ Section seqZ.
   Proof. rewrite Forall_forall. setoid_rewrite elem_of_seqZ. auto with lia. Qed.
 End seqZ.
 
-(** ** Properties of the [sum_list] and [max_list] functions *)
+(** ** Properties of the [sum_list] function *)
 Section sum_list.
   Context {A : Type}.
   Implicit Types x y z : A.
@@ -208,10 +208,29 @@ Section sum_list.
   Qed.
   Lemma sum_list_replicate n m : sum_list (replicate m n) = m * n.
   Proof. induction m; simpl; auto. Qed.
-  Lemma max_list_elem_of_le n ns:
+End sum_list.
+
+(** ** Properties of the [max_list] function *)
+Section max_list.
+  Context {A : Type}.
+
+  Lemma max_list_elem_of_le n ns :
     n ∈ ns → n ≤ max_list ns.
   Proof. induction 1; simpl; lia. Qed.
-End sum_list.
+
+  Lemma max_list_not_elem_of_gt n ns : max_list ns < n → n ∉ ns.
+  Proof. intros ??%max_list_elem_of_le. lia. Qed.
+
+  Lemma max_list_elem_of ns : ns ≠ [] → max_list ns ∈ ns.
+  Proof.
+    intros. induction ns as [|n ns IHns]; [done|]. simpl.
+    destruct (Nat.max_spec n (max_list ns)) as [[? ->]|[? ->]].
+    - destruct ns.
+      + simpl in *. lia.
+      + by apply elem_of_list_further, IHns.
+    - apply elem_of_list_here.
+  Qed.
+End max_list.
 
 (** ** Properties of the [Z_to_little_endian] and [little_endian_to_Z] functions *)
 Section Z_little_endian.

@@ -39,6 +39,7 @@ API-breaking change is listed.
   + Add new instance `cons_Permutation_inj_l : Inj (=) (≡ₚ) (.:: k).`.
   + Add lemma `Permutation_cross_split`.
   + Make lemma `elem_of_Permutation` a biimplication
+- Add function `kmap` to transform the keys of finite maps.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`):

@@ -773,6 +773,11 @@ Infix "*" := Qp_mul : Qp_scope.
 Notation "/ q" := (Qp_inv q) : Qp_scope.
 Infix "/" := Qp_div : Qp_scope.
 
+Lemma Qp_to_Qc_inj_add p q : (Qp_to_Qc (p + q) = Qp_to_Qc p + Qp_to_Qc q)%Qc.
+Proof. by destruct p, q. Qed.
+Lemma Qp_to_Qc_inj_mul p q : (Qp_to_Qc (p * q) = Qp_to_Qc p * Qp_to_Qc q)%Qc.
+Proof. by destruct p, q. Qed.
+
 Program Definition pos_to_Qp (n : positive) : Qp := mk_Qp (Qc_of_Z $ Z.pos n) _.
 Next Obligation. intros n. by rewrite <-Z2Qc_inj_0, <-Z2Qc_inj_lt. Qed.
 Global Arguments pos_to_Qp : simpl never.

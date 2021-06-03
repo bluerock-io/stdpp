@@ -460,14 +460,18 @@ Proof. auto. Qed.
 relation [R] instead of [⊆] to support multiple orders on the same type. *)
 Definition strict {A} (R : relation A) : relation A := λ X Y, R X Y ∧ ¬R Y X.
 Global Instance: Params (@strict) 2 := {}.
+
 Class PartialOrder {A} (R : relation A) : Prop := {
   partial_order_pre :> PreOrder R;
   partial_order_anti_symm :> AntiSymm (=) R
 }.
+Global Hint Mode PartialOrder ! + : typeclass_instances.
+
 Class TotalOrder {A} (R : relation A) : Prop := {
   total_order_partial :> PartialOrder R;
   total_order_trichotomy :> Trichotomy (strict R)
 }.
+Global Hint Mode TotalOrder ! + : typeclass_instances.
 
 (** * Logic *)
 Global Instance prop_inhabited : Inhabited Prop := populate True.
@@ -1007,18 +1011,27 @@ class with the monad laws). *)
 Class MRet (M : Type → Type) := mret: ∀ {A}, A → M A.
 Global Arguments mret {_ _ _} _ : assert.
 Global Instance: Params (@mret) 3 := {}.
+Global Hint Mode MRet ! : typeclass_instances.
+
 Class MBind (M : Type → Type) := mbind : ∀ {A B}, (A → M B) → M A → M B.
 Global Arguments mbind {_ _ _ _} _ !_ / : assert.
 Global Instance: Params (@mbind) 4 := {}.
+Global Hint Mode MBind ! : typeclass_instances.
+
 Class MJoin (M : Type → Type) := mjoin: ∀ {A}, M (M A) → M A.
 Global Arguments mjoin {_ _ _} !_ / : assert.
 Global Instance: Params (@mjoin) 3 := {}.
+Global Hint Mode MJoin ! : typeclass_instances.
+
 Class FMap (M : Type → Type) := fmap : ∀ {A B}, (A → B) → M A → M B.
 Global Arguments fmap {_ _ _ _} _ !_ / : assert.
 Global Instance: Params (@fmap) 4 := {}.
+Global Hint Mode FMap ! : typeclass_instances.
+
 Class OMap (M : Type → Type) := omap: ∀ {A B}, (A → option B) → M A → M B.
 Global Arguments omap {_ _ _ _} _ !_ / : assert.
 Global Instance: Params (@omap) 4 := {}.
+Global Hint Mode OMap ! : typeclass_instances.
 
 Notation "m ≫= f" := (mbind f m) (at level 60, right associativity) : stdpp_scope.
 Notation "( m ≫=.)" := (λ f, mbind f m) (only parsing) : stdpp_scope.
@@ -1044,6 +1057,7 @@ Notation "ps .*2" := (fmap (M:=list) snd ps)
 Class MGuard (M : Type → Type) :=
   mguard: ∀ P {dec : Decision P} {A}, (P → M A) → M A.
 Global Arguments mguard _ _ _ !_ _ _ / : assert.
+Global Hint Mode MGuard ! : typeclass_instances.
 Notation "'guard' P ; z" := (mguard P (λ _, z))
   (at level 20, z at level 200, only parsing, right associativity) : stdpp_scope.
 Notation "'guard' P 'as' H ; z" := (mguard P (λ H, z))
@@ -1283,18 +1297,23 @@ Class SemiSet A C `{ElemOf A C,
   elem_of_singleton (x y : A) : x ∈@{C} {[ y ]} ↔ x = y;
   elem_of_union (X Y : C) (x : A) : x ∈ X ∪ Y ↔ x ∈ X ∨ x ∈ Y
 }.
+Global Hint Mode SemiSet - ! - - - - : typeclass_instances.
+
 Class Set_ A C `{ElemOf A C, Empty C, Singleton A C,
     Union C, Intersection C, Difference C} : Prop := {
   set_semi_set :> SemiSet A C;
   elem_of_intersection (X Y : C) (x : A) : x ∈ X ∩ Y ↔ x ∈ X ∧ x ∈ Y;
   elem_of_difference (X Y : C) (x : A) : x ∈ X ∖ Y ↔ x ∈ X ∧ x ∉ Y
 }.
+Global Hint Mode Set_ - ! - - - - - - : typeclass_instances.
+
 Class TopSet A C `{ElemOf A C, Empty C, Top C, Singleton A C,
     Union C, Intersection C, Difference C} : Prop := {
   top_set_set :> Set_ A C;
   elem_of_top' (x : A) : x ∈@{C} ⊤; (* We prove [elem_of_top : x ∈@{C} ⊤ ↔ True]
   in [sets.v], which is more convenient for rewriting. *)
 }.
+Global Hint Mode TopSet - ! - - - - - - - : typeclass_instances.
 
 (** We axiomative a finite set as a set whose elements can be
 enumerated as a list. These elements, given by the [elements] function, may be
@@ -1386,6 +1405,7 @@ Class Infinite A := {
   infinite_is_fresh (xs : list A) : fresh xs ∉ xs;
   infinite_fresh_Permutation :> Proper (@Permutation A ==> (=)) fresh;
 }.
+Global Hint Mode Infinite ! : typeclass_instances.
 Global Arguments infinite_fresh : simpl never.
 
 (** * Miscellaneous *)

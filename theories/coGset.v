@@ -138,7 +138,7 @@ End infinite.
 Definition coGpick `{Countable A, Infinite A} (X : coGset A) : A :=
   fresh (match X with FinGSet _ => ∅ | CoFinGset X => X end).
 
-Lemma coGpick_elem_of `{Countable A, Infinite A} X :
+Lemma coGpick_elem_of `{Countable A, Infinite A} (X : coGset A) :
   ¬set_finite X → coGpick X ∈ X.
 Proof.
   unfold coGpick.

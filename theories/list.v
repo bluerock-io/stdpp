@@ -3558,7 +3558,7 @@ Section fmap.
     Proper ((≡) ==> (≡)) f → Proper ((≡) ==> (≡)) (fmap f).
   Proof. induction 2; simpl; [constructor|solve_proper]. Qed.
 
-  Global Instance fmap_inj: Inj (=) (=) f → Inj (=) (=) (fmap f).
+  Global Instance fmap_inj: Inj (=) (=) f → Inj (=@{list A}) (=) (fmap f).
   Proof.
     intros ? l1. induction l1 as [|x l1 IH]; [by intros [|??]|].
     intros [|??]; intros; f_equal/=; simplify_eq; auto.

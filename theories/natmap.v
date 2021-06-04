@@ -190,7 +190,7 @@ Global Instance natmap_to_list {A} : FinMapToList nat A (natmap A) := λ m,
   let (l,_) := m in natmap_to_list_raw 0 l.
 
 Definition natmap_map_raw {A B} (f : A → B) : natmap_raw A → natmap_raw B :=
-  fmap (fmap f).
+  fmap (fmap (M:=option) f).
 Lemma natmap_map_wf {A B} (f : A → B) l :
   natmap_wf l → natmap_wf (natmap_map_raw f l).
 Proof.

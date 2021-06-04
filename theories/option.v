@@ -205,10 +205,10 @@ Lemma fmap_None {A B} (f : A → B) mx : f <$> mx = None ↔ mx = None.
 Proof. by destruct mx. Qed.
 Lemma option_fmap_id {A} (mx : option A) : id <$> mx = mx.
 Proof. by destruct mx. Qed.
-Lemma option_fmap_compose {A B} (f : A → B) {C} (g : B → C) mx :
+Lemma option_fmap_compose {A B} (f : A → B) {C} (g : B → C) (mx : option A) :
   g ∘ f <$> mx = g <$> (f <$> mx).
 Proof. by destruct mx. Qed.
-Lemma option_fmap_ext {A B} (f g : A → B) mx :
+Lemma option_fmap_ext {A B} (f g : A → B) (mx : option A) :
   (∀ x, f x = g x) → f <$> mx = g <$> mx.
 Proof. intros; destruct mx; f_equal/=; auto. Qed.
 Lemma option_fmap_equiv_ext {A} `{Equiv B} (f g : A → B) (mx : option A) :

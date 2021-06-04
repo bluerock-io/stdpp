@@ -853,7 +853,7 @@ Global Instance Qp_mul_inj_r p : Inj (=) (=) (Qp_mul p).
 Proof.
   destruct p as [p ?]. intros [q1 ?] [q2 ?]. rewrite <-!Qp_to_Qc_inj_iff; simpl.
   intros Hpq.
-  apply (anti_symm _); apply (Qcmult_le_mono_pos_l _ _ p); by rewrite ?Hpq.
+  apply (anti_symm Qcle); apply (Qcmult_le_mono_pos_l _ _ p); by rewrite ?Hpq.
 Qed.
 Global Instance Qp_mul_inj_l p : Inj (=) (=) (λ q, q * p).
 Proof.

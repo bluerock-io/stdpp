@@ -40,6 +40,8 @@ API-breaking change is listed.
   + Add lemma `Permutation_cross_split`.
   + Make lemma `elem_of_Permutation` a biimplication
 - Add function `kmap` to transform the keys of finite maps.
+- Set `Hint Mode` for the classes `PartialOrder`, `TotalOrder`, `MRet`, `MBind`,
+  `MJoin`, `FMap`, `OMap`, `MGuard`, `SemiSet`, `Set_`, `TopSet`, and `Infinite`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`):

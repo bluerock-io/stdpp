@@ -465,13 +465,13 @@ Class PartialOrder {A} (R : relation A) : Prop := {
   partial_order_pre :> PreOrder R;
   partial_order_anti_symm :> AntiSymm (=) R
 }.
-Global Hint Mode PartialOrder ! + : typeclass_instances.
+Global Hint Mode PartialOrder ! ! : typeclass_instances.
 
 Class TotalOrder {A} (R : relation A) : Prop := {
   total_order_partial :> PartialOrder R;
   total_order_trichotomy :> Trichotomy (strict R)
 }.
-Global Hint Mode TotalOrder ! + : typeclass_instances.
+Global Hint Mode TotalOrder ! ! : typeclass_instances.
 
 (** * Logic *)
 Global Instance prop_inhabited : Inhabited Prop := populate True.

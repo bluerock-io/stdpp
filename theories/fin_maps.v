@@ -2226,6 +2226,31 @@ Proof.
   destruct (m1 !! i), (m2 !! i); simpl; repeat (destruct (f _)); naive_solver.
 Qed.
 
+Lemma map_cross_split {A} (m ma mb mc md : M A) :
+  ma ##ₘ mb → mc ##ₘ md →
+  ma ∪ mb = m → mc ∪ md = m →
+  ∃ mac mad mbc mbd,
+    mac ##ₘ mad ∧ mbc ##ₘ mbd ∧
+    mac ##ₘ mbc ∧ mad ##ₘ mbd ∧
+    mac ∪ mad = ma ∧ mbc ∪ mbd = mb ∧ mac ∪ mbc = mc ∧ mad ∪ mbd = md.
+Proof.
+  intros Hab_disj Hcd_disj Hab Hcd.
+  exists (filter (λ kx, is_Some (mc !! kx.1)) ma),
+    (filter (λ kx, ¬is_Some (mc !! kx.1)) ma),
+    (filter (λ kx, is_Some (mc !! kx.1)) mb),
+    (filter (λ kx, ¬is_Some (mc !! kx.1)) mb).
+  split_and!; [auto using map_disjoint_filter_complement, map_disjoint_filter,
+    map_filter_union_complement..| |].
+  - rewrite <-map_filter_union, Hab, <-Hcd by done.
+    apply map_eq; intros k. apply option_eq; intros x.
+    rewrite map_filter_lookup_Some, lookup_union_Some, <-not_eq_None_Some by done.
+    rewrite map_disjoint_alt in Hcd_disj; naive_solver.
+  - rewrite <-map_filter_union, Hab, <-Hcd by done.
+    apply map_eq; intros k. apply option_eq; intros x.
+    rewrite map_filter_lookup_Some, lookup_union_Some, <-not_eq_None_Some by done.
+    rewrite map_disjoint_alt in Hcd_disj; naive_solver.
+Qed.
+
 (** ** Properties of the [union_list] operation *)
 Lemma map_disjoint_union_list_l {A} (ms : list (M A)) (m : M A) :
   ⋃ ms ##ₘ m ↔ Forall (.##ₘ m) ms.

@@ -42,6 +42,7 @@ API-breaking change is listed.
 - Add function `kmap` to transform the keys of finite maps.
 - Set `Hint Mode` for the classes `PartialOrder`, `TotalOrder`, `MRet`, `MBind`,
   `MJoin`, `FMap`, `OMap`, `MGuard`, `SemiSet`, `Set_`, `TopSet`, and `Infinite`.
+- Make `map_filter_strong_ext` and `map_filter_ext` bidirectional.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`):

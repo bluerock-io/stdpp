@@ -1326,16 +1326,24 @@ Section map_filter_ext.
   Context {A} (P Q : K * A → Prop) `{!∀ x, Decision (P x), !∀ x, Decision (Q x)}.
 
   Lemma map_filter_strong_ext (m1 m2 : M A) :
+    filter P m1 = filter Q m2 ↔
+    (∀ i x, (P (i, x) ∧ m1 !! i = Some x) ↔ (Q (i, x) ∧ m2 !! i = Some x)).
+  Proof.
+    intros. rewrite map_eq_iff. setoid_rewrite option_eq.
+    setoid_rewrite map_filter_lookup_Some. naive_solver.
+  Qed.
+  Lemma map_filter_strong_ext_1 (m1 m2 : M A) :
     (∀ i x, (P (i, x) ∧ m1 !! i = Some x) ↔ (Q (i, x) ∧ m2 !! i = Some x)) →
     filter P m1 = filter Q m2.
-  Proof.
-    intros HPiff. apply map_eq. intros i. apply option_eq; intros x.
-    rewrite !map_filter_lookup_Some. naive_solver.
-  Qed.
+  Proof. by rewrite map_filter_strong_ext. Qed.
+  Lemma map_filter_strong_ext_2 (m1 m2 : M A) i x :
+    filter P m1 = filter Q m2 →
+    (P (i, x) ∧ m1 !! i = Some x) ↔ (Q (i, x) ∧ m2 !! i = Some x).
+  Proof. by rewrite map_filter_strong_ext. Qed.
   Lemma map_filter_ext (m : M A) :
-    (∀ i x, m !! i = Some x → P (i, x) ↔ Q (i, x)) →
+    (∀ i x, m !! i = Some x → P (i, x) ↔ Q (i, x)) ↔
     filter P m = filter Q m.
-  Proof. intro. apply map_filter_strong_ext. naive_solver. Qed.
+  Proof. rewrite map_filter_strong_ext. naive_solver. Qed.
 End map_filter_ext.
 
 Section map_filter_insert_and_delete.

@@ -200,6 +200,8 @@ Section sum_list.
   Proof.
     induction l; simpl; rewrite ?reverse_cons, ?sum_list_with_app; simpl; lia.
   Qed.
+  Lemma sum_list_with_in x (f : A → nat) ls : x ∈ ls → f x ≤ sum_list_with f ls.
+  Proof. induction 1; simpl; lia. Qed.
   Lemma join_reshape szs l :
     sum_list szs = length l → mjoin (reshape szs l) = l.
   Proof.

@@ -182,7 +182,7 @@ Proof.
   intros.
   exists (filter (λ '(k,x), k ∈ X1) m), (filter (λ '(k,x), k ∉ X1) m).
   assert (filter (λ '(k, _), k ∈ X1) m ##ₘ filter (λ '(k, _), k ∉ X1) m).
-  { apply map_disjoint_filter. }
+  { apply map_disjoint_filter_complement. }
   split_and!; [|done| |].
   - apply map_eq; intros i. apply option_eq; intros x.
     rewrite lookup_union_Some, !map_filter_lookup_Some by done.

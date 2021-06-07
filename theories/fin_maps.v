@@ -1868,7 +1868,9 @@ Proof.
 Qed.
 Lemma map_disjoint_delete_r {A} (m1 m2 : M A) i : m1 ##ₘ m2 → m1 ##ₘ delete i m2.
 Proof. symmetry. by apply map_disjoint_delete_l. Qed.
-Lemma map_disjoint_filter {A} (P : K * A → Prop) `{!∀ x, Decision (P x)} (m : M A) :
+
+Lemma map_disjoint_filter_complement {A} (P : K * A → Prop)
+    `{!∀ x, Decision (P x)} (m : M A) :
   filter P m ##ₘ filter (λ v, ¬ P v) m.
 Proof.
   apply map_disjoint_spec. intros i x y.
@@ -2184,11 +2186,12 @@ Proof.
   naive_solver eauto using map_Forall_union_1_1,
     map_Forall_union_1_2, map_Forall_union_2.
 Qed.
-Lemma map_union_filter {A} (P : K * A → Prop) `{!∀ x, Decision (P x)} (m : M A) :
+Lemma map_filter_union_complement {A} (P : K * A → Prop) `{!∀ x, Decision (P x)} (m : M A) :
   filter P m ∪ filter (λ v, ¬ P v) m = m.
 Proof.
   apply map_eq; intros i. apply option_eq; intros x.
-  rewrite lookup_union_Some, !map_filter_lookup_Some by apply map_disjoint_filter.
+  rewrite lookup_union_Some, !map_filter_lookup_Some
+    by auto using map_disjoint_filter_complement.
   destruct (decide (P (i,x))); naive_solver.
 Qed.
 Lemma map_fmap_union {A B} (f : A → B) (m1 m2 : M A) :

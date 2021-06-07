@@ -328,6 +328,10 @@ Section filter.
   Proof. set_solver. Qed.
   Lemma filter_union X Y : filter P (X ∪ Y) ≡ filter P X ∪ filter P Y.
   Proof. set_solver. Qed.
+  Lemma disjoint_filter_complement X : filter P X ## filter (λ x, ¬P x) X.
+  Proof. set_solver. Qed.
+  Lemma filter_union_complement X : filter P X ∪ filter (λ x, ¬P x) X ≡ X.
+  Proof. intros x. destruct (decide (P x)); set_solver. Qed.
 
   Section leibniz_equiv.
     Context `{!LeibnizEquiv C}.
@@ -340,6 +344,8 @@ Section filter.
 
     Lemma filter_union_L X Y : filter P (X ∪ Y) = filter P X ∪ filter P Y.
     Proof. unfold_leibniz. apply filter_union. Qed.
+    Lemma filter_union_complement_L X Y : filter P X ∪ filter (λ x, ¬P x) X = X.
+    Proof. unfold_leibniz. apply filter_union_complement. Qed.
   End leibniz_equiv.
 End filter.
 

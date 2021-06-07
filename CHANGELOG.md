@@ -43,6 +43,15 @@ API-breaking change is listed.
 - Set `Hint Mode` for the classes `PartialOrder`, `TotalOrder`, `MRet`, `MBind`,
   `MJoin`, `FMap`, `OMap`, `MGuard`, `SemiSet`, `Set_`, `TopSet`, and `Infinite`.
 - Make `map_filter_strong_ext` and `map_filter_ext` bidirectional.
+- Make collection of lemmas for filter + union/disjoint consistent for sets and
+  maps:
+  + Sets: Add lemmas `disjoint_filter`, `disjoint_filter_complement`, and
+    `filter_union_complement`.
+  + Maps: Rename `map_disjoint_filter` → `map_disjoint_filter_complement` and
+    `map_union_filter` → `map_filter_union_complement` to be consistent with sets.
+  + Maps: Add lemmas `map_disjoint_filter` and `map_filter_union` analogous to
+    sets.
+- Add cross split lemma `map_cross_split` for maps
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`):
@@ -54,6 +63,9 @@ s/\bdecide_right\b/decide_False_pi/g
 s/\bPermutation_nil\b/Permutation_nil_r/g
 s/\bPermutation_singleton\b/Permutation_singleton_r/g
 s/\Permutation_cons_inv\b/Permutation_cons_inv_r/g
+# Filter
+s/\bmap_disjoint_filter\b/map_disjoint_filter_complement/g
+s/\bmap_union_filter\b/map_filter_union_complement/g
 ' $(find theories -name "*.v")
 ```
 

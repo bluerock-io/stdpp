@@ -243,10 +243,10 @@ Proof. by destruct mx. Qed.
 Global Instance option_fmap_proper `{Equiv A, Equiv B} :
   Proper (((≡) ==> (≡)) ==> (≡@{option A}) ==> (≡@{option B})) fmap.
 Proof. destruct 2; constructor; auto. Qed.
-Global Instance option_mbind_proper `{Equiv A, Equiv B} :
+Global Instance option_bind_proper `{Equiv A, Equiv B} :
   Proper (((≡) ==> (≡)) ==> (≡@{option A}) ==> (≡@{option B})) mbind.
 Proof. destruct 2; simpl; try constructor; auto. Qed.
-Global Instance option_mjoin_proper `{Equiv A} :
+Global Instance option_join_proper `{Equiv A} :
   Proper ((≡) ==> (≡@{option (option A)})) mjoin.
 Proof. destruct 1 as [?? []|]; simpl; by constructor. Qed.
 

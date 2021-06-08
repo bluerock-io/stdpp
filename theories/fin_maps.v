@@ -166,6 +166,8 @@ Context `{FinMap K M}.
 Section setoid.
   Context `{Equiv A}.
 
+  Lemma map_equiv_iff (m1 m2 : M A) : m1 ≡ m2 ↔ ∀ i, m1 !! i ≡ m2 !! i.
+  Proof. done. Qed.
   Lemma map_equiv_empty (m : M A) : m ≡ ∅ ↔ m = ∅.
   Proof.
     split; [intros Hm; apply map_eq; intros i|intros ->].

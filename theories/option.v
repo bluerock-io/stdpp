@@ -179,6 +179,9 @@ Global Instance option_guard: MGuard option := λ P dec A f,
 Global Instance option_fmap_inj {A B} (f : A → B) :
   Inj (=) (=) f → Inj (=@{option A}) (=@{option B}) (fmap f).
 Proof. intros ? [x1|] [x2|] [=]; naive_solver. Qed.
+Global Instance option_fmap_equiv_inj `{Equiv A, Equiv B} (f : A → B) :
+  Inj (≡) (≡) f → Inj (≡@{option A}) (≡@{option B}) (fmap f).
+Proof. intros ? [x1|] [x2|]; inversion 1; subst; constructor; by apply (inj _). Qed.
 
 Lemma fmap_is_Some {A B} (f : A → B) mx : is_Some (f <$> mx) ↔ is_Some mx.
 Proof. unfold is_Some; destruct mx; naive_solver. Qed.

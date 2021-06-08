@@ -166,6 +166,12 @@ Context `{FinMap K M}.
 Section setoid.
   Context `{Equiv A}.
 
+  Lemma map_equiv_empty (m : M A) : m ≡ ∅ ↔ m = ∅.
+  Proof.
+    split; [intros Hm; apply map_eq; intros i|intros ->].
+    - generalize (Hm i). by rewrite lookup_empty, equiv_None.
+    - intros ?. rewrite lookup_empty; constructor.
+  Qed.
   Lemma map_equiv_lookup_l (m1 m2 : M A) i x :
     m1 ≡ m2 → m1 !! i = Some x → ∃ y, m2 !! i = Some y ∧ x ≡ y.
   Proof. generalize (equiv_Some_inv_l (m1 !! i) (m2 !! i) x); naive_solver. Qed.
@@ -177,6 +183,9 @@ Section setoid.
     - by intros m1 m2 ? i.
     - by intros m1 m2 m3 ?? i; trans (m2 !! i).
   Qed.
+  Global Instance map_leibniz `{!LeibnizEquiv A} : LeibnizEquiv (M A).
+  Proof. intros m1 m2 Hm; apply map_eq; intros i. apply leibniz_equiv, Hm. Qed.
+
   Global Instance lookup_proper (i : K) : Proper ((≡@{M A}) ==> (≡)) (lookup i).
   Proof. by intros m1 m2 Hm. Qed.
   Global Instance lookup_total_proper (i : K) `{!Inhabited A} :
@@ -209,6 +218,7 @@ Section setoid.
     intros ?? Hf; apply partial_alter_proper.
     by destruct 1; constructor; apply Hf.
   Qed.
+
   Lemma merge_ext `{Equiv B, Equiv C} (f g : option A → option B → option C)
       `{!DiagNone f, !DiagNone g} :
     ((≡) ==> (≡) ==> (≡))%signature f g →
@@ -222,14 +232,7 @@ Section setoid.
     intros ?? Hf ?? Hm1 ?? Hm2 i; apply (merge_ext _ _); auto.
     by do 2 destruct 1; first [apply Hf | constructor].
   Qed.
-  Global Instance map_leibniz `{!LeibnizEquiv A} : LeibnizEquiv (M A).
-  Proof. intros m1 m2 Hm; apply map_eq; intros i. apply leibniz_equiv, Hm. Qed.
-  Lemma map_equiv_empty (m : M A) : m ≡ ∅ ↔ m = ∅.
-  Proof.
-    split; [intros Hm; apply map_eq; intros i|intros ->].
-    - generalize (Hm i). by rewrite lookup_empty, equiv_None.
-    - intros ?. rewrite lookup_empty; constructor.
-  Qed.
+
   Global Instance map_fmap_proper `{Equiv B} (f : A → B) :
     Proper ((≡) ==> (≡)) f → Proper ((≡) ==> (≡@{M _})) (fmap f).
   Proof.

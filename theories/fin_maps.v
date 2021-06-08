@@ -191,11 +191,11 @@ Section setoid.
   Global Instance map_leibniz `{!LeibnizEquiv A} : LeibnizEquiv (M A).
   Proof. intros m1 m2 Hm; apply map_eq; intros i. apply leibniz_equiv, Hm. Qed.
 
-  Global Instance lookup_proper (i : K) : Proper ((≡@{M A}) ==> (≡)) (lookup i).
+  Global Instance lookup_proper (i : K) : Proper ((≡@{M A}) ==> (≡)) (.!! i).
   Proof. by intros m1 m2 Hm. Qed.
   Global Instance lookup_total_proper (i : K) `{!Inhabited A} :
     Proper (≡@{A}) inhabitant →
-    Proper ((≡@{M A}) ==> (≡)) (lookup_total i).
+    Proper ((≡@{M A}) ==> (≡)) (.!!! i).
   Proof.
     intros ? m1 m2 Hm. unfold lookup_total, map_lookup_total.
     apply from_option_proper; auto. by intros ??.
@@ -237,18 +237,48 @@ Section setoid.
     intros ?? Hf ?? Hm1 ?? Hm2 i; apply (merge_ext _ _); auto.
     by do 2 destruct 1; first [apply Hf | constructor].
   Qed.
-
-  Global Instance map_fmap_proper `{Equiv B} (f : A → B) :
-    Proper ((≡) ==> (≡)) f → Proper ((≡) ==> (≡@{M _})) (fmap f).
+  Global Instance intersection_with_proper :
+    Proper (((≡) ==> (≡) ==> (≡)) ==> (≡) ==> (≡) ==>(≡@{M A})) intersection_with.
   Proof.
-    intros ? m m' ? k; rewrite !lookup_fmap. by apply option_fmap_proper.
+    intros ?? Hf ?? Hm1 ?? Hm2 i; apply (merge_ext _ _); auto.
+    by do 2 destruct 1; first [apply Hf | constructor].
   Qed.
-  Global Instance map_zip_with_proper `{Equiv B, Equiv C} (f : A → B → C) :
-    Proper ((≡) ==> (≡) ==> (≡)) f →
-    Proper ((≡) ==> (≡) ==> (≡)) (map_zip_with (M:=M) f).
+  Global Instance difference_with_proper :
+    Proper (((≡) ==> (≡) ==> (≡)) ==> (≡) ==> (≡) ==>(≡@{M A})) difference_with.
   Proof.
-    intros Hf m1 m1' Hm1 m2 m2' Hm2. apply merge_ext; try done.
-    destruct 1; destruct 1; repeat f_equiv; constructor || done.
+    intros ?? Hf ?? Hm1 ?? Hm2 i; apply (merge_ext _ _); auto.
+    by do 2 destruct 1; first [apply Hf | constructor].
+  Qed.
+  Global Instance union_proper : Proper ((≡) ==> (≡) ==>(≡@{M A})) (∪).
+  Proof. apply union_with_proper; solve_proper. Qed.
+  Global Instance intersection_proper : Proper ((≡) ==> (≡) ==>(≡@{M A})) (∩).
+  Proof. apply intersection_with_proper; solve_proper. Qed.
+  Global Instance difference_proper : Proper ((≡) ==> (≡) ==>(≡@{M A})) (∖).
+  Proof. apply difference_with_proper. constructor. Qed.
+
+  Global Instance map_zip_with_proper `{Equiv B, Equiv C} :
+    Proper (((≡) ==> (≡) ==> (≡)) ==> (≡@{M A}) ==> (≡@{M B}) ==> (≡@{M C}))
+      map_zip_with.
+  Proof.
+    intros f1 f2 Hf m1 m1' Hm1 m2 m2' Hm2. apply merge_ext; try done.
+    destruct 1; destruct 1; repeat f_equiv; constructor || by apply Hf.
+  Qed.
+
+  Global Instance map_disjoint_proper :
+    Proper ((≡@{M A}) ==> (≡@{M A}) ==> iff) map_disjoint.
+  Proof.
+    intros m1 m1' Hm1 m2 m2' Hm2; split;
+      intros Hm i; specialize (Hm i); by destruct (Hm1 i), (Hm2 i).
+  Qed.
+  Global Instance map_fmap_proper `{Equiv B} :
+    Proper (((≡) ==> (≡)) ==> (≡@{M A}) ==> (≡@{M B})) fmap.
+  Proof.
+    intros f f' Hf m m' ? k; rewrite !lookup_fmap. by apply option_fmap_proper.
+  Qed.
+  Global Instance map_omap_proper `{Equiv B} :
+    Proper (((≡) ==> (≡)) ==> (≡@{M A}) ==> (≡@{M B})) omap.
+  Proof.
+    intros f f' ? m m' ? k; rewrite !lookup_omap. by apply option_bind_proper.
   Qed.
 End setoid.
 

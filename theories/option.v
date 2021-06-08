@@ -145,8 +145,8 @@ Section setoids.
 
   Global Instance is_Some_proper : Proper ((≡@{option A}) ==> iff) is_Some.
   Proof. inversion_clear 1; split; eauto. Qed.
-  Global Instance from_option_proper {B} (R : relation B) (f : A → B) :
-    Proper ((≡) ==> R) f → Proper (R ==> (≡) ==> R) (from_option f).
+  Global Instance from_option_proper {B} (R : relation B) :
+    Proper (((≡@{A}) ==> R) ==> R ==> (≡) ==> R) from_option.
   Proof. destruct 3; simpl; auto. Qed.
 End setoids.
 

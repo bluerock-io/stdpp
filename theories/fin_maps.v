@@ -677,6 +677,14 @@ Proof.
   - rewrite lookup_singleton in Heq. naive_solver.
   - rewrite lookup_singleton_ne in Heq by done. naive_solver.
 Qed.
+Global Instance map_singleton_equiv_inj `{Equiv A} :
+  Inj2 (=) (≡) (≡) (singletonM (M:=M A)).
+Proof.
+  intros i1 x1 i2 x2 Heq. specialize (Heq i1).
+  rewrite lookup_singleton in Heq. destruct (decide (i1 = i2)) as [->|].
+  - rewrite lookup_singleton in Heq. apply (inj _) in Heq. naive_solver.
+  - rewrite lookup_singleton_ne in Heq by done. inversion Heq.
+Qed.
 
 Lemma map_non_empty_singleton {A} i (x : A) : {[i := x]} ≠ (∅ : M A).
 Proof.
@@ -715,6 +723,12 @@ Global Instance map_fmap_inj {A B} (f : A → B) :
 Proof.
   intros ? m1 m2 Hm. apply map_eq; intros i.
   apply (inj (fmap (M:=option) f)). by rewrite <-!lookup_fmap, Hm.
+Qed.
+Global Instance map_fmap_equiv_inj `{Equiv A, Equiv B} (f : A → B) :
+  Inj (≡) (≡) f → Inj (≡@{M A}) (≡@{M B}) (fmap f).
+Proof.
+  intros ? m1 m2 Hm i. apply (inj (fmap (M:=option) f)).
+  rewrite <-!lookup_fmap. by apply lookup_proper.
 Qed.
 
 Lemma lookup_fmap_Some {A B} (f : A → B) (m : M A) i y :

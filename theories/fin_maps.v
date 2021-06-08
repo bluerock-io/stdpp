@@ -177,6 +177,9 @@ Section setoid.
   Lemma map_equiv_lookup_l (m1 m2 : M A) i x :
     m1 ≡ m2 → m1 !! i = Some x → ∃ y, m2 !! i = Some y ∧ x ≡ y.
   Proof. generalize (equiv_Some_inv_l (m1 !! i) (m2 !! i) x); naive_solver. Qed.
+  Lemma map_equiv_lookup_r (m1 m2 : M A) i y :
+    m1 ≡ m2 → m2 !! i = Some y → ∃ x, m1 !! i = Some x ∧ x ≡ y.
+  Proof. generalize (equiv_Some_inv_r (m1 !! i) (m2 !! i) y); naive_solver. Qed.
 
   Global Instance map_equivalence : Equivalence (≡@{A}) → Equivalence (≡@{M A}).
   Proof.

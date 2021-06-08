@@ -1868,7 +1868,15 @@ Proof.
 Qed.
 Lemma map_disjoint_delete_r {A} (m1 m2 : M A) i : m1 ##ₘ m2 → m1 ##ₘ delete i m2.
 Proof. symmetry. by apply map_disjoint_delete_l. Qed.
-Lemma map_disjoint_filter {A} (P : K * A → Prop) `{!∀ x, Decision (P x)} (m : M A) :
+
+Lemma map_disjoint_filter {A} (P : K * A → Prop) `{!∀ x, Decision (P x)} (m1 m2 : M A) :
+  m1 ##ₘ m2 → filter P m1 ##ₘ filter P m2.
+Proof.
+  rewrite !map_disjoint_spec. intros ? i x y.
+  rewrite !map_filter_lookup_Some. naive_solver.
+Qed.
+Lemma map_disjoint_filter_complement {A} (P : K * A → Prop)
+    `{!∀ x, Decision (P x)} (m : M A) :
   filter P m ##ₘ filter (λ v, ¬ P v) m.
 Proof.
   apply map_disjoint_spec. intros i x y.
@@ -2184,11 +2192,21 @@ Proof.
   naive_solver eauto using map_Forall_union_1_1,
     map_Forall_union_1_2, map_Forall_union_2.
 Qed.
-Lemma map_union_filter {A} (P : K * A → Prop) `{!∀ x, Decision (P x)} (m : M A) :
+Lemma map_filter_union {A} (P : K * A → Prop) `{!∀ x, Decision (P x)} (m1 m2 : M A) :
+  m1 ##ₘ m2 →
+  filter P (m1 ∪ m2) = filter P m1 ∪ filter P m2.
+Proof.
+  intros. apply map_eq; intros i. apply option_eq; intros x.
+  rewrite lookup_union_Some, !map_filter_lookup_Some,
+    lookup_union_Some by auto using map_disjoint_filter.
+  naive_solver.
+Qed.
+Lemma map_filter_union_complement {A} (P : K * A → Prop) `{!∀ x, Decision (P x)} (m : M A) :
   filter P m ∪ filter (λ v, ¬ P v) m = m.
 Proof.
   apply map_eq; intros i. apply option_eq; intros x.
-  rewrite lookup_union_Some, !map_filter_lookup_Some by apply map_disjoint_filter.
+  rewrite lookup_union_Some, !map_filter_lookup_Some
+    by auto using map_disjoint_filter_complement.
   destruct (decide (P (i,x))); naive_solver.
 Qed.
 Lemma map_fmap_union {A B} (f : A → B) (m1 m2 : M A) :
@@ -2206,6 +2224,31 @@ Proof.
   apply option_eq; intros x.
   rewrite lookup_omap, !lookup_union, !lookup_omap.
   destruct (m1 !! i), (m2 !! i); simpl; repeat (destruct (f _)); naive_solver.
+Qed.
+
+Lemma map_cross_split {A} (m ma mb mc md : M A) :
+  ma ##ₘ mb → mc ##ₘ md →
+  ma ∪ mb = m → mc ∪ md = m →
+  ∃ mac mad mbc mbd,
+    mac ##ₘ mad ∧ mbc ##ₘ mbd ∧
+    mac ##ₘ mbc ∧ mad ##ₘ mbd ∧
+    mac ∪ mad = ma ∧ mbc ∪ mbd = mb ∧ mac ∪ mbc = mc ∧ mad ∪ mbd = md.
+Proof.
+  intros Hab_disj Hcd_disj Hab Hcd.
+  exists (filter (λ kx, is_Some (mc !! kx.1)) ma),
+    (filter (λ kx, ¬is_Some (mc !! kx.1)) ma),
+    (filter (λ kx, is_Some (mc !! kx.1)) mb),
+    (filter (λ kx, ¬is_Some (mc !! kx.1)) mb).
+  split_and!; [auto using map_disjoint_filter_complement, map_disjoint_filter,
+    map_filter_union_complement..| |].
+  - rewrite <-map_filter_union, Hab, <-Hcd by done.
+    apply map_eq; intros k. apply option_eq; intros x.
+    rewrite map_filter_lookup_Some, lookup_union_Some, <-not_eq_None_Some by done.
+    rewrite map_disjoint_alt in Hcd_disj; naive_solver.
+  - rewrite <-map_filter_union, Hab, <-Hcd by done.
+    apply map_eq; intros k. apply option_eq; intros x.
+    rewrite map_filter_lookup_Some, lookup_union_Some, <-not_eq_None_Some by done.
+    rewrite map_disjoint_alt in Hcd_disj; naive_solver.
 Qed.
 
 (** ** Properties of the [union_list] operation *)

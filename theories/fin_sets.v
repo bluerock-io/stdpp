@@ -302,39 +302,50 @@ Lemma minimal_exists_L R `{!LeibnizEquiv C, !Transitive R,
 Proof. unfold_leibniz. apply (minimal_exists R). Qed.
 
 (** * Filter *)
+Lemma elem_of_filter (P : A → Prop) `{!∀ x, Decision (P x)} X x :
+  x ∈ filter P X ↔ P x ∧ x ∈ X.
+Proof.
+  unfold filter, set_filter.
+  by rewrite elem_of_list_to_set, elem_of_list_filter, elem_of_elements.
+Qed.
+Global Instance set_unfold_filter (P : A → Prop) `{!∀ x, Decision (P x)} X Q x :
+  SetUnfoldElemOf x X Q → SetUnfoldElemOf x (filter P X) (P x ∧ Q).
+Proof.
+  intros ?; constructor. by rewrite elem_of_filter, (set_unfold_elem_of x X Q).
+Qed.
+
 Section filter.
   Context (P : A → Prop) `{!∀ x, Decision (P x)}.
 
-  Lemma elem_of_filter X x : x ∈ filter P X ↔ P x ∧ x ∈ X.
-  Proof.
-    unfold filter, set_filter.
-    by rewrite elem_of_list_to_set, elem_of_list_filter, elem_of_elements.
-  Qed.
-  Global Instance set_unfold_filter X Q x :
-    SetUnfoldElemOf x X Q → SetUnfoldElemOf x (filter P X) (P x ∧ Q).
-  Proof.
-    intros ?; constructor. by rewrite elem_of_filter, (set_unfold_elem_of x X Q).
-  Qed.
-
   Lemma filter_empty : filter P (∅:C) ≡ ∅.
-  Proof. set_solver. Qed.
-  Lemma filter_union X Y : filter P (X ∪ Y) ≡ filter P X ∪ filter P Y.
   Proof. set_solver. Qed.
   Lemma filter_singleton x : P x → filter P ({[ x ]} : C) ≡ {[ x ]}.
   Proof. set_solver. Qed.
   Lemma filter_singleton_not x : ¬P x → filter P ({[ x ]} : C) ≡ ∅.
   Proof. set_solver. Qed.
 
+  Lemma disjoint_filter X Y : X ## Y → filter P X ## filter P Y.
+  Proof. set_solver. Qed.
+  Lemma filter_union X Y : filter P (X ∪ Y) ≡ filter P X ∪ filter P Y.
+  Proof. set_solver. Qed.
+  Lemma disjoint_filter_complement X : filter P X ## filter (λ x, ¬P x) X.
+  Proof. set_solver. Qed.
+  Lemma filter_union_complement X : filter P X ∪ filter (λ x, ¬P x) X ≡ X.
+  Proof. intros x. destruct (decide (P x)); set_solver. Qed.
+
   Section leibniz_equiv.
     Context `{!LeibnizEquiv C}.
     Lemma filter_empty_L : filter P (∅:C) = ∅.
-    Proof. set_solver. Qed.
-    Lemma filter_union_L X Y : filter P (X ∪ Y) = filter P X ∪ filter P Y.
-    Proof. set_solver. Qed.
+    Proof. unfold_leibniz. apply filter_empty. Qed.
     Lemma filter_singleton_L x : P x → filter P ({[ x ]} : C) = {[ x ]}.
-    Proof. set_solver. Qed.
+    Proof. unfold_leibniz. apply filter_singleton. Qed.
     Lemma filter_singleton_not_L x : ¬P x → filter P ({[ x ]} : C) = ∅.
-    Proof. set_solver. Qed.
+    Proof. unfold_leibniz. apply filter_singleton_not. Qed.
+
+    Lemma filter_union_L X Y : filter P (X ∪ Y) = filter P X ∪ filter P Y.
+    Proof. unfold_leibniz. apply filter_union. Qed.
+    Lemma filter_union_complement_L X Y : filter P X ∪ filter (λ x, ¬P x) X = X.
+    Proof. unfold_leibniz. apply filter_union_complement. Qed.
   End leibniz_equiv.
 End filter.
 

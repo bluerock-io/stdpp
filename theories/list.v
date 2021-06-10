@@ -168,6 +168,7 @@ if the list [l] is empty. *)
 Fixpoint last {A} (l : list A) : option A :=
   match l with [] => None | [x] => Some x | _ :: l => last l end.
 Global Instance: Params (@last) 1 := {}.
+Global Arguments last : simpl nomatch.
 
 (** The function [resize n y l] takes the first [n] elements of [l] in case
 [length l ≤ n], and otherwise appends elements with value [x] to [l] to obtain

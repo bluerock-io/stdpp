@@ -78,11 +78,12 @@ Definition locally_confluent {A} (R : relation A) :=
 Global Hint Unfold nf red : core.
 
 (** * General theorems *)
-Section closure.
+Section general.
   Context `{R : relation A}.
 
   Local Hint Constructors rtc nsteps bsteps tc : core.
 
+  (** ** Results about the reflexive-transitive closure [rtc] *)
   Lemma rtc_transitive x y z : rtc R x y → rtc R y z → rtc R x z.
   Proof. induction 1; eauto. Qed.
 
@@ -139,6 +140,7 @@ Section closure.
     (∀ x y, R x y → R' (f x) (f y)) → rtc R x y → rtc R' (f x) (f y).
   Proof. induction 2; econstructor; eauto. Qed.
 
+  (** ** Results about [nsteps] *)
   Lemma nsteps_once x y : R x y → nsteps R 1 x y.
   Proof. eauto. Qed.
   Lemma nsteps_once_inv x y : nsteps R 1 x y → R x y.
@@ -148,10 +150,6 @@ Section closure.
   Proof. induction 1; simpl; eauto. Qed.
   Lemma nsteps_r n x y z : nsteps R n x y → R y z → nsteps R (S n) x z.
   Proof. induction 1; eauto. Qed.
-  Lemma nsteps_rtc n x y : nsteps R n x y → rtc R x y.
-  Proof. induction 1; eauto. Qed.
-  Lemma rtc_nsteps x y : rtc R x y → ∃ n, nsteps R n x y.
-  Proof. induction 1; firstorder eauto. Qed.
 
   Lemma nsteps_plus_inv n m x z :
     nsteps R (n + m) x z → ∃ y, nsteps R n x y ∧ nsteps R m y z.
@@ -171,6 +169,10 @@ Section closure.
     (∀ x y, R x y → R' (f x) (f y)) → nsteps R n x y → nsteps R' n (f x) (f y).
   Proof. induction 2; econstructor; eauto. Qed.
 
+  Lemma nsteps_rtc n x y : nsteps R n x y → rtc R x y.
+  Proof. induction 1; eauto. Qed.
+
+  (** ** Results about [bsteps] *)
   Lemma bsteps_once n x y : R x y → bsteps R (S n) x y.
   Proof. eauto. Qed.
   Lemma bsteps_plus_r n m x y :
@@ -191,10 +193,6 @@ Section closure.
   Proof. induction 1; simpl; eauto using bsteps_plus_l. Qed.
   Lemma bsteps_r n x y z : bsteps R n x y → R y z → bsteps R (S n) x z.
   Proof. induction 1; eauto. Qed.
-  Lemma bsteps_rtc n x y : bsteps R n x y → rtc R x y.
-  Proof. induction 1; eauto. Qed.
-  Lemma rtc_bsteps x y : rtc R x y → ∃ n, bsteps R n x y.
-  Proof. induction 1; [exists 0; constructor|]. naive_solver eauto. Qed.
   Lemma bsteps_ind_r (P : nat → A → Prop) (x : A)
     (Prefl : ∀ n, P n x)
     (Pstep : ∀ n y z, bsteps R n x y → R y z → P n y → P (S n) z) :
@@ -216,6 +214,10 @@ Section closure.
     (∀ x y, R x y → R' (f x) (f y)) → bsteps R n x y → bsteps R' n (f x) (f y).
   Proof. induction 2; econstructor; eauto. Qed.
 
+  Lemma bsteps_rtc n x y : bsteps R n x y → rtc R x y.
+  Proof. induction 1; eauto. Qed.
+
+  (** ** Results about the transitive closure [tc] *)
   Lemma tc_transitive x y z : tc R x y → tc R y z → tc R x z.
   Proof. induction 1; eauto. Qed.
   Global Instance tc_transitive' : Transitive (tc R).
@@ -233,6 +235,7 @@ Section closure.
     (∀ x y, R x y → R' (f x) (f y)) → tc R x y → tc R' (f x) (f y).
   Proof. induction 2; econstructor; by eauto. Qed.
 
+  (** ** Results about the symmetric closure [sc] *)
   Global Instance sc_symmetric : Symmetric (sc R).
   Proof. unfold Symmetric, sc. naive_solver. Qed.
 
@@ -245,11 +248,105 @@ Section closure.
     (∀ x y, R x y → R' (f x) (f y)) → sc R x y → sc R' (f x) (f y).
   Proof. induction 2; econstructor; by eauto. Qed.
 
-End closure.
+  (** ** Equivalences between closure operators *)
+  Lemma bsteps_nsteps n x y : bsteps R n x y ↔ ∃ n', n' ≤ n ∧ nsteps R n' x y.
+  Proof.
+    split.
+    - induction 1 as [|n x1 x2 y ?? (n'&?&?)].
+      + exists 0; naive_solver eauto with lia.
+      + exists (S n'); naive_solver eauto with lia.
+    - intros (n'&Hn'&Hsteps). apply bsteps_weaken with n'; [done|].
+      clear Hn'. induction Hsteps; eauto.
+  Qed.
 
-Section more_closure.
+  Lemma tc_nsteps x y : tc R x y ↔ ∃ n, 0 < n ∧ nsteps R n x y.
+  Proof.
+    split.
+    - induction 1 as [|x1 x2 y ?? (n&?&?)].
+      { exists 1. eauto using nsteps_once with lia. }
+      exists (S n); eauto using nsteps_l.
+    - intros (n & ? & Hstep). induction Hstep as [|n x1 x2 y ? Hstep]; [lia|].
+      destruct Hstep; eauto with lia.
+  Qed.
+
+  Lemma rtc_tc x y : rtc R x y ↔ x = y ∨ tc R x y.
+  Proof.
+    split.
+    - induction 1; naive_solver.
+    - naive_solver eauto using tc_rtc.
+  Qed.
+  Lemma rtc_nsteps x y : rtc R x y ↔ ∃ n, nsteps R n x y.
+  Proof.
+    split.
+    - induction 1; [exists 0; constructor|]. naive_solver.
+    - intros [n Hstep]. induction Hstep; eauto.
+  Qed.
+  Lemma rtc_bsteps x y : rtc R x y ↔ ∃ n, bsteps R n x y.
+  Proof. rewrite rtc_nsteps. setoid_rewrite bsteps_nsteps. naive_solver. Qed.
+
+  Lemma nsteps_list n x y :
+    nsteps R n x y ↔ ∃ l,
+      length l = S n ∧
+      head l = Some x ∧
+      last l = Some y ∧
+      ∀ i a b, l !! i = Some a → l !! S i = Some b → R a b.
+  Proof.
+    setoid_rewrite head_lookup. split.
+    - induction 1 as [x|n' x x' y ?? IH].
+      { exists [x]; naive_solver. }
+      destruct IH as (l & Hlen & Hfirst & Hlast & Hcons).
+      exists (x :: l). simpl. rewrite Hlen, last_cons, Hlast.
+      split_and!; [done..|]. intros [|i]; naive_solver.
+    - intros ([|x' l]&?&Hfirst&Hlast&Hcons); simplify_eq/=.
+      revert x Hlast Hcons.
+      induction l as [|x1 l IH]; intros x2 Hlast Hcons; simplify_eq/=; [constructor|].
+      econstructor; [by apply (Hcons 0)|].
+      apply IH; [done|]. intros i. apply (Hcons (S i)).
+  Qed.
+
+  Lemma bsteps_list n x y :
+    bsteps R n x y ↔ ∃ l,
+      length l ≤ S n ∧
+      head l = Some x ∧
+      last l = Some y ∧
+      ∀ i a b, l !! i = Some a → l !! S i = Some b → R a b.
+  Proof.
+    rewrite bsteps_nsteps. split.
+    - intros (n'&?&(l&?&?&?&?)%nsteps_list). exists l; eauto with lia.
+    - intros (l&?&?&?&?). exists (pred (length l)). split; [lia|].
+      apply nsteps_list. exists l. split; [|by eauto]. by destruct l.
+  Qed.
+
+  Lemma rtc_list x y :
+    rtc R x y ↔ ∃ l,
+      head l = Some x ∧
+      last l = Some y ∧
+      ∀ i a b, l !! i = Some a → l !! S i = Some b → R a b.
+  Proof.
+    rewrite rtc_bsteps. split.
+    - intros (n'&(l&?&?&?&?)%bsteps_list). exists l; eauto with lia.
+    - intros (l&?&?&?). exists (pred (length l)).
+      apply bsteps_list. exists l. eauto with lia.
+  Qed.
+
+  Lemma tc_list x y :
+    tc R x y ↔ ∃ l,
+      1 < length l ∧
+      head l = Some x ∧
+      last l = Some y ∧
+      ∀ i a b, l !! i = Some a → l !! S i = Some b → R a b.
+  Proof.
+    rewrite tc_nsteps. split.
+    - intros (n'&?&(l&?&?&?&?)%nsteps_list). exists l; eauto with lia.
+    - intros (l&?&?&?&?). exists (pred (length l)).
+      split; [lia|]. apply nsteps_list. exists l. eauto with lia.
+  Qed.
+End general.
+
+Section more_general.
   Context `{R : relation A}.
 
+  (** ** Results about the reflexive-transitive-symmetric closure [rtsc] *)
   Global Instance rtsc_equivalence : Equivalence (rtsc R) | 10.
   Proof. apply rtc_equivalence, _. Qed.
 
@@ -266,7 +363,7 @@ Section more_closure.
     (∀ x y, R x y → R' (f x) (f y)) → rtsc R x y → rtsc R' (f x) (f y).
   Proof. unfold rtsc; eauto using rtc_congruence, sc_congruence. Qed.
 
-End more_closure.
+End more_general.
 
 Section properties.
   Context `{R : relation A}.

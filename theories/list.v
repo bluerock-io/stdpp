@@ -1085,10 +1085,37 @@ Proof.
 Qed.
 
 (** ** Properties of the [last] function *)
+Lemma last_nil : last [] =@{option A} None.
+Proof. done. Qed.
+Lemma last_singleton x : last [x] = Some x.
+Proof. done. Qed.
+Lemma last_cons_cons x1 x2 l : last (x1 :: x2 :: l) = last (x2 :: l).
+Proof. done. Qed.
+
+Lemma last_None l : last l = None ↔ l = [].
+Proof.
+  split; [|by intros ->].
+  induction l as [|x1 [|x2 l] IH]; naive_solver.
+Qed.
+Lemma last_is_Some l : is_Some (last l) ↔ l ≠ [].
+Proof. rewrite <-not_eq_None_Some, last_None. naive_solver. Qed.
+
+Lemma last_cons x l :
+  last (x :: l) = match last l with Some y => Some y | None => Some x end.
+Proof.
+  destruct l as [|x' l]; simpl; [done|].
+  destruct (last (x' :: l)) eqn:Hlast; [done|].
+  by apply last_None in Hlast.
+Qed.
 Lemma last_snoc x l : last (l ++ [x]) = Some x.
 Proof. induction l as [|? []]; simpl; auto. Qed.
+Lemma last_lookup l : last l = l !! pred (length l).
+Proof. by induction l as [| ?[]]. Qed.
+
 Lemma last_reverse l : last (reverse l) = head l.
-Proof. by destruct l as [|x l]; rewrite ?reverse_cons, ?last_snoc. Qed.
+Proof. destruct l as [|x l]; simpl; by rewrite ?reverse_cons, ?last_snoc. Qed.
+
+(** ** Properties of the [head] function *)
 Lemma head_reverse l : head (reverse l) = last l.
 Proof. by rewrite <-last_reverse, reverse_involutive. Qed.
 

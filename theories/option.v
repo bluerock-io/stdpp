@@ -145,8 +145,8 @@ Section setoids.
 
   Global Instance is_Some_proper : Proper ((≡@{option A}) ==> iff) is_Some.
   Proof. inversion_clear 1; split; eauto. Qed.
-  Global Instance from_option_proper {B} (R : relation B) (f : A → B) :
-    Proper ((≡) ==> R) f → Proper (R ==> (≡) ==> R) (from_option f).
+  Global Instance from_option_proper {B} (R : relation B) :
+    Proper (((≡@{A}) ==> R) ==> R ==> (≡) ==> R) from_option.
   Proof. destruct 3; simpl; auto. Qed.
 End setoids.
 
@@ -179,6 +179,9 @@ Global Instance option_guard: MGuard option := λ P dec A f,
 Global Instance option_fmap_inj {A B} (f : A → B) :
   Inj (=) (=) f → Inj (=@{option A}) (=@{option B}) (fmap f).
 Proof. intros ? [x1|] [x2|] [=]; naive_solver. Qed.
+Global Instance option_fmap_equiv_inj `{Equiv A, Equiv B} (f : A → B) :
+  Inj (≡) (≡) f → Inj (≡@{option A}) (≡@{option B}) (fmap f).
+Proof. intros ? [x1|] [x2|]; inversion 1; subst; constructor; by apply (inj _). Qed.
 
 Lemma fmap_is_Some {A B} (f : A → B) mx : is_Some (f <$> mx) ↔ is_Some mx.
 Proof. unfold is_Some; destruct mx; naive_solver. Qed.
@@ -243,10 +246,10 @@ Proof. by destruct mx. Qed.
 Global Instance option_fmap_proper `{Equiv A, Equiv B} :
   Proper (((≡) ==> (≡)) ==> (≡@{option A}) ==> (≡@{option B})) fmap.
 Proof. destruct 2; constructor; auto. Qed.
-Global Instance option_mbind_proper `{Equiv A, Equiv B} :
+Global Instance option_bind_proper `{Equiv A, Equiv B} :
   Proper (((≡) ==> (≡)) ==> (≡@{option A}) ==> (≡@{option B})) mbind.
 Proof. destruct 2; simpl; try constructor; auto. Qed.
-Global Instance option_mjoin_proper `{Equiv A} :
+Global Instance option_join_proper `{Equiv A} :
   Proper ((≡) ==> (≡@{option (option A)})) mjoin.
 Proof. destruct 1 as [?? []|]; simpl; by constructor. Qed.
 

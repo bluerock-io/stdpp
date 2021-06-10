@@ -191,7 +191,7 @@ Section setoid.
   Global Instance map_leibniz `{!LeibnizEquiv A} : LeibnizEquiv (M A).
   Proof. intros m1 m2 Hm; apply map_eq; intros i. apply leibniz_equiv, Hm. Qed.
 
-  Global Instance lookup_proper (i : K) : Proper ((≡@{M A}) ==> (≡)) (.!! i).
+  Global Instance lookup_proper (i : K) : Proper ((≡@{M A}) ==> (≡)) (lookup i).
   Proof. by intros m1 m2 Hm. Qed.
   Global Instance lookup_total_proper (i : K) `{!Inhabited A} :
     Proper (≡@{A}) inhabitant →
@@ -249,11 +249,11 @@ Section setoid.
     intros ?? Hf ?? Hm1 ?? Hm2 i; apply (merge_ext _ _); auto.
     by do 2 destruct 1; first [apply Hf | constructor].
   Qed.
-  Global Instance union_proper : Proper ((≡) ==> (≡) ==>(≡@{M A})) (∪).
+  Global Instance union_proper : Proper ((≡) ==> (≡) ==>(≡@{M A})) union.
   Proof. apply union_with_proper; solve_proper. Qed.
-  Global Instance intersection_proper : Proper ((≡) ==> (≡) ==>(≡@{M A})) (∩).
+  Global Instance intersection_proper : Proper ((≡) ==> (≡) ==>(≡@{M A})) intersection.
   Proof. apply intersection_with_proper; solve_proper. Qed.
-  Global Instance difference_proper : Proper ((≡) ==> (≡) ==>(≡@{M A})) (∖).
+  Global Instance difference_proper : Proper ((≡) ==> (≡) ==>(≡@{M A})) difference.
   Proof. apply difference_with_proper. constructor. Qed.
 
   Global Instance map_zip_with_proper `{Equiv B, Equiv C} :

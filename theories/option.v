@@ -302,18 +302,9 @@ Lemma option_union_Some {A} (mx my : option A) z :
   mx ∪ my = Some z → mx = Some z ∨ my = Some z.
 Proof. destruct mx, my; naive_solver. Qed.
 
-Class DiagNone {A B C} (f : option A → option B → option C) :=
-  diag_none : f None None = None.
-
 Section union_intersection_difference.
   Context {A} (f : A → A → option A).
 
-  Global Instance union_with_diag_none : DiagNone (union_with f).
-  Proof. reflexivity. Qed.
-  Global Instance intersection_with_diag_none : DiagNone (intersection_with f).
-  Proof. reflexivity. Qed.
-  Global Instance difference_with_diag_none : DiagNone (difference_with f).
-  Proof. reflexivity. Qed.
   Global Instance union_with_left_id : LeftId (=) None (union_with f).
   Proof. by intros [?|]. Qed.
   Global Instance union_with_right_id : RightId (=) None (union_with f).

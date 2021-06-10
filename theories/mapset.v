@@ -120,7 +120,7 @@ Lemma elem_of_mapset_dom_with {A} (f : A → bool) m i :
   i ∈ mapset_dom_with f m ↔ ∃ x, m !! i = Some x ∧ f x.
 Proof.
   unfold mapset_dom_with, elem_of, mapset_elem_of.
-  simpl. rewrite lookup_merge by done. destruct (m !! i) as [a|].
+  simpl. rewrite lookup_merge, lookup_empty. destruct (m !! i) as [a|]; simpl.
   - destruct (Is_true_reflect (f a)); naive_solver.
   - naive_solver.
 Qed.

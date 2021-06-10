@@ -128,7 +128,7 @@ Definition natmap_merge_raw {A B C} (f : option A → option B → option C) :
   match l1, l2 with
   | [], l2 => natmap_omap_raw (f None ∘ Some) l2
   | l1, [] => natmap_omap_raw (flip f None ∘ Some) l1
-  | o1 :: l1, o2 :: l2 => natmap_cons_canon (f o1 o2) (go l1 l2)
+  | o1 :: l1, o2 :: l2 => natmap_cons_canon (diag_None f o1 o2) (go l1 l2)
   end.
 Lemma natmap_merge_wf {A B C} (f : option A → option B → option C) l1 l2 :
   natmap_wf l1 → natmap_wf l2 → natmap_wf (natmap_merge_raw f l1 l2).
@@ -136,9 +136,8 @@ Proof.
   revert l2. induction l1; intros [|??]; simpl;
     eauto using natmap_omap_raw_wf, natmap_cons_canon_wf, natmap_wf_inv.
 Qed.
-Lemma natmap_lookup_merge_raw {A B C} (f : option A → option B → option C)
-    l1 l2 i : f None None = None →
-  mjoin (natmap_merge_raw f l1 l2 !! i) = f (mjoin (l1 !! i)) (mjoin (l2 !! i)).
+Lemma natmap_lookup_merge_raw {A B C} (f : option A → option B → option C) l1 l2 i :
+  mjoin (natmap_merge_raw f l1 l2 !! i) = diag_None f (mjoin (l1 !! i)) (mjoin (l2 !! i)).
 Proof.
   intros. revert i l2. induction l1; intros [|?] [|??]; simpl;
     autorewrite with natmap; auto;
@@ -230,7 +229,7 @@ Proof.
   - intros ? [??]. by apply natmap_to_list_raw_nodup.
   - intros ? [??] ??. by apply natmap_elem_of_to_list_raw.
   - intros ??? [??] ?. by apply natmap_lookup_omap_raw.
-  - intros ????? [??] [??] ?. by apply natmap_lookup_merge_raw.
+  - intros ???? [??] [??] ?. apply natmap_lookup_merge_raw.
 Qed.
 
 Fixpoint strip_Nones {A} (l : list (option A)) : list (option A) :=

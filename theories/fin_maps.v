@@ -30,6 +30,10 @@ Class FinMapToList K A M := map_to_list: M → list (K * A).
 Global Hint Mode FinMapToList ! - - : typeclass_instances.
 Global Hint Mode FinMapToList - - ! : typeclass_instances.
 
+Definition diag_None {A B C} (f : option A → option B → option C)
+    (mx : option A) (my : option B) : option C :=
+  match mx, my with None, None => None | _, _ => f mx my end.
+
 Class FinMap K M `{FMap M, ∀ A, Lookup K A (M A), ∀ A, Empty (M A), ∀ A,
     PartialAlter K A (M A), OMap M, Merge M, ∀ A, FinMapToList K A (M A),
     EqDecision K} := {
@@ -45,9 +49,8 @@ Class FinMap K M `{FMap M, ∀ A, Lookup K A (M A), ∀ A, Empty (M A), ∀ A,
     (i,x) ∈ map_to_list m ↔ m !! i = Some x;
   lookup_omap {A B} (f : A → option B) (m : M A) i :
     omap f m !! i = m !! i ≫= f;
-  lookup_merge {A B C} (f : option A → option B → option C)
-      `{!DiagNone f} (m1 : M A) (m2 : M B) i :
-    merge f m1 m2 !! i = f (m1 !! i) (m2 !! i)
+  lookup_merge {A B C} (f : option A → option B → option C) (m1 : M A) (m2 : M B) i :
+    merge f m1 m2 !! i = diag_None f (m1 !! i) (m2 !! i)
 }.
 
 (** * Derived operations *)
@@ -225,30 +228,28 @@ Section setoid.
     intros ?? Hf; apply partial_alter_proper.
     by destruct 1; constructor; apply Hf.
   Qed.
-
-  Lemma merge_ext `{Equiv B, Equiv C} (f g : option A → option B → option C)
-      `{!DiagNone f, !DiagNone g} :
-    ((≡) ==> (≡) ==> (≡))%signature f g →
-    ((≡) ==> (≡) ==> (≡@{M _}))%signature (merge f) (merge g).
+  Global Instance merge_proper `{Equiv B, Equiv C} :
+    Proper (((≡) ==> (≡) ==> (≡)) ==> (≡@{M A}) ==> (≡@{M B}) ==> (≡@{M C})) merge.
   Proof.
-    by intros Hf ?? Hm1 ?? Hm2 i; rewrite !lookup_merge by done; apply Hf.
+    intros ?? Hf ?? Hm1 ?? Hm2 i. rewrite !lookup_merge.
+    destruct (Hm1 i), (Hm2 i); try apply Hf; by constructor.
   Qed.
   Global Instance union_with_proper :
     Proper (((≡) ==> (≡) ==> (≡)) ==> (≡) ==> (≡) ==>(≡@{M A})) union_with.
   Proof.
-    intros ?? Hf ?? Hm1 ?? Hm2 i; apply (merge_ext _ _); auto.
+    intros ?? Hf. apply merge_proper.
     by do 2 destruct 1; first [apply Hf | constructor].
   Qed.
   Global Instance intersection_with_proper :
     Proper (((≡) ==> (≡) ==> (≡)) ==> (≡) ==> (≡) ==>(≡@{M A})) intersection_with.
   Proof.
-    intros ?? Hf ?? Hm1 ?? Hm2 i; apply (merge_ext _ _); auto.
+    intros ?? Hf. apply merge_proper.
     by do 2 destruct 1; first [apply Hf | constructor].
   Qed.
   Global Instance difference_with_proper :
     Proper (((≡) ==> (≡) ==> (≡)) ==> (≡) ==> (≡) ==>(≡@{M A})) difference_with.
   Proof.
-    intros ?? Hf ?? Hm1 ?? Hm2 i; apply (merge_ext _ _); auto.
+    intros ?? Hf. apply merge_proper.
     by do 2 destruct 1; first [apply Hf | constructor].
   Qed.
   Global Instance union_proper : Proper ((≡) ==> (≡) ==>(≡@{M A})) union.
@@ -262,7 +263,7 @@ Section setoid.
     Proper (((≡) ==> (≡) ==> (≡)) ==> (≡@{M A}) ==> (≡@{M B}) ==> (≡@{M C}))
       map_zip_with.
   Proof.
-    intros f1 f2 Hf m1 m1' Hm1 m2 m2' Hm2. apply merge_ext; try done.
+    intros f1 f2 Hf. apply merge_proper.
     destruct 1; destruct 1; repeat f_equiv; constructor || by apply Hf.
   Qed.
 
@@ -1569,7 +1570,7 @@ End map_Forall.
 
 (** ** Properties of the [merge] operation *)
 Section merge.
-  Context {A} (f : option A → option A → option A) `{!DiagNone f}.
+  Context {A} (f : option A → option A → option A).
   Implicit Types m : M A.
 
   (** These instances can in many cases not be applied automatically due to Coq
@@ -1577,87 +1578,95 @@ Section merge.
   specific operations such as union or difference in the rest of this file. *)
   Global Instance: LeftId (=) None f → LeftId (=) (∅ : M A) (merge f).
   Proof.
-    intros ??. apply map_eq. intros.
-    by rewrite !(lookup_merge f), lookup_empty, (left_id_L None f).
+    intros ? m. apply map_eq; intros i.
+    rewrite !lookup_merge, lookup_empty. destruct (m !! i); by simpl.
   Qed.
   Global Instance: RightId (=) None f → RightId (=) (∅ : M A) (merge f).
   Proof.
-    intros ??. apply map_eq. intros.
-    by rewrite !(lookup_merge f), lookup_empty, (right_id_L None f).
+    intros ? m. apply map_eq; intros i.
+    rewrite !lookup_merge, lookup_empty. destruct (m !! i); by simpl.
   Qed.
   Global Instance: LeftAbsorb (=) None f → LeftAbsorb (=) (∅ : M A) (merge f).
   Proof.
-    intros ??. apply map_eq. intros.
-    by rewrite !(lookup_merge f), lookup_empty, (left_absorb_L None f).
+    intros ? m. apply map_eq; intros i.
+    rewrite !lookup_merge, lookup_empty. destruct (m !! i); by simpl.
   Qed.
   Global Instance: RightAbsorb (=) None f → RightAbsorb (=) (∅ : M A) (merge f).
   Proof.
-    intros ??. apply map_eq. intros.
-    by rewrite !(lookup_merge f), lookup_empty, (right_absorb_L None f).
+    intros ? m. apply map_eq; intros i.
+    rewrite !lookup_merge, lookup_empty. destruct (m !! i); by simpl.
   Qed.
   Lemma merge_comm m1 m2 :
     (∀ i, f (m1 !! i) (m2 !! i) = f (m2 !! i) (m1 !! i)) →
     merge f m1 m2 = merge f m2 m1.
-  Proof. intros. apply map_eq. intros. by rewrite !(lookup_merge f). Qed.
+  Proof.
+    intros Hm. apply map_eq; intros i. specialize (Hm i).
+    rewrite !lookup_merge. by destruct (m1 !! i), (m2 !! i).
+  Qed.
   Global Instance merge_comm' : Comm (=) f → Comm (=@{M _}) (merge f).
   Proof. intros ???. apply merge_comm. intros. by apply (comm f). Qed.
   Lemma merge_assoc m1 m2 m3 :
-    (∀ i, f (m1 !! i) (f (m2 !! i) (m3 !! i)) =
-          f (f (m1 !! i) (m2 !! i)) (m3 !! i)) →
+    (∀ i, diag_None f (m1 !! i) (diag_None f (m2 !! i) (m3 !! i)) =
+          diag_None f (diag_None f (m1 !! i) (m2 !! i)) (m3 !! i)) →
     merge f m1 (merge f m2 m3) = merge f (merge f m1 m2) m3.
-  Proof. intros. apply map_eq. intros. by rewrite !(lookup_merge f). Qed.
-  Global Instance merge_assoc' : Assoc (=) f → Assoc (=@{M _}) (merge f).
-  Proof. intros ????. apply merge_assoc. intros. by apply (assoc_L f). Qed.
+  Proof.
+    intros Hm. apply map_eq; intros i. specialize (Hm i).
+    by rewrite !lookup_merge.
+  Qed.
   Lemma merge_idemp m1 :
     (∀ i, f (m1 !! i) (m1 !! i) = m1 !! i) → merge f m1 m1 = m1.
-  Proof. intros. apply map_eq. intros. by rewrite !(lookup_merge f). Qed.
+  Proof.
+    intros Hm. apply map_eq; intros i. specialize (Hm i).
+    rewrite !lookup_merge. by destruct (m1 !! i).
+  Qed.
   Global Instance merge_idemp' : IdemP (=) f → IdemP (=@{M _}) (merge f).
   Proof. intros ??. apply merge_idemp. intros. by apply (idemp f). Qed.
 End merge.
 
 Section more_merge.
-  Context {A B C} (f : option A → option B → option C) `{!DiagNone f}.
+  Context {A B C} (f : option A → option B → option C).
 
   Lemma merge_Some (m1 : M A) (m2 : M B) (m : M C) :
+    f None None = None →
     (∀ i, m !! i = f (m1 !! i) (m2 !! i)) ↔ merge f m1 m2 = m.
   Proof.
-    split; [|intros <-; apply (lookup_merge _) ].
-    intros Hlookup. apply map_eq; intros. rewrite Hlookup. apply (lookup_merge _).
+   intros. rewrite map_eq_iff. apply forall_proper; intros i.
+   rewrite lookup_merge. destruct (m1 !! i), (m2 !! i); naive_solver congruence.
   Qed.
   Lemma merge_empty : merge f (∅ : M A) (∅ : M B) = ∅.
-  Proof. apply map_eq. intros. by rewrite !(lookup_merge f), !lookup_empty. Qed.
+  Proof. apply map_eq. intros. by rewrite !lookup_merge, !lookup_empty. Qed.
   Lemma partial_alter_merge g g1 g2 (m1 : M A) (m2 : M B) i :
-    g (f (m1 !! i) (m2 !! i)) = f (g1 (m1 !! i)) (g2 (m2 !! i)) →
+    g (diag_None f (m1 !! i) (m2 !! i)) = diag_None f (g1 (m1 !! i)) (g2 (m2 !! i)) →
     partial_alter g i (merge f m1 m2) =
       merge f (partial_alter g1 i m1) (partial_alter g2 i m2).
   Proof.
     intro. apply map_eq. intros j. destruct (decide (i = j)); subst.
-    - by rewrite (lookup_merge _), !lookup_partial_alter, !(lookup_merge _).
-    - by rewrite (lookup_merge _), !lookup_partial_alter_ne, (lookup_merge _).
+    - by rewrite lookup_merge, !lookup_partial_alter, !lookup_merge.
+    - by rewrite lookup_merge, !lookup_partial_alter_ne, lookup_merge.
   Qed.
   Lemma partial_alter_merge_l g g1 (m1 : M A) (m2 : M B) i :
-    g (f (m1 !! i) (m2 !! i)) = f (g1 (m1 !! i)) (m2 !! i) →
+    g (diag_None f (m1 !! i) (m2 !! i)) = diag_None f (g1 (m1 !! i)) (m2 !! i) →
     partial_alter g i (merge f m1 m2) = merge f (partial_alter g1 i m1) m2.
   Proof.
     intro. apply map_eq. intros j. destruct (decide (i = j)); subst.
-    - by rewrite (lookup_merge _), !lookup_partial_alter, !(lookup_merge _).
-    - by rewrite (lookup_merge _), !lookup_partial_alter_ne, (lookup_merge _).
+    - by rewrite lookup_merge, !lookup_partial_alter, !lookup_merge.
+    - by rewrite lookup_merge, !lookup_partial_alter_ne, lookup_merge.
   Qed.
   Lemma partial_alter_merge_r g g2 (m1 : M A) (m2 : M B) i :
-    g (f (m1 !! i) (m2 !! i)) = f (m1 !! i) (g2 (m2 !! i)) →
+    g (diag_None f (m1 !! i) (m2 !! i)) = diag_None f (m1 !! i) (g2 (m2 !! i)) →
     partial_alter g i (merge f m1 m2) = merge f m1 (partial_alter g2 i m2).
   Proof.
     intro. apply map_eq. intros j. destruct (decide (i = j)); subst.
-    - by rewrite (lookup_merge _), !lookup_partial_alter, !(lookup_merge _).
-    - by rewrite (lookup_merge _), !lookup_partial_alter_ne, (lookup_merge _).
+    - by rewrite lookup_merge, !lookup_partial_alter, !lookup_merge.
+    - by rewrite lookup_merge, !lookup_partial_alter_ne, lookup_merge.
   Qed.
   Lemma insert_merge (m1 : M A) (m2 : M B) i x y z :
     f (Some y) (Some z) = Some x →
     <[i:=x]>(merge f m1 m2) = merge f (<[i:=y]>m1) (<[i:=z]>m2).
-  Proof. by intros; apply partial_alter_merge. Qed.
+  Proof. intros; by apply partial_alter_merge. Qed.
   Lemma delete_merge (m1 : M A) (m2 : M B) i :
     delete i (merge f m1 m2) = merge f (delete i m1) (delete i m2).
-  Proof. by intros; apply partial_alter_merge. Qed.
+  Proof. intros; by apply partial_alter_merge. Qed.
   Lemma merge_singleton i x y z :
     f (Some y) (Some z) = Some x →
     merge f ({[i := y]} : M A) ({[i := z]} : M B) = {[i := x]}.
@@ -1671,37 +1680,34 @@ Section more_merge.
   Lemma insert_merge_r (m1 : M A) (m2 : M B) i x z :
     f (m1 !! i) (Some z) = Some x →
     <[i:=x]>(merge f m1 m2) = merge f m1 (<[i:=z]>m2).
-  Proof. by intros; apply partial_alter_merge_r. Qed.
+  Proof. intros; apply partial_alter_merge_r. by destruct (m1 !! i). Qed.
 
   Lemma fmap_merge {D} (g : C → D) (m1 : M A) (m2 : M B) :
     g <$> merge f m1 m2 = merge (λ mx1 mx2, g <$> f mx1 mx2) m1 m2.
   Proof.
-    assert (DiagNone (λ mx1 mx2, g <$> f mx1 mx2)).
-    { unfold DiagNone. by rewrite diag_none. }
-    apply map_eq; intros i. by rewrite lookup_fmap, !lookup_merge by done.
+    apply map_eq; intros i. rewrite lookup_fmap, !lookup_merge.
+    by destruct (m1 !! i), (m2 !! i).
   Qed.
   Lemma omap_merge {D} (g : C → option D) (m1 : M A) (m2 : M B) :
     omap g (merge f m1 m2) = merge (λ mx1 mx2, f mx1 mx2 ≫= g) m1 m2.
   Proof.
-    assert (DiagNone (λ mx1 mx2, f mx1 mx2 ≫= g)).
-    { unfold DiagNone. by rewrite diag_none. }
-    apply map_eq; intros i. by rewrite lookup_omap, !lookup_merge by done.
+    apply map_eq; intros i. rewrite lookup_omap, !lookup_merge.
+    by destruct (m1 !! i), (m2 !! i).
   Qed.
 End more_merge.
 
-Lemma merge_diag {A C} (f : option A → option A → option C) `{!DiagNone f} (m : M A) :
+Lemma merge_diag {A C} (f : option A → option A → option C) (m : M A) :
   merge f m m = omap (λ x, f (Some x) (Some x)) m.
 Proof.
   apply map_eq. intros i.
-  rewrite lookup_merge by done.
-  rewrite lookup_omap. destruct (m !! i); done.
+  rewrite lookup_merge, lookup_omap. by destruct (m !! i).
 Qed.
 
 (** Properties of the [zip_with] and [zip] functions *)
 Lemma map_lookup_zip_with {A B C} (f : A → B → C) (m1 : M A) (m2 : M B) i :
   map_zip_with f m1 m2 !! i = (x ← m1 !! i; y ← m2 !! i; Some (f x y)).
 Proof.
-  unfold map_zip_with. rewrite lookup_merge by done.
+  unfold map_zip_with. rewrite lookup_merge.
   by destruct (m1 !! i), (m2 !! i).
 Qed.
 Lemma map_lookup_zip_with_Some {A B C} (f : A → B → C) (m1 : M A) (m2 : M B) i z :
@@ -1744,7 +1750,7 @@ Lemma map_zip_with_fmap_2 {A B' B C} (f : A → B → C)
     (g : B' → B) (m1 : M A) (m2 : M B') :
   map_zip_with f m1 (g <$> m2) = map_zip_with (λ x y, f x (g y)) m1 m2.
 Proof.
-  rewrite <- (map_fmap_id m1) at 1. by rewrite map_zip_with_fmap.
+  rewrite <-(map_fmap_id m1) at 1. by rewrite map_zip_with_fmap.
 Qed.
 
 Lemma map_fmap_zip_with {A B C D} (f : A → B → C) (g : C → D)
@@ -1801,10 +1807,7 @@ Qed.
 
 Lemma map_zip_with_diag {A C} (f : A → A → C) (m : M A) :
   map_zip_with f m m = (λ x, f x x) <$> m.
-Proof.
-  unfold map_zip_with. rewrite merge_diag by naive_solver.
-  rewrite map_fmap_alt. done.
-Qed.
+Proof. unfold map_zip_with. by rewrite merge_diag, map_fmap_alt. Qed.
 
 Lemma map_zip_diag {A} (m : M A) :
   map_zip m m = (λ x, (x, x)) <$> m.
@@ -1826,10 +1829,10 @@ Section Forall2.
     map_relation R P Q m1 m2 ↔ map_Forall (λ _, Is_true) (merge f m1 m2).
   Proof.
     split.
-    - intros Hm i P'; rewrite lookup_merge by done; intros.
+    - intros Hm i P'; rewrite lookup_merge; intros.
       specialize (Hm i). destruct (m1 !! i), (m2 !! i);
         simplify_eq/=; auto using bool_decide_pack.
-    - intros Hm i. specialize (Hm i). rewrite lookup_merge in Hm by done.
+    - intros Hm i. specialize (Hm i). rewrite lookup_merge in Hm.
       destruct (m1 !! i), (m2 !! i); simplify_eq/=; auto;
         by eapply bool_decide_unpack, Hm.
   Qed.
@@ -1848,7 +1851,7 @@ Section Forall2.
   Proof.
     split.
     - rewrite map_relation_alt, (map_not_Forall _). intros (i&?&Hm&?); exists i.
-      rewrite lookup_merge in Hm by done.
+      rewrite lookup_merge in Hm.
       destruct (m1 !! i), (m2 !! i); naive_solver auto 2 using bool_decide_pack.
     - unfold map_relation, option_relation.
       by intros [i[(x&y&?&?&?)|[(x&?&?&?)|(y&?&?&?)]]] Hm;
@@ -1956,7 +1959,10 @@ Section union_with.
 
   Lemma lookup_union_with m1 m2 i :
     union_with f m1 m2 !! i = union_with f (m1 !! i) (m2 !! i).
-  Proof. by rewrite <-(lookup_merge _). Qed.
+  Proof.
+    unfold union_with, map_union_with. rewrite lookup_merge.
+    by destruct (m1 !! i), (m2 !! i).
+  Qed.
   Lemma lookup_union_with_Some m1 m2 i z :
     union_with f m1 m2 !! i = Some z ↔
       (m1 !! i = Some z ∧ m2 !! i = None) ∨
@@ -1974,7 +1980,7 @@ Section union_with.
     (∀ i x y, m1 !! i = Some x → m2 !! i = Some y → f x y = f y x) →
     union_with f m1 m2 = union_with f m2 m1.
   Proof.
-    intros. apply (merge_comm _). intros i.
+    intros. apply merge_comm. intros i.
     destruct (m1 !! i) eqn:?, (m2 !! i) eqn:?; simpl; eauto.
   Qed.
   Global Instance: Comm (=) f → Comm (=@{M A}) (union_with f).
@@ -1982,7 +1988,7 @@ Section union_with.
   Lemma union_with_idemp m :
     (∀ i x, m !! i = Some x → f x x = Some x) → union_with f m m = m.
   Proof.
-    intros. apply (merge_idemp _). intros i.
+    intros. apply merge_idemp. intros i.
     destruct (m !! i) eqn:?; simpl; eauto.
   Qed.
   Lemma alter_union_with (g : A → A) m1 m2 i :
@@ -1990,7 +1996,7 @@ Section union_with.
     alter g i (union_with f m1 m2) =
       union_with f (alter g i m1) (alter g i m2).
   Proof.
-    intros. apply (partial_alter_merge _).
+    intros. apply partial_alter_merge.
     destruct (m1 !! i) eqn:?, (m2 !! i) eqn:?; simpl; eauto.
   Qed.
   Lemma alter_union_with_l (g : A → A) m1 m2 i :
@@ -1998,7 +2004,7 @@ Section union_with.
     (∀ y, m1 !! i = None → m2 !! i = Some y → g y = y) →
     alter g i (union_with f m1 m2) = union_with f (alter g i m1) m2.
   Proof.
-    intros. apply (partial_alter_merge_l _).
+    intros. apply partial_alter_merge_l.
     destruct (m1 !! i) eqn:?, (m2 !! i) eqn:?; f_equal/=; auto.
   Qed.
   Lemma alter_union_with_r (g : A → A) m1 m2 i :
@@ -2006,12 +2012,12 @@ Section union_with.
     (∀ x, m1 !! i = Some x → m2 !! i = None → g x = x) →
     alter g i (union_with f m1 m2) = union_with f m1 (alter g i m2).
   Proof.
-    intros. apply (partial_alter_merge_r _).
+    intros. apply partial_alter_merge_r.
     destruct (m1 !! i) eqn:?, (m2 !! i) eqn:?; f_equal/=; auto.
   Qed.
   Lemma delete_union_with m1 m2 i :
     delete i (union_with f m1 m2) = union_with f (delete i m1) (delete i m2).
-  Proof. by apply (partial_alter_merge _). Qed.
+  Proof. by apply partial_alter_merge. Qed.
   Lemma foldr_delete_union_with (m1 m2 : M A) is :
     foldr delete (union_with f m1 m2) is =
       union_with f (foldr delete m1 is) (foldr delete m2 is).
@@ -2027,13 +2033,13 @@ Section union_with.
     m2 !! i = None → <[i:=x]>(union_with f m1 m2) = union_with f (<[i:=x]>m1) m2.
   Proof.
     intros Hm2. unfold union_with, map_union_with.
-    by erewrite (insert_merge_l _) by (by rewrite Hm2).
+    by erewrite insert_merge_l by (by rewrite Hm2).
   Qed.
   Lemma insert_union_with_r m1 m2 i x :
     m1 !! i = None → <[i:=x]>(union_with f m1 m2) = union_with f m1 (<[i:=x]>m2).
   Proof.
     intros Hm1. unfold union_with, map_union_with.
-    by erewrite (insert_merge_r _) by (by rewrite Hm1).
+    by erewrite insert_merge_r by (by rewrite Hm1).
   Qed.
 End union_with.
 
@@ -2043,7 +2049,7 @@ Global Instance map_union_empty {A} : RightId (=@{M A}) ∅ (∪) := _.
 Global Instance map_union_assoc {A} : Assoc (=@{M A}) (∪).
 Proof.
   intros m1 m2 m3. unfold union, map_union, union_with, map_union_with.
-  apply (merge_assoc _). intros i.
+  apply merge_assoc. intros i.
   by destruct (m1 !! i), (m2 !! i), (m3 !! i).
 Qed.
 Global Instance map_union_idemp {A} : IdemP (=@{M A}) (∪).
@@ -2425,7 +2431,10 @@ Section intersection_with.
   Proof. unfold intersection_with, map_intersection_with. apply _. Qed.
   Lemma lookup_intersection_with m1 m2 i :
     intersection_with f m1 m2 !! i = intersection_with f (m1 !! i) (m2 !! i).
-  Proof. by rewrite <-(lookup_merge _). Qed.
+  Proof.
+    unfold intersection_with, map_intersection_with. rewrite lookup_merge.
+    by destruct (m1 !! i), (m2 !! i).
+  Qed.
   Lemma lookup_intersection_with_Some m1 m2 i z :
     intersection_with f m1 m2 !! i = Some z ↔
       (∃ x y, m1 !! i = Some x ∧ m2 !! i = Some y ∧ f x y = Some z).
@@ -2503,7 +2512,11 @@ Qed.
 (** ** Properties of the [difference_with] operation *)
 Lemma lookup_difference_with {A} (f : A → A → option A) (m1 m2 : M A) i :
   difference_with f m1 m2 !! i = difference_with f (m1 !! i) (m2 !! i).
-Proof. by rewrite <-lookup_merge by done. Qed.
+Proof.
+  unfold difference_with, map_difference_with. rewrite lookup_merge.
+  by destruct (m1 !! i), (m2 !! i).
+Qed.
+
 Lemma lookup_difference_with_Some {A} (f : A → A → option A) (m1 m2 : M A) i z :
   difference_with f m1 m2 !! i = Some z ↔
     (m1 !! i = Some z ∧ m2 !! i = None) ∨
@@ -2540,7 +2553,7 @@ Proof.
   rewrite map_subseteq_spec. intro Hm1m2. apply map_eq. intros i.
   apply option_eq. intros v. specialize (Hm1m2 i).
   unfold difference, map_difference, difference_with, map_difference_with.
-  rewrite lookup_union_Some_raw, (lookup_merge _).
+  rewrite lookup_union_Some_raw, lookup_merge.
   destruct (m1 !! i) as [x'|], (m2 !! i);
     try specialize (Hm1m2 x'); compute; intuition congruence.
 Qed.
@@ -2737,33 +2750,32 @@ Section kmap.
   Proof. apply kmap_partial_alter. Qed.
 
   Lemma kmap_merge {A B C} (g : option A → option B → option C)
-      `{!DiagNone g} (m1 : M1 A) (m2 : M1 B) :
+      (m1 : M1 A) (m2 : M1 B) :
     kmap f (merge g m1 m2) = merge g (kmap f m1) (kmap f m2).
   Proof.
     apply map_eq; intros j. apply option_eq; intros y.
-    rewrite (lookup_merge g), lookup_kmap_Some.
-    setoid_rewrite (lookup_merge g). split.
+    rewrite lookup_merge, lookup_kmap_Some.
+    setoid_rewrite lookup_merge. split.
     { intros [i [-> ?]]. by rewrite !lookup_kmap. }
     intros Hg. destruct (kmap f m1 !! j) as [x1|] eqn:Hm1.
     { apply lookup_kmap_Some in Hm1 as (i&->&Hm1i).
       exists i. split; [done|]. by rewrite Hm1i, <-lookup_kmap. }
-    destruct (kmap f m2 !! j) as [x2|] eqn:Hm2.
-    { apply lookup_kmap_Some in Hm2 as (i&->&Hm2i).
-      exists i. split; [done|]. by rewrite Hm2i, <-lookup_kmap, Hm1. }
-    unfold DiagNone in *. naive_solver.
+    destruct (kmap f m2 !! j) as [x2|] eqn:Hm2; [|naive_solver].
+    apply lookup_kmap_Some in Hm2 as (i&->&Hm2i).
+    exists i. split; [done|]. by rewrite Hm2i, <-lookup_kmap, Hm1.
   Qed.
   Lemma kmap_union_with {A} (g : A → A → option A) (m1 m2 : M1 A) :
     kmap f (union_with g m1 m2)
     = union_with g (kmap f m1) (kmap f m2).
-  Proof. apply (kmap_merge _). Qed.
+  Proof. apply kmap_merge. Qed.
   Lemma kmap_intersection_with {A} (g : A → A → option A) (m1 m2 : M1 A) :
     kmap f (intersection_with g m1 m2)
     = intersection_with g (kmap f m1) (kmap f m2).
-  Proof. apply (kmap_merge _). Qed.
+  Proof. apply kmap_merge. Qed.
   Lemma kmap_difference_with {A} (g : A → A → option A) (m1 m2 : M1 A) :
     kmap f (difference_with g m1 m2)
     = difference_with g (kmap f m1) (kmap f m2).
-  Proof. apply (kmap_merge _). Qed.
+  Proof. apply kmap_merge. Qed.
 
   Lemma kmap_union {A} (m1 m2 : M1 A) :
     kmap f (m1 ∪ m2) = kmap f m1 ∪ kmap f m2.
@@ -2773,7 +2785,7 @@ Section kmap.
   Proof. apply kmap_intersection_with. Qed.
   Lemma kmap_difference {A} (m1 m2 : M1 A) :
     kmap f (m1 ∖ m2) = kmap f m1 ∖ kmap f m2.
-  Proof. apply (kmap_merge _). Qed.
+  Proof. apply kmap_difference_with. Qed.
 
   Lemma kmap_zip_with {A B C} (g : A → B → C) (m1 : M1 A) (m2 : M1 B) :
     kmap f (map_zip_with g m1 m2) = map_zip_with g (kmap f m1) (kmap f m2).

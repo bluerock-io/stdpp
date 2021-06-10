@@ -83,18 +83,18 @@ Global Instance gmap_omap `{Countable K} : OMap (gmap K) := λ A B f '(GMap m Hm
   GMap (omap f m) (gmap_omap_wf f m Hm).
 Lemma gmap_merge_wf `{Countable K} {A B C}
     (f : option A → option B → option C) m1 m2 :
-  let f' o1 o2 := match o1, o2 with None, None => None | _, _ => f o1 o2 end in
-  gmap_wf K m1 → gmap_wf K m2 → gmap_wf K (merge f' m1 m2).
+  gmap_wf K m1 → gmap_wf K m2 → gmap_wf K (merge f m1 m2).
 Proof.
-  intros f'; unfold gmap_wf; rewrite !bool_decide_spec.
-  intros Hm1 Hm2 p z; rewrite lookup_merge by done; intros.
+  unfold gmap_wf; rewrite !bool_decide_spec.
+  intros Hm1 Hm2 p z. rewrite lookup_merge; intros.
   destruct (m1 !! _) eqn:?, (m2 !! _) eqn:?; naive_solver.
 Qed.
-Global Instance gmap_merge `{Countable K} : Merge (gmap K) := λ A B C f '(GMap m1 Hm1) '(GMap m2 Hm2),
-  let f' o1 o2 := match o1, o2 with None, None => None | _, _ => f o1 o2 end in
-  GMap (merge f' m1 m2) (gmap_merge_wf f m1 m2 Hm1 Hm2).
-Global Instance gmap_to_list `{Countable K} {A} : FinMapToList K A (gmap K A) := λ '(GMap m _),
-  omap (λ '(i, x), (., x) <$> decode i) (map_to_list m).
+Global Instance gmap_merge `{Countable K} : Merge (gmap K) :=
+  λ A B C f '(GMap m1 Hm1) '(GMap m2 Hm2),
+    GMap (merge f m1 m2) (gmap_merge_wf f m1 m2 Hm1 Hm2).
+Global Instance gmap_to_list `{Countable K} {A} : FinMapToList K A (gmap K A) :=
+  λ '(GMap m _),
+    omap (λ '(i, x), (., x) <$> decode i) (map_to_list m).
 
 (** * Instantiation of the finite map interface *)
 Global Instance gmap_finmap `{Countable K} : FinMap K (gmap K).
@@ -129,8 +129,7 @@ Proof.
     + intros; exists (encode i,x); simpl.
       by rewrite elem_of_map_to_list, decode_encode.
   - intros A B f [m Hm] i; apply (lookup_omap f m).
-  - intros A B C f ? [m1 Hm1] [m2 Hm2] i; unfold merge, lookup; simpl.
-    set (f' o1 o2 := match o1, o2 with None,None => None | _, _ => f o1 o2 end).
+  - intros A B C f [m1 Hm1] [m2 Hm2] i; unfold merge, lookup; simpl.
     by rewrite lookup_merge by done; destruct (m1 !! _), (m2 !! _).
 Qed.
 

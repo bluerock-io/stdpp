@@ -52,6 +52,15 @@ API-breaking change is listed.
   + Maps: Add lemmas `map_disjoint_filter` and `map_filter_union` analogous to
     sets.
 - Add cross split lemma `map_cross_split` for maps
+- Better setoid results for options and maps:
+  + Add instances `map_singleton_equiv_inj` and `map_fmap_equiv_inj`.
+  + Add instance `option_fmap_equiv_inj`.
+  + Add and generalize `Proper` instances for various operations on maps.
+  + Add lemma `map_equiv_lookup_r`.
+  + Add lemma `map_equiv_iff`.
+- Rename instances `option_mbind_proper` → `option_bind_proper` and
+  `option_mjoin_proper` → `option_join_proper` to be consistent with similar
+  instances for sets and lists.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`):
@@ -66,6 +75,9 @@ s/\Permutation_cons_inv\b/Permutation_cons_inv_r/g
 # Filter
 s/\bmap_disjoint_filter\b/map_disjoint_filter_complement/g
 s/\bmap_union_filter\b/map_filter_union_complement/g
+# mbind
+s/\boption_mbind_proper\b/option_bind_proper/g
+s/\boption_mjoin_proper\b/option_join_proper/g
 ' $(find theories -name "*.v")
 ```
 

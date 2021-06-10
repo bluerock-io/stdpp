@@ -67,7 +67,8 @@ Global Instance map_singleton `{PartialAlter K A M, Empty M} :
 Definition list_to_map `{Insert K A M, Empty M} : list (K * A) → M :=
   fold_right (λ p, <[p.1:=p.2]>) ∅.
 
-Global Instance map_size `{FinMapToList K A M} : Size M := λ m, length (map_to_list m).
+Global Instance map_size `{FinMapToList K A M} : Size M := λ m,
+  length (map_to_list m).
 
 Definition map_to_set `{FinMapToList K A M,
     Singleton B C, Empty C, Union C} (f : K → A → B) (m : M) : C :=
@@ -145,7 +146,8 @@ is unspecified. *)
 Definition map_fold `{FinMapToList K A M} {B}
   (f : K → A → B → B) (b : B) : M → B := foldr (curry f) b ∘ map_to_list.
 
-Global Instance map_filter `{FinMapToList K A M, Insert K A M, Empty M} : Filter (K * A) M :=
+Global Instance map_filter
+    `{FinMapToList K A M, Insert K A M, Empty M} : Filter (K * A) M :=
   λ P _, map_fold (λ k v m, if decide (P (k,v)) then <[k := v]>m else m) ∅.
 
 Fixpoint map_seq `{Insert nat A M, Empty M} (start : nat) (xs : list A) : M :=
@@ -1921,7 +1923,8 @@ Qed.
 Lemma map_disjoint_delete_r {A} (m1 m2 : M A) i : m1 ##ₘ m2 → m1 ##ₘ delete i m2.
 Proof. symmetry. by apply map_disjoint_delete_l. Qed.
 
-Lemma map_disjoint_filter {A} (P : K * A → Prop) `{!∀ x, Decision (P x)} (m1 m2 : M A) :
+Lemma map_disjoint_filter {A} (P : K * A → Prop)
+    `{!∀ x, Decision (P x)} (m1 m2 : M A) :
   m1 ##ₘ m2 → filter P m1 ##ₘ filter P m2.
 Proof.
   rewrite !map_disjoint_spec. intros ? i x y.
@@ -2012,7 +2015,10 @@ Section union_with.
   Lemma foldr_delete_union_with (m1 m2 : M A) is :
     foldr delete (union_with f m1 m2) is =
       union_with f (foldr delete m1 is) (foldr delete m2 is).
-  Proof. induction is as [|?? IHis]; simpl; [done|]. by rewrite IHis, delete_union_with. Qed.
+  Proof.
+    induction is as [|?? IHis]; simpl; [done|].
+    by rewrite IHis, delete_union_with.
+  Qed.
   Lemma insert_union_with m1 m2 i x y z :
     f x y = Some z →
     <[i:=z]>(union_with f m1 m2) = union_with f (<[i:=x]>m1) (<[i:=y]>m2).
@@ -2253,7 +2259,8 @@ Proof.
     lookup_union_Some by auto using map_disjoint_filter.
   naive_solver.
 Qed.
-Lemma map_filter_union_complement {A} (P : K * A → Prop) `{!∀ x, Decision (P x)} (m : M A) :
+Lemma map_filter_union_complement {A} (P : K * A → Prop)
+    `{!∀ x, Decision (P x)} (m : M A) :
   filter P m ∪ filter (λ v, ¬ P v) m = m.
 Proof.
   apply map_eq; intros i. apply option_eq; intros x.
@@ -2450,15 +2457,20 @@ Section intersection_with.
     destruct (m1 !! i) eqn:?, (m2 !! i) eqn:?; simpl; eauto.
   Qed.
   Lemma delete_intersection_with m1 m2 i :
-    delete i (intersection_with f m1 m2) = intersection_with f (delete i m1) (delete i m2).
+    delete i (intersection_with f m1 m2) =
+      intersection_with f (delete i m1) (delete i m2).
   Proof. by apply (partial_alter_merge _). Qed.
   Lemma foldr_delete_intersection_with (m1 m2 : M A) is :
     foldr delete (intersection_with f m1 m2) is =
       intersection_with f (foldr delete m1 is) (foldr delete m2 is).
-  Proof. induction is as [|?? IHis]; simpl; [done|]. by rewrite IHis, delete_intersection_with. Qed.
+  Proof.
+    induction is as [|?? IHis]; simpl; [done|].
+    by rewrite IHis, delete_intersection_with.
+  Qed.
   Lemma insert_intersection_with m1 m2 i x y z :
     f x y = Some z →
-    <[i:=z]>(intersection_with f m1 m2) = intersection_with f (<[i:=x]>m1) (<[i:=y]>m2).
+    <[i:=z]>(intersection_with f m1 m2) =
+      intersection_with f (<[i:=x]>m1) (<[i:=y]>m2).
   Proof. by intros; apply (partial_alter_merge _). Qed.
 End intersection_with.
 

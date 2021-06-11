@@ -15,12 +15,18 @@ Global Instance: Params (@length) 1 := {}.
 Global Instance: Params (@cons) 1 := {}.
 Global Instance: Params (@app) 1 := {}.
 
+(** [head] and [tail] are defined as [parsing only] for [hd_error] and [tl] in
+the Coq standard library. We redefine these notations to make sure they also
+pretty print properly. *)
+Notation head := hd_error.
 Notation tail := tl.
+
 Notation take := firstn.
 Notation drop := skipn.
 
 Global Arguments head {_} _ : assert.
 Global Arguments tail {_} _ : assert.
+
 Global Arguments take {_} !_ !_ / : assert.
 Global Arguments drop {_} !_ !_ / : assert.
 
@@ -168,6 +174,7 @@ if the list [l] is empty. *)
 Fixpoint last {A} (l : list A) : option A :=
   match l with [] => None | [x] => Some x | _ :: l => last l end.
 Global Instance: Params (@last) 1 := {}.
+Global Arguments last : simpl nomatch.
 
 (** The function [resize n y l] takes the first [n] elements of [l] in case
 [length l ≤ n], and otherwise appends elements with value [x] to [l] to obtain
@@ -1084,10 +1091,56 @@ Proof.
 Qed.
 
 (** ** Properties of the [last] function *)
+Lemma last_nil : last [] =@{option A} None.
+Proof. done. Qed.
+Lemma last_singleton x : last [x] = Some x.
+Proof. done. Qed.
+Lemma last_cons_cons x1 x2 l : last (x1 :: x2 :: l) = last (x2 :: l).
+Proof. done. Qed.
+
+Lemma last_None l : last l = None ↔ l = [].
+Proof.
+  split; [|by intros ->].
+  induction l as [|x1 [|x2 l] IH]; naive_solver.
+Qed.
+Lemma last_is_Some l : is_Some (last l) ↔ l ≠ [].
+Proof. rewrite <-not_eq_None_Some, last_None. naive_solver. Qed.
+
+Lemma last_cons x l :
+  last (x :: l) = match last l with Some y => Some y | None => Some x end.
+Proof.
+  destruct l as [|x' l]; simpl; [done|].
+  destruct (last (x' :: l)) eqn:Hlast; [done|].
+  by apply last_None in Hlast.
+Qed.
 Lemma last_snoc x l : last (l ++ [x]) = Some x.
 Proof. induction l as [|? []]; simpl; auto. Qed.
+Lemma last_lookup l : last l = l !! pred (length l).
+Proof. by induction l as [| ?[]]. Qed.
+
 Lemma last_reverse l : last (reverse l) = head l.
-Proof. by destruct l as [|x l]; rewrite ?reverse_cons, ?last_snoc. Qed.
+Proof. destruct l as [|x l]; simpl; by rewrite ?reverse_cons, ?last_snoc. Qed.
+
+(** ** Properties of the [head] function *)
+Lemma head_nil : head [] =@{option A} None.
+Proof. done. Qed.
+Lemma head_cons x l : head (x :: l) = Some x.
+Proof. done. Qed.
+
+Lemma head_None l : head l = None ↔ l = [].
+Proof. split; [|by intros ->]. by destruct l. Qed.
+Lemma head_is_Some l : is_Some (head l) ↔ l ≠ [].
+Proof. rewrite <-not_eq_None_Some, head_None. naive_solver. Qed.
+
+Lemma head_snoc x l :
+  head (l ++ [x]) = match head l with Some y => Some y | None => Some x end.
+Proof. by destruct l. Qed.
+Lemma head_snoc_snoc x1 x2 l :
+  head (l ++ [x1; x2]) = head (l ++ [x1]).
+Proof. by destruct l. Qed.
+Lemma head_lookup l : head l = l !! 0.
+Proof. by destruct l. Qed.
+
 Lemma head_reverse l : head (reverse l) = last l.
 Proof. by rewrite <-last_reverse, reverse_involutive. Qed.
 

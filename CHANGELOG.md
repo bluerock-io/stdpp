@@ -68,6 +68,11 @@ API-breaking change is listed.
   + Generalize lemmas `partial_alter_merge`, `partial_alter_merge_l`, and
     `partial_alter_merge_r`.
   + Drop unused `merge_assoc'` instance.
+- Improvements to `head` and `tail` functions for lists:
+  + Define `head` as notation that prints (Coq defines it as `parsing only`)
+    similar to `tail`.
+  + Declare `tail` as `simpl nomatch`.
+  + Add lemmas about `head` and `tail`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`):

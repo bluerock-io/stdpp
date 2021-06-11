@@ -42,9 +42,9 @@ Global Instance Zomap: OMap Zmap := λ A B f t,
 Global Instance Zmerge: Merge Zmap := λ A B C f t1 t2,
   match t1, t2 with
   | ZMap o1 t1 t1', ZMap o2 t2 t2' =>
-     ZMap (f o1 o2) (merge f t1 t2) (merge f t1' t2')
+     ZMap (diag_None f o1 o2) (merge f t1 t2) (merge f t1' t2')
   end.
-Global Instance Nfmap: FMap Zmap := λ A B f t,
+Global Instance Zfmap: FMap Zmap := λ A B f t,
   match t with ZMap o t t' => ZMap (f <$> o) (f <$> t) (f <$> t') end.
 
 Global Instance: FinMap Z Zmap.
@@ -85,7 +85,7 @@ Proof.
         { left; exists (i, x). by rewrite elem_of_map_to_list. }
         right; exists (i, x). by rewrite elem_of_map_to_list.
   - intros ?? f [??] [|?|?]; simpl; [done| |]; apply (lookup_omap f).
-  - intros ??? f ? [??] [??] [|?|?]; simpl; [done| |]; apply (lookup_merge f).
+  - intros ??? f [??] [??] [|?|?]; simpl; [done| |]; apply (lookup_merge f).
 Qed.
 
 (** * Finite sets *)

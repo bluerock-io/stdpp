@@ -61,6 +61,13 @@ API-breaking change is listed.
 - Rename instances `option_mbind_proper` → `option_bind_proper` and
   `option_mjoin_proper` → `option_join_proper` to be consistent with similar
   instances for sets and lists.
+- Drop `DiagNone` precondition of `lookup_merge` rule of `FinMap` interface.
+  + Drop `DiagNone` class.
+  + Add `merge_proper` instance.
+  + Simplify lemmas about `merge` by dropping the `DiagNone` precondition.
+  + Generalize lemmas `partial_alter_merge`, `partial_alter_merge_l`, and
+    `partial_alter_merge_r`.
+  + Drop unused `merge_assoc'` instance.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`):

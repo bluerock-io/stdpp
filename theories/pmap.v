@@ -99,7 +99,7 @@ Fixpoint Pmerge_raw {A B C} (f : option A → option B → option C)
   | PLeaf, t2 => Pomap_raw (f None ∘ Some) t2
   | t1, PLeaf => Pomap_raw (flip f None ∘ Some) t1
   | PNode o1 l1 r1, PNode o2 l2 r2 =>
-      PNode' (f o1 o2) (Pmerge_raw f l1 l2) (Pmerge_raw f r1 r2)
+      PNode' (diag_None f o1 o2) (Pmerge_raw f l1 l2) (Pmerge_raw f r1 r2)
   end.
 
 (** Proofs *)
@@ -241,14 +241,13 @@ Proof.
   revert i. induction t as [|o l IHl r IHr]; intros [i|i|]; simpl;
     rewrite ?PNode_lookup; simpl; auto.
 Qed.
-Lemma Pmerge_lookup {A B C} (f : option A → option B → option C)
-    (Hf : f None None = None) t1 t2 i :
-  Pmerge_raw f t1 t2 !! i = f (t1 !! i) (t2 !! i).
+Lemma Pmerge_lookup {A B C} (f : option A → option B → option C) t1 t2 i :
+  Pmerge_raw f t1 t2 !! i = diag_None f (t1 !! i) (t2 !! i).
 Proof.
   revert t2 i; induction t1 as [|o1 l1 IHl1 r1 IHr1]; intros t2 i; simpl.
   { rewrite Pomap_lookup. by destruct (t2 !! i). }
   unfold compose, flip.
-  destruct t2 as [|l2 o2 r2]; rewrite PNode_lookup.
+  destruct t2 as [|o2 l2 r2]; rewrite PNode_lookup.
   - by destruct i; rewrite ?Pomap_lookup; simpl; rewrite ?Pomap_lookup;
       match goal with |- ?o ≫= _ = _ => destruct o end.
   - destruct i; rewrite ?Pomap_lookup; simpl; auto.
@@ -299,7 +298,7 @@ Proof.
     + by intros [(?&->&?)|].
     + by left; exists i.
   - intros ?? ? [??] ?. by apply Pomap_lookup.
-  - intros ??? ?? [??] [??] ?. by apply Pmerge_lookup.
+  - intros ??? ? [??] [??] ?. by apply Pmerge_lookup.
 Qed.
 
 Global Program Instance Pmap_countable `{Countable A} : Countable (Pmap A) := {

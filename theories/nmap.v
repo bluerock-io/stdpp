@@ -39,7 +39,7 @@ Global Instance Nomap: OMap Nmap := λ A B f t,
   match t with NMap o t => NMap (o ≫= f) (omap f t) end.
 Global Instance Nmerge: Merge Nmap := λ A B C f t1 t2,
   match t1, t2 with
-  | NMap o1 t1, NMap o2 t2 => NMap (f o1 o2) (merge f t1 t2)
+  | NMap o1 t1, NMap o2 t2 => NMap (diag_None f o1 o2) (merge f t1 t2)
   end.
 Global Instance Nfmap: FMap Nmap := λ A B f t,
   match t with NMap o t => NMap (f <$> o) (f <$> t) end.
@@ -74,7 +74,7 @@ Proof.
         destruct i as [|i]; simpl; [done |].
         intros. exists (i, x). by rewrite elem_of_map_to_list.
   - intros ?? f [??] [|?]; simpl; [done|]; apply (lookup_omap f).
-  - intros ??? f ? [??] [??] [|?]; simpl; [done|]; apply (lookup_merge f).
+  - intros ??? f [??] [??] [|?]; simpl; [done|]; apply (lookup_merge f).
 Qed.
 
 (** * Finite sets *)

@@ -1117,6 +1117,25 @@ Lemma last_reverse l : last (reverse l) = head l.
 Proof. destruct l as [|x l]; simpl; by rewrite ?reverse_cons, ?last_snoc. Qed.
 
 (** ** Properties of the [head] function *)
+Lemma head_nil : head [] =@{option A} None.
+Proof. done. Qed.
+Lemma head_cons x l : head (x :: l) = Some x.
+Proof. done. Qed.
+
+Lemma head_None l : head l = None ↔ l = [].
+Proof. split; [|by intros ->]. by destruct l. Qed.
+Lemma head_is_Some l : is_Some (head l) ↔ l ≠ [].
+Proof. rewrite <-not_eq_None_Some, head_None. naive_solver. Qed.
+
+Lemma head_snoc x l :
+  head (l ++ [x]) = match head l with Some y => Some y | None => Some x end.
+Proof. by destruct l. Qed.
+Lemma head_snoc_snoc x1 x2 l :
+  head (l ++ [x1; x2]) = head (l ++ [x1]).
+Proof. by destruct l. Qed.
+Lemma head_lookup l : head l = l !! 0.
+Proof. by destruct l. Qed.
+
 Lemma head_reverse l : head (reverse l) = last l.
 Proof. by rewrite <-last_reverse, reverse_involutive. Qed.
 

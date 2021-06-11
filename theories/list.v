@@ -15,6 +15,7 @@ Global Instance: Params (@length) 1 := {}.
 Global Instance: Params (@cons) 1 := {}.
 Global Instance: Params (@app) 1 := {}.
 
+Notation head := hd_error.
 Notation tail := tl.
 Notation take := firstn.
 Notation drop := skipn.

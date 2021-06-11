@@ -21,7 +21,7 @@ Proof. congruence. Qed.
 (** The [from_option] is the eliminator for option. *)
 Definition from_option {A B} (f : A → B) (y : B) (mx : option A) : B :=
   match mx with None => y | Some x => f x end.
-Global Instance: Params (@from_option) 3 := {}.
+Global Instance: Params (@from_option) 2 := {}.
 Global Arguments from_option {_ _} _ _ !_ / : assert.
 
 (** The eliminator with the identity function. *)

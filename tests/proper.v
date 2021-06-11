@@ -23,6 +23,13 @@ Section tests.
   Proof. solve_proper. Qed.
 End tests.
 
+Global Instance from_option_proper_test1 `{Equiv A} {B} (R : relation B) (f : A → B) :
+  Proper ((≡) ==> R) f → Proper (R ==> (≡) ==> R) (from_option f).
+Proof. apply _. Qed.
+Global Instance from_option_proper_test2 `{Equiv A} {B} (R : relation B) (f : A → B) :
+  Proper ((≡) ==> R) f → Proper (R ==> (≡) ==> R) (from_option f).
+Proof. solve_proper. Qed.
+
 Section map_tests.
   Context `{FinMap K M} `{Equiv A}.
 

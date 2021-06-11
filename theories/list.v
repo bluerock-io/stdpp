@@ -15,13 +15,18 @@ Global Instance: Params (@length) 1 := {}.
 Global Instance: Params (@cons) 1 := {}.
 Global Instance: Params (@app) 1 := {}.
 
+(** [head] and [tail] are defined as [parsing only] for [hd_error] and [tl] in
+the Coq standard library. We redefine these notations to make sure they also
+pretty print properly. *)
 Notation head := hd_error.
 Notation tail := tl.
+
 Notation take := firstn.
 Notation drop := skipn.
 
 Global Arguments head {_} _ : assert.
 Global Arguments tail {_} _ : assert.
+
 Global Arguments take {_} !_ !_ / : assert.
 Global Arguments drop {_} !_ !_ / : assert.
 

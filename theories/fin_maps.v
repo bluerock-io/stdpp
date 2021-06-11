@@ -30,6 +30,11 @@ Class FinMapToList K A M := map_to_list: M → list (K * A).
 Global Hint Mode FinMapToList ! - - : typeclass_instances.
 Global Hint Mode FinMapToList - - ! : typeclass_instances.
 
+(** The function [diag_None f] is used in the specification and lemmas of
+[merge f]. It lifts a function [f : option A → option B → option C] by returning
+[None] if both arguments are [None], to make sure that in [merge f m1 m2], the
+function [f] can only operate on elements that are in the domain of either [m1]
+or [m2]. *)
 Definition diag_None {A B C} (f : option A → option B → option C)
     (mx : option A) (my : option B) : option C :=
   match mx, my with None, None => None | _, _ => f mx my end.

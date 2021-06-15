@@ -172,124 +172,6 @@ Typeclasses Opaque map_lookup_total.
 Section theorems.
 Context `{FinMap K M}.
 
-(** ** Setoids *)
-Section setoid.
-  Context `{Equiv A}.
-
-  Lemma map_equiv_iff (m1 m2 : M A) : m1 ≡ m2 ↔ ∀ i, m1 !! i ≡ m2 !! i.
-  Proof. done. Qed.
-  Lemma map_equiv_empty (m : M A) : m ≡ ∅ ↔ m = ∅.
-  Proof.
-    split; [intros Hm; apply map_eq; intros i|intros ->].
-    - generalize (Hm i). by rewrite lookup_empty, equiv_None.
-    - intros ?. rewrite lookup_empty; constructor.
-  Qed.
-  Lemma map_equiv_lookup_l (m1 m2 : M A) i x :
-    m1 ≡ m2 → m1 !! i = Some x → ∃ y, m2 !! i = Some y ∧ x ≡ y.
-  Proof. generalize (equiv_Some_inv_l (m1 !! i) (m2 !! i) x); naive_solver. Qed.
-  Lemma map_equiv_lookup_r (m1 m2 : M A) i y :
-    m1 ≡ m2 → m2 !! i = Some y → ∃ x, m1 !! i = Some x ∧ x ≡ y.
-  Proof. generalize (equiv_Some_inv_r (m1 !! i) (m2 !! i) y); naive_solver. Qed.
-
-  Global Instance map_equivalence : Equivalence (≡@{A}) → Equivalence (≡@{M A}).
-  Proof.
-    split.
-    - by intros m i.
-    - by intros m1 m2 ? i.
-    - by intros m1 m2 m3 ?? i; trans (m2 !! i).
-  Qed.
-  Global Instance map_leibniz `{!LeibnizEquiv A} : LeibnizEquiv (M A).
-  Proof. intros m1 m2 Hm; apply map_eq; intros i. apply leibniz_equiv, Hm. Qed.
-
-  Global Instance lookup_proper (i : K) : Proper ((≡@{M A}) ==> (≡)) (lookup i).
-  Proof. by intros m1 m2 Hm. Qed.
-  Global Instance lookup_total_proper (i : K) `{!Inhabited A} :
-    Proper (≡@{A}) inhabitant →
-    Proper ((≡@{M A}) ==> (≡)) (.!!! i).
-  Proof.
-    intros ? m1 m2 Hm. unfold lookup_total, map_lookup_total.
-    apply from_option_proper; auto. by intros ??.
-  Qed.
-  Global Instance partial_alter_proper :
-    Proper (((≡) ==> (≡)) ==> (=) ==> (≡) ==> (≡@{M A})) partial_alter.
-  Proof.
-    by intros f1 f2 Hf i ? <- m1 m2 Hm j; destruct (decide (i = j)) as [->|];
-      rewrite ?lookup_partial_alter, ?lookup_partial_alter_ne by done;
-      try apply Hf; apply lookup_proper.
-  Qed.
-  Global Instance insert_proper (i : K) :
-    Proper ((≡) ==> (≡) ==> (≡@{M A})) (insert i).
-  Proof. by intros ???; apply partial_alter_proper; [constructor|]. Qed.
-  Global Instance singletonM_proper k : Proper ((≡) ==> (≡@{M A})) (singletonM k).
-  Proof.
-    intros ???; apply insert_proper; [done|].
-    intros ?. rewrite lookup_empty; constructor.
-  Qed.
-  Global Instance delete_proper (i : K) : Proper ((≡) ==> (≡@{M A})) (delete i).
-  Proof. by apply partial_alter_proper; [constructor|]. Qed.
-  Global Instance alter_proper :
-    Proper (((≡) ==> (≡)) ==> (=) ==> (≡) ==> (≡@{M A})) alter.
-  Proof.
-    intros ?? Hf; apply partial_alter_proper.
-    by destruct 1; constructor; apply Hf.
-  Qed.
-  Global Instance merge_proper `{Equiv B, Equiv C} :
-    Proper (((≡) ==> (≡) ==> (≡)) ==> (≡@{M A}) ==> (≡@{M B}) ==> (≡@{M C})) merge.
-  Proof.
-    intros ?? Hf ?? Hm1 ?? Hm2 i. rewrite !lookup_merge.
-    destruct (Hm1 i), (Hm2 i); try apply Hf; by constructor.
-  Qed.
-  Global Instance union_with_proper :
-    Proper (((≡) ==> (≡) ==> (≡)) ==> (≡) ==> (≡) ==>(≡@{M A})) union_with.
-  Proof.
-    intros ?? Hf. apply merge_proper.
-    by do 2 destruct 1; first [apply Hf | constructor].
-  Qed.
-  Global Instance intersection_with_proper :
-    Proper (((≡) ==> (≡) ==> (≡)) ==> (≡) ==> (≡) ==>(≡@{M A})) intersection_with.
-  Proof.
-    intros ?? Hf. apply merge_proper.
-    by do 2 destruct 1; first [apply Hf | constructor].
-  Qed.
-  Global Instance difference_with_proper :
-    Proper (((≡) ==> (≡) ==> (≡)) ==> (≡) ==> (≡) ==>(≡@{M A})) difference_with.
-  Proof.
-    intros ?? Hf. apply merge_proper.
-    by do 2 destruct 1; first [apply Hf | constructor].
-  Qed.
-  Global Instance union_proper : Proper ((≡) ==> (≡) ==>(≡@{M A})) union.
-  Proof. apply union_with_proper; solve_proper. Qed.
-  Global Instance intersection_proper : Proper ((≡) ==> (≡) ==>(≡@{M A})) intersection.
-  Proof. apply intersection_with_proper; solve_proper. Qed.
-  Global Instance difference_proper : Proper ((≡) ==> (≡) ==>(≡@{M A})) difference.
-  Proof. apply difference_with_proper. constructor. Qed.
-
-  Global Instance map_zip_with_proper `{Equiv B, Equiv C} :
-    Proper (((≡) ==> (≡) ==> (≡)) ==> (≡@{M A}) ==> (≡@{M B}) ==> (≡@{M C}))
-      map_zip_with.
-  Proof.
-    intros f1 f2 Hf. apply merge_proper.
-    destruct 1; destruct 1; repeat f_equiv; constructor || by apply Hf.
-  Qed.
-
-  Global Instance map_disjoint_proper :
-    Proper ((≡@{M A}) ==> (≡@{M A}) ==> iff) map_disjoint.
-  Proof.
-    intros m1 m1' Hm1 m2 m2' Hm2; split;
-      intros Hm i; specialize (Hm i); by destruct (Hm1 i), (Hm2 i).
-  Qed.
-  Global Instance map_fmap_proper `{Equiv B} :
-    Proper (((≡) ==> (≡)) ==> (≡@{M A}) ==> (≡@{M B})) fmap.
-  Proof.
-    intros f f' Hf m m' ? k; rewrite !lookup_fmap. by apply option_fmap_proper.
-  Qed.
-  Global Instance map_omap_proper `{Equiv B} :
-    Proper (((≡) ==> (≡)) ==> (≡@{M A}) ==> (≡@{M B})) omap.
-  Proof.
-    intros f f' ? m m' ? k; rewrite !lookup_omap. by apply option_bind_proper.
-  Qed.
-End setoid.
-
 (** ** General properties *)
 Lemma map_eq_iff {A} (m1 m2 : M A) : m1 = m2 ↔ ∀ i, m1 !! i = m2 !! i.
 Proof. split; [by intros ->|]. apply map_eq. Qed.
@@ -685,14 +567,6 @@ Proof.
   - rewrite lookup_singleton in Heq. naive_solver.
   - rewrite lookup_singleton_ne in Heq by done. naive_solver.
 Qed.
-Global Instance map_singleton_equiv_inj `{Equiv A} :
-  Inj2 (=) (≡) (≡) (singletonM (M:=M A)).
-Proof.
-  intros i1 x1 i2 x2 Heq. specialize (Heq i1).
-  rewrite lookup_singleton in Heq. destruct (decide (i1 = i2)) as [->|].
-  - rewrite lookup_singleton in Heq. apply (inj _) in Heq. naive_solver.
-  - rewrite lookup_singleton_ne in Heq by done. inversion Heq.
-Qed.
 
 Lemma map_non_empty_singleton {A} i (x : A) : {[i := x]} ≠ (∅ : M A).
 Proof.
@@ -731,12 +605,6 @@ Global Instance map_fmap_inj {A B} (f : A → B) :
 Proof.
   intros ? m1 m2 Hm. apply map_eq; intros i.
   apply (inj (fmap (M:=option) f)). by rewrite <-!lookup_fmap, Hm.
-Qed.
-Global Instance map_fmap_equiv_inj `{Equiv A, Equiv B} (f : A → B) :
-  Inj (≡) (≡) f → Inj (≡@{M A}) (≡@{M B}) (fmap f).
-Proof.
-  intros ? m1 m2 Hm i. apply (inj (fmap (M:=option) f)).
-  rewrite <-!lookup_fmap. by apply lookup_proper.
 Qed.
 
 Lemma lookup_fmap_Some {A B} (f : A → B) (m : M A) i y :
@@ -838,12 +706,6 @@ Proof. apply map_eq; intros i; by rewrite lookup_fmap, option_fmap_id. Qed.
 Lemma map_fmap_compose {A B C} (f : A → B) (g : B → C) (m : M A) :
   g ∘ f <$> m = g <$> (f <$> m).
 Proof. apply map_eq; intros i; by rewrite !lookup_fmap,option_fmap_compose. Qed.
-Lemma map_fmap_equiv_ext {A} `{Equiv B} (f1 f2 : A → B) (m : M A) :
-  (∀ i x, m !! i = Some x → f1 x ≡ f2 x) → f1 <$> m ≡ f2 <$> m.
-Proof.
-  intros Hi i; rewrite !lookup_fmap.
-  destruct (m !! i) eqn:?; constructor; eauto.
-Qed.
 Lemma map_fmap_ext {A B} (f1 f2 : A → B) (m : M A) :
   (∀ i x, m !! i = Some x → f1 x = f2 x) → f1 <$> m = f2 <$> m.
 Proof.
@@ -2619,6 +2481,148 @@ Proof.
   rewrite lookup_insert_Some, !lookup_difference_Some, lookup_delete_None.
   destruct (decide (i = j)); naive_solver.
 Qed.
+
+(** ** Setoids *)
+Section setoid.
+  Context `{Equiv A}.
+
+  Lemma map_equiv_iff (m1 m2 : M A) : m1 ≡ m2 ↔ ∀ i, m1 !! i ≡ m2 !! i.
+  Proof. done. Qed.
+  Lemma map_equiv_empty (m : M A) : m ≡ ∅ ↔ m = ∅.
+  Proof.
+    split; [intros Hm; apply map_eq; intros i|intros ->].
+    - generalize (Hm i). by rewrite lookup_empty, equiv_None.
+    - intros ?. rewrite lookup_empty; constructor.
+  Qed.
+  Lemma map_equiv_lookup_l (m1 m2 : M A) i x :
+    m1 ≡ m2 → m1 !! i = Some x → ∃ y, m2 !! i = Some y ∧ x ≡ y.
+  Proof. intros Hm Hi. destruct (Hm i); naive_solver. Qed.
+  Lemma map_equiv_lookup_r (m1 m2 : M A) i y :
+    m1 ≡ m2 → m2 !! i = Some y → ∃ x, m1 !! i = Some x ∧ x ≡ y.
+  Proof. intros Hm Hi. destruct (Hm i); naive_solver. Qed.
+
+  Global Instance map_equivalence : Equivalence (≡@{A}) → Equivalence (≡@{M A}).
+  Proof.
+    split.
+    - by intros m i.
+    - by intros m1 m2 ? i.
+    - by intros m1 m2 m3 ?? i; trans (m2 !! i).
+  Qed.
+  Global Instance map_leibniz `{!LeibnizEquiv A} : LeibnizEquiv (M A).
+  Proof. intros m1 m2 Hm; apply map_eq; intros i. apply leibniz_equiv, Hm. Qed.
+
+  Global Instance lookup_proper (i : K) : Proper ((≡@{M A}) ==> (≡)) (lookup i).
+  Proof. by intros m1 m2 Hm. Qed.
+  Global Instance lookup_total_proper (i : K) `{!Inhabited A} :
+    Proper (≡@{A}) inhabitant →
+    Proper ((≡@{M A}) ==> (≡)) (.!!! i).
+  Proof.
+    intros ? m1 m2 Hm. unfold lookup_total, map_lookup_total.
+    apply from_option_proper; auto. by intros ??.
+  Qed.
+  Global Instance partial_alter_proper :
+    Proper (((≡) ==> (≡)) ==> (=) ==> (≡) ==> (≡@{M A})) partial_alter.
+  Proof.
+    by intros f1 f2 Hf i ? <- m1 m2 Hm j; destruct (decide (i = j)) as [->|];
+      rewrite ?lookup_partial_alter, ?lookup_partial_alter_ne by done;
+      try apply Hf; apply lookup_proper.
+  Qed.
+  Global Instance insert_proper (i : K) :
+    Proper ((≡) ==> (≡) ==> (≡@{M A})) (insert i).
+  Proof. by intros ???; apply partial_alter_proper; [constructor|]. Qed.
+  Global Instance singletonM_proper k : Proper ((≡) ==> (≡@{M A})) (singletonM k).
+  Proof.
+    intros ???; apply insert_proper; [done|].
+    intros ?. rewrite lookup_empty; constructor.
+  Qed.
+  Global Instance delete_proper (i : K) : Proper ((≡) ==> (≡@{M A})) (delete i).
+  Proof. by apply partial_alter_proper; [constructor|]. Qed.
+  Global Instance alter_proper :
+    Proper (((≡) ==> (≡)) ==> (=) ==> (≡) ==> (≡@{M A})) alter.
+  Proof.
+    intros ?? Hf; apply partial_alter_proper.
+    by destruct 1; constructor; apply Hf.
+  Qed.
+  Global Instance merge_proper `{Equiv B, Equiv C} :
+    Proper (((≡) ==> (≡) ==> (≡)) ==> (≡@{M A}) ==> (≡@{M B}) ==> (≡@{M C})) merge.
+  Proof.
+    intros ?? Hf ?? Hm1 ?? Hm2 i. rewrite !lookup_merge.
+    destruct (Hm1 i), (Hm2 i); try apply Hf; by constructor.
+  Qed.
+
+  Global Instance union_with_proper :
+    Proper (((≡) ==> (≡) ==> (≡)) ==> (≡) ==> (≡) ==>(≡@{M A})) union_with.
+  Proof.
+    intros ?? Hf. apply merge_proper.
+    by do 2 destruct 1; first [apply Hf | constructor].
+  Qed.
+  Global Instance intersection_with_proper :
+    Proper (((≡) ==> (≡) ==> (≡)) ==> (≡) ==> (≡) ==>(≡@{M A})) intersection_with.
+  Proof.
+    intros ?? Hf. apply merge_proper.
+    by do 2 destruct 1; first [apply Hf | constructor].
+  Qed.
+  Global Instance difference_with_proper :
+    Proper (((≡) ==> (≡) ==> (≡)) ==> (≡) ==> (≡) ==>(≡@{M A})) difference_with.
+  Proof.
+    intros ?? Hf. apply merge_proper.
+    by do 2 destruct 1; first [apply Hf | constructor].
+  Qed.
+  Global Instance union_proper : Proper ((≡) ==> (≡) ==>(≡@{M A})) union.
+  Proof. apply union_with_proper; solve_proper. Qed.
+  Global Instance intersection_proper : Proper ((≡) ==> (≡) ==>(≡@{M A})) intersection.
+  Proof. apply intersection_with_proper; solve_proper. Qed.
+  Global Instance difference_proper : Proper ((≡) ==> (≡) ==>(≡@{M A})) difference.
+  Proof. apply difference_with_proper. constructor. Qed.
+
+  Global Instance map_zip_with_proper `{Equiv B, Equiv C} :
+    Proper (((≡) ==> (≡) ==> (≡)) ==> (≡@{M A}) ==> (≡@{M B}) ==> (≡@{M C}))
+      map_zip_with.
+  Proof.
+    intros f1 f2 Hf. apply merge_proper.
+    destruct 1; destruct 1; repeat f_equiv; constructor || by apply Hf.
+  Qed.
+
+  Global Instance map_disjoint_proper :
+    Proper ((≡@{M A}) ==> (≡@{M A}) ==> iff) map_disjoint.
+  Proof.
+    intros m1 m1' Hm1 m2 m2' Hm2; split;
+      intros Hm i; specialize (Hm i); by destruct (Hm1 i), (Hm2 i).
+  Qed.
+  Global Instance map_fmap_proper `{Equiv B} :
+    Proper (((≡) ==> (≡)) ==> (≡@{M A}) ==> (≡@{M B})) fmap.
+  Proof.
+    intros f f' Hf m m' ? k; rewrite !lookup_fmap. by apply option_fmap_proper.
+  Qed.
+  Global Instance map_omap_proper `{Equiv B} :
+    Proper (((≡) ==> (≡)) ==> (≡@{M A}) ==> (≡@{M B})) omap.
+  Proof.
+    intros f f' ? m m' ? k; rewrite !lookup_omap. by apply option_bind_proper.
+  Qed.
+
+  Global Instance map_singleton_equiv_inj :
+    Inj2 (=) (≡) (≡) (singletonM (M:=M A)).
+  Proof.
+    intros i1 x1 i2 x2 Heq. specialize (Heq i1).
+    rewrite lookup_singleton in Heq. destruct (decide (i1 = i2)) as [->|].
+    - rewrite lookup_singleton in Heq. apply (inj _) in Heq. naive_solver.
+    - rewrite lookup_singleton_ne in Heq by done. inversion Heq.
+  Qed.
+
+  Global Instance map_fmap_equiv_inj `{Equiv B} (f : A → B) :
+    Inj (≡) (≡) f → Inj (≡@{M A}) (≡@{M B}) (fmap f).
+  Proof.
+    intros ? m1 m2 Hm i. apply (inj (fmap (M:=option) f)).
+    rewrite <-!lookup_fmap. by apply Hm.
+  Qed.
+
+  Lemma map_fmap_equiv_ext `{Equiv B} (f1 f2 : A → B) (m : M A) :
+    (∀ i x, m !! i = Some x → f1 x ≡ f2 x) → f1 <$> m ≡ f2 <$> m.
+  Proof.
+    intros Hi i; rewrite !lookup_fmap.
+    destruct (m !! i) eqn:?; constructor; eauto.
+  Qed.
+End setoid.
 End theorems.
 
 (** ** The seq operation *)

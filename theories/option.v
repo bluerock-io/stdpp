@@ -321,6 +321,19 @@ Section union_intersection_difference.
   Proof. by intros ? [?|] [?|]; compute; rewrite 1?(comm f). Qed.
   Global Instance difference_with_right_id : RightId (=) None (difference_with f).
   Proof. by intros [?|]. Qed.
+
+  Global Instance union_with_proper `{Equiv A} :
+    Proper (((≡) ==> (≡) ==> (≡)) ==> (≡@{option A}) ==> (≡) ==> (≡)) union_with.
+  Proof. intros ?? Hf; do 2 destruct 1; try constructor; by try apply Hf. Qed.
+  Global Instance intersection_with_proper `{Equiv A} :
+    Proper (((≡) ==> (≡) ==> (≡)) ==> (≡@{option A}) ==> (≡) ==> (≡)) intersection_with.
+  Proof. intros ?? Hf; do 2 destruct 1; try constructor; by try apply Hf. Qed.
+  Global Instance difference_with_proper `{Equiv A} :
+    Proper (((≡) ==> (≡) ==> (≡)) ==> (≡@{option A}) ==> (≡) ==> (≡)) difference_with.
+  Proof. intros ?? Hf; do 2 destruct 1; try constructor; by try apply Hf. Qed.
+  Global Instance union_proper `{Equiv A} :
+    Proper ((≡@{option A}) ==> (≡) ==> (≡)) union.
+  Proof. apply union_with_proper. by constructor. Qed.
 End union_intersection_difference.
 
 (** * Tactics *)

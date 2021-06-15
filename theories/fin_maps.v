@@ -1354,17 +1354,26 @@ Section map_filter_lookup.
   Context {A} (P : K * A → Prop) `{!∀ x, Decision (P x)}.
   Implicit Types m : M A.
 
+  Lemma map_filter_lookup m i :
+    filter P m !! i = x ← m !! i; guard (P (i,x)); Some x.
+  Proof.
+    revert m i. apply (map_fold_ind (λ m1 m2,
+      ∀ i, m1 !! i = x ← m2 !! i; guard (P (i,x)); Some x)); intros i.
+    { by rewrite lookup_empty. }
+    intros y m m' Hm IH j. case (decide (j = i))as [->|?].
+    - case_decide.
+      + rewrite !lookup_insert. simpl. by rewrite option_guard_True.
+      + rewrite lookup_insert. simpl. by rewrite option_guard_False, IH, Hm.
+    - case_decide.
+      + by rewrite !lookup_insert_ne by done.
+      + by rewrite !lookup_insert_ne.
+  Qed.
+
   Lemma map_filter_lookup_Some m i x :
     filter P m !! i = Some x ↔ m !! i = Some x ∧ P (i, x).
   Proof.
-    revert m i x. apply (map_fold_ind (λ m1 m2,
-      ∀ i x, m1 !! i = Some x ↔ m2 !! i = Some x ∧ P _)); intros i x.
-    - rewrite lookup_empty. naive_solver.
-    - intros m m' Hm Eq j y. case_decide; case (decide (j = i))as [->|?].
-      + rewrite 2!lookup_insert. naive_solver.
-      + rewrite !lookup_insert_ne by done. by apply Eq.
-      + rewrite Eq, Hm, lookup_insert. naive_solver.
-      + by rewrite lookup_insert_ne.
+    rewrite map_filter_lookup.
+    destruct (m !! i); simpl; repeat case_option_guard; naive_solver.
   Qed.
   Lemma map_filter_lookup_Some_1_1 m i x :
     filter P m !! i = Some x → m !! i = Some x.

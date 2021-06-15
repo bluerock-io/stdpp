@@ -807,6 +807,18 @@ Lemma map_fmap_singleton {A B} (f : A → B) i x :
 Proof.
   by unfold singletonM, map_singleton; rewrite fmap_insert, fmap_empty.
 Qed.
+Lemma map_fmap_singleton_inv {A B} (f : A → B) (m : M A) i y :
+  f <$> m = {[i := y]} → ∃ x, y = f x ∧ m = {[ i := x ]}.
+Proof.
+  intros Hm. pose proof (f_equal (.!! i) Hm) as Hmi.
+  rewrite lookup_fmap, lookup_singleton, fmap_Some in Hmi.
+  destruct Hmi as (x&?&->). exists x. split; [done|].
+  apply map_eq; intros j. destruct (decide (i = j)) as[->|?].
+  - by rewrite lookup_singleton.
+  - rewrite lookup_singleton_ne by done.
+    apply (fmap_None f). by rewrite <-lookup_fmap, Hm, lookup_singleton_ne.
+Qed.
+
 Lemma omap_singleton {A B} (f : A → option B) i x :
   omap f {[ i := x ]} =@{M B} match f x with Some y => {[ i:=y ]} | None => ∅ end.
 Proof.

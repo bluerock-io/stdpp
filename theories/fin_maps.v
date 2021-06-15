@@ -2491,7 +2491,7 @@ Section setoid.
   Lemma map_equiv_empty (m : M A) : m ≡ ∅ ↔ m = ∅.
   Proof.
     split; [intros Hm; apply map_eq; intros i|intros ->].
-    - generalize (Hm i). by rewrite lookup_empty, equiv_None.
+    - generalize (Hm i). by rewrite lookup_empty, None_equiv_eq.
     - intros ?. rewrite lookup_empty; constructor.
   Qed.
   Lemma map_equiv_lookup_l (m1 m2 : M A) i x :

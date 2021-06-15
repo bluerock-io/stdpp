@@ -129,19 +129,10 @@ Section setoids.
   Global Instance Some_equiv_inj : Inj (≡) (≡@{option A}) Some.
   Proof. by inversion_clear 1. Qed.
 
-  Lemma equiv_None mx : mx ≡ None ↔ mx = None.
+  Lemma None_equiv_eq mx : mx ≡ None ↔ mx = None.
   Proof. split; [by inversion_clear 1|intros ->; constructor]. Qed.
-  Lemma equiv_Some_inv_l mx my x :
-    mx ≡ my → mx = Some x → ∃ y, my = Some y ∧ x ≡ y.
-  Proof. destruct 1; naive_solver. Qed.
-  Lemma equiv_Some_inv_r mx my y :
-    mx ≡ my → my = Some y → ∃ x, mx = Some x ∧ x ≡ y.
-  Proof. destruct 1; naive_solver. Qed.
-  Lemma equiv_Some_inv_l' my x : Some x ≡ my → ∃ x', Some x' = my ∧ x ≡ x'.
-  Proof. intros ?%(equiv_Some_inv_l _ _ x); naive_solver. Qed.
-  Lemma equiv_Some_inv_r' `{!Equivalence (≡@{A})} mx y :
-    mx ≡ Some y → ∃ y', mx = Some y' ∧ y ≡ y'.
-  Proof. intros ?%(equiv_Some_inv_r _ _ y); naive_solver. Qed.
+  Lemma Some_equiv_eq mx y : mx ≡ Some y ↔ ∃ y', mx = Some y' ∧ y' ≡ y.
+  Proof. split; [inversion 1; naive_solver|naive_solver (by constructor)]. Qed.
 
   Global Instance is_Some_proper : Proper ((≡@{option A}) ==> iff) is_Some.
   Proof. inversion_clear 1; split; eauto. Qed.
@@ -199,8 +190,8 @@ Proof.
   destruct mx; simpl; split.
   - intros ?%(inj Some). eauto.
   - intros (? & ->%(inj Some) & ?). constructor. done.
-  - intros ?%symmetry%equiv_None. done.
-  - intros (? & ? & ?). done.
+  - intros [=]%symmetry%None_equiv_eq.
+  - intros (? & [=] & ?).
 Qed.
 Lemma fmap_Some_equiv_1 {A B} `{Equiv B} `{!Equivalence (≡@{B})} (f : A → B) mx y :
   f <$> mx ≡ Some y → ∃ x, mx = Some x ∧ y ≡ f x.

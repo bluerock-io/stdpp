@@ -807,6 +807,18 @@ Lemma map_fmap_singleton {A B} (f : A → B) i x :
 Proof.
   by unfold singletonM, map_singleton; rewrite fmap_insert, fmap_empty.
 Qed.
+Lemma map_fmap_singleton_inv {A B} (f : A → B) (m : M A) i y :
+  f <$> m = {[i := y]} → ∃ x, y = f x ∧ m = {[ i := x ]}.
+Proof.
+  intros Hm. pose proof (f_equal (.!! i) Hm) as Hmi.
+  rewrite lookup_fmap, lookup_singleton, fmap_Some in Hmi.
+  destruct Hmi as (x&?&->). exists x. split; [done|].
+  apply map_eq; intros j. destruct (decide (i = j)) as[->|?].
+  - by rewrite lookup_singleton.
+  - rewrite lookup_singleton_ne by done.
+    apply (fmap_None f). by rewrite <-lookup_fmap, Hm, lookup_singleton_ne.
+Qed.
+
 Lemma omap_singleton {A B} (f : A → option B) i x :
   omap f {[ i := x ]} =@{M B} match f x with Some y => {[ i:=y ]} | None => ∅ end.
 Proof.
@@ -1342,17 +1354,26 @@ Section map_filter_lookup.
   Context {A} (P : K * A → Prop) `{!∀ x, Decision (P x)}.
   Implicit Types m : M A.
 
+  Lemma map_filter_lookup m i :
+    filter P m !! i = x ← m !! i; guard (P (i,x)); Some x.
+  Proof.
+    revert m i. apply (map_fold_ind (λ m1 m2,
+      ∀ i, m1 !! i = x ← m2 !! i; guard (P (i,x)); Some x)); intros i.
+    { by rewrite lookup_empty. }
+    intros y m m' Hm IH j. case (decide (j = i))as [->|?].
+    - case_decide.
+      + rewrite !lookup_insert. simpl. by rewrite option_guard_True.
+      + rewrite lookup_insert. simpl. by rewrite option_guard_False, IH, Hm.
+    - case_decide.
+      + by rewrite !lookup_insert_ne by done.
+      + by rewrite !lookup_insert_ne.
+  Qed.
+
   Lemma map_filter_lookup_Some m i x :
     filter P m !! i = Some x ↔ m !! i = Some x ∧ P (i, x).
   Proof.
-    revert m i x. apply (map_fold_ind (λ m1 m2,
-      ∀ i x, m1 !! i = Some x ↔ m2 !! i = Some x ∧ P _)); intros i x.
-    - rewrite lookup_empty. naive_solver.
-    - intros m m' Hm Eq j y. case_decide; case (decide (j = i))as [->|?].
-      + rewrite 2!lookup_insert. naive_solver.
-      + rewrite !lookup_insert_ne by done. by apply Eq.
-      + rewrite Eq, Hm, lookup_insert. naive_solver.
-      + by rewrite lookup_insert_ne.
+    rewrite map_filter_lookup.
+    destruct (m !! i); simpl; repeat case_option_guard; naive_solver.
   Qed.
   Lemma map_filter_lookup_Some_1_1 m i x :
     filter P m !! i = Some x → m !! i = Some x.
@@ -1701,6 +1722,18 @@ Section more_merge.
   Qed.
 End more_merge.
 
+Lemma merge_empty_l {A B C} (f : option A → option B → option C) (m2 : M B) :
+  merge f ∅ m2 = omap (f None ∘ Some) m2.
+Proof.
+  apply map_eq; intros i. rewrite lookup_merge, lookup_omap, lookup_empty.
+  by destruct (m2 !! i).
+Qed.
+Lemma merge_empty_r {A B C} (f : option A → option B → option C) (m1 : M A) :
+  merge f m1 ∅ = omap (flip f None ∘ Some) m1.
+Proof.
+  apply map_eq; intros i. rewrite lookup_merge, lookup_omap, lookup_empty.
+  by destruct (m1 !! i).
+Qed.
 Lemma merge_diag {A C} (f : option A → option A → option C) (m : M A) :
   merge f m m = omap (λ x, f (Some x) (Some x)) m.
 Proof.

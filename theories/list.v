@@ -3456,6 +3456,19 @@ Section setoid.
   Proof.
     induction n; destruct 2; simpl; repeat (constructor || f_equiv); auto.
   Qed.
+
+  Lemma nil_equiv_eq mx : mx ≡ [] ↔ mx = [].
+  Proof. split; [by inversion_clear 1|intros ->; constructor]. Qed.
+  Lemma cons_equiv_eq l x k : l ≡ x :: k ↔ ∃ x' k', l = x' :: k' ∧ x' ≡ x ∧ k' ≡ k.
+  Proof. split; [inversion 1; naive_solver|naive_solver (by constructor)]. Qed.
+  Lemma list_singleton_equiv_eq l x : l ≡ [x] ↔ ∃ x', l = [x'] ∧ x' ≡ x.
+  Proof. rewrite cons_equiv_eq. setoid_rewrite nil_equiv_eq. naive_solver. Qed.
+  Lemma app_equiv_eq l k1 k2 :
+    l ≡ k1 ++ k2 ↔ ∃ k1' k2', l = k1' ++ k2' ∧ k1' ≡ k1 ∧ k2' ≡ k2.
+  Proof.
+    split; [|intros (?&?&->&?&?); by f_equiv].
+    setoid_rewrite equiv_Forall2. rewrite Forall2_app_inv_r. naive_solver.
+  Qed.
 End setoid.
 
 (** * Properties of the [find] function *)

@@ -169,9 +169,6 @@ Section general.
     (∀ x y, R x y → R' (f x) (f y)) → nsteps R n x y → nsteps R' n (f x) (f y).
   Proof. induction 2; econstructor; eauto. Qed.
 
-  Lemma nsteps_rtc n x y : nsteps R n x y → rtc R x y.
-  Proof. induction 1; eauto. Qed.
-
   (** ** Results about [bsteps] *)
   Lemma bsteps_once n x y : R x y → bsteps R (S n) x y.
   Proof. eauto. Qed.
@@ -213,9 +210,6 @@ Section general.
   Lemma bsteps_congruence {B} (f : A → B) (R' : relation B) n x y :
     (∀ x y, R x y → R' (f x) (f y)) → bsteps R n x y → bsteps R' n (f x) (f y).
   Proof. induction 2; econstructor; eauto. Qed.
-
-  Lemma bsteps_rtc n x y : bsteps R n x y → rtc R x y.
-  Proof. induction 1; eauto. Qed.
 
   (** ** Results about the transitive closure [tc] *)
   Lemma tc_transitive x y z : tc R x y → tc R y z → tc R x z.
@@ -271,18 +265,27 @@ Section general.
 
   Lemma rtc_tc x y : rtc R x y ↔ x = y ∨ tc R x y.
   Proof.
-    split.
-    - induction 1; naive_solver.
-    - naive_solver eauto using tc_rtc.
+    split; [|naive_solver eauto using tc_rtc].
+    induction 1; naive_solver.
   Qed.
+
   Lemma rtc_nsteps x y : rtc R x y ↔ ∃ n, nsteps R n x y.
   Proof.
     split.
-    - induction 1; [exists 0; constructor|]. naive_solver.
-    - intros [n Hstep]. induction Hstep; eauto.
+    - induction 1; naive_solver.
+    - intros [n Hsteps]. induction Hsteps; naive_solver.
   Qed.
+  Lemma rtc_nsteps_1 x y : rtc R x y → ∃ n, nsteps R n x y.
+  Proof. rewrite rtc_nsteps. naive_solver. Qed.
+  Lemma rtc_nsteps_2 n x y : nsteps R n x y → rtc R x y.
+  Proof. rewrite rtc_nsteps. naive_solver. Qed.
+
   Lemma rtc_bsteps x y : rtc R x y ↔ ∃ n, bsteps R n x y.
   Proof. rewrite rtc_nsteps. setoid_rewrite bsteps_nsteps. naive_solver. Qed.
+  Lemma rtc_bsteps_1 x y : rtc R x y → ∃ n, bsteps R n x y.
+  Proof. rewrite rtc_bsteps. naive_solver. Qed.
+  Lemma rtc_bsteps_2 n x y : bsteps R n x y → rtc R x y.
+  Proof. rewrite rtc_bsteps. naive_solver. Qed.
 
   Lemma nsteps_list n x y :
     nsteps R n x y ↔ ∃ l,

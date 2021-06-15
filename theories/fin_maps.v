@@ -2600,6 +2600,14 @@ Section setoid.
     intros f f' ? m m' ? k; rewrite !lookup_omap. by apply option_bind_proper.
   Qed.
 
+  Global Instance map_filter_proper (P : K * A → Prop) `{!∀ kx, Decision (P kx)} :
+    (∀ k, Proper ((≡) ==> iff) (uncurry P k)) →
+    Proper ((≡@{M A}) ==> (≡)) (filter P).
+  Proof.
+    intros ? m1 m2 Hm i. rewrite !map_filter_lookup.
+    destruct (Hm i); simpl; repeat case_option_guard; try constructor; naive_solver.
+  Qed.
+
   Global Instance map_singleton_equiv_inj :
     Inj2 (=) (≡) (≡) (singletonM (M:=M A)).
   Proof.

@@ -1722,6 +1722,18 @@ Section more_merge.
   Qed.
 End more_merge.
 
+Lemma merge_empty_l {A B C} (f : option A → option B → option C) (m2 : M B) :
+  merge f ∅ m2 = omap (f None ∘ Some) m2.
+Proof.
+  apply map_eq; intros i. rewrite lookup_merge, lookup_omap, lookup_empty.
+  by destruct (m2 !! i).
+Qed.
+Lemma merge_empty_r {A B C} (f : option A → option B → option C) (m1 : M A) :
+  merge f m1 ∅ = omap (flip f None ∘ Some) m1.
+Proof.
+  apply map_eq; intros i. rewrite lookup_merge, lookup_omap, lookup_empty.
+  by destruct (m1 !! i).
+Qed.
 Lemma merge_diag {A C} (f : option A → option A → option C) (m : M A) :
   merge f m m = omap (λ x, f (Some x) (Some x)) m.
 Proof.

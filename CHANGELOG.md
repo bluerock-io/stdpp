@@ -73,6 +73,13 @@ API-breaking change is listed.
     similar to `tail`.
   + Declare `tail` as `simpl nomatch`.
   + Add lemmas about `head` and `tail`.
+- Add and extend equivalences between closure operators:
+  - Add `↔` lemmas that relate `rtc`, `tc`, `nsteps`, and `bsteps`.
+  - Rename `→` lemmas `rtc_nsteps` → `rtc_nsteps_1`,
+    `nsteps_rtc` → `rtc_nsteps_2`, `rtc_bsteps` → `rtc_bsteps_1`, and
+    `bsteps_rtc` → `rtc_bsteps_2`.
+  - Add lemmas that relate `rtc`, `tc`, `nsteps`, and `bsteps` to path
+    representations as lists.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`):
@@ -90,6 +97,11 @@ s/\bmap_union_filter\b/map_filter_union_complement/g
 # mbind
 s/\boption_mbind_proper\b/option_bind_proper/g
 s/\boption_mjoin_proper\b/option_join_proper/g
+# relations
+s/\brtc_nsteps\b/rtc_nsteps_1/g
+s/\bnsteps_rtc\b/rtc_nsteps_2/g
+s/\brtc_bsteps\b/rtc_bsteps_1/g
+s/\bbsteps_rtc\b/rtc_bsteps_2/g
 ' $(find theories -name "*.v")
 ```
 

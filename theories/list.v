@@ -3469,6 +3469,27 @@ Section setoid.
     split; [|intros (?&?&->&?&?); by f_equiv].
     setoid_rewrite equiv_Forall2. rewrite Forall2_app_inv_r. naive_solver.
   Qed.
+
+  Lemma equiv_Permutation l1 l2 l3 :
+    l1 ≡ l2 → l2 ≡ₚ l3 → ∃ l2', l1 ≡ₚ l2' ∧ l2' ≡ l3.
+  Proof.
+    intros Hequiv Hperm. revert l1 Hequiv.
+    induction Hperm as [|x l2 l3 _ IH|x y l2|l2 l3 l4 _ IH1 _ IH2]; intros l1.
+    - intros ?. by exists l1.
+    - intros (x'&l2'&->&?&(l2''&?&?)%IH)%cons_equiv_eq.
+      exists (x' :: l2''). by repeat constructor.
+    - intros (y'&?&->&?&(x'&l2'&->&?&?)%cons_equiv_eq)%cons_equiv_eq.
+      exists (x' :: y' :: l2'). by repeat constructor.
+    - intros (l2'&?&(l3'&?&?)%IH2)%IH1. exists l3'. split; [by etrans|done].
+  Qed.
+
+  Lemma Permutation_equiv `{!Equivalence (≡@{A})} l1 l2 l3 :
+    l1 ≡ₚ l2 → l2 ≡ l3 → ∃ l2', l1 ≡ l2' ∧ l2' ≡ₚ l3.
+  Proof.
+    intros Hperm%symmetry Hequiv%symmetry.
+    destruct (equiv_Permutation _ _  _ Hequiv Hperm) as (l2'&?&?).
+    by exists l2'.
+  Qed.
 End setoid.
 
 (** * Properties of the [find] function *)

@@ -2408,6 +2408,13 @@ Proof.
   unfold intersection, map_intersection. rewrite lookup_intersection_with.
   destruct (m1 !! i), (m2 !! i); compute; naive_solver.
 Qed.
+Lemma map_intersection_filter {A} (m1 m2 : M A) :
+  m1 ∩ m2 = filter (λ kx, is_Some (m1 !! kx.1) ∧ is_Some (m2 !! kx.1)) (m1 ∪ m2).
+Proof.
+  apply map_eq; intros i. apply option_eq; intros x.
+  rewrite lookup_intersection_Some, map_filter_lookup_Some, lookup_union; simpl.
+  unfold is_Some. destruct (m1 !! i), (m2 !! i); naive_solver.
+Qed.
 
 (** ** Properties of the [difference_with] operation *)
 Lemma lookup_difference_with {A} (f : A → A → option A) (m1 m2 : M A) i :
@@ -2480,6 +2487,12 @@ Proof.
   intros. apply map_eq. intros j. apply option_eq. intros y.
   rewrite lookup_insert_Some, !lookup_difference_Some, lookup_delete_None.
   destruct (decide (i = j)); naive_solver.
+Qed.
+Lemma map_difference_filter {A} (m1 m2 : M A) :
+  m1 ∖ m2 = filter (λ kx, m2 !! kx.1 = None) m1.
+Proof.
+  apply map_eq; intros i. apply option_eq; intros x.
+  by rewrite lookup_difference_Some, map_filter_lookup_Some.
 Qed.
 
 (** ** Setoids *)

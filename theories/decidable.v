@@ -99,7 +99,7 @@ Lemma decide_bool_decide P {Hdec: Decision P} {X : Type} (x1 x2 : X):
   (if decide P then x1 else x2) = (if bool_decide P then x1 else x2).
 Proof. unfold bool_decide, decide. destruct Hdec; reflexivity. Qed.
 
-Tactic Notation "case_bool_decide" "as" ident (Hd) :=
+Tactic Notation "case_bool_decide" "as" ident(Hd) :=
   match goal with
   | H : context [@bool_decide ?P ?dec] |- _ =>
     destruct_decide (@bool_decide_reflect P dec) as Hd

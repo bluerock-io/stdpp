@@ -52,15 +52,30 @@ API-breaking change is listed.
   + Maps: Add lemmas `map_disjoint_filter` and `map_filter_union` analogous to
     sets.
 - Add cross split lemma `map_cross_split` for maps
-- Better setoid results for options and maps:
-  + Add instances `map_singleton_equiv_inj` and `map_fmap_equiv_inj`.
+- Setoid results for options:
   + Add instance `option_fmap_equiv_inj`.
-  + Add and generalize `Proper` instances for various operations on maps.
+  + Add `Proper` instances for `union`, `union_with`, `intersection_with`, and
+    `difference_with`.
+  + Rename instances `option_mbind_proper` → `option_bind_proper` and
+    `option_mjoin_proper` → `option_join_proper` to be consistent with similar
+    instances for sets and lists.
+  + Rename `equiv_None` → `None_equiv_eq`.
+  + Replace `equiv_Some_inv_l`, `equiv_Some_inv_r`, `equiv_Some_inv_l'`, and
+    `equiv_Some_inv_r'` by new lemma `Some_equiv_eq` that follows the pattern of
+    other `≡`-inversion lemmas: it uses a `↔` and puts the arguments of `≡` and
+    `=` in consistent order.
+- Setoid results for lists:
+  + Add `≡`-inversion lemmas `nil_equiv_eq`, `cons_equiv_eq`,
+    `list_singleton_equiv_eq`,  and `app_equiv_eq`.
+  + Add lemmas `Permutation_equiv` and `equiv_Permutation`.
+- Setoid results for maps:
+  + Add instances `map_singleton_equiv_inj` and `map_fmap_equiv_inj`.
+  + Add and generalize many `Proper` instances.
   + Add lemma `map_equiv_lookup_r`.
   + Add lemma `map_equiv_iff`.
-- Rename instances `option_mbind_proper` → `option_bind_proper` and
-  `option_mjoin_proper` → `option_join_proper` to be consistent with similar
-  instances for sets and lists.
+  + Rename `map_equiv_empty` → `map_empty_equiv_eq`.
+  + Add `≡`-inversion lemmas `insert_equiv_eq`, `delete_equiv_eq`,
+    `map_union_equiv_eq`, etc.
 - Drop `DiagNone` precondition of `lookup_merge` rule of `FinMap` interface.
   + Drop `DiagNone` class.
   + Add `merge_proper` instance.
@@ -102,6 +117,9 @@ s/\brtc_nsteps\b/rtc_nsteps_1/g
 s/\bnsteps_rtc\b/rtc_nsteps_2/g
 s/\brtc_bsteps\b/rtc_bsteps_1/g
 s/\bbsteps_rtc\b/rtc_bsteps_2/g
+# setoid
+s/\bequiv_None\b/None_equiv_eq/g
+s/\bmap_equiv_empty\b/map_empty_equiv_eq/g
 ' $(find theories -name "*.v")
 ```
 

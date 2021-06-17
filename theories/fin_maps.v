@@ -2501,12 +2501,7 @@ Section setoid.
 
   Lemma map_equiv_iff (m1 m2 : M A) : m1 ≡ m2 ↔ ∀ i, m1 !! i ≡ m2 !! i.
   Proof. done. Qed.
-  Lemma map_equiv_empty (m : M A) : m ≡ ∅ ↔ m = ∅.
-  Proof.
-    split; [intros Hm; apply map_eq; intros i|intros ->].
-    - generalize (Hm i). by rewrite lookup_empty, equiv_None.
-    - intros ?. rewrite lookup_empty; constructor.
-  Qed.
+
   Lemma map_equiv_lookup_l (m1 m2 : M A) i x :
     m1 ≡ m2 → m1 !! i = Some x → ∃ y, m2 !! i = Some y ∧ x ≡ y.
   Proof. intros Hm Hi. destruct (Hm i); naive_solver. Qed.
@@ -2613,6 +2608,14 @@ Section setoid.
     intros f f' ? m m' ? k; rewrite !lookup_omap. by apply option_bind_proper.
   Qed.
 
+  Global Instance map_filter_proper (P : K * A → Prop) `{!∀ kx, Decision (P kx)} :
+    (∀ k, Proper ((≡) ==> iff) (uncurry P k)) →
+    Proper ((≡@{M A}) ==> (≡)) (filter P).
+  Proof.
+    intros ? m1 m2 Hm i. rewrite !map_filter_lookup.
+    destruct (Hm i); simpl; repeat case_option_guard; try constructor; naive_solver.
+  Qed.
+
   Global Instance map_singleton_equiv_inj :
     Inj2 (=) (≡) (≡) (singletonM (M:=M A)).
   Proof.
@@ -2636,6 +2639,215 @@ Section setoid.
     destruct (m !! i) eqn:?; constructor; eauto.
   Qed.
 End setoid.
+
+(** The lemmas below make it possible to turn an [≡] into an [=]. *)
+Section setoid_inversion.
+  Context `{Equiv A, !Equivalence (≡@{A})}.
+  Implicit Types m : M A.
+
+  Lemma map_empty_equiv_eq m : m ≡ ∅ ↔ m = ∅.
+  Proof.
+    split; [intros Hm; apply map_eq; intros i|intros ->].
+    - generalize (Hm i). by rewrite lookup_empty, None_equiv_eq.
+    - intros ?. rewrite lookup_empty; constructor.
+  Qed.
+
+  Lemma partial_alter_equiv_eq (f : option A → option A) (m1 m2 : M A) i :
+    Proper ((≡) ==> (≡)) f →
+    (∀ x1 mx2, Some x1 ≡ f mx2 → ∃ mx2', Some x1 = f mx2' ∧ mx2' ≡ mx2) →
+    m1 ≡ partial_alter f i m2 ↔ ∃ m2', m1 = partial_alter f i m2' ∧ m2' ≡ m2.
+  Proof.
+    intros ? Hf. split; [|by intros (?&->&<-)]. intros Hm.
+    assert (∃ mx2', m1 !! i = f mx2' ∧ mx2' ≡ m2 !! i) as (mx2'&?&?).
+    { destruct (m1 !! i) as [x1|] eqn:Hix1.
+      - apply (Hf x1 (m2 !! i)). by rewrite <-Hix1, Hm, lookup_partial_alter.
+      - exists (m2 !! i). split; [|done]. apply symmetry, None_equiv_eq.
+        by rewrite <-Hix1, Hm, lookup_partial_alter. }
+    exists (partial_alter (λ _, mx2') i m1). split.
+    - apply map_eq; intros j. destruct (decide (i = j)) as [->|?].
+      + by rewrite !lookup_partial_alter.
+      + by rewrite !lookup_partial_alter_ne.
+    - intros j. destruct (decide (i = j)) as [->|?].
+      + by rewrite lookup_partial_alter.
+      + by rewrite Hm, !lookup_partial_alter_ne.
+  Qed.
+  Lemma alter_equiv_eq (f : A → A) (m1 m2 : M A) i :
+    Proper ((≡) ==> (≡)) f →
+    (∀ x1 x2, x1 ≡ f x2 → ∃ x2', x1 = f x2' ∧ x2' ≡ x2) →
+    m1 ≡ alter f i m2 ↔ ∃ m2', m1 = alter f i m2' ∧ m2' ≡ m2.
+  Proof.
+    intros ? Hf. apply (partial_alter_equiv_eq _ _ _ _ _). intros mx1 [x2|]; simpl.
+    - intros (x2'&->&?)%(inj _)%Hf. exists (Some x2'). by repeat constructor.
+    - intros ->%None_equiv_eq. by exists None.
+  Qed.
+
+  Lemma delete_equiv_eq m1 m2 i :
+    m1 ≡ delete i m2 ↔ ∃ m2', m1 = delete i m2' ∧ m2' ≡ m2.
+  Proof. apply (partial_alter_equiv_eq _ _ _ _ _). intros ?? [=]%None_equiv_eq. Qed.
+  Lemma insert_equiv_eq m1 m2 i x :
+    m1 ≡ <[i:=x]> m2 ↔ ∃ x' m2', m1 = <[i:=x']> m2' ∧ x' ≡ x ∧ m2' ≡ m2.
+  Proof.
+    split; [|by intros (?&?&->&<-&<-)]. intros Hm.
+    assert (is_Some (m1 !! i)) as [x' Hix'].
+    { rewrite Hm, lookup_insert. eauto. }
+    destruct (m2 !! i) as [y|] eqn:?.
+    - exists x', (<[i:=y]> m1). split_and!.
+      + by rewrite insert_insert, insert_id by done.
+      + apply (inj Some). by rewrite <-Hix', Hm, lookup_insert.
+      + by rewrite Hm, insert_insert, insert_id by done.
+    - exists x', (delete i m1). split_and!.
+      + by rewrite insert_delete, insert_id by done.
+      + apply (inj Some). by rewrite <-Hix', Hm, lookup_insert.
+      + by rewrite Hm, delete_insert by done.
+  Qed.
+  Lemma map_singleton_equiv_eq m i x :
+    m ≡ {[i:=x]} ↔ ∃ x', m = {[i:=x']} ∧ x' ≡ x.
+  Proof.
+    rewrite <-!insert_empty, insert_equiv_eq.
+    setoid_rewrite map_empty_equiv_eq. naive_solver.
+  Qed.
+
+  Lemma map_filter_equiv_eq (P : K * A → Prop) `{!∀ kx, Decision (P kx)} (m1 m2 : M A):
+    (∀ k, Proper ((≡) ==> iff) (uncurry P k)) →
+    m1 ≡ filter P m2 ↔ ∃ m2', m1 = filter P m2' ∧ m2' ≡ m2.
+  Proof.
+    intros HP. split; [|by intros (?&->&->)].
+    revert m1. induction m2 as [|i x m2 ? IH] using map_ind; intros m1 Hm.
+    { rewrite map_filter_empty in Hm. exists ∅.
+      by rewrite map_filter_empty, <-map_empty_equiv_eq. }
+    destruct (decide (P (i,x))).
+    - rewrite map_filter_insert in Hm by done.
+      apply insert_equiv_eq in Hm as (x'&m2'&->&?&(m2''&->&?)%IH).
+      exists (<[i:=x']> m2''). split; [|by f_equiv].
+      by rewrite map_filter_insert by (by eapply HP).
+    - rewrite map_filter_insert_not' in Hm by naive_solver.
+      apply IH in Hm as (m2'&->&Hm2). exists (<[i:=x]> m2'). split; [|by f_equiv].
+      assert (m2' !! i = None).
+      { by rewrite <-None_equiv_eq, Hm2, None_equiv_eq. }
+      by rewrite map_filter_insert_not' by naive_solver.
+  Qed.
+End setoid_inversion.
+
+Lemma map_omap_equiv_eq `{Equiv A, !Equivalence (≡@{A}),
+      Equiv B, !Equivalence (≡@{B})}
+    (f : A → option B) (m1 : M B) (m2 : M A) :
+  Proper ((≡) ==> (≡)) f →
+  (∀ y x, Some y ≡ f x → ∃ x', Some y = f x' ∧ x' ≡ x) →
+  m1 ≡ omap f m2 ↔ ∃ m2', m1 = omap f m2' ∧ m2' ≡ m2.
+Proof.
+  intros ? Hf. split; [|by intros (?&->&->)].
+  revert m1. induction m2 as [|i x m2 ? IH] using map_ind; intros m1 Hm.
+  { rewrite omap_empty, map_empty_equiv_eq in Hm. subst m1.
+    exists ∅. by rewrite omap_empty. }
+  rewrite omap_insert in Hm. destruct (f x) as [y|] eqn:Hfx.
+  - apply insert_equiv_eq in Hm as (y'&m1'&->&Hy&(m2'&->&?)%IH).
+    destruct (Hf y' x) as (x'&Hfx'&?).
+    { by rewrite Hfx, Hy. }
+    exists (<[i:=x']> m2'). split; [|by f_equiv].
+    by rewrite omap_insert, <-Hfx'.
+  - apply delete_equiv_eq in Hm as (m1'&->&(m2'&->&?)%IH).
+    exists (<[i:=x]> m2'). split; [|by f_equiv]. by rewrite omap_insert, Hfx.
+Qed.
+Lemma map_fmap_equiv_eq `{Equiv A, !Equivalence (≡@{A}),
+      Equiv B, !Equivalence (≡@{B})} (f : A → B) (m1 : M B) (m2 : M A) :
+  Proper ((≡) ==> (≡)) f →
+  (∀ y x, y ≡ f x → ∃ x', y = f x' ∧ x' ≡ x) →
+  m1 ≡ f <$> m2 ↔ ∃ m2', m1 = f <$> m2' ∧ m2' ≡ m2.
+Proof.
+  intros ? Hf. rewrite map_fmap_alt; setoid_rewrite map_fmap_alt.
+  apply map_omap_equiv_eq; [solve_proper|].
+  intros ?? (?&->&?)%(inj _)%Hf; eauto.
+Qed.
+
+Lemma merge_equiv_eq `{Equiv A, !Equivalence (≡@{A}),
+    Equiv B, !Equivalence (≡@{B}), Equiv C, !Equivalence (≡@{C})}
+    (f : option A → option B → option C) (m1 : M C) (m2a : M A) (m2b : M B) :
+  Proper ((≡) ==> (≡) ==> (≡)) f →
+  (∀ y mx1 mx2,
+    Some y ≡ f mx1 mx2 →
+    ∃ mx1' mx2', Some y = f mx1' mx2' ∧ mx1' ≡ mx1 ∧ mx2' ≡ mx2) →
+  m1 ≡ merge f m2a m2b ↔
+    ∃ m2a' m2b', m1 = merge f m2a' m2b' ∧ m2a' ≡ m2a ∧ m2b' ≡ m2b.
+Proof.
+  intros ? Hf. split; [|by intros (?&?&->&->&->)].
+  revert m1. induction m2a as [|i x m2a ? IH] using map_ind; intros m1.
+  { assert (∀ y x,
+      Some y ≡ f None (Some x) → ∃ x', Some y = f None (Some x') ∧ x' ≡ x).
+    { intros ?? (?&?&?&->%None_equiv_eq&(?&->&?)%Some_equiv_eq)%Hf; eauto. }
+    rewrite merge_empty_l, map_omap_equiv_eq by (done || solve_proper).
+    intros (m2'&->&?). exists ∅, m2'. by rewrite merge_empty_l. }
+  unfold insert at 1, map_insert at 1.
+  rewrite <-(partial_alter_merge_l _ (λ _, f (Some x) (m2b !! i))) by done.
+  destruct (f (Some x) (m2b !! i)) as [y|] eqn:Hfi.
+  - intros (y'&m'&->&Hy&(m2a'&m2b'&->&Hm2a&Hm2b)%IH)%insert_equiv_eq.
+    destruct (Hf y' (Some x) (m2b !! i)) as (mx1&mx2&?&(x'&->&?)%Some_equiv_eq&?).
+    { by rewrite Hy, Hfi. }
+    exists (<[i:=x']> m2a'), (partial_alter (λ _, mx2) i m2b').
+    split_and!; [by apply partial_alter_merge|by f_equiv|].
+    intros j. destruct (decide (i = j)) as [->|?].
+    + by rewrite lookup_partial_alter.
+    + by rewrite Hm2b, lookup_partial_alter_ne.
+  - intros (m'&->&(m2a'&m2b'&->&Hm2a&Hm2b)%IH)%delete_equiv_eq.
+    exists (<[i:=x]> m2a'), m2b'. split_and!; [|by f_equiv|done].
+    apply partial_alter_merge_l, symmetry, None_equiv_eq; simpl.
+    by rewrite Hm2b, Hfi.
+Qed.
+
+Lemma map_union_with_equiv_eq `{Equiv A, !Equivalence (≡@{A})}
+    (f : A → A → option A) (m1 m2a m2b : M A) :
+  Proper ((≡) ==> (≡) ==> (≡)) f →
+  (∀ y x1 x2,
+    Some y ≡ f x1 x2 → ∃ x1' x2', Some y = f x1' x2' ∧ x1' ≡ x1 ∧ x2' ≡ x2) →
+  m1 ≡ union_with f m2a m2b ↔
+    ∃ m2a' m2b', m1 = union_with f m2a' m2b' ∧ m2a' ≡ m2a ∧ m2b' ≡ m2b.
+Proof.
+  intros ? Hf. apply (merge_equiv_eq _ _ _ _ _).
+  intros ? [x1|] [x2|]; simpl;
+    first [intros (?&?&?&?&?)%Hf|intros (?&?&?)%Some_equiv_eq|intros ?%None_equiv_eq];
+    by repeat econstructor.
+Qed.
+Lemma map_intersection_with_equiv_eq `{Equiv A, !Equivalence (≡@{A})}
+    (f : A → A → option A) (m1 m2a m2b : M A) :
+  Proper ((≡) ==> (≡) ==> (≡)) f →
+  (∀ y x1 x2,
+    Some y ≡ f x1 x2 → ∃ x1' x2', Some y = f x1' x2' ∧ x1' ≡ x1 ∧ x2' ≡ x2) →
+  m1 ≡ intersection_with f m2a m2b ↔
+    ∃ m2a' m2b', m1 = intersection_with f m2a' m2b' ∧ m2a' ≡ m2a ∧ m2b' ≡ m2b.
+Proof.
+  intros ? Hf. apply (merge_equiv_eq _ _ _ _ _).
+  intros ? [x1|] [x2|]; simpl;
+    first [intros (?&?&?&?&?)%Hf|intros (?&?&?)%Some_equiv_eq|intros ?%None_equiv_eq];
+    by repeat econstructor.
+Qed.
+Lemma map_difference_with_equiv_eq `{Equiv A, !Equivalence (≡@{A})}
+    (f : A → A → option A) (m1 m2a m2b : M A) :
+  Proper ((≡) ==> (≡) ==> (≡)) f →
+  (∀ y x1 x2,
+    Some y ≡ f x1 x2 → ∃ x1' x2', Some y = f x1' x2' ∧ x1' ≡ x1 ∧ x2' ≡ x2) →
+  m1 ≡ difference_with f m2a m2b ↔
+    ∃ m2a' m2b', m1 = difference_with f m2a' m2b' ∧ m2a' ≡ m2a ∧ m2b' ≡ m2b.
+Proof.
+  intros ? Hf. apply (merge_equiv_eq _ _ _ _ _).
+  intros ? [x1|] [x2|]; simpl;
+    first [intros (?&?&?&?&?)%Hf|intros (?&?&?)%Some_equiv_eq|intros ?%None_equiv_eq];
+    by repeat econstructor.
+Qed.
+
+Lemma map_union_equiv_eq `{Equiv A, !Equivalence (≡@{A})} (m1 m2a m2b : M A) :
+  m1 ≡ m2a ∪ m2b ↔ ∃ m2a' m2b', m1 = m2a' ∪ m2b' ∧ m2a' ≡ m2a ∧ m2b' ≡ m2b.
+Proof.
+  apply map_union_with_equiv_eq; [solve_proper|]. intros ??? ?%(inj _); eauto.
+Qed.
+Lemma map_intersection_equiv_eq `{Equiv A, !Equivalence (≡@{A})} (m1 m2a m2b : M A) :
+  m1 ≡ m2a ∩ m2b ↔ ∃ m2a' m2b', m1 = m2a' ∩ m2b' ∧ m2a' ≡ m2a ∧ m2b' ≡ m2b.
+Proof.
+  apply map_intersection_with_equiv_eq; [solve_proper|]. intros ??? ?%(inj _); eauto.
+Qed.
+Lemma map_difference_equiv_eq `{Equiv A, !Equivalence (≡@{A})} (m1 m2a m2b : M A) :
+  m1 ≡ m2a ∖ m2b ↔ ∃ m2a' m2b', m1 = m2a' ∖ m2b' ∧ m2a' ≡ m2a ∧ m2b' ≡ m2b.
+Proof.
+  apply map_difference_with_equiv_eq; [constructor|]. intros ??? [=]%None_equiv_eq.
+Qed.
 End theorems.
 
 (** ** The seq operation *)

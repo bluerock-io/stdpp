@@ -1833,18 +1833,17 @@ Lemma Permutation_cons_inv_l l k x :
   x :: l ≡ₚ k → ∃ k1 k2, k = k1 ++ x :: k2 ∧ l ≡ₚ k1 ++ k2.
 Proof. by intros ?%(symmetry_iff (≡ₚ))%Permutation_cons_inv_r. Qed.
 
-Lemma Permutation_cross_split l la lb lc ld :
-  la ++ lb ≡ₚ l →
-  lc ++ ld ≡ₚ l →
+Lemma Permutation_cross_split (la lb lc ld : list A) :
+  la ++ lb ≡ₚ lc ++ ld →
   ∃ lac lad lbc lbd,
     lac ++ lad ≡ₚ la ∧ lbc ++ lbd ≡ₚ lb ∧ lac ++ lbc ≡ₚ lc ∧ lad ++ lbd ≡ₚ ld.
 Proof.
-  intros <-. revert lc ld.
+  revert lc ld.
   induction la as [|x la IH]; simpl; intros lc ld Hperm.
   { exists [], [], lc, ld. by rewrite !(right_id_L [] (++)). }
   assert (x ∈ lc ++ ld)
     as [[lc' Hlc]%elem_of_Permutation|[ld' Hld]%elem_of_Permutation]%elem_of_app.
-  { rewrite Hperm, elem_of_cons. auto. }
+  { rewrite <-Hperm, elem_of_cons. auto. }
   - rewrite Hlc in Hperm. simpl in Hperm. apply (inj (x ::.)) in Hperm.
     apply IH in Hperm as (lac&lad&lbc&lbd&Ha&Hb&Hc&Hd).
     exists (x :: lac), lad, lbc, lbd; simpl. by rewrite Ha, Hb, Hc, Hd.

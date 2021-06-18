@@ -1118,11 +1118,11 @@ Proof.
   exists qmin. split; eapply Qp_lt_sum; eauto.
 Qed.
 
-Lemma Qp_cross_split p a b c d :
-  a + b = p → c + d = p →
+Lemma Qp_cross_split a b c d :
+  a + b = c + d →
   ∃ ac ad bc bd, ac + ad = a ∧ bc + bd = b ∧ ac + bc = c ∧ ad + bd = d.
 Proof.
-  intros H <-. revert a b c d H. cut (∀ a b c d : Qp,
+  intros H. revert a b c d H. cut (∀ a b c d : Qp,
     a < c → a + b = c + d →
     ∃ ac ad bc bd, ac + ad = a ∧ bc + bd = b ∧ ac + bc = c ∧ ad + bd = d)%Qp.
   { intros help a b c d Habcd.

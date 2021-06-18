@@ -95,6 +95,8 @@ API-breaking change is listed.
     `bsteps_rtc` → `rtc_bsteps_2`.
   - Add lemmas that relate `rtc`, `tc`, `nsteps`, and `bsteps` to path
     representations as lists.
+- Remove explicit equality from cross split lemmas so that they become easier
+  to use in forward-style proofs.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`):

@@ -30,7 +30,7 @@ The key features of this library are as follows:
 """
 
 depends: [
-  "coq" { (>= "8.10.2" & < "8.14~") | (= "dev") }
+  "coq" { (>= "8.10.2" & < "8.15~") | (= "dev") }
 ]
 
 build: [make "-j%{jobs}%"]

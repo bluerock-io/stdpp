@@ -41,10 +41,10 @@ variables:
 
 ## Build jobs
 
-build-coq.dev:
+build-coq.8.14.dev:
   <<: *template
   variables:
-    OPAM_PINS: "coq version dev"
+    OPAM_PINS: "coq version 8.14.dev"
     MANGLE_NAMES: "1"
     CI_COQCHK: "1"
 

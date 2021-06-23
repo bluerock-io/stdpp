@@ -1,4 +1,6 @@
 -Q theories stdpp
+# 'Global Hint Rewrite' not supported before Coq 8.14.
+-arg -w -arg -deprecated-hint-rewrite-without-locality
 
 theories/options.v
 theories/base.v

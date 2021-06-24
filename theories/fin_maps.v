@@ -1713,6 +1713,16 @@ Lemma map_zip_diag {A} (m : M A) :
   map_zip m m = (λ x, (x, x)) <$> m.
 Proof. apply map_zip_with_diag. Qed.
 
+Lemma fst_map_zip {A B} (m1 : M A) (m2 : M B) :
+  (∀ k : K, is_Some (m1 !! k) → is_Some (m2 !! k)) →
+  fst <$> map_zip m1 m2 = m1.
+Proof. intros ?. by apply map_fmap_zip_with_l. Qed.
+
+Lemma snd_map_zip {A B} (m1 : M A) (m2 : M B) :
+  (∀ k : K, is_Some (m2 !! k) → is_Some (m1 !! k)) →
+  snd <$> map_zip m1 m2 = m2.
+Proof. intros ?. by apply map_fmap_zip_with_r. Qed.
+
 (** ** Properties on the [map_relation] relation *)
 Section Forall2.
   Context {A B} (R : A → B → Prop) (P : A → Prop) (Q : B → Prop).

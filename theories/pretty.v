@@ -23,7 +23,7 @@ Fixpoint pretty_N_go_help (x : N) (acc : Acc (<)%N x) (s : string) : string :=
   | right _ => s
   end.
 Definition pretty_N_go (x : N) : string → string :=
-  pretty_N_go_help x (wf_guard 32 N.lt_wf_0 x).
+  pretty_N_go_help x (wf_guard (S (N.size_nat x)) N.lt_wf_0 x).
 Global Instance pretty_N : Pretty N := λ x,
   if decide (x = 0)%N then "0" else pretty_N_go x "".
 

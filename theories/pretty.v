@@ -22,6 +22,9 @@ Fixpoint pretty_N_go_help (x : N) (acc : Acc (<)%N x) (s : string) : string :=
      (String (pretty_N_char (x `mod` 10)) s)
   | right _ => s
   end.
+(* The argument [S (N.size_nat x)] of [wf_guard] makes sure that computation
+works if [x] is a closed term, but that it blocks if [x] is an open term. The
+latter prevents unexpected stack overflows, see [tests/pretty.v]. *)
 Definition pretty_N_go (x : N) : string → string :=
   pretty_N_go_help x (wf_guard (S (N.size_nat x)) N.lt_wf_0 x).
 Global Instance pretty_N : Pretty N := λ x,

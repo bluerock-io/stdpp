@@ -1,4 +1,5 @@
 From stdpp Require Import pretty.
+From Coq Require Import Ascii.
 
 Section N.
   Local Open Scope N_scope.
@@ -16,6 +17,17 @@ Section N.
   Lemma pretty_N_123456789 : pretty 123456789 = "123456789".
   Proof. reflexivity. Qed.
 End N.
+
+(** Minimized version of:
+
+  https://coq.zulipchat.com/#narrow/stream/237977-Coq-users/topic/Stack.20overflow.20in.20Qed.2E
+
+Fixed by making the [wp_guard] in [pretty_N_go] proportional to the
+size of the input so that it blocks in case the input is an open term. *)
+Lemma test_no_stack_overflow p n :
+  get n (pretty (N.pos p)) ≠ Some "_"%char →
+  get (S n) ("-" +:+ pretty (N.pos p)) ≠ Some "_"%char.
+Proof. intros Hlem. apply Hlem. Qed.
 
 Section nat.
   Local Open Scope nat_scope.

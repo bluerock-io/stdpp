@@ -100,9 +100,12 @@ API-breaking change is listed.
 - Add lemmas for finite maps: `dom_map_zip_with`, `dom_map_zip_with_L`,
   `map_filter_id`, `map_filter_subseteq`, and `map_lookup_zip_Some`.
 - Add lemmas for sets: `elem_of_weaken` and `not_elem_of_weaken`.
- 
+- Rename `insert_delete` → `insert_delete_insert`; add new `insert_delete` that
+  is consistent with `delete_insert`.
+
 The following `sed` script should perform most of the renaming
-(on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`):
+(on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).
+Note that the script is not idempotent, do not run it twice.
 ```
 sed -i -E '
 s/\bdecide_left\b/decide_True_pi/g
@@ -125,6 +128,8 @@ s/\bbsteps_rtc\b/rtc_bsteps_2/g
 # setoid
 s/\bequiv_None\b/None_equiv_eq/g
 s/\bmap_equiv_empty\b/map_empty_equiv_eq/g
+# insert_delete
+s/\binsert_delete\b/insert_delete_insert/g
 ' $(find theories -name "*.v")
 ```
 

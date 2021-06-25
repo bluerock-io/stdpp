@@ -24,20 +24,6 @@ Lemma lookup_lookup_total_dom `{!Inhabited A} (m : M A) i :
   i ∈ dom D m → m !! i = Some (m !!! i).
 Proof. rewrite elem_of_dom. apply lookup_lookup_total. Qed.
 
-Lemma dom_filter {A} (P : K * A → Prop) `{!∀ x, Decision (P x)} (m : M A) X :
-  (∀ i, i ∈ X ↔ ∃ x, m !! i = Some x ∧ P (i, x)) →
-  dom D (filter P m) ≡ X.
-Proof.
-  intros HX i. rewrite elem_of_dom, HX.
-  unfold is_Some. by setoid_rewrite map_filter_lookup_Some.
-Qed.
-Lemma dom_filter_subseteq {A} (P : K * A → Prop) `{!∀ x, Decision (P x)} (m : M A):
-  dom D (filter P m) ⊆ dom D m.
-Proof.
-  intros ?. rewrite 2!elem_of_dom.
-  destruct 1 as [?[Eq _]%map_filter_lookup_Some]. by eexists.
-Qed.
-
 Lemma dom_imap_subseteq {A B} (f: K → A → option B) (m: M A) :
   dom D (map_imap f m) ⊆ dom D m.
 Proof.
@@ -68,6 +54,18 @@ Proof.
   specialize (Hss2 i). rewrite !elem_of_dom in Hss2.
   destruct Hss2; eauto. by simplify_map_eq.
 Qed.
+
+Lemma dom_filter {A} (P : K * A → Prop) `{!∀ x, Decision (P x)} (m : M A) X :
+  (∀ i, i ∈ X ↔ ∃ x, m !! i = Some x ∧ P (i, x)) →
+  dom D (filter P m) ≡ X.
+Proof.
+  intros HX i. rewrite elem_of_dom, HX.
+  unfold is_Some. by setoid_rewrite map_filter_lookup_Some.
+Qed.
+Lemma dom_filter_subseteq {A} (P : K * A → Prop) `{!∀ x, Decision (P x)} (m : M A):
+  dom D (filter P m) ⊆ dom D m.
+Proof. apply subseteq_dom, map_filter_subseteq. Qed.
+
 Lemma dom_empty {A} : dom D (@empty (M A) _) ≡ ∅.
 Proof.
   intros x. rewrite elem_of_dom, lookup_empty, <-not_eq_None_Some. set_solver.
@@ -174,6 +172,14 @@ Proof.
   apply not_elem_of_dom. set_solver.
 Qed.
 
+Lemma dom_map_zip_with {A B C} (f : A → B → C) (ma : M A) (mb : M B) :
+  dom D (map_zip_with f ma mb) ≡ dom D ma ∩ dom D mb.
+Proof.
+  rewrite set_equiv. intros x.
+  rewrite elem_of_intersection, !elem_of_dom, map_lookup_zip_with.
+  destruct (ma !! x), (mb !! x); rewrite !is_Some_alt; naive_solver.
+Qed.
+
 Lemma dom_union_inv `{!RelDecision (∈@{D})} {A} (m : M A) (X1 X2 : D) :
   X1 ## X2 →
   dom D m ≡ X1 ∪ X2 →
@@ -254,6 +260,9 @@ Section leibniz.
   Lemma dom_singleton_inv_L {A} (m : M A) i :
     dom D m = {[i]} → ∃ x, m = {[i := x]}.
   Proof. unfold_leibniz. apply dom_singleton_inv. Qed.
+  Lemma dom_map_zip_with_L {A B C} (f : A → B → C) (ma : M A) (mb : M B) :
+    dom D (map_zip_with f ma mb) = dom D ma ∩ dom D mb.
+  Proof. unfold_leibniz. apply dom_map_zip_with. Qed.
   Lemma dom_union_inv_L `{!RelDecision (∈@{D})} {A} (m : M A) (X1 X2 : D) :
     X1 ## X2 →
     dom D m = X1 ∪ X2 →

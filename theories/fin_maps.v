@@ -1378,6 +1378,17 @@ Section map_filter_misc.
     (∀ i x, m !! i = Some x → Q (i, x) → P (i, x)) →
     filter P (filter Q m) = filter Q m.
   Proof. intros ?. rewrite map_filter_filter. apply map_filter_ext. naive_solver. Qed.
+
+  Lemma map_filter_id m :
+    (∀ i x, m !! i = Some x → P (i, x)) → filter P m = m.
+  Proof.
+    intros Hi. apply map_eq. intros i. rewrite map_filter_lookup.
+    destruct (m !! i) eqn:Hlook; [|done].
+    apply option_guard_True, Hi, Hlook.
+  Qed.
+
+  Lemma map_filter_subseteq m : filter P m ⊆ m.
+  Proof. apply map_subseteq_spec, map_filter_lookup_Some_1_1. Qed.
 End map_filter_misc.
 
 (** ** Properties of the [map_Forall] predicate *)
@@ -1603,7 +1614,7 @@ Proof.
   rewrite lookup_merge, lookup_omap. by destruct (m !! i).
 Qed.
 
-(** Properties of the [zip_with] and [zip] functions *)
+(** Properties of the [map_zip_with] and [map_zip] functions *)
 Lemma map_lookup_zip_with {A B C} (f : A → B → C) (m1 : M A) (m2 : M B) i :
   map_zip_with f m1 m2 !! i = (x ← m1 !! i; y ← m2 !! i; Some (f x y)).
 Proof.
@@ -1617,6 +1628,10 @@ Proof. rewrite map_lookup_zip_with. destruct (m1 !! i), (m2 !! i); naive_solver.
 Lemma map_lookup_zip_with_None {A B C} (f : A → B → C) (m1 : M A) (m2 : M B) i :
   map_zip_with f m1 m2 !! i = None ↔ m1 !! i = None ∨ m2 !! i = None.
 Proof. rewrite map_lookup_zip_with. destruct (m1 !! i), (m2 !! i); naive_solver. Qed.
+
+Lemma map_lookup_zip_Some {A B} (m1 : M A) (m2 : M B) i p :
+  map_zip m1 m2 !! i = Some p ↔ m1 !! i = Some p.1 ∧ m2 !! i = Some p.2.
+Proof. rewrite map_lookup_zip_with_Some. destruct p. naive_solver. Qed.
 
 Lemma map_zip_with_empty {A B C} (f : A → B → C) :
   map_zip_with f (∅ : M A) (∅ : M B) = ∅.

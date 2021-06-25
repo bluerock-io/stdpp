@@ -394,6 +394,11 @@ Section semi_set.
   Proof. done. Qed.
   Lemma elem_of_subset X Y : X ⊂ Y ↔ (∀ x, x ∈ X → x ∈ Y) ∧ ¬(∀ x, x ∈ Y → x ∈ X).
   Proof. set_solver. Qed.
+  Lemma elem_of_weaken x X Y : x ∈ X → X ⊆ Y → x ∈ Y.
+  Proof. set_solver. Qed.
+
+  Lemma not_elem_of_weaken x X Y : x ∉ Y → X ⊆ Y → x ∉ X.
+  Proof. set_solver. Qed.
 
   (** Union *)
   Lemma union_subseteq X Y Z : X ∪ Y ⊆ Z ↔ X ⊆ Z ∧ Y ⊆ Z.

@@ -1387,8 +1387,7 @@ Section map_filter_misc.
     apply option_guard_True, Hi, Hlook.
   Qed.
 
-  Lemma map_filter_subseteq f `{∀ (x : (K *A)), Decision (f x)} m :
-    filter f m ⊆ m.
+  Lemma map_filter_subseteq m : filter P m ⊆ m.
   Proof. apply map_subseteq_spec, map_filter_lookup_Some_1_1. Qed.
 End map_filter_misc.
 
@@ -1630,8 +1629,8 @@ Lemma map_lookup_zip_with_None {A B C} (f : A → B → C) (m1 : M A) (m2 : M B)
   map_zip_with f m1 m2 !! i = None ↔ m1 !! i = None ∨ m2 !! i = None.
 Proof. rewrite map_lookup_zip_with. destruct (m1 !! i), (m2 !! i); naive_solver. Qed.
 
-Lemma map_lookup_zip_Some {A B} (m1 : M A) (m2 : M B) l p :
-  (map_zip m1 m2) !! l = Some p ↔ m1 !! l = Some p.1 ∧ m2 !! l = Some p.2.
+Lemma map_lookup_zip_Some {A B} (m1 : M A) (m2 : M B) i p :
+  map_zip m1 m2 !! i = Some p ↔ m1 !! i = Some p.1 ∧ m2 !! i = Some p.2.
 Proof. rewrite map_lookup_zip_with_Some. destruct p. naive_solver. Qed.
 
 Lemma map_zip_with_empty {A B C} (f : A → B → C) :

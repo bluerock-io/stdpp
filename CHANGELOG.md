@@ -97,7 +97,10 @@ API-breaking change is listed.
     representations as lists.
 - Remove explicit equality from cross split lemmas so that they become easier
   to use in forward-style proofs.
-
+- Add lemmas for finite maps: `dom_map_zip_with`, `dom_map_zip_with_L`,
+  `map_filter_id`, `map_filter_subseteq`, and `map_lookup_zip_Some`.
+- Add lemmas for sets: `elem_of_weaken` and `not_elem_of_weaken`.
+ 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`):
 ```

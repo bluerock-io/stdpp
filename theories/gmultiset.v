@@ -431,7 +431,7 @@ Section more_lemmas.
     revert Y; induction X as [|x n X HX IH] using map_ind; intros Y.
     { by rewrite (left_id_L _ _ Y), map_to_list_empty. }
     destruct (Y !! x) as [n'|] eqn:HY.
-    - rewrite <-(insert_id Y x n'), <-(insert_delete Y) by done.
+    - rewrite <-(insert_delete Y x n') by done.
       erewrite <-insert_union_with by done.
       rewrite !map_to_list_insert, !bind_cons
         by (by rewrite ?lookup_union_with, ?lookup_delete, ?HX).

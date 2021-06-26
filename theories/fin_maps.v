@@ -411,8 +411,6 @@ Proof. apply delete_partial_alter. Qed.
 Lemma delete_insert_delete {A} (m : M A) i x :
   delete i (<[i:=x]>m) = delete i m.
 Proof. by setoid_rewrite <-partial_alter_compose. Qed.
-Lemma insert_delete {A} (m : M A) i x : <[i:=x]>(delete i m) = <[i:=x]> m.
-Proof. symmetry; apply (partial_alter_compose (λ _, Some x)). Qed.
 Lemma delete_subseteq {A} (m : M A) i : delete i m ⊆ m.
 Proof.
   rewrite !map_subseteq_spec. intros j x. rewrite lookup_delete_Some. tauto.
@@ -484,6 +482,11 @@ Lemma insert_non_empty {A} (m : M A) i x : <[i:=x]>m ≠ ∅.
 Proof.
   intros Hi%(f_equal (.!! i)). by rewrite lookup_insert, lookup_empty in Hi.
 Qed.
+Lemma insert_delete_insert {A} (m : M A) i x : <[i:=x]>(delete i m) = <[i:=x]> m.
+Proof. symmetry; apply (partial_alter_compose (λ _, Some x)). Qed.
+Lemma insert_delete {A} (m : M A) i x :
+  m !! i = Some x → <[i:=x]> (delete i m) = m.
+Proof. intros. rewrite insert_delete_insert, insert_id; done. Qed.
 
 Lemma insert_subseteq {A} (m : M A) i x : m !! i = None → m ⊆ <[i:=x]>m.
 Proof. apply partial_alter_subseteq. Qed.
@@ -533,7 +536,7 @@ Lemma insert_subset_inv {A} (m1 m2 : M A) i x :
   ∃ m2', m2 = <[i:=x]>m2' ∧ m1 ⊂ m2' ∧ m2' !! i = None.
 Proof.
   intros Hi Hm1m2. exists (delete i m2). split_and?.
-  - rewrite insert_delete, insert_id; [done|].
+  - rewrite insert_delete; [done|].
     eapply lookup_weaken, strict_include; eauto. by rewrite lookup_insert.
   - eauto using insert_delete_subset.
   - by rewrite lookup_delete.
@@ -891,7 +894,7 @@ Lemma map_to_list_delete {A} (m : M A) i x :
   m !! i = Some x → (i,x) :: map_to_list (delete i m) ≡ₚ map_to_list m.
 Proof.
   intros. rewrite <-map_to_list_insert by (by rewrite lookup_delete).
-  by rewrite insert_delete, insert_id.
+  by rewrite insert_delete.
 Qed.
 
 Lemma map_to_list_submseteq {A} (m1 m2 : M A) :
@@ -1040,7 +1043,7 @@ Lemma map_size_insert {A} i x (m : M A) :
   size (<[i:=x]> m) = (match m !! i with Some _ => id | None => S end) (size m).
 Proof.
   destruct (m !! i) as [y|] eqn:?; simpl.
-  - rewrite <-(insert_id m i y) at 2 by done. rewrite <-!(insert_delete m).
+  - rewrite <-(insert_id m i y) at 2 by done. rewrite <-!(insert_delete_insert m).
     unfold size, map_size.
     by rewrite !map_to_list_insert by (by rewrite lookup_delete).
   - unfold size, map_size. by rewrite map_to_list_insert.
@@ -1203,7 +1206,7 @@ Proof.
   { intros m Hm. cut (m = ∅); [by intros ->|]. apply map_empty; intros i.
     apply eq_None_not_Some; intros [x []%Hm%elem_of_nil]. }
   intros m Hm. assert (m !! i = Some x) by (apply Hm; by left).
-  rewrite <-(insert_id m i x), <-insert_delete by done.
+  rewrite <-(insert_delete m i x) by done.
   apply Hinsert; auto using lookup_delete.
   apply IH. intros j y. rewrite lookup_delete_Some, Hm. split.
   - by intros [? [[= ??]|?]%elem_of_cons].
@@ -1316,7 +1319,7 @@ Section map_filter_insert_and_delete.
   Lemma map_filter_insert_not_delete m i x :
     ¬ P (i, x) → filter P (<[i:=x]> m) = filter P (delete i m).
   Proof.
-    intros. rewrite <-insert_delete by done.
+    intros. rewrite <-insert_delete_insert by done.
     rewrite map_filter_insert_not'; [done..|].
     rewrite lookup_delete; done.
   Qed.
@@ -2156,14 +2159,14 @@ Lemma union_delete_insert {A} (m1 m2 : M A) i x :
   delete i m1 ∪ <[i:=x]> m2 = m1 ∪ m2.
 Proof.
   intros. rewrite <-insert_union_r by apply lookup_delete.
-  by rewrite insert_union_l, insert_delete, insert_id by done.
+  by rewrite insert_union_l, insert_delete by done.
 Qed.
 Lemma union_insert_delete {A} (m1 m2 : M A) i x :
   m1 !! i = None → m2 !! i = Some x →
   <[i:=x]> m1 ∪ delete i m2 = m1 ∪ m2.
 Proof.
   intros. rewrite <-insert_union_l by apply lookup_delete.
-  by rewrite insert_union_r, insert_delete, insert_id by done.
+  by rewrite insert_union_r, insert_delete by done.
 Qed.
 Lemma map_Forall_union_1_1 {A} (m1 m2 : M A) P :
   map_Forall P (m1 ∪ m2) → map_Forall P m1.
@@ -2721,7 +2724,7 @@ Section setoid_inversion.
       + apply (inj Some). by rewrite <-Hix', Hm, lookup_insert.
       + by rewrite Hm, insert_insert, insert_id by done.
     - exists x', (delete i m1). split_and!.
-      + by rewrite insert_delete, insert_id by done.
+      + by rewrite insert_delete by done.
       + apply (inj Some). by rewrite <-Hix', Hm, lookup_insert.
       + by rewrite Hm, delete_insert by done.
   Qed.

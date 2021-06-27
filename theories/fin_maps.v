@@ -3198,10 +3198,9 @@ Tactic Notation "simpl_map" "by" tactic3(tac) := repeat
   | H : context[ (_ <$> _) !! _ ] |- _ => rewrite lookup_fmap in H
   | H : context[ (omap _ _) !! _ ] |- _ => rewrite lookup_omap in H
   | H : context[ lookup (A:=?A) ?i (?m1 ∪ ?m2) ] |- _ =>
-    let x := fresh in evar (x:A);
-    let x' := eval unfold x in x in clear x;
+    let x := mk_evar A in
     let E := fresh in
-    assert ((m1 ∪ m2) !! i = Some x') as E by (clear H; by tac);
+    assert ((m1 ∪ m2) !! i = Some x) as E by (clear H; by tac);
     rewrite E in H; clear E
   | |- context[ ∅ !! _ ] => rewrite lookup_empty
   | |- context[ (<[_:=_]>_) !! _ ] =>
@@ -3215,10 +3214,9 @@ Tactic Notation "simpl_map" "by" tactic3(tac) := repeat
   | |- context[ (_ <$> _) !! _ ] => rewrite lookup_fmap
   | |- context[ (omap _ _) !! _ ] => rewrite lookup_omap
   | |- context [ lookup (A:=?A) ?i ?m ] =>
-    let x := fresh in evar (x:A);
-    let x' := eval unfold x in x in clear x;
+    let x := mk_evar A in
     let E := fresh in
-    assert (m !! i = Some x') as E by tac;
+    assert (m !! i = Some x) as E by tac;
     rewrite E; clear E
   end.
 

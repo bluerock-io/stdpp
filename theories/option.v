@@ -360,8 +360,8 @@ Proof. intros [??]. repeat case_option_guard; intuition. Qed.
 
 Tactic Notation "simpl_option" "by" tactic3(tac) :=
   let assert_Some_None A mx H := first
-    [ let x := fresh in evar (x:A); let x' := eval unfold x in x in clear x;
-      assert (mx = Some x') as H by tac
+    [ let x := mk_evar A in
+      assert (mx = Some x) as H by tac
     | assert (mx = None) as H by tac ]
   in repeat match goal with
   | H : context [@mret _ _ ?A] |- _ =>

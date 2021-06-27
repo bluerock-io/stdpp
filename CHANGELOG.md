@@ -102,6 +102,7 @@ API-breaking change is listed.
 - Add lemmas for sets: `elem_of_weaken` and `not_elem_of_weaken`.
 - Rename `insert_delete` → `insert_delete_insert`; add new `insert_delete` that
   is consistent with `delete_insert`.
+- Fix statement of `sum_inhabited_r`. (by Paolo G. Giarrusso)
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

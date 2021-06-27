@@ -749,8 +749,8 @@ Global Arguments sum_map {_ _ _ _} _ _ !_ / : assert.
 
 Global Instance sum_inhabited_l {A B} (iA : Inhabited A) : Inhabited (A + B) :=
   match iA with populate x => populate (inl x) end.
-Global Instance sum_inhabited_r {A B} (iB : Inhabited A) : Inhabited (A + B) :=
-  match iB with populate y => populate (inl y) end.
+Global Instance sum_inhabited_r {A B} (iB : Inhabited B) : Inhabited (A + B) :=
+  match iB with populate y => populate (inr y) end.
 
 Global Instance inl_inj {A B} : Inj (=) (=) (@inl A B).
 Proof. injection 1; auto. Qed.

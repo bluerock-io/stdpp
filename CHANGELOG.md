@@ -42,7 +42,12 @@ API-breaking change is listed.
 - Add function `kmap` to transform the keys of finite maps.
 - Set `Hint Mode` for the classes `PartialOrder`, `TotalOrder`, `MRet`, `MBind`,
   `MJoin`, `FMap`, `OMap`, `MGuard`, `SemiSet`, `Set_`, `TopSet`, and `Infinite`.
-- Make `map_filter_strong_ext` and `map_filter_ext` bidirectional.
+- Strengthen the extensionality lemmas `map_filter_ext` and
+  `map_filter_strong_ext`:
+  + Rename `map_filter_strong_ext` → `map_filter_strong_ext_1` and
+    `map_filter_ext` → `map_filter_ext_1`.
+  + Add new bidirectional lemmas `map_filter_strong_ext` and `map_filter_ext`.
+  + Add `map_filter_strong_ext_2` and `map_filter_ext_2`.
 - Make collection of lemmas for filter + union/disjoint consistent for sets and
   maps:
   + Sets: Add lemmas `disjoint_filter`, `disjoint_filter_complement`, and
@@ -131,6 +136,9 @@ s/\bequiv_None\b/None_equiv_eq/g
 s/\bmap_equiv_empty\b/map_empty_equiv_eq/g
 # insert_delete
 s/\binsert_delete\b/insert_delete_insert/g
+# filter extensionality lemmas
+s/\bmap_filter_ext\b/map_filter_ext_1/g
+s/\bmap_filter_strong_ext\b/map_filter_strong_ext_1/g
 ' $(find theories -name "*.v")
 ```
 

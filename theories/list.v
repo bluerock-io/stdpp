@@ -4,6 +4,13 @@ From Coq Require Export Permutation.
 From stdpp Require Export numbers base option.
 From stdpp Require Import options.
 
+(** FIXME: Workaround for https://github.com/coq/coq/issues/14571 *)
+(** Remove the instance [Permutation_app'], since its priority is 10, which is
+above the priority 5 of [proper_relation], and add it back with the right
+priority (default = 0, since the instance has no premises). *)
+Global Remove Hints Permutation_app' : typeclass_instances.
+Global Existing Instance Permutation_app'.
+
 (* Pick up extra assumptions from section parameters. *)
 Set Default Proof Using "Type*".
 

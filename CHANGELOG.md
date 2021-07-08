@@ -111,6 +111,8 @@ API-breaking change is listed.
 - Make `done` work on goals of the form `is_Some`.
 - Add `mk_evar` tactic to generate evars (intended as a more useful replacement
   for Coq's `evar` tactic).
+- Make `solve_ndisj` able to solve more goals of the form `_ ⊆ ⊤ ∖ _`,
+  `_ ∖ _ ## _`, `_ ## _ ∖ _`, as well as `_ ## ∅` and `∅ ## _`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

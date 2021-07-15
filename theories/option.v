@@ -40,12 +40,14 @@ Proof. congruence. Qed.
 Definition is_Some {A} (mx : option A) := ∃ x, mx = Some x.
 Global Instance: Params (@is_Some) 1 := {}.
 
+Global Hint Extern 0 (is_Some _) => by eexists : core.
+
 Lemma is_Some_alt {A} (mx : option A) :
   is_Some mx ↔ match mx with Some _ => True | None => False end.
 Proof. unfold is_Some. destruct mx; naive_solver. Qed.
 
 Lemma mk_is_Some {A} (mx : option A) x : mx = Some x → is_Some mx.
-Proof. intros; red; subst; eauto. Qed.
+Proof. by intros ->. Qed.
 Global Hint Resolve mk_is_Some : core.
 Lemma is_Some_None {A} : ¬is_Some (@None A).
 Proof. by destruct 1. Qed.
@@ -135,7 +137,7 @@ Section setoids.
   Proof. split; [inversion 1; naive_solver|naive_solver (by constructor)]. Qed.
 
   Global Instance is_Some_proper : Proper ((≡@{option A}) ==> iff) is_Some.
-  Proof. inversion_clear 1; split; eauto. Qed.
+  Proof. by inversion_clear 1. Qed.
   Global Instance from_option_proper {B} (R : relation B) :
     Proper (((≡@{A}) ==> R) ==> R ==> (≡) ==> R) from_option.
   Proof. destruct 3; simpl; auto. Qed.

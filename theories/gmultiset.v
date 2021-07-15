@@ -273,10 +273,9 @@ End multiset_unfold.
 Ltac multiset_instantiate :=
   repeat match goal with
   | H : (∀ x : ?A, @?P x) |- _ =>
-     let e := fresh in evar (e:A);
-     let e' := eval unfold e in e in clear e;
-     lazymatch constr:(P e') with
-     | context [ {[+ ?y +]} ] => unify y e'; learn_hyp (H y)
+     let e := mk_evar A in
+     lazymatch constr:(P e) with
+     | context [ {[+ ?y +]} ] => unify y e; learn_hyp (H y)
      end
   | H : (∀ x : ?A, _), _ : context [multiplicity ?y _] |- _ => learn_hyp (H y)
   | H : (∀ x : ?A, _) |- context [multiplicity ?y _] => learn_hyp (H y)

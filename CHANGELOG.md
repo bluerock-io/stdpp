@@ -109,6 +109,8 @@ API-breaking change is listed.
   is consistent with `delete_insert`.
 - Fix statement of `sum_inhabited_r`. (by Paolo G. Giarrusso)
 - Make `done` work on goals of the form `is_Some`.
+- Add `mk_evar` tactic to generate evars (intended as a more useful replacement
+  for Coq's `evar` tactic).
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

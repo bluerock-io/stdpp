@@ -217,6 +217,14 @@ does the converse. *)
 Ltac var_eq x1 x2 := match x1 with x2 => idtac | _ => fail 1 end.
 Ltac var_neq x1 x2 := match x1 with x2 => fail 1 | _ => idtac end.
 
+(** The tactic [mk_evar T] returns a new evar of type [T], without affecting the
+current context.
+
+This is usually a more useful behavior than Coq's [evar], which is a
+side-effecting tactic (not returning anything) that introduces a local
+definition into the context that holds the evar. *)
+Ltac mk_evar T := open_constr:(_ : T).
+
 (** The tactic [eunify x y] succeeds if [x] and [y] can be unified, and fails
 otherwise. If it succeeds, it will instantiate necessary evars in [x] and [y].
 
@@ -483,9 +491,8 @@ Tactic Notation "efeed" constr(H) "using" tactic3(tac) "by" tactic3 (bytac) :=
     let HT1 := fresh "feed" in assert T1 as HT1;
       [bytac | go (H HT1); clear HT1 ]
   | ?T1 → _ =>
-    let e := fresh "feed" in evar (e:T1);
-    let e' := eval unfold e in e in
-    clear e; go (H e')
+    let e := mk_evar T1 in
+    go (H e)
   | ?T1 => tac H
   end in go H.
 Tactic Notation "efeed" constr(H) "using" tactic3(tac) :=

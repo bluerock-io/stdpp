@@ -40,7 +40,7 @@ Proof. congruence. Qed.
 Definition is_Some {A} (mx : option A) := ∃ x, mx = Some x.
 Global Instance: Params (@is_Some) 1 := {}.
 
-Global Hint Extern 0 (is_Some _) => eexists; reflexivity : core.
+Global Hint Extern 0 (is_Some _) => eexists; fast_done : core.
 
 Lemma is_Some_alt {A} (mx : option A) :
   is_Some mx ↔ match mx with Some _ => True | None => False end.

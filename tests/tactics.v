@@ -1,4 +1,4 @@
-From stdpp Require Import tactics.
+From stdpp Require Import tactics option.
 
 Goal ∀ P1 P2 P3 P4 (P: Prop),
   P1 ∨ (Is_true (P2 || P3)) ∨ P4 →
@@ -69,3 +69,12 @@ universe, like [Is_true : bool → Prop]. *)
 Goal True.
 let x := mk_evar true in idtac.
 Abort.
+
+(** Make sure that [done] is not called recursively when solving [is_Some],
+which might leave an unresolved evar before performing ex falso. *)
+Goal False → is_Some (@None nat).
+Proof. done. Qed.
+Goal ∀ mx, mx = Some 10 → is_Some mx.
+Proof. done. Qed.
+Goal ∀ mx, Some 10 = mx → is_Some mx.
+Proof. done. Qed.

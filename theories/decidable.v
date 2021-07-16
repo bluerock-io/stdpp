@@ -206,9 +206,9 @@ Proof. solve_decision. Defined.
 Global Instance sum_eq_dec `{EqDecision A, EqDecision B} : EqDecision (A + B).
 Proof. solve_decision. Defined.
 
-Global Instance curry_dec `(P_dec : ∀ (x : A) (y : B), Decision (P x y)) p :
-    Decision (curry P p) :=
-  match p as p return Decision (curry P p) with
+Global Instance uncurry_dec `(P_dec : ∀ (x : A) (y : B), Decision (P x y)) p :
+    Decision (uncurry P p) :=
+  match p as p return Decision (uncurry P p) with
   | (x,y) => P_dec x y
   end.
 

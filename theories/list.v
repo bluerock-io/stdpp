@@ -2934,7 +2934,7 @@ Proof.
 Qed.
 
 Lemma Forall2_Forall {A} P (l1 l2 : list A) :
-  Forall2 P l1 l2 → Forall (curry P) (zip l1 l2).
+  Forall2 P l1 l2 → Forall (uncurry P) (zip l1 l2).
 Proof. induction 1; constructor; auto. Qed.
 
 Section Forall2.
@@ -4345,9 +4345,9 @@ Section zip_with.
   Lemma fmap_zip_with_r (g : C → B) l k :
     (∀ x y, g (f x y) = y) → length k ≤ length l → g <$> zip_with f l k = k.
   Proof. revert l. induction k; intros [|??] ??; f_equal/=; auto with lia. Qed.
-  Lemma zip_with_zip l k : zip_with f l k = curry f <$> zip l k.
+  Lemma zip_with_zip l k : zip_with f l k = uncurry f <$> zip l k.
   Proof. revert k. by induction l; intros [|??]; f_equal/=. Qed.
-  Lemma zip_with_fst_snd lk : zip_with f (lk.*1) (lk.*2) = curry f <$> lk.
+  Lemma zip_with_fst_snd lk : zip_with f (lk.*1) (lk.*2) = uncurry f <$> lk.
   Proof. by induction lk as [|[]]; f_equal/=. Qed.
   Lemma zip_with_replicate n x y :
     zip_with f (replicate n x) (replicate n y) = replicate n (f x y).

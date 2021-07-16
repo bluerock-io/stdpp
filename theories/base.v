@@ -671,16 +671,20 @@ Global Instance: Params (@pair) 2 := {}.
 Global Instance: Params (@fst) 2 := {}.
 Global Instance: Params (@snd) 2 := {}.
 
-Notation curry := prod_curry.
-Notation uncurry := prod_uncurry.
-Definition curry3 {A B C D} (f : A → B → C → D) (p : A * B * C) : D :=
+(** The Coq standard library swapped the names of curry/uncurry, see
+https://github.com/coq/coq/pull/12716/ 
+FIXME: Remove this workaround once the lowest Coq version we support is 8.13. *)
+Notation curry := prod_uncurry.
+Notation uncurry := prod_curry.
+
+Definition uncurry3 {A B C D} (f : A → B → C → D) (p : A * B * C) : D :=
   let '(a,b,c) := p in f a b c.
-Definition curry4 {A B C D E} (f : A → B → C → D → E) (p : A * B * C * D) : E :=
+Definition uncurry4 {A B C D E} (f : A → B → C → D → E) (p : A * B * C * D) : E :=
   let '(a,b,c,d) := p in f a b c d.
 
-Definition uncurry3 {A B C D} (f : A * B * C → D) (a : A) (b : B) (c : C) : D :=
+Definition curry3 {A B C D} (f : A * B * C → D) (a : A) (b : B) (c : C) : D :=
   f (a, b, c).
-Definition uncurry4 {A B C D E} (f : A * B * C * D → E)
+Definition curry4 {A B C D E} (f : A * B * C * D → E)
   (a : A) (b : B) (c : C) (d : D) : E := f (a, b, c, d).
 
 Definition prod_map {A A' B B'} (f: A → A') (g: B → B') (p : A * B) : A' * B' :=

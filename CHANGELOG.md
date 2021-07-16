@@ -113,6 +113,9 @@ API-breaking change is listed.
   for Coq's `evar` tactic).
 - Make `solve_ndisj` able to solve more goals of the form `_ ⊆ ⊤ ∖ _`,
   `_ ∖ _ ## _`, `_ ## _ ∖ _`, as well as `_ ## ∅` and `∅ ## _`.
+- Swap names of `curry`/`uncurry`, `curry3`/`uncurry3`, `curry4`/`uncurry4`,
+  `gmap_curry`/`gmap_uncurry`, and `hcurry`/`huncurry` to be consistent with
+  Haskell and friends.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).
@@ -144,6 +147,14 @@ s/\binsert_delete\b/insert_delete_insert/g
 # filter extensionality lemmas
 s/\bmap_filter_ext\b/map_filter_ext_1/g
 s/\bmap_filter_strong_ext\b/map_filter_strong_ext_1/g
+# swap curry/uncurry
+s/\b(lookup_gmap_|gmap_|h|)curry(|3|4)\b/OLD\1curry\2/g
+s/\b(lookup_gmap_|gmap_|h|)uncurry(|3|4)\b/\1curry\2/g
+s/\bOLD(lookup_gmap_|gmap_|h|)curry(|3|4)\b/\1uncurry\2/g
+s/\bgmap_curry_uncurry\b/gmap_uncurry_curry/g
+s/\bgmap_uncurry_non_empty\b/gmap_curry_non_empty/g
+s/\bgmap_uncurry_curry_non_empty\b/gmap_curry_uncurry_non_empty/g
+s/\bhcurry_uncurry\b/huncurry_curry/g
 ' $(find theories -name "*.v")
 ```
 

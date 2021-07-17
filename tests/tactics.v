@@ -55,20 +55,10 @@ Proof. intros ?. rename select nat into m. exists m. done. Qed.
 Goal ∀ (P : nat → Prop), P 3 → P 4 → P 4.
 Proof. intros P **. rename select (P _) into HP4. apply HP4. Qed.
 
-(** [mk_evar] works on things that coerce to types. *)
-(** This is a feature when we have packed structures, for example Iris's [ofe]
-(fields other than the carrier omitted). *)
-Structure ofe := Ofe { ofe_car :> Type }.
-Goal ∀ A : ofe, True.
-intros A.
-let x := mk_evar A in idtac.
-Abort.
-
-(** More surprisingly, it also works for other coercions into a
-universe, like [Is_true : bool → Prop]. *)
-Goal True.
-let x := mk_evar true in idtac.
-Abort.
+(** Regression tests for [naive_solver]. *)
+Lemma naive_solver_issue_115 (P : nat → Prop) (x : nat) :
+  (∀ x', P x' → x' = 10) → P x → x + 1 = 11.
+Proof. naive_solver. Qed.
 
 (** Make sure that [done] is not called recursively when solving [is_Some],
 which might leave an unresolved evar before performing ex falso. *)

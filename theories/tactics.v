@@ -222,8 +222,20 @@ current context.
 
 This is usually a more useful behavior than Coq's [evar], which is a
 side-effecting tactic (not returning anything) that introduces a local
-definition into the context that holds the evar. *)
-Ltac mk_evar T := open_constr:(_ : T).
+definition into the context that holds the evar.
+Note that the obvious alternative [open_constr (_:T)] has subtly different
+behavior, see std++ issue 115.
+
+Usually, Ltacs cannot return a value and have a side-effect, but we use the
+trickd escribed at
+<https://stackoverflow.com/questions/45949064/check-for-evars-in-a-tactic-that-returns-a-value/46178884#46178884>
+to work around that: wrap the side-effect in a [match goal]. *)
+Ltac mk_evar T :=
+  let e := fresh in
+  let _ := match goal with _ => evar (e:T) end in
+  let e' := eval unfold e in e in
+  let _ := match goal with _ => clear e end in
+  e'.
 
 (** The tactic [eunify x y] succeeds if [x] and [y] can be unified, and fails
 otherwise. If it succeeds, it will instantiate necessary evars in [x] and [y].

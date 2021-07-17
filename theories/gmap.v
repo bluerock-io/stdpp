@@ -237,7 +237,7 @@ Definition gset K `{Countable K} := mapset (gmap K).
 
 Section gset.
   Context `{Countable K}.
-  (* Lift instances of operational TCs from [mapset]. *)
+  (* Lift instances of operational TCs from [mapset] and mark them [simpl never]. *)
   Global Instance gset_elem_of: ElemOf K (gset K) := _.
   Global Instance gset_empty : Empty (gset K) := _.
   Global Instance gset_singleton : Singleton K (gset K) := _.
@@ -252,6 +252,21 @@ Section gset.
   Global Instance gset_disjoint_dec : RelDecision (##@{gset K}) := _.
   Global Instance gset_subseteq_dec : RelDecision (⊆@{gset K}) := _.
   Global Instance gset_dom {A} : Dom (gmap K A) (gset K) := mapset_dom.
+
+  Global Arguments gset_elem_of : simpl never.
+  Global Arguments gset_empty : simpl never.
+  Global Arguments gset_singleton : simpl never.
+  Global Arguments gset_union : simpl never.
+  Global Arguments gset_intersection : simpl never.
+  Global Arguments gset_difference : simpl never.
+  Global Arguments gset_elements : simpl never.
+  Global Arguments gset_eq_dec : simpl never.
+  Global Arguments gset_countable : simpl never.
+  Global Arguments gset_equiv_dec : simpl never.
+  Global Arguments gset_elem_of_dec : simpl never.
+  Global Arguments gset_disjoint_dec : simpl never.
+  Global Arguments gset_subseteq_dec : simpl never.
+  Global Arguments gset_dom : simpl never.
 
   (* Lift instances of other TCs. *)
   Global Instance gset_leibniz : LeibnizEquiv (gset K) := _.

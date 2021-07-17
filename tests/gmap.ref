@@ -1,0 +1,72 @@
+The command has indeed failed with message:
+Failed to progress.
+The command has indeed failed with message:
+Failed to progress.
+1 goal
+  
+  ============================
+  {[1; 2; 3]} = ∅
+The command has indeed failed with message:
+Failed to progress.
+The command has indeed failed with message:
+Failed to progress.
+1 goal
+  
+  ============================
+  elements {[1; 2; 3]} = []
+The command has indeed failed with message:
+Failed to progress.
+The command has indeed failed with message:
+Failed to progress.
+1 goal
+  
+  ============================
+  {[1; 2; 3]} ∖ {[1]} ∪ {[4]} ∩ {[10]} = ∅ ∖ {[2]}
+The command has indeed failed with message:
+Failed to progress.
+The command has indeed failed with message:
+Failed to progress.
+1 goal
+  
+  ============================
+  1 ∈ dom (gset nat) (<[1:=2]> ∅)
+The command has indeed failed with message:
+Failed to progress.
+The command has indeed failed with message:
+Failed to progress.
+1 goal
+  
+  ============================
+  bool_decide (∅ = {[1; 2; 3]}) = false
+The command has indeed failed with message:
+Failed to progress.
+The command has indeed failed with message:
+Failed to progress.
+1 goal
+  
+  ============================
+  bool_decide (∅ ≡ {[1; 2; 3]}) = false
+The command has indeed failed with message:
+Failed to progress.
+The command has indeed failed with message:
+Failed to progress.
+1 goal
+  
+  ============================
+  bool_decide (1 ∈ {[1; 2; 3]}) = true
+The command has indeed failed with message:
+Failed to progress.
+The command has indeed failed with message:
+Failed to progress.
+1 goal
+  
+  ============================
+  bool_decide (∅ ## {[1; 2; 3]}) = true
+The command has indeed failed with message:
+Failed to progress.
+The command has indeed failed with message:
+Failed to progress.
+1 goal
+  
+  ============================
+  bool_decide (∅ ⊆ {[1; 2; 3]}) = true

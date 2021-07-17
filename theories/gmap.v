@@ -237,6 +237,7 @@ Definition gset K `{Countable K} := mapset (gmap K).
 
 Section gset.
   Context `{Countable K}.
+  (* Lift instances of operational TCs from [mapset]. *)
   Global Instance gset_elem_of: ElemOf K (gset K) := _.
   Global Instance gset_empty : Empty (gset K) := _.
   Global Instance gset_singleton : Singleton K (gset K) := _.
@@ -244,10 +245,6 @@ Section gset.
   Global Instance gset_intersection: Intersection (gset K) := _.
   Global Instance gset_difference: Difference (gset K) := _.
   Global Instance gset_elements: Elements K (gset K) := _.
-  Global Instance gset_leibniz : LeibnizEquiv (gset K) := _.
-  Global Instance gset_semi_set : SemiSet K (gset K) | 1 := _.
-  Global Instance gset_set : Set_ K (gset K) | 1 := _.
-  Global Instance gset_fin_set : FinSet K (gset K) := _.
   Global Instance gset_eq_dec : EqDecision (gset K) := _.
   Global Instance gset_countable : Countable (gset K) := _.
   Global Instance gset_equiv_dec : RelDecision (≡@{gset K}) | 1 := _.
@@ -255,6 +252,12 @@ Section gset.
   Global Instance gset_disjoint_dec : RelDecision (##@{gset K}) := _.
   Global Instance gset_subseteq_dec : RelDecision (⊆@{gset K}) := _.
   Global Instance gset_dom {A} : Dom (gmap K A) (gset K) := mapset_dom.
+
+  (* Lift instances of other TCs. *)
+  Global Instance gset_leibniz : LeibnizEquiv (gset K) := _.
+  Global Instance gset_semi_set : SemiSet K (gset K) | 1 := _.
+  Global Instance gset_set : Set_ K (gset K) | 1 := _.
+  Global Instance gset_fin_set : FinSet K (gset K) := _.
   Global Instance gset_dom_spec : FinMapDom K (gmap K) (gset K) := mapset_dom_spec.
 
   (** If you are looking for a lemma showing that [gset] is extensional, see

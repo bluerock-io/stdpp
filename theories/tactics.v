@@ -227,7 +227,7 @@ Note that the obvious alternative [open_constr (_:T)] has subtly different
 behavior, see std++ issue 115.
 
 Usually, Ltacs cannot return a value and have a side-effect, but we use the
-trickd escribed at
+trick described at
 <https://stackoverflow.com/questions/45949064/check-for-evars-in-a-tactic-that-returns-a-value/46178884#46178884>
 to work around that: wrap the side-effect in a [match goal]. *)
 Ltac mk_evar T :=

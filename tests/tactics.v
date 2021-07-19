@@ -60,6 +60,20 @@ Lemma naive_solver_issue_115 (P : nat → Prop) (x : nat) :
   (∀ x', P x' → x' = 10) → P x → x + 1 = 11.
 Proof. naive_solver. Qed.
 
+(** [mk_evar] works on things that coerce to types. *)
+(** This is a feature when we have packed structures, for example Iris's [ofe]
+(fields other than the carrier omitted). *)
+Structure ofe := Ofe { ofe_car :> Type }.
+Goal ∀ A : ofe, True.
+intros A.
+let x := mk_evar A in idtac.
+Abort.
+(** More surprisingly, it also works for other coercions into a
+universe, like [Is_true : bool → Prop]. *)
+Goal True.
+let x := mk_evar true in idtac.
+Abort.
+
 (** Make sure that [done] is not called recursively when solving [is_Some],
 which might leave an unresolved evar before performing ex falso. *)
 Goal False → is_Some (@None nat).

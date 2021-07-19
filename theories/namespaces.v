@@ -99,6 +99,17 @@ Global Hint Resolve coPset_disjoint_difference_l1 | 50 : ndisj.
 Local Definition coPset_disjoint_difference_l2 := disjoint_difference_l2 (C:=coPset).
 Global Hint Resolve coPset_disjoint_difference_l2 | 100 : ndisj.
 Global Hint Resolve ndot_preserve_disjoint_l ndot_preserve_disjoint_r | 100 : ndisj.
+Local Definition coPset_disjoint_empty_l := disjoint_empty_l (C:=coPset).
+Global Hint Resolve coPset_disjoint_empty_l : ndisj.
+Local Definition coPset_disjoint_empty_r := disjoint_empty_r (C:=coPset).
+Global Hint Resolve coPset_disjoint_empty_r : ndisj.
+(** We prefer ∖ on the left of ## (for the [disjoint_difference] lemmas to
+apply), so try moving it there. *)
+Global Hint Extern 10 (_ ## (_ ∖ _)) =>
+  lazymatch goal with
+  | |- (_ ∖ _) ## _ => fail (* ∖ on both sides, leave it be *)
+  | |- _ => symmetry
+  end : ndisj.
 
 Ltac solve_ndisj :=
   repeat match goal with

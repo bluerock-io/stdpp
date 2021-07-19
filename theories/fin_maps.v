@@ -80,7 +80,7 @@ Global Instance map_size `{FinMapToList K A M} : Size M := λ m,
 
 Definition map_to_set `{FinMapToList K A M,
     Singleton B C, Empty C, Union C} (f : K → A → B) (m : M) : C :=
-  list_to_set (curry f <$> map_to_list m).
+  list_to_set (uncurry f <$> map_to_list m).
 Definition set_to_map `{Elements B C, Insert K A M, Empty M}
     (f : B → K * A) (X : C) : M :=
   list_to_map (f <$> elements X).
@@ -131,7 +131,7 @@ Global Instance map_difference `{Merge M} {A} : Difference (M A) :=
 of the elements. Implemented by conversion to lists, so not very efficient. *)
 Definition map_imap `{∀ A, Insert K A (M A), ∀ A, Empty (M A),
     ∀ A, FinMapToList K A (M A)} {A B} (f : K → A → option B) (m : M A) : M B :=
-  list_to_map (omap (λ ix, (fst ix ,.) <$> curry f ix) (map_to_list m)).
+  list_to_map (omap (λ ix, (fst ix ,.) <$> uncurry f ix) (map_to_list m)).
 
 (** Given a function [f : K1 → K2], the function [kmap f] turns a maps with
 keys of type [K1] into a map with keys of type [K2]. The function [kmap f]
@@ -152,7 +152,7 @@ Notation map_zip := (map_zip_with pair).
 (* Folds a function [f] over a map. The order in which the function is called
 is unspecified. *)
 Definition map_fold `{FinMapToList K A M} {B}
-  (f : K → A → B → B) (b : B) : M → B := foldr (curry f) b ∘ map_to_list.
+  (f : K → A → B → B) (b : B) : M → B := foldr (uncurry f) b ∘ map_to_list.
 
 Global Instance map_filter
     `{FinMapToList K A M, Insert K A M, Empty M} : Filter (K * A) M :=
@@ -1172,9 +1172,9 @@ Lemma map_fold_insert {A B} (R : relation B) `{!PreOrder R}
   R (map_fold f b (<[i:=x]> m)) (f i x (map_fold f b m)).
 Proof.
   intros Hf_proper Hf Hi. unfold map_fold; simpl.
-  assert (∀ kz, Proper (R ==> R) (curry f kz)) by (intros []; apply _).
-  trans (foldr (curry f) b ((i, x) :: map_to_list m)); [|done].
-  eapply (foldr_permutation R (curry f) b), map_to_list_insert; auto.
+  assert (∀ kz, Proper (R ==> R) (uncurry f kz)) by (intros []; apply _).
+  trans (foldr (uncurry f) b ((i, x) :: map_to_list m)); [|done].
+  eapply (foldr_permutation R (uncurry f) b), map_to_list_insert; auto.
   intros j1 [k1 y1] j2 [k2 y2] c Hj Hj1 Hj2. apply Hf.
   - intros ->.
     eapply Hj, NoDup_lookup; [apply (NoDup_fst_map_to_list (<[i:=x]> m))| | ].
@@ -1199,7 +1199,7 @@ Lemma map_fold_ind {A B} (P : B → M A → Prop) (f : K → A → B → B) (b :
 Proof.
   intros Hemp Hinsert.
   cut (∀ l, NoDup l →
-    ∀ m, (∀ i x, m !! i = Some x ↔ (i,x) ∈ l) → P (foldr (curry f) b l) m).
+    ∀ m, (∀ i x, m !! i = Some x ↔ (i,x) ∈ l) → P (foldr (uncurry f) b l) m).
   { intros help ?. apply help; [apply NoDup_map_to_list|].
     intros i x. by rewrite elem_of_map_to_list. }
   induction 1 as [|[i x] l ?? IH]; simpl.
@@ -1399,7 +1399,7 @@ Section map_Forall.
   Context {A} (P : K → A → Prop).
   Implicit Types m : M A.
 
-  Lemma map_Forall_to_list m : map_Forall P m ↔ Forall (curry P) (map_to_list m).
+  Lemma map_Forall_to_list m : map_Forall P m ↔ Forall (uncurry P) (map_to_list m).
   Proof.
     rewrite Forall_forall. split.
     - intros Hforall [i x]. rewrite elem_of_map_to_list. by apply (Hforall i x).
@@ -1457,7 +1457,7 @@ Section map_Forall.
   Context `{∀ i x, Decision (P i x)}.
   Global Instance map_Forall_dec m : Decision (map_Forall P m).
   Proof.
-    refine (cast_if (decide (Forall (curry P) (map_to_list m))));
+    refine (cast_if (decide (Forall (uncurry P) (map_to_list m))));
       by rewrite map_Forall_to_list.
   Defined.
   Lemma map_not_Forall (m : M A) :
@@ -1687,7 +1687,7 @@ Proof.
 Qed.
 
 Lemma map_zip_with_map_zip {A B C} (f : A → B → C) (m1 : M A) (m2 : M B) :
-  map_zip_with f m1 m2 = curry f <$> map_zip m1 m2.
+  map_zip_with f m1 m2 = uncurry f <$> map_zip m1 m2.
 Proof.
   apply map_eq; intro i. rewrite lookup_fmap, !map_lookup_zip_with.
   by destruct (m1 !! i), (m2 !! i).
@@ -2640,7 +2640,7 @@ Section setoid.
   Qed.
 
   Global Instance map_filter_proper (P : K * A → Prop) `{!∀ kx, Decision (P kx)} :
-    (∀ k, Proper ((≡) ==> iff) (uncurry P k)) →
+    (∀ k, Proper ((≡) ==> iff) (curry P k)) →
     Proper ((≡@{M A}) ==> (≡)) (filter P).
   Proof.
     intros ? m1 m2 Hm i. rewrite !map_filter_lookup.
@@ -2739,7 +2739,7 @@ Section setoid_inversion.
   Qed.
 
   Lemma map_filter_equiv_eq (P : K * A → Prop) `{!∀ kx, Decision (P kx)} (m1 m2 : M A):
-    (∀ k, Proper ((≡) ==> iff) (uncurry P k)) →
+    (∀ k, Proper ((≡) ==> iff) (curry P k)) →
     m1 ≡ filter P m2 ↔ ∃ m2', m1 = filter P m2' ∧ m2' ≡ m2.
   Proof.
     intros HP. split; [|by intros (?&->&->)].

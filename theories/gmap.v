@@ -144,11 +144,11 @@ Next Obligation.
 Qed.
 
 (** * Curry and uncurry *)
-Definition gmap_curry `{Countable K1, Countable K2} {A} :
+Definition gmap_uncurry `{Countable K1, Countable K2} {A} :
     gmap K1 (gmap K2 A) → gmap (K1 * K2) A :=
   map_fold (λ i1 m' macc,
     map_fold (λ i2 x, <[(i1,i2):=x]>) macc m') ∅.
-Definition gmap_uncurry `{Countable K1, Countable K2} {A} :
+Definition gmap_curry `{Countable K1, Countable K2} {A} :
     gmap (K1 * K2) A → gmap K1 (gmap K2 A) :=
   map_fold (λ '(i1, i2) x,
     partial_alter (Some ∘ <[i2:=x]> ∘ default ∅) i1) ∅.
@@ -158,8 +158,8 @@ Section curry_uncurry.
 
   (* FIXME: the type annotations `option (gmap K2 A)` are silly. Maybe these are
   a consequence of Coq bug #5735 *)
-  Lemma lookup_gmap_curry (m : gmap K1 (gmap K2 A)) i j :
-    gmap_curry m !! (i,j) = (m !! i : option (gmap K2 A)) ≫= (.!! j).
+  Lemma lookup_gmap_uncurry (m : gmap K1 (gmap K2 A)) i j :
+    gmap_uncurry m !! (i,j) = (m !! i : option (gmap K2 A)) ≫= (.!! j).
   Proof.
     apply (map_fold_ind (λ mr m, mr !! (i,j) = m !! i ≫= (.!! j))).
     { by rewrite !lookup_empty. }
@@ -175,8 +175,8 @@ Section curry_uncurry.
     - by rewrite !lookup_insert_ne, IH', lookup_insert_ne by congruence.
   Qed.
 
-  Lemma lookup_gmap_uncurry (m : gmap (K1 * K2) A) i j :
-    (gmap_uncurry m !! i : option (gmap K2 A)) ≫= (.!! j) = m !! (i, j).
+  Lemma lookup_gmap_curry (m : gmap (K1 * K2) A) i j :
+    (gmap_curry m !! i : option (gmap K2 A)) ≫= (.!! j) = m !! (i, j).
   Proof.
     apply (map_fold_ind (λ mr m, mr !! i ≫= (.!! j) = m !! (i, j))).
     { by rewrite !lookup_empty. }
@@ -188,8 +188,8 @@ Section curry_uncurry.
     - by rewrite lookup_partial_alter_ne, lookup_insert_ne by congruence.
   Qed.
 
-  Lemma lookup_gmap_uncurry_None (m : gmap (K1 * K2) A) i :
-    gmap_uncurry m !! i = None ↔ (∀ j, m !! (i, j) = None).
+  Lemma lookup_gmap_curry_None (m : gmap (K1 * K2) A) i :
+    gmap_curry m !! i = None ↔ (∀ j, m !! (i, j) = None).
   Proof.
     apply (map_fold_ind (λ mr m, mr !! i = None ↔ (∀ j, m !! (i, j) = None)));
       [done|].
@@ -201,34 +201,34 @@ Section curry_uncurry.
       intros j. rewrite lookup_insert_ne; [done|congruence].
   Qed.
 
-  Lemma gmap_curry_uncurry (m : gmap (K1 * K2) A) :
-    gmap_curry (gmap_uncurry m) = m.
-  Proof.
-   apply map_eq; intros [i j]. by rewrite lookup_gmap_curry, lookup_gmap_uncurry.
-  Qed.
-
-  Lemma gmap_uncurry_non_empty (m : gmap (K1 * K2) A) i x :
-    gmap_uncurry m !! i = Some x → x ≠ ∅.
-  Proof.
-    intros Hm ->. eapply eq_None_not_Some; [|by eexists].
-    eapply lookup_gmap_uncurry_None; intros j.
-    by rewrite <-lookup_gmap_uncurry, Hm.
-  Qed.
-
-  Lemma gmap_uncurry_curry_non_empty (m : gmap K1 (gmap K2 A)) :
-    (∀ i x, m !! i = Some x → x ≠ ∅) →
+  Lemma gmap_uncurry_curry (m : gmap (K1 * K2) A) :
     gmap_uncurry (gmap_curry m) = m.
   Proof.
+   apply map_eq; intros [i j]. by rewrite lookup_gmap_uncurry, lookup_gmap_curry.
+  Qed.
+
+  Lemma gmap_curry_non_empty (m : gmap (K1 * K2) A) i x :
+    gmap_curry m !! i = Some x → x ≠ ∅.
+  Proof.
+    intros Hm ->. eapply eq_None_not_Some; [|by eexists].
+    eapply lookup_gmap_curry_None; intros j.
+    by rewrite <-lookup_gmap_curry, Hm.
+  Qed.
+
+  Lemma gmap_curry_uncurry_non_empty (m : gmap K1 (gmap K2 A)) :
+    (∀ i x, m !! i = Some x → x ≠ ∅) →
+    gmap_curry (gmap_uncurry m) = m.
+  Proof.
     intros Hne. apply map_eq; intros i. destruct (m !! i) as [m2|] eqn:Hm.
-    - destruct (gmap_uncurry (gmap_curry m) !! i) as [m2'|] eqn:Hcurry.
+    - destruct (gmap_curry (gmap_uncurry m) !! i) as [m2'|] eqn:Hcurry.
       + f_equal. apply map_eq. intros j.
-        trans ((gmap_uncurry (gmap_curry m) !! i : option (gmap _ _)) ≫= (.!! j)).
+        trans ((gmap_curry (gmap_uncurry m) !! i : option (gmap _ _)) ≫= (.!! j)).
         { by rewrite Hcurry. }
-        by rewrite lookup_gmap_uncurry, lookup_gmap_curry, Hm.
-      + rewrite lookup_gmap_uncurry_None in Hcurry.
+        by rewrite lookup_gmap_curry, lookup_gmap_uncurry, Hm.
+      + rewrite lookup_gmap_curry_None in Hcurry.
         exfalso; apply (Hne i m2), map_eq; [done|intros j].
-        by rewrite lookup_empty, <-(Hcurry j), lookup_gmap_curry, Hm.
-   - apply lookup_gmap_uncurry_None; intros j. by rewrite lookup_gmap_curry, Hm.
+        by rewrite lookup_empty, <-(Hcurry j), lookup_gmap_uncurry, Hm.
+   - apply lookup_gmap_curry_None; intros j. by rewrite lookup_gmap_uncurry, Hm.
   Qed.
 End curry_uncurry.
 

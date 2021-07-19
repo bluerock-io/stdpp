@@ -23,6 +23,11 @@ Lemma test5 N1 N2 :
   ⊤ ∖ ↑N1 ∖ ↑N2 ⊆@{coPset} ⊤ ∖ ↑N1.@"x" ∖ ↑N2 ∖ ↑N1.@"y".
 Proof. solve_ndisj. Qed.
 
+Lemma test_ndisjoint_difference_l N : ⊤ ∖ ↑N ##@{coPset} ↑N.
+Proof. solve_ndisj. Qed.
+Lemma test_ndisjoint_difference_r N : ↑N ##@{coPset} ⊤ ∖ ↑N.
+Proof. solve_ndisj. Qed.
+
 Lemma test6 E N :
   ↑N ⊆ E → ↑N ⊆ ⊤ ∖ (E ∖ ↑N).
 Proof. solve_ndisj. Qed.

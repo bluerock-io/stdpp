@@ -155,6 +155,7 @@ s/\bgmap_curry_uncurry\b/gmap_uncurry_curry/g
 s/\bgmap_uncurry_non_empty\b/gmap_curry_non_empty/g
 s/\bgmap_uncurry_curry_non_empty\b/gmap_curry_uncurry_non_empty/g
 s/\bhcurry_uncurry\b/huncurry_curry/g
+s/\blookup_gmap_uncurry_None\b/lookup_gmap_curry_None/g
 ' $(find theories -name "*.v")
 ```
 

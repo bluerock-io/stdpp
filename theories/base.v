@@ -772,6 +772,8 @@ End prod_relation.
 Global Instance prod_equiv `{Equiv A,Equiv B} : Equiv (A * B) :=
   prod_relation (≡) (≡).
 
+(** Below we make [prod_equiv] type class opaque, so we first lift all
+instances *)
 Section prod_setoid.
   Context `{Equiv A, Equiv B}.
 

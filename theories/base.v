@@ -718,36 +718,91 @@ Definition prod_relation {A B} (R1 : relation A) (R2 : relation B) :
   relation (A * B) := λ x y, R1 (x.1) (y.1) ∧ R2 (x.2) (y.2).
 
 Section prod_relation.
-  Context `{R1 : relation A, R2 : relation B}.
+  Context `{RA : relation A, RB : relation B}.
   Global Instance prod_relation_refl :
-    Reflexive R1 → Reflexive R2 → Reflexive (prod_relation R1 R2).
+    Reflexive RA → Reflexive RB → Reflexive (prod_relation RA RB).
   Proof. firstorder eauto. Qed.
   Global Instance prod_relation_sym :
-    Symmetric R1 → Symmetric R2 → Symmetric (prod_relation R1 R2).
+    Symmetric RA → Symmetric RB → Symmetric (prod_relation RA RB).
   Proof. firstorder eauto. Qed.
   Global Instance prod_relation_trans :
-    Transitive R1 → Transitive R2 → Transitive (prod_relation R1 R2).
+    Transitive RA → Transitive RB → Transitive (prod_relation RA RB).
   Proof. firstorder eauto. Qed.
   Global Instance prod_relation_equiv :
-    Equivalence R1 → Equivalence R2 → Equivalence (prod_relation R1 R2).
+    Equivalence RA → Equivalence RB → Equivalence (prod_relation RA RB).
   Proof. split; apply _. Qed.
 
-  Global Instance pair_proper' : Proper (R1 ==> R2 ==> prod_relation R1 R2) pair.
+  Global Instance pair_proper' : Proper (RA ==> RB ==> prod_relation RA RB) pair.
   Proof. firstorder eauto. Qed.
-  Global Instance pair_inj' : Inj2 R1 R2 (prod_relation R1 R2) pair.
+  Global Instance pair_inj' : Inj2 RA RB (prod_relation RA RB) pair.
   Proof. inversion_clear 1; eauto. Qed.
-  Global Instance fst_proper' : Proper (prod_relation R1 R2 ==> R1) fst.
+  Global Instance fst_proper' : Proper (prod_relation RA RB ==> RA) fst.
   Proof. firstorder eauto. Qed.
-  Global Instance snd_proper' : Proper (prod_relation R1 R2 ==> R2) snd.
+  Global Instance snd_proper' : Proper (prod_relation RA RB ==> RB) snd.
   Proof. firstorder eauto. Qed.
+
+  Global Instance curry_proper' `{RC : relation C} :
+    Proper ((prod_relation RA RB ==> RC) ==> RA ==> RB ==> RC) curry.
+  Proof. firstorder eauto. Qed.
+  Global Instance uncurry_proper' `{RC : relation C} :
+    Proper ((RA ==> RB ==> RC) ==> prod_relation RA RB ==> RC) uncurry.
+  Proof. intros f1 f2 Hf [x1 y1] [x2 y2] []; apply Hf; assumption. Qed.
+
+  Global Instance curry3_proper' `{RC : relation C, RD : relation D} :
+    Proper ((prod_relation (prod_relation RA RB) RC ==> RD) ==>
+            RA ==> RB ==> RC ==> RD) curry3.
+  Proof. firstorder eauto. Qed.
+  Global Instance uncurry3_proper' `{RC : relation C, RD : relation D} :
+    Proper ((RA ==> RB ==> RC ==> RD) ==>
+            prod_relation (prod_relation RA RB) RC ==> RD) uncurry3.
+  Proof. intros f1 f2 Hf [[??] ?] [[??] ?] [[??] ?]; apply Hf; assumption. Qed.
+
+  Global Instance curry4_proper' `{RC : relation C, RD : relation D, RE : relation E} :
+    Proper ((prod_relation (prod_relation (prod_relation RA RB) RC) RD ==> RE) ==>
+            RA ==> RB ==> RC ==> RD ==> RE) curry4.
+  Proof. firstorder eauto. Qed.
+  Global Instance uncurry5_proper' `{RC : relation C, RD : relation D, RE : relation E} :
+    Proper ((RA ==> RB ==> RC ==> RD ==> RE) ==>
+            prod_relation (prod_relation (prod_relation RA RB) RC) RD ==> RE) uncurry4.
+  Proof.
+    intros f1 f2 Hf [[[??] ?] ?] [[[??] ?] ?] [[[??] ?] ?]; apply Hf; assumption.
+  Qed.
 End prod_relation.
 
-Global Instance prod_equiv `{Equiv A,Equiv B} : Equiv (A * B) := prod_relation (≡) (≡).
-Global Instance pair_proper `{Equiv A, Equiv B} :
-  Proper ((≡) ==> (≡) ==> (≡)) (@pair A B) := _.
-Global Instance pair_equiv_inj `{Equiv A, Equiv B} : Inj2 (≡) (≡) (≡) (@pair A B) := _.
-Global Instance fst_proper `{Equiv A, Equiv B} : Proper ((≡) ==> (≡)) (@fst A B) := _.
-Global Instance snd_proper `{Equiv A, Equiv B} : Proper ((≡) ==> (≡)) (@snd A B) := _.
+Global Instance prod_equiv `{Equiv A,Equiv B} : Equiv (A * B) :=
+  prod_relation (≡) (≡).
+
+Section prod_setoid.
+  Context `{Equiv A, Equiv B}.
+
+  Global Instance prod_equivalence :
+    Equivalence (≡@{A}) → Equivalence (≡@{B}) → Equivalence (≡@{A * B}) := _.
+
+  Global Instance pair_proper : Proper ((≡) ==> (≡) ==> (≡@{A*B})) pair := _.
+  Global Instance pair_equiv_inj : Inj2 (≡) (≡) (≡@{A*B}) pair := _.
+  Global Instance fst_proper : Proper ((≡@{A*B}) ==> (≡)) fst := _.
+  Global Instance snd_proper : Proper ((≡@{A*B}) ==> (≡)) snd := _.
+
+  Global Instance curry_proper `{Equiv C} :
+    Proper (((≡@{A*B}) ==> (≡@{C})) ==> (≡) ==> (≡) ==> (≡)) curry := _.
+  Global Instance uncurry_proper `{Equiv C} :
+    Proper (((≡) ==> (≡) ==> (≡)) ==> (≡@{A*B}) ==> (≡@{C})) uncurry := _.
+
+  Global Instance curry3_proper `{Equiv C, Equiv D} :
+    Proper (((≡@{A*B*C}) ==> (≡@{D})) ==>
+            (≡) ==> (≡) ==> (≡) ==> (≡)) curry3 := _.
+  Global Instance uncurry3_proper `{Equiv C, Equiv D} :
+    Proper (((≡) ==> (≡) ==> (≡) ==> (≡)) ==>
+            (≡@{A*B*C}) ==> (≡@{D})) uncurry3 := _.
+
+  Global Instance curry4_proper `{Equiv C, Equiv D, Equiv E} :
+    Proper (((≡@{A*B*C*D}) ==> (≡@{E})) ==>
+            (≡) ==> (≡) ==> (≡) ==> (≡) ==> (≡)) curry4 := _.
+  Global Instance uncurry4_proper `{Equiv C, Equiv D, Equiv E} :
+    Proper (((≡) ==> (≡) ==> (≡) ==> (≡) ==> (≡)) ==>
+            (≡@{A*B*C*D}) ==> (≡@{E})) uncurry4 := _.
+End prod_setoid.
+
 Typeclasses Opaque prod_equiv.
 
 Global Instance prod_leibniz `{LeibnizEquiv A, LeibnizEquiv B} :

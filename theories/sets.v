@@ -385,7 +385,11 @@ Section semi_set.
 
   Lemma union_subseteq_l X Y : X ⊆ X ∪ Y.
   Proof. set_solver. Qed.
+  Lemma union_subseteq_l' X X' Y : X ⊆ X' → X ⊆ X' ∪ Y.
+  Proof. set_solver. Qed.
   Lemma union_subseteq_r X Y : Y ⊆ X ∪ Y.
+  Proof. set_solver. Qed.
+  Lemma union_subseteq_r' X Y Y' : Y ⊆ Y' → Y ⊆ X ∪ Y'.
   Proof. set_solver. Qed.
   Lemma union_least X Y Z : X ⊆ Z → Y ⊆ Z → X ∪ Y ⊆ Z.
   Proof. set_solver. Qed.

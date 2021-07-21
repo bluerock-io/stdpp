@@ -1,4 +1,4 @@
-From stdpp Require Import prelude fin_maps.
+From stdpp Require Import prelude fin_maps propset.
 
 (** Some tests for solve_proper. *)
 Section tests.
@@ -69,3 +69,7 @@ Section map_tests.
     Proper ((≡) ==> (≡@{M _})) (omap f).
   Proof. solve_proper. Qed.
 End map_tests.
+
+Lemma test_prod_equivalence (X1 X2 X3 Y : propset nat * propset nat) :
+  X3 ≡ X2 → X2 ≡ X1 → (X1,Y) ≡ (X3,Y).
+Proof. intros H1 H2. by rewrite H1, <-H2. Qed.

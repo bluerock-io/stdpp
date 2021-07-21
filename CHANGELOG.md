@@ -113,9 +113,12 @@ API-breaking change is listed.
   for Coq's `evar` tactic).
 - Make `solve_ndisj` able to solve more goals of the form `_ ⊆ ⊤ ∖ _`,
   `_ ∖ _ ## _`, `_ ## _ ∖ _`, as well as `_ ## ∅` and `∅ ## _`.
-- Swap names of `curry`/`uncurry`, `curry3`/`uncurry3`, `curry4`/`uncurry4`,
-  `gmap_curry`/`gmap_uncurry`, and `hcurry`/`huncurry` to be consistent with
-  Haskell and friends.
+- Improvements to curry:
+  + Swap names of `curry`/`uncurry`, `curry3`/`uncurry3`, `curry4`/`uncurry4`,
+    `gmap_curry`/`gmap_uncurry`, and `hcurry`/`huncurry` to be consistent with
+    Haskell and friends.
+  + Add `Params` and `Proper` instances for `curry`/`uncurry`,
+    `curry3`/`uncurry3`, and `curry4`/`uncurry4`.
 - Rename `map_union_subseteq_l_alt` → `map_union_subseteq_l'` and
   `map_union_subseteq_r_alt` → `map_union_subseteq_r'` to be consistent with
   `or_intro_{l,r}'`.

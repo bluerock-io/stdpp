@@ -116,6 +116,9 @@ API-breaking change is listed.
 - Swap names of `curry`/`uncurry`, `curry3`/`uncurry3`, `curry4`/`uncurry4`,
   `gmap_curry`/`gmap_uncurry`, and `hcurry`/`huncurry` to be consistent with
   Haskell and friends.
+- Rename `map_union_subseteq_l_alt` → `map_union_subseteq_l'` and
+  `map_union_subseteq_r_alt` → `map_union_subseteq_r'` to be consistent with
+  `or_intro_{l,r}'`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).
@@ -156,6 +159,8 @@ s/\bgmap_uncurry_non_empty\b/gmap_curry_non_empty/g
 s/\bgmap_uncurry_curry_non_empty\b/gmap_curry_uncurry_non_empty/g
 s/\bhcurry_uncurry\b/huncurry_curry/g
 s/\blookup_gmap_uncurry_None\b/lookup_gmap_curry_None/g
+# map_union_subseteq
+s/\bmap_union_subseteq_(r|l)_alt\b/map_union_subseteq_\1'/g
 ' $(find theories -name "*.v")
 ```
 

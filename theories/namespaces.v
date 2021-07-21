@@ -84,6 +84,11 @@ Local Definition coPset_empty_subseteq := empty_subseteq (C:=coPset).
 Global Hint Resolve coPset_empty_subseteq : ndisj.
 Local Definition coPset_union_least := union_least (C:=coPset).
 Global Hint Resolve coPset_union_least : ndisj.
+(** For goals like [X ⊆ L ∪ R], backtrack for the two sides. *)
+Local Definition coPset_union_subseteq_l' := union_subseteq_l' (C:=coPset).
+Global Hint Resolve coPset_union_subseteq_l' | 50 : ndisj.
+Local Definition coPset_union_subseteq_r' := union_subseteq_r' (C:=coPset).
+Global Hint Resolve coPset_union_subseteq_r' | 50 : ndisj.
 (** Fallback, loses lots of information but lets other rules make progress. *)
 Local Definition coPset_subseteq_difference_l := subseteq_difference_l (C:=coPset).
 Global Hint Resolve coPset_subseteq_difference_l | 100 : ndisj.

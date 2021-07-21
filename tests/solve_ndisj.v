@@ -35,3 +35,11 @@ Proof. solve_ndisj. Qed.
 Lemma test7 N :
   ↑N ⊆@{coPset} ⊤ ∖ ∅.
 Proof. solve_ndisj. Qed.
+
+Lemma test8 N1 N2 :
+  ⊤ ∖ (↑N1 ∪ ↑N2) ⊆@{coPset} ⊤ ∖ ↑N1.@"counter".
+Proof. solve_ndisj. Qed.
+
+Lemma test9 N1 N2 :
+  ⊤ ∖ (↑N1 ∪ ↑N2) ⊆@{coPset} ⊤ ∖ ↑N1.@"counter" ∖ ↑N1.@"state" ∖ ↑N2.
+Proof. solve_ndisj. Qed.

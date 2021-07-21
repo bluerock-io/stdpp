@@ -675,17 +675,23 @@ Global Instance: Params (@snd) 2 := {}.
 https://github.com/coq/coq/pull/12716/ 
 FIXME: Remove this workaround once the lowest Coq version we support is 8.13. *)
 Notation curry := prod_uncurry.
+Global Instance: Params (@curry) 3 := {}.
 Notation uncurry := prod_curry.
+Global Instance: Params (@uncurry) 3 := {}.
 
 Definition uncurry3 {A B C D} (f : A → B → C → D) (p : A * B * C) : D :=
   let '(a,b,c) := p in f a b c.
+Global Instance: Params (@uncurry3) 4 := {}.
 Definition uncurry4 {A B C D E} (f : A → B → C → D → E) (p : A * B * C * D) : E :=
   let '(a,b,c,d) := p in f a b c d.
+Global Instance: Params (@uncurry4) 5 := {}.
 
 Definition curry3 {A B C D} (f : A * B * C → D) (a : A) (b : B) (c : C) : D :=
   f (a, b, c).
+Global Instance: Params (@curry3) 4 := {}.
 Definition curry4 {A B C D E} (f : A * B * C * D → E)
   (a : A) (b : B) (c : C) (d : D) : E := f (a, b, c, d).
+Global Instance: Params (@curry4) 5 := {}.
 
 Definition prod_map {A A' B B'} (f: A → A') (g: B → B') (p : A * B) : A' * B' :=
   (f (p.1), g (p.2)).
@@ -710,6 +716,7 @@ Qed.
 
 Definition prod_relation {A B} (R1 : relation A) (R2 : relation B) :
   relation (A * B) := λ x y, R1 (x.1) (y.1) ∧ R2 (x.2) (y.2).
+
 Section prod_relation.
   Context `{R1 : relation A, R2 : relation B}.
   Global Instance prod_relation_refl :

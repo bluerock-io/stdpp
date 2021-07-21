@@ -2039,9 +2039,9 @@ Lemma map_union_subseteq_r {A} (m1 m2 : M A) : m1 ##ₘ m2 → m2 ⊆ m1 ∪ m2.
 Proof.
   intros. rewrite map_union_comm by done. by apply map_union_subseteq_l.
 Qed.
-Lemma map_union_subseteq_l_alt {A} (m1 m2 m3 : M A) : m1 ⊆ m2 → m1 ⊆ m2 ∪ m3.
+Lemma map_union_subseteq_l' {A} (m1 m2 m3 : M A) : m1 ⊆ m2 → m1 ⊆ m2 ∪ m3.
 Proof. intros. trans m2; auto using map_union_subseteq_l. Qed.
-Lemma map_union_subseteq_r_alt {A} (m1 m2 m3 : M A) :
+Lemma map_union_subseteq_r' {A} (m1 m2 m3 : M A) :
   m2 ##ₘ m3 → m1 ⊆ m3 → m1 ⊆ m2 ∪ m3.
 Proof. intros. trans m3; auto using map_union_subseteq_r. Qed.
 Lemma map_union_mono_l {A} (m1 m2 m3 : M A) : m1 ⊆ m2 → m3 ∪ m1 ⊆ m3 ∪ m2.

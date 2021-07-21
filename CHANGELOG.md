@@ -119,7 +119,7 @@ API-breaking change is listed.
 - Rename `map_union_subseteq_l_alt` → `map_union_subseteq_l'` and
   `map_union_subseteq_r_alt` → `map_union_subseteq_r'` to be consistent with
   `or_intro_{l,r}'`.
-- Add `union_subseteq_l'`, `union_subseteq_r'` as versions of
+- Add `union_subseteq_l'`, `union_subseteq_r'` as transitive versions of
   `union_subseteq_l`, `union_subseteq_r` that can be more easily `apply`ed.
 
 The following `sed` script should perform most of the renaming

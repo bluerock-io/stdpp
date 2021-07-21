@@ -743,7 +743,8 @@ Global Instance fst_proper `{Equiv A, Equiv B} : Proper ((≡) ==> (≡)) (@fst 
 Global Instance snd_proper `{Equiv A, Equiv B} : Proper ((≡) ==> (≡)) (@snd A B) := _.
 Typeclasses Opaque prod_equiv.
 
-Global Instance prod_leibniz `{LeibnizEquiv A, LeibnizEquiv B} : LeibnizEquiv (A * B).
+Global Instance prod_leibniz `{LeibnizEquiv A, LeibnizEquiv B} :
+  LeibnizEquiv (A * B).
 Proof. intros [??] [??] [??]; f_equal; apply leibniz_equiv; auto. Qed.
 
 (** ** Sums *)
@@ -766,31 +767,31 @@ Global Instance sum_map_inj {A A' B B'} (f : A → A') (g : B → B') :
 Proof. intros ?? [?|?] [?|?] [=]; f_equal; apply (inj _); auto. Qed.
 
 Inductive sum_relation {A B}
-     (R1 : relation A) (R2 : relation B) : relation (A + B) :=
-  | inl_related x1 x2 : R1 x1 x2 → sum_relation R1 R2 (inl x1) (inl x2)
-  | inr_related y1 y2 : R2 y1 y2 → sum_relation R1 R2 (inr y1) (inr y2).
+     (RA : relation A) (RB : relation B) : relation (A + B) :=
+  | inl_related x1 x2 : RA x1 x2 → sum_relation RA RB (inl x1) (inl x2)
+  | inr_related y1 y2 : RB y1 y2 → sum_relation RA RB (inr y1) (inr y2).
 
 Section sum_relation.
-  Context `{R1 : relation A, R2 : relation B}.
+  Context `{RA : relation A, RB : relation B}.
   Global Instance sum_relation_refl :
-    Reflexive R1 → Reflexive R2 → Reflexive (sum_relation R1 R2).
+    Reflexive RA → Reflexive RB → Reflexive (sum_relation RA RB).
   Proof. intros ?? [?|?]; constructor; reflexivity. Qed.
   Global Instance sum_relation_sym :
-    Symmetric R1 → Symmetric R2 → Symmetric (sum_relation R1 R2).
+    Symmetric RA → Symmetric RB → Symmetric (sum_relation RA RB).
   Proof. destruct 3; constructor; eauto. Qed.
   Global Instance sum_relation_trans :
-    Transitive R1 → Transitive R2 → Transitive (sum_relation R1 R2).
+    Transitive RA → Transitive RB → Transitive (sum_relation RA RB).
   Proof. destruct 3; inversion_clear 1; constructor; eauto. Qed.
   Global Instance sum_relation_equiv :
-    Equivalence R1 → Equivalence R2 → Equivalence (sum_relation R1 R2).
+    Equivalence RA → Equivalence RB → Equivalence (sum_relation RA RB).
   Proof. split; apply _. Qed.
-  Global Instance inl_proper' : Proper (R1 ==> sum_relation R1 R2) inl.
+  Global Instance inl_proper' : Proper (RA ==> sum_relation RA RB) inl.
   Proof. constructor; auto. Qed.
-  Global Instance inr_proper' : Proper (R2 ==> sum_relation R1 R2) inr.
+  Global Instance inr_proper' : Proper (RB ==> sum_relation RA RB) inr.
   Proof. constructor; auto. Qed.
-  Global Instance inl_inj' : Inj R1 (sum_relation R1 R2) inl.
+  Global Instance inl_inj' : Inj RA (sum_relation RA RB) inl.
   Proof. inversion_clear 1; auto. Qed.
-  Global Instance inr_inj' : Inj R2 (sum_relation R1 R2) inr.
+  Global Instance inr_inj' : Inj RB (sum_relation RA RB) inr.
   Proof. inversion_clear 1; auto. Qed.
 End sum_relation.
 

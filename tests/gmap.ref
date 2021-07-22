@@ -77,4 +77,4 @@ Failed to progress.
 1 goal
   
   ============================
-  Some true = Some true
+  {[3 := false; 2 := true]} !! 2 = Some true

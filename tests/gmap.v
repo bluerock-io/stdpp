@@ -69,42 +69,79 @@ Proof.
   reflexivity.
 Qed.
 
+Definition pmap_insert_positives (n : positive) : Pmap unit :=
+  Pos.iter (λ rec p m,
+    rec (p + 1)%positive (<[p:=tt]> m)) (λ _ m, m) n 1%positive ∅.
+Definition pmap_insert_positives_rev (n : positive) : Pmap unit :=
+  Pos.iter (λ rec p m,
+    rec (p - 1)%positive (<[p:=tt]> m)) (λ _ m, m) n n ∅.
+
+(* Test that the time is approximately n-log-n. We cannot test this on CI since
+you get different timings all the time.
+Definition pmap_insert_positives_test (p : positive) : bool :=
+  bool_decide (pmap_insert_positives p = pmap_insert_positives_rev p).
+
+Time Eval vm_compute in pmap_insert_positives_test 1000.
+Time Eval vm_compute in pmap_insert_positives_test 2000.
+Time Eval vm_compute in pmap_insert_positives_test 4000.
+Time Eval vm_compute in pmap_insert_positives_test 8000.
+Time Eval vm_compute in pmap_insert_positives_test 16000.
+Time Eval vm_compute in pmap_insert_positives_test 32000.
+Time Eval vm_compute in pmap_insert_positives_test 64000.
+Time Eval vm_compute in pmap_insert_positives_test 128000.
+Time Eval vm_compute in pmap_insert_positives_test 256000.
+Time Eval vm_compute in pmap_insert_positives_test 512000.
+Time Eval vm_compute in pmap_insert_positives_test 1000000.
+*)
+
+Definition gmap_insert_positives (n : positive) : gmap positive unit :=
+  Pos.iter (λ rec p m,
+    rec (p + 1)%positive (<[p:=tt]> m)) (λ _ m, m) n 1%positive ∅.
+Definition gmap_insert_positives_rev (n : positive) : gmap positive unit :=
+  Pos.iter (λ rec p m,
+    rec (p - 1)%positive (<[p:=tt]> m)) (λ _ m, m) n n ∅.
+
+(* Test that the time increases linearly *)
+Definition gmap_insert_positives_test (p : positive) : bool :=
+  bool_decide (gmap_insert_positives p = gmap_insert_positives_rev p).
+
+(* Test that the time is approximately n-log-n. We cannot test this on CI since
+you get different timings all the time.
+Time Eval vm_compute in gmap_insert_positives_test 1000.
+Time Eval vm_compute in gmap_insert_positives_test 2000.
+Time Eval vm_compute in gmap_insert_positives_test 4000.
+Time Eval vm_compute in gmap_insert_positives_test 8000.
+Time Eval vm_compute in gmap_insert_positives_test 16000.
+Time Eval vm_compute in gmap_insert_positives_test 32000.
+Time Eval vm_compute in gmap_insert_positives_test 64000.
+Time Eval vm_compute in gmap_insert_positives_test 128000.
+Time Eval vm_compute in gmap_insert_positives_test 256000.
+Time Eval vm_compute in gmap_insert_positives_test 512000.
+Time Eval vm_compute in gmap_insert_positives_test 1000000.
+*)
+
 Theorem gmap_insert_comm :
-  <[3:=false]> {[2:=true]} =@{gmap nat bool} <[2:=true]> {[3:=false]}.
-Proof.
-  simpl. Show.
-  reflexivity.
-Qed.
-
-Transparent gmap_empty.
-Arguments map_insert _ _ _ / _ _ _ _ : assert.
-Arguments Plookup _ _ _ / : assert.
-
-Theorem gmap_lookup_concrete :
-  lookup (M:=gmap nat bool) 2 (<[3:=false]> {[2:=true]}) = Some true.
+  {[ 3:=false; 2:=true]} =@{gmap nat bool} {[ 2:=true; 3:=false ]}.
 Proof. simpl. Show. reflexivity. Qed.
 
-Fixpoint insert_l (m:gmap Z unit) (l: list Z) : gmap Z unit :=
-  match l with
-  | [] => m
-  | p::l => <[p:=tt]> (insert_l m l)
-  end.
+Theorem gmap_lookup_concrete :
+  lookup (M:=gmap nat bool) 2 {[ 3:=false; 2:=true ]} = Some true.
+Proof. simpl. Show. reflexivity. Qed.
 
-Fixpoint n_positives (n:nat) (p:Z) : list Z :=
-  match n with
-  | 0 => []
-  | S n => p :: n_positives n (1 + p)%Z
-  end.
+Theorem gmap_insert_positives_reflexivity_500 :
+  gmap_insert_positives 500 = gmap_insert_positives_rev 500.
+Proof. reflexivity. Qed.
+Theorem gmap_insert_positives_reflexivity_1000 :
+  gmap_insert_positives 1000 = gmap_insert_positives_rev 1000.
+Proof. (* this should take about a second *) reflexivity. Qed.
 
-Fixpoint n_positives_rev (n:nat) (p:Z) : list Z :=
-  match n with
-  | 0 => []
-  | S n => p :: n_positives_rev n (p - 1)%Z
-  end.
-
-Theorem gmap_lookup_insert_fwd_rev :
-  insert_l ∅ (n_positives 500 1) = insert_l ∅ (n_positives_rev 500 500).
-Proof.
-  cbn [n_positives n_positives_rev Z.add Z.pos_sub Pos.add Pos.succ].
-  Time reflexivity.
-Qed.
+Theorem gmap_insert_positives_union_reflexivity_500 :
+  (gmap_insert_positives_rev 400) ∪
+    (gmap_insert_positives 500 ∖ gmap_insert_positives_rev 400)
+  = gmap_insert_positives 500.
+Proof. reflexivity. Qed.
+Theorem gmap_insert_positives_union_reflexivity_1000 :
+  (gmap_insert_positives_rev 800) ∪
+    (gmap_insert_positives 1000 ∖ gmap_insert_positives_rev 800)
+  = gmap_insert_positives 1000.
+Proof. reflexivity. Qed.

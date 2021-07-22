@@ -127,24 +127,36 @@ Lemma PNode_lookup {A} o (l r : Pmap_raw A) i :
   PNode' o l r !! i = PNode o l r !! i.
 Proof. by destruct i, o, l, r. Qed.
 
-Lemma Psingleton_wf {A} i (x : A) : Pmap_wf (Psingleton_raw i x).
+Local Lemma Psingleton_wf' {A} i (x : A) : Pmap_wf (Psingleton_raw i x).
 Proof. induction i as [[]|[]|]; simpl; rewrite ?andb_true_r; auto. Qed.
-Lemma Ppartial_alter_wf {A} f i (t : Pmap_raw A) :
-  Pmap_wf t → Pmap_wf (Ppartial_alter_raw f i t).
+Local Lemma Ppartial_alter_wf {A} f i (t : Pmap_raw A) :
+  SIs_true (Pmap_wf t) → SIs_true (Pmap_wf (Ppartial_alter_raw f i t)).
 Proof.
+  intros Hwf%SIs_true_elim. apply SIs_true_intro. revert Hwf.
   revert i; induction t as [|o l IHl r IHr]; intros i ?; simpl.
-  - destruct (f None); auto using Psingleton_wf.
+  - destruct (f None); auto using Psingleton_wf'.
   - destruct i; simpl; eauto.
 Qed.
-Lemma Pfmap_wf {A B} (f : A → B) t : Pmap_wf t → Pmap_wf (Pfmap_raw f t).
+Local Lemma Pfmap_wf {A B} (f : A → B) t :
+  SIs_true (Pmap_wf t) → SIs_true (Pmap_wf (Pfmap_raw f t)).
 Proof.
+  intros Hwf%SIs_true_elim. apply SIs_true_intro. revert Hwf.
   induction t as [|[x|] [] ? [] ?]; simpl in *; rewrite ?andb_True; intuition.
 Qed.
-Lemma Pomap_wf {A B} (f : A → option B) t : Pmap_wf t → Pmap_wf (Pomap_raw f t).
+Local Lemma Pomap_wf' {A B} (f : A → option B) t :
+  Pmap_wf t → Pmap_wf (Pomap_raw f t).
 Proof. induction t; simpl; eauto. Qed.
-Lemma Pmerge_wf {A B C} (f : option A → option B → option C) t1 t2 :
-  Pmap_wf t1 → Pmap_wf t2 → Pmap_wf (Pmerge_raw f t1 t2).
-Proof. revert t2. induction t1; intros []; simpl; eauto using Pomap_wf. Qed.
+Local Lemma Pomap_wf {A B} (f : A → option B) t :
+  SIs_true (Pmap_wf t) → SIs_true (Pmap_wf (Pomap_raw f t)).
+Proof. intros. by apply SIs_true_intro, Pomap_wf', SIs_true_elim. Qed.
+Local Lemma Pmerge_wf {A B C} (f : option A → option B → option C) t1 t2 :
+  SIs_true (Pmap_wf t1) → SIs_true (Pmap_wf t2) →
+  SIs_true (Pmap_wf (Pmerge_raw f t1 t2)).
+Proof.
+  intros Hwf1%SIs_true_elim Hwf2%SIs_true_elim.
+  apply SIs_true_intro. revert Hwf1 Hwf2.
+  revert t2. induction t1; intros []; simpl; eauto using Pomap_wf'.
+Qed.
 
 Lemma Plookup_empty {A} i : (∅ : Pmap_raw A) !! i = None.
 Proof. by destruct i. Qed.
@@ -256,7 +268,7 @@ Qed.
 
 (** Packed version and instance of the finite map type class *)
 Inductive Pmap (A : Type) : Type :=
-  PMap { pmap_car : Pmap_raw A; pmap_prf : is_true (Pmap_wf pmap_car) }.
+  PMap { pmap_car : Pmap_raw A; pmap_prf : SIs_true (Pmap_wf pmap_car) }.
 Global Arguments PMap {_} _ _ : assert.
 Global Arguments pmap_car {_} _ : assert.
 Global Arguments pmap_prf {_} _ : assert.
@@ -274,25 +286,23 @@ Global Instance Pmap_eq_dec `{EqDecision A} : EqDecision (Pmap A) := λ m1 m2,
 
 Global Instance Pempty {A} : Empty (Pmap A) := PMap ∅ stt.
 Global Instance Plookup {A} : Lookup positive A (Pmap A) := λ i m, pmap_car m !! i.
-Global Instance Ppartial_alter {A} : PartialAlter positive A (Pmap A) := λ f i m,
-  let (t,Ht) := m in PMap (partial_alter f i t) (is_true_fmap (Ppartial_alter_wf f i _) Ht).
-Global Instance Pfmap : FMap Pmap := λ A B f m,
-  let (t,Ht) := m in PMap (f <$> t) (is_true_fmap (Pfmap_wf f _) Ht).
-Global Instance Pto_list {A} : FinMapToList positive A (Pmap A) := λ m,
-  let (t,Ht) := m in Pto_list_raw 1 t [].
-Global Instance Pomap : OMap Pmap := λ A B f m,
-  let (t,Ht) := m in PMap (omap f t) (is_true_fmap (Pomap_wf f _) Ht).
-Global Instance Pmerge : Merge Pmap := λ A B C f m1 m2,
-  let (t1,Ht1) := m1 in
-  let (t2,Ht2) := m2 in
-  PMap _ (is_true_bind Ht1 (λ Ht1,
-          is_true_bind Ht2 (λ Ht2,
-          is_true_intro $ Pmerge_wf f _ _ Ht1 Ht2))).
+Global Instance Ppartial_alter {A} : PartialAlter positive A (Pmap A) :=
+  λ f i '(PMap t Ht),
+    PMap (partial_alter f i t) (Ppartial_alter_wf f i _ Ht).
+Global Instance Pfmap : FMap Pmap := λ A B f '(PMap t Ht),
+  PMap (f <$> t) (Pfmap_wf f _ Ht).
+Global Instance Pto_list {A} : FinMapToList positive A (Pmap A) := λ '(PMap t Ht),
+  Pto_list_raw 1 t [].
+Global Instance Pomap : OMap Pmap := λ A B f '(PMap t Ht),
+  PMap (omap f t) (Pomap_wf f _ Ht).
+Global Instance Pmerge : Merge Pmap := λ A B C f '(PMap t1 Ht1) '(PMap t2 Ht2),
+  PMap _ (Pmerge_wf f _ _ Ht1 Ht2).
 
 Global Instance Pmap_finmap : FinMap positive Pmap.
 Proof.
  split.
-  - intros ? [t1 ?] [t2 ?] ?; apply Pmap_eq, Pmap_wf_eq; auto using is_true_elim.
+  - intros ? [t1 ?] [t2 ?] ?.
+    apply Pmap_eq, Pmap_wf_eq; auto using SIs_true_elim.
   - by intros ? [].
   - intros ?? [??] ?. by apply Plookup_alter.
   - intros ?? [??] ??. by apply Plookup_alter_ne.

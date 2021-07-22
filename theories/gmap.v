@@ -54,8 +54,8 @@ Global Opaque gmap_empty.
 Lemma gmap_partial_alter_wf `{Countable K} {A} (f : option A → option A) m i :
   gmap_wf K m → gmap_wf K (partial_alter f (encode (A:=K) i) m).
 Proof.
-  unfold gmap_wf; apply is_true_fmap; rewrite !bool_decide_spec.
-  intros Hm p x. destruct (decide (encode i = p)) as [<-|?].
+  intros Hm%sprop_decide_unpack. apply sprop_decide_pack.
+  intros p x. destruct (decide (encode i = p)) as [<-|?].
   - rewrite decode_encode; eauto.
   - rewrite lookup_partial_alter_ne by done. by apply Hm.
 Qed.
@@ -67,16 +67,16 @@ Global Instance gmap_partial_alter `{Countable K} {A} :
 Lemma gmap_fmap_wf `{Countable K} {A B} (f : A → B) m :
   gmap_wf K m → gmap_wf K (f <$> m).
 Proof.
-  unfold gmap_wf; apply is_true_fmap; rewrite !bool_decide_spec.
-  intros ? p x. rewrite lookup_fmap, fmap_Some; intros (?&?&?); eauto.
+  intros Hm%sprop_decide_unpack. apply sprop_decide_pack.
+  intros p x. rewrite lookup_fmap, fmap_Some; intros (?&?&?); eauto.
 Qed.
 Global Instance gmap_fmap `{Countable K} : FMap (gmap K) := λ A B f '(GMap m Hm),
   GMap (f <$> m) (gmap_fmap_wf f m Hm).
 Lemma gmap_omap_wf `{Countable K} {A B} (f : A → option B) m :
   gmap_wf K m → gmap_wf K (omap f m).
 Proof.
-  unfold gmap_wf; apply is_true_fmap; rewrite !bool_decide_spec.
-  intros ? p x; rewrite lookup_omap, bind_Some; intros (?&?&?); eauto.
+  intros Hm%sprop_decide_unpack. apply sprop_decide_pack.
+  intros p x; rewrite lookup_omap, bind_Some; intros (?&?&?); eauto.
 Qed.
 Global Instance gmap_omap `{Countable K} : OMap (gmap K) := λ A B f '(GMap m Hm),
   GMap (omap f m) (gmap_omap_wf f m Hm).
@@ -84,11 +84,8 @@ Lemma gmap_merge_wf `{Countable K} {A B C}
     (f : option A → option B → option C) m1 m2 :
   gmap_wf K m1 → gmap_wf K m2 → gmap_wf K (merge f m1 m2).
 Proof.
-  unfold gmap_wf.
-  refine (λ H1' H2', is_true_bind H1' (λ H1, is_true_bind H2' (λ H2, is_true_intro (_ H1 H2)))).
-  clear H1 H2 H1' H2'.
-  rewrite !bool_decide_spec.
-  intros Hm1 Hm2 p z; rewrite lookup_merge by done; intros.
+  intros Hm1%sprop_decide_unpack Hm2%sprop_decide_unpack. apply sprop_decide_pack.
+  intros p z. rewrite lookup_merge by done.
   destruct (m1 !! _) eqn:?, (m2 !! _) eqn:?; naive_solver.
 Qed.
 Global Instance gmap_merge `{Countable K} : Merge (gmap K) :=

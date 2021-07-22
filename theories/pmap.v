@@ -267,7 +267,7 @@ Proof.
 Qed.
 
 (** Packed version and instance of the finite map type class *)
-Inductive Pmap (A : Type) : Type :=
+Record Pmap (A : Type) : Type :=
   PMap { pmap_car : Pmap_raw A; pmap_prf : SIs_true (Pmap_wf pmap_car) }.
 Global Arguments PMap {_} _ _ : assert.
 Global Arguments pmap_car {_} _ : assert.

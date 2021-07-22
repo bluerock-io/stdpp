@@ -36,7 +36,7 @@ Section namespace.
   Proof. intros N1 x1 N2 x2; rewrite !ndot_eq; naive_solver. Qed.
 
   Lemma nclose_nroot : ↑nroot = (⊤:coPset).
-  Proof. rewrite nclose_eq. by apply (sig_eq_pi _). Qed.
+  Proof. by rewrite nclose_eq. Qed.
 
   Lemma nclose_subseteq N x : ↑N.@x ⊆ (↑N : coPset).
   Proof.

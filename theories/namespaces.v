@@ -111,8 +111,11 @@ Global Hint Extern 10 (_ ## (_ ∖ _)) =>
   end : ndisj.
 (** Before we apply disjoint_difference, let's make sure we normalize the goal
 to [_ ∖ (_ ∪ _)]. *)
-Global Hint Extern 20 ((?X ∖ ?Y ∖ ?Z) ## _) =>
-  rewrite (difference_difference_L (C:=coPset) X Y Z) : ndisj.
+Local Lemma coPset_difference_difference (X1 X2 X3 Y : coPset) :
+  X1 ∖ (X2 ∪ X3) ## Y →
+  X1 ∖ X2 ∖ X3 ## Y.
+Proof. set_solver. Qed.
+Global Hint Resolve coPset_difference_difference | 20 : ndisj.
 (** Fallback, loses lots of information but lets other rules make progress.
 Tests show trying [disjoint_difference_l1] first gives better performance. *)
 Local Definition coPset_disjoint_difference_l1 := disjoint_difference_l1 (C:=coPset).

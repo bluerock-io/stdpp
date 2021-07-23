@@ -112,7 +112,8 @@ API-breaking change is listed.
 - Add `mk_evar` tactic to generate evars (intended as a more useful replacement
   for Coq's `evar` tactic).
 - Make `solve_ndisj` able to solve more goals of the form `_ ⊆ ⊤ ∖ _`,
-  `_ ∖ _ ## _`, `_ ## _ ∖ _`, as well as `_ ## ∅` and `∅ ## _`.
+  `_ ∖ _ ## _`, `_ ## _ ∖ _`, as well as `_ ## ∅` and `∅ ## _`,
+  and goals containing `_ ∖ _ ∖ _`.
 - Improvements to curry:
   + Swap names of `curry`/`uncurry`, `curry3`/`uncurry3`, `curry4`/`uncurry4`,
     `gmap_curry`/`gmap_uncurry`, and `hcurry`/`huncurry` to be consistent with

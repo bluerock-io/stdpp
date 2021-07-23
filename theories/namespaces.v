@@ -97,13 +97,7 @@ Global Hint Resolve nclose_subseteq' | 100 : ndisj.
 (** Rules for goals of the form [_ ## _] *)
 (** The base rule that we want to ultimately get down to. *)
 Global Hint Extern 0 (_ ## _) => apply ndot_ne_disjoint; congruence : ndisj.
-(** Fallback, loses lots of information but lets other rules make progress.
-Tests show trying [disjoint_difference_l1] first gives better performance. *)
-Local Definition coPset_disjoint_difference_l1 := disjoint_difference_l1 (C:=coPset).
-Global Hint Resolve coPset_disjoint_difference_l1 | 50 : ndisj.
-Local Definition coPset_disjoint_difference_l2 := disjoint_difference_l2 (C:=coPset).
-Global Hint Resolve coPset_disjoint_difference_l2 | 100 : ndisj.
-Global Hint Resolve ndot_preserve_disjoint_l ndot_preserve_disjoint_r | 100 : ndisj.
+(** Trivial cases. *)
 Local Definition coPset_disjoint_empty_l := disjoint_empty_l (C:=coPset).
 Global Hint Resolve coPset_disjoint_empty_l : ndisj.
 Local Definition coPset_disjoint_empty_r := disjoint_empty_r (C:=coPset).
@@ -115,6 +109,20 @@ Global Hint Extern 10 (_ ## (_ ∖ _)) =>
   | |- (_ ∖ _) ## _ => fail (* ∖ on both sides, leave it be *)
   | |- _ => symmetry
   end : ndisj.
+(** Before we apply disjoint_difference, let's make sure we normalize the goal
+to [_ ∖ (_ ∪ _)]. *)
+Local Lemma coPset_difference_difference (X1 X2 X3 Y : coPset) :
+  X1 ∖ (X2 ∪ X3) ## Y →
+  X1 ∖ X2 ∖ X3 ## Y.
+Proof. set_solver. Qed.
+Global Hint Resolve coPset_difference_difference | 20 : ndisj.
+(** Fallback, loses lots of information but lets other rules make progress.
+Tests show trying [disjoint_difference_l1] first gives better performance. *)
+Local Definition coPset_disjoint_difference_l1 := disjoint_difference_l1 (C:=coPset).
+Global Hint Resolve coPset_disjoint_difference_l1 | 50 : ndisj.
+Local Definition coPset_disjoint_difference_l2 := disjoint_difference_l2 (C:=coPset).
+Global Hint Resolve coPset_disjoint_difference_l2 | 100 : ndisj.
+Global Hint Resolve ndot_preserve_disjoint_l ndot_preserve_disjoint_r | 100 : ndisj.
 
 Ltac solve_ndisj :=
   repeat match goal with

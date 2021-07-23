@@ -43,3 +43,7 @@ Proof. solve_ndisj. Qed.
 Lemma test9 N1 N2 :
   ⊤ ∖ (↑N1 ∪ ↑N2) ⊆@{coPset} ⊤ ∖ ↑N1.@"counter" ∖ ↑N1.@"state" ∖ ↑N2.
 Proof. solve_ndisj. Qed.
+
+Lemma test10 N1 N2 E :
+  ↑N1 ∪ E ## ⊤ ∖ ↑N1 ∖ ↑N2 ∖ E.
+Proof. solve_ndisj. Qed.

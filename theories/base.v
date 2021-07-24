@@ -705,6 +705,24 @@ Global Instance prod_inhabited {A B} (iA : Inhabited A)
     (iB : Inhabited B) : Inhabited (A * B) :=
   match iA, iB with populate x, populate y => populate (x,y) end.
 
+(** Note that we need eta for products for the [uncurry_curry] lemmas to hold
+in non-applied form ([uncurry (curry f) = f]). *)
+Lemma curry_uncurry {A B C} (f : A → B → C) : curry (uncurry f) = f.
+Proof. reflexivity. Qed.
+Lemma uncurry_curry {A B C} (f : A * B → C) p : uncurry (curry f) p = f p.
+Proof. destruct p; reflexivity. Qed.
+Lemma curry3_uncurry3 {A B C D} (f : A → B → C → D) : curry3 (uncurry3 f) = f.
+Proof. reflexivity. Qed.
+Lemma uncurry3_curry3 {A B C D} (f : A * B * C → D) p :
+  uncurry3 (curry3 f) p = f p.
+Proof. destruct p as [[??] ?]; reflexivity. Qed.
+Lemma curry4_uncurry4 {A B C D E} (f : A → B → C → D → E) :
+  curry4 (uncurry4 f) = f.
+Proof. reflexivity. Qed.
+Lemma uncurry4_curry4 {A B C D E} (f : A * B * C * D → E) p :
+  uncurry4 (curry4 f) p = f p.
+Proof. destruct p as [[[??] ?] ?]; reflexivity. Qed.
+
 Global Instance pair_inj {A B} : Inj2 (=) (=) (=) (@pair A B).
 Proof. injection 1; auto. Qed.
 Global Instance prod_map_inj {A A' B B'} (f : A → A') (g : B → B') :

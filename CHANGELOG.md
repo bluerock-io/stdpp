@@ -120,6 +120,8 @@ API-breaking change is listed.
     Haskell and friends.
   + Add `Params` and `Proper` instances for `curry`/`uncurry`,
     `curry3`/`uncurry3`, and `curry4`/`uncurry4`.
+  + Add lemmas that say that `curry`/`curry3`/`curry4` and
+    `uncurry`/`uncurry3`/`uncurry4` are inverses.
 - Rename `map_union_subseteq_l_alt` → `map_union_subseteq_l'` and
   `map_union_subseteq_r_alt` → `map_union_subseteq_r'` to be consistent with
   `or_intro_{l,r}'`.

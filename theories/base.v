@@ -719,6 +719,7 @@ Definition prod_relation {A B} (R1 : relation A) (R2 : relation B) :
 
 Section prod_relation.
   Context `{RA : relation A, RB : relation B}.
+
   Global Instance prod_relation_refl :
     Reflexive RA → Reflexive RB → Reflexive (prod_relation RA RB).
   Proof. firstorder eauto. Qed.

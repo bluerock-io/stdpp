@@ -568,7 +568,7 @@ Section more_lemmas.
   Lemma gmultiset_union_subset_r X Y : X ≠ ∅ → Y ⊂ X ⊎ Y.
   Proof. multiset_solver. Qed.
 
-  Lemma gmultiset_elem_of_singleton_subseteq x X : x ∈ X ↔ {[+ x +]} ⊆ X.
+  Lemma gmultiset_singleton_subseteq_l x X : {[+ x +]} ⊆ X ↔ x ∈ X.
   Proof. multiset_solver. Qed.
 
   Lemma gmultiset_elem_of_subseteq X1 X2 x : x ∈ X1 → X1 ⊆ X2 → x ∈ X2.

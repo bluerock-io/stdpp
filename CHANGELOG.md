@@ -128,7 +128,7 @@ API-breaking change is listed.
 - Add `union_subseteq_l'`, `union_subseteq_r'` as transitive versions of
   `union_subseteq_l`, `union_subseteq_r` that can be more easily `apply`ed.
 - Rename `gmultiset_elem_of_singleton_subseteq` → `gmultiset_singleton_subseteq_l`
-  and swap the order to be consistent with Iris's `singleton_included_l`. Add
+  and swap the equivalence to be consistent with Iris's `singleton_included_l`. Add
   `gmultiset_singleton_subseteq`, which is similar to `singleton_included` in
   Iris.
 - Add lemmas `singleton_subseteq_l` and `singleton_subseteq` for sets.

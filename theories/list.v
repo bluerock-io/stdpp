@@ -2603,7 +2603,7 @@ Proof.
   by apply submseteq_skip, (submseteq_app_inv_l _ _ [x]).
 Qed.
 
-Lemma submseteq_singleton l x :
+Lemma singleton_submseteq_l l x :
   [x] ⊆+ l ↔ x ∈ l.
 Proof.
   split.
@@ -2613,6 +2613,9 @@ Proof.
     eapply take_drop_middle in Hlook; rewrite <-Hlook.
     eapply submseteq_cons_middle, submseteq_nil_l.
 Qed.
+Lemma singleton_submseteq x y :
+  [x] ⊆+ [y] ↔ x = y.
+Proof. rewrite singleton_submseteq_l. apply elem_of_list_singleton. Qed.
 
 Section submseteq_dec.
   Context `{!EqDecision A}.

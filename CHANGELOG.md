@@ -127,6 +127,11 @@ API-breaking change is listed.
   `or_intro_{l,r}'`.
 - Add `union_subseteq_l'`, `union_subseteq_r'` as transitive versions of
   `union_subseteq_l`, `union_subseteq_r` that can be more easily `apply`ed.
+- Rename `gmultiset_elem_of_singleton_subseteq` → `gmultiset_singleton_subseteq_l`
+  and swap the order to be consistent with Iris's `singleton_included_l`. Add
+  `gmultiset_singleton_subseteq`, which is similar to `singleton_included` in
+  Iris.
+- Add lemmas `singleton_subseteq_l` and `singleton_subseteq` for sets.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).
@@ -169,6 +174,8 @@ s/\bhcurry_uncurry\b/huncurry_curry/g
 s/\blookup_gmap_uncurry_None\b/lookup_gmap_curry_None/g
 # map_union_subseteq
 s/\bmap_union_subseteq_(r|l)_alt\b/map_union_subseteq_\1'/g
+# singleton
+s/\bgmultiset_elem_of_singleton_subseteq\b/gmultiset_singleton_subseteq_l/g
 ' $(find theories -name "*.v")
 ```
 

@@ -2580,6 +2580,48 @@ Proof.
   intros. apply (anti_symm submseteq); apply NoDup_submseteq; naive_solver.
 Qed.
 
+Lemma submseteq_insert l1 l2 i j x y :
+  l1 ⊆+ l2 →
+  l1 !! i = Some x →
+  l2 !! j = Some x →
+  (<[i := y]> l1) ⊆+ (<[j := y]> l2).
+Proof.
+  intros Hsub H1 H2.
+  eapply lookup_lt_Some in H1 as Hlt1.
+  eapply lookup_lt_Some in H2 as Hlt2.
+  eapply take_drop_middle in H1.
+  eapply take_drop_middle in H2.
+  rewrite <-H1, <-H2.
+  rewrite !insert_app_r_alt; [|(rewrite take_length; lia)..].
+  rewrite !take_length.
+  replace (i - i `min` length l1) with 0 by lia.
+  replace (j - j `min` length l2) with 0 by lia. simpl.
+  rewrite <-H1, <-H2 in Hsub. revert Hsub.
+  rewrite !cons_middle.
+  rewrite !(Permutation_app_comm [x]), !(Permutation_app_comm [y]).
+  rewrite !app_assoc.
+  intros ?%submseteq_app_inv_r; by eapply submseteq_skips_r.
+Qed.
+
+Lemma submseteq_lookup l1 l2 i x :
+  l1 ⊆+ l2 →
+  l1 !! i = Some x →
+  ∃ j, l2 !! j = Some x.
+Proof.
+  intros Hsub Hlook.
+  eapply elem_of_list_lookup_1, elem_of_submseteq;
+    eauto using elem_of_list_lookup_2.
+Qed.
+
+Lemma submseteq_singleton l i x :
+  l !! i = Some x →
+  [x] ⊆+ l.
+Proof.
+  intros Hlook.
+  eapply take_drop_middle in Hlook; rewrite <-Hlook.
+  eapply submseteq_cons_middle, submseteq_nil_l.
+Qed.
+
 Section submseteq_dec.
   Context `{!EqDecision A}.
 

@@ -161,7 +161,9 @@ Proof.
 Qed.
 
 (** * Packed together + set operations *)
-Record coPset := CoPset {
+(** Add an underscore to [CoPset_] to avoid nameclash with Iris's
+[algebra.coPset.CoPset]. *)
+Record coPset := CoPset_ {
   coPset_car : coPset_raw;
   coPset_prf : SIs_true (coPset_wf coPset_car);
 }.
@@ -178,20 +180,20 @@ Global Instance coPset_eq_dec : EqDecision coPset := λ X1 X2,
   end.
 
 Global Instance coPset_singleton : Singleton positive coPset := λ p,
-  CoPset (coPset_singleton_raw p) (coPset_singleton_wf _).
+  CoPset_ (coPset_singleton_raw p) (coPset_singleton_wf _).
 Global Instance coPset_elem_of : ElemOf positive coPset := λ p X,
   e_of p (coPset_car X).
-Global Instance coPset_empty : Empty coPset := CoPset (coPLeaf false) stt.
-Global Instance coPset_top : Top coPset := CoPset (coPLeaf true) stt.
+Global Instance coPset_empty : Empty coPset := CoPset_ (coPLeaf false) stt.
+Global Instance coPset_top : Top coPset := CoPset_ (coPLeaf true) stt.
 Global Instance coPset_union : Union coPset :=
-  λ '(CoPset t1 Ht1) '(CoPset t2 Ht2),
-    CoPset (t1 ∪ t2) (coPset_union_wf _ _ Ht1 Ht2).
+  λ '(CoPset_ t1 Ht1) '(CoPset_ t2 Ht2),
+    CoPset_ (t1 ∪ t2) (coPset_union_wf _ _ Ht1 Ht2).
 Global Instance coPset_intersection : Intersection coPset :=
-  λ '(CoPset t1 Ht1) '(CoPset t2 Ht2),
-    CoPset (t1 ∩ t2) (coPset_intersection_wf _ _ Ht1 Ht2).
+  λ '(CoPset_ t1 Ht1) '(CoPset_ t2 Ht2),
+    CoPset_ (t1 ∩ t2) (coPset_intersection_wf _ _ Ht1 Ht2).
 Global Instance coPset_difference : Difference coPset :=
-  λ '(CoPset t1 Ht1) '(CoPset t2 Ht2),
-    CoPset (t1 ∩ coPset_opp_raw t2)
+  λ '(CoPset_ t1 Ht1) '(CoPset_ t2 Ht2),
+    CoPset_ (t1 ∩ coPset_opp_raw t2)
            (coPset_intersection_wf _ _ Ht1 (coPset_opp_wf _)).
 
 Global Instance coPset_top_set : TopSet positive coPset.
@@ -347,7 +349,7 @@ Proof. induction t as [|[[]|]]; simpl; rewrite ?andb_True; auto. Qed.
 
 Definition Pset_to_coPset (X : Pset) : coPset :=
   let 'Mapset (PMap t Ht) := X in
-  CoPset (Pset_to_coPset_raw t) (Pset_to_coPset_wf _ Ht).
+  CoPset_ (Pset_to_coPset_raw t) (Pset_to_coPset_wf _ Ht).
 Lemma elem_of_Pset_to_coPset X i : i ∈ Pset_to_coPset X ↔ i ∈ X.
 Proof. destruct X as [[t ?]]; apply elem_of_Pset_to_coPset_raw. Qed.
 Lemma Pset_to_coPset_finite X : set_finite (Pset_to_coPset X).
@@ -364,7 +366,7 @@ Definition coPset_to_gset (X : coPset) : gset positive :=
 
 Definition gset_to_coPset (X : gset positive) : coPset :=
   let 'Mapset (GMap (PMap t Ht) _) := X in
-  CoPset (Pset_to_coPset_raw t) (Pset_to_coPset_wf _ Ht).
+  CoPset_ (Pset_to_coPset_raw t) (Pset_to_coPset_wf _ Ht).
 
 Lemma elem_of_coPset_to_gset X i : set_finite X → i ∈ coPset_to_gset X ↔ i ∈ X.
 Proof.
@@ -421,7 +423,7 @@ Fixpoint coPset_suffixes_raw (p : positive) : coPset_raw :=
 Lemma coPset_suffixes_wf p : SIs_true (coPset_wf (coPset_suffixes_raw p)).
 Proof. apply SIs_true_intro. induction p; simpl; eauto. Qed.
 Definition coPset_suffixes (p : positive) : coPset :=
-  CoPset (coPset_suffixes_raw p) (coPset_suffixes_wf _).
+  CoPset_ (coPset_suffixes_raw p) (coPset_suffixes_wf _).
 Lemma elem_coPset_suffixes p q : p ∈ coPset_suffixes q ↔ ∃ q', p = q' ++ q.
 Proof.
   unfold elem_of, coPset_elem_of; simpl; split.
@@ -454,9 +456,9 @@ Proof. apply SIs_true_intro. induction t as [[]|]; simpl; auto. Qed.
 Lemma coPset_r_wf t : SIs_true (coPset_wf (coPset_r_raw t)).
 Proof. apply SIs_true_intro.  induction t as [[]|]; simpl; auto. Qed.
 Definition coPset_l (X : coPset) : coPset :=
-  let (t,Ht) := X in CoPset (coPset_l_raw t) (coPset_l_wf _).
+  let (t,Ht) := X in CoPset_ (coPset_l_raw t) (coPset_l_wf _).
 Definition coPset_r (X : coPset) : coPset :=
-  let (t,Ht) := X in CoPset (coPset_r_raw t) (coPset_r_wf _).
+  let (t,Ht) := X in CoPset_ (coPset_r_raw t) (coPset_r_wf _).
 
 Lemma coPset_lr_disjoint X : coPset_l X ∩ coPset_r X = ∅.
 Proof.

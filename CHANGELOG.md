@@ -132,6 +132,7 @@ API-breaking change is listed.
   `gmultiset_singleton_subseteq`, which is similar to `singleton_included` in
   Iris.
 - Add lemmas `singleton_subseteq_l` and `singleton_subseteq` for sets.
+- Add lemmas `map_singleton_subseteq_l` and `map_singleton_subseteq` for maps.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

@@ -138,7 +138,8 @@ API-breaking change is listed.
 - Make `map_empty` a biimplication.
 - Clean up `empty{',_inv,_iff}` lemmas:
   + Write them all using `↔` and consistently use the `_iff` suffix.
-  + Remove `map_to_list_empty_inv_alt`.
+  + Remove `map_to_list_empty_inv_alt`, chain `Permutation_nil_r` and
+    `map_to_list_empty_iff` instead.
   + Add lemma `map_filter_empty_iff`.
 
 The following `sed` script should perform most of the renaming

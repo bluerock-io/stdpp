@@ -602,6 +602,17 @@ Lemma delete_singleton_ne {A} i j (x : A) :
   i ≠ j → delete i {[j := x]} =@{M A} {[j := x]}.
 Proof. intro. apply delete_notin. by apply lookup_singleton_ne. Qed.
 
+Lemma map_singleton_subseteq_l {A} i (x : A) (m : M A) :
+  {[i := x]} ⊆ m ↔ m !! i = Some x.
+Proof.
+  rewrite map_subseteq_spec. setoid_rewrite lookup_singleton_Some. naive_solver.
+Qed.
+Lemma map_singleton_subseteq {A} i j (x y : A) :
+  {[i := x]} ⊆@{M A} {[j := y]} ↔ i = j ∧ x = y.
+Proof.
+  rewrite map_subseteq_spec. setoid_rewrite lookup_singleton_Some. naive_solver.
+Qed.
+
 (** ** Properties of the map operations *)
 Global Instance map_fmap_inj {A B} (f : A → B) :
   Inj (=) (=) f → Inj (=@{M A}) (=@{M B}) (fmap f).

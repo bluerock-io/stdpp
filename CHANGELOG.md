@@ -135,6 +135,11 @@ API-breaking change is listed.
 - Add lemmas `map_singleton_subseteq_l` and `map_singleton_subseteq` for maps.
 - Add lemmas `singleton_submseteq_l` and `singleton_submseteq` for unordered
   list inclusion, as well as `lookup_submseteq` and `submseteq_insert`.
+- Make `map_empty` a biimplication.
+- Clean up `empty{',_inv,_iff}` lemmas:
+  + Write them all using `↔` and consistently use the `_iff` suffix.
+  + Remove `map_to_list_empty_inv_alt`.
+  + Add lemma `map_filter_empty_iff`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).
@@ -179,6 +184,16 @@ s/\blookup_gmap_uncurry_None\b/lookup_gmap_curry_None/g
 s/\bmap_union_subseteq_(r|l)_alt\b/map_union_subseteq_\1'/g
 # singleton
 s/\bgmultiset_elem_of_singleton_subseteq\b/gmultiset_singleton_subseteq_l/g
+# empty_iff
+s/\bfmap_empty_inv\b/fmap_empty_iff/g
+s/\bmap_to_list_empty('|_inv)\b/map_to_list_empty_iff/g
+s/\bmap_size_empty_inv\b/map_size_empty_iff/g
+s/\bkmap_empty_inv\b/kmap_empty_iff/g
+s/\belements_empty('|_inv)\b/elements_empty_iff/g
+s/\bsize_empty_inv\b/size_empty_iff/g
+s/\bdom_empty_inv(_L|)\b/dom_empty_iff\1/g
+s/\bgmultiset_elements_empty('|_inv)\b/gmultiset_elements_empty_iff/g
+s/\bgmultiset_size_empty_inv\b/gmultiset_size_empty_iff/g
 ' $(find theories -name "*.v")
 ```
 

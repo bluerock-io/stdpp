@@ -1358,6 +1358,15 @@ Section map_filter_misc.
   Lemma map_filter_empty : filter P ∅ =@{M A} ∅.
   Proof. apply map_fold_empty. Qed.
 
+  Lemma map_filter_empty_iff m :
+    filter P m = ∅ ↔ map_Forall (λ i x, ¬P (i,x)) m.
+  Proof.
+    rewrite map_empty. setoid_rewrite map_filter_lookup_None. split.
+    - intros Hm i x Hi. destruct (Hm i); naive_solver.
+    - intros Hm i. destruct (m !! i) as [x|] eqn:?; [|by auto].
+      right; intros ? [= <-]. by apply Hm.
+  Qed.
+
   Lemma map_filter_alt m : filter P m = list_to_map (filter P (map_to_list m)).
   Proof.
     apply list_to_map_flip. induction m as [|k x m ? IH] using map_ind.

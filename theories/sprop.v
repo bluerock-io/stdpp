@@ -2,6 +2,8 @@ From Coq Require Export Logic.StrictProp.
 From stdpp Require Import decidable.
 From stdpp Require Import options.
 
+Global Set Allow StrictProp.
+
 Lemma unsquash (P : Prop) `{!Decision P} : Squash P → P.
 Proof.
   intros HP. destruct (decide P) as [?|HnotP]; [assumption|].

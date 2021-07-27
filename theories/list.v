@@ -2454,6 +2454,15 @@ Proof. red. auto using submseteq_Permutation_length_le, submseteq_length. Qed.
 
 Lemma elem_of_submseteq l k x : x ∈ l → l ⊆+ k → x ∈ k.
 Proof. intros ? [l' ->]%submseteq_Permutation. apply elem_of_app; auto. Qed.
+Lemma lookup_submseteq l k i x :
+  l !! i = Some x →
+  l ⊆+ k →
+  ∃ j, k !! j = Some x.
+Proof.
+  intros Hsub Hlook.
+  eapply elem_of_list_lookup_1, elem_of_submseteq;
+    eauto using elem_of_list_lookup_2.
+Qed.
 
 Lemma submseteq_take l i : take i l ⊆+ l.
 Proof. auto using sublist_take, sublist_submseteq. Qed.
@@ -2579,6 +2588,33 @@ Lemma NoDup_Permutation l k : NoDup l → NoDup k → (∀ x, x ∈ l ↔ x ∈ 
 Proof.
   intros. apply (anti_symm submseteq); apply NoDup_submseteq; naive_solver.
 Qed.
+
+Lemma submseteq_insert l1 l2 i j x y :
+  l1 !! i = Some x →
+  l2 !! j = Some x →
+  l1 ⊆+ l2 →
+  (<[i := y]> l1) ⊆+ (<[j := y]> l2).
+Proof.
+  intros ?? Hsub.
+  rewrite !insert_take_drop,
+    <-!Permutation_middle by eauto using lookup_lt_Some.
+  rewrite <-(take_drop_middle l1 i x), <-(take_drop_middle l2 j x),
+    <-!Permutation_middle in Hsub by done.
+  by apply submseteq_skip, (submseteq_app_inv_l _ _ [x]).
+Qed.
+
+Lemma singleton_submseteq_l l x :
+  [x] ⊆+ l ↔ x ∈ l.
+Proof.
+  split.
+  - intros Hsub. eapply elem_of_submseteq; [|done].
+    apply elem_of_list_singleton. done.
+  - intros (l1&l2&->)%elem_of_list_split.
+    apply submseteq_cons_middle, submseteq_nil_l.
+Qed.
+Lemma singleton_submseteq x y :
+  [x] ⊆+ [y] ↔ x = y.
+Proof. rewrite singleton_submseteq_l. apply elem_of_list_singleton. Qed.
 
 Section submseteq_dec.
   Context `{!EqDecision A}.

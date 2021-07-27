@@ -133,6 +133,8 @@ API-breaking change is listed.
   Iris.
 - Add lemmas `singleton_subseteq_l` and `singleton_subseteq` for sets.
 - Add lemmas `map_singleton_subseteq_l` and `map_singleton_subseteq` for maps.
+- Add lemmas `singleton_submseteq_l` and `singleton_submseteq` for unordered
+  list inclusion, as well as `lookup_submseteq` and `submseteq_insert`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

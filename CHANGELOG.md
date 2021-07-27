@@ -146,7 +146,7 @@ The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).
 Note that the script is not idempotent, do not run it twice.
 ```
-sed -i -E '
+sed -i -E -f- $(find theories -name "*.v") <<EOF
 s/\bdecide_left\b/decide_True_pi/g
 s/\bdecide_right\b/decide_False_pi/g
 # Permutation
@@ -195,7 +195,7 @@ s/\bsize_empty_inv\b/size_empty_iff/g
 s/\bdom_empty_inv(_L|)\b/dom_empty_iff\1/g
 s/\bgmultiset_elements_empty('|_inv)\b/gmultiset_elements_empty_iff/g
 s/\bgmultiset_size_empty_inv\b/gmultiset_size_empty_iff/g
-' $(find theories -name "*.v")
+EOF
 ```
 
 ## std++ 1.5.0 (2021-02-16)

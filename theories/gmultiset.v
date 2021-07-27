@@ -406,18 +406,15 @@ Section more_lemmas.
   Proof.
     unfold elements, gmultiset_elements; simpl. by rewrite map_to_list_empty.
   Qed.
-  Lemma gmultiset_elements_empty_inv X : elements X = [] → X = ∅.
+  Lemma gmultiset_elements_empty_iff X : elements X = [] ↔ X = ∅.
   Proof.
+    split; [|intros ->; by rewrite gmultiset_elements_empty].
     destruct X as [X]; unfold elements, gmultiset_elements; simpl.
     intros; apply (f_equal GMultiSet). destruct (map_to_list X) as [|[]] eqn:?.
-    - by apply map_to_list_empty_inv.
+    - by apply map_to_list_empty_iff.
     - naive_solver.
   Qed.
-  Lemma gmultiset_elements_empty' X : elements X = [] ↔ X = ∅.
-  Proof.
-    split; intros HX; [by apply gmultiset_elements_empty_inv|].
-    by rewrite HX, gmultiset_elements_empty.
-  Qed.
+
   Lemma gmultiset_elements_singleton x : elements ({[+ x +]} : gmultiset A) = [ x ].
   Proof.
     unfold elements, gmultiset_elements; simpl. by rewrite map_to_list_singleton.
@@ -478,15 +475,10 @@ Section more_lemmas.
   (** Properties of the size operation *)
   Lemma gmultiset_size_empty : size (∅ : gmultiset A) = 0.
   Proof. done. Qed.
-  Lemma gmultiset_size_empty_inv X : size X = 0 → X = ∅.
-  Proof.
-    unfold size, gmultiset_size; simpl. rewrite length_zero_iff_nil.
-    apply gmultiset_elements_empty_inv.
-  Qed.
   Lemma gmultiset_size_empty_iff X : size X = 0 ↔ X = ∅.
   Proof.
-    split; [apply gmultiset_size_empty_inv|].
-    by intros ->; rewrite gmultiset_size_empty.
+    unfold size, gmultiset_size; simpl.
+    by rewrite length_zero_iff_nil, gmultiset_elements_empty_iff.
   Qed.
   Lemma gmultiset_size_non_empty_iff X : size X ≠ 0 ↔ X ≠ ∅.
   Proof. by rewrite gmultiset_size_empty_iff. Qed.
@@ -494,7 +486,7 @@ Section more_lemmas.
   Lemma gmultiset_choose_or_empty X : (∃ x, x ∈ X) ∨ X = ∅.
   Proof.
     destruct (elements X) as [|x l] eqn:HX; [right|left].
-    - by apply gmultiset_elements_empty_inv.
+    - by apply gmultiset_elements_empty_iff.
     - exists x. rewrite <-gmultiset_elem_of_elements, HX. by left.
   Qed.
   Lemma gmultiset_choose X : X ≠ ∅ → ∃ x, x ∈ X.

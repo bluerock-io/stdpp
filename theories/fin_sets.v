@@ -77,15 +77,11 @@ Proof.
   apply elem_of_nil_inv; intros x.
   rewrite elem_of_elements, elem_of_empty; tauto.
 Qed.
-Lemma elements_empty_inv X : elements X = [] → X ≡ ∅.
+Lemma elements_empty_iff X : elements X = [] ↔ X ≡ ∅.
 Proof.
-  intros HX; apply elem_of_equiv_empty; intros x.
-  rewrite <-elem_of_elements, HX, elem_of_nil. tauto.
-Qed.
-Lemma elements_empty' X : elements X = [] ↔ X ≡ ∅.
-Proof.
-  split; intros HX; [by apply elements_empty_inv|].
-  by rewrite <-Permutation_nil_r, HX, elements_empty.
+  rewrite <-Permutation_nil_r. split; [|intros ->; by rewrite elements_empty].
+  intros HX. apply elem_of_equiv_empty; intros x.
+  rewrite <-elem_of_elements, HX. apply not_elem_of_nil.
 Qed.
 
 Lemma elements_union_singleton (X : C) x :
@@ -127,13 +123,12 @@ Proof. intros ?? E. apply Permutation_length. by rewrite E. Qed.
 
 Lemma size_empty : size (∅ : C) = 0.
 Proof. unfold size, set_size. simpl. by rewrite elements_empty. Qed.
-Lemma size_empty_inv (X : C) : size X = 0 → X ≡ ∅.
+Lemma size_empty_iff (X : C) : size X = 0 ↔ X ≡ ∅.
 Proof.
+  split; [|intros ->; by rewrite size_empty].
   intros; apply equiv_empty; intros x; rewrite <-elem_of_elements.
   by rewrite (nil_length_inv (elements X)), ?elem_of_nil.
 Qed.
-Lemma size_empty_iff (X : C) : size X = 0 ↔ X ≡ ∅.
-Proof. split; [apply size_empty_inv|]. by intros ->; rewrite size_empty. Qed.
 Lemma size_non_empty_iff (X : C) : size X ≠ 0 ↔ X ≢ ∅.
 Proof. by rewrite size_empty_iff. Qed.
 

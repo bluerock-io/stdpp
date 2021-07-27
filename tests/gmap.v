@@ -1,4 +1,4 @@
-From stdpp Require Import pmap gmap.
+From stdpp Require Import strings pmap gmap.
 
 Goal {[1; 2; 3]} =@{gset nat} ∅.
 Proof.
@@ -120,10 +120,12 @@ Time Eval vm_compute in gmap_insert_positives_test 512000.
 Time Eval vm_compute in gmap_insert_positives_test 1000000.
 *)
 
+Check "gmap_insert_comm".
 Theorem gmap_insert_comm :
   {[ 3:=false; 2:=true]} =@{gmap nat bool} {[ 2:=true; 3:=false ]}.
 Proof. simpl. Show. reflexivity. Qed.
 
+Check "gmap_lookup_concrete".
 Theorem gmap_lookup_concrete :
   lookup (M:=gmap nat bool) 2 {[ 3:=false; 2:=true ]} = Some true.
 Proof. simpl. Show. reflexivity. Qed.

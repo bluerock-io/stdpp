@@ -2609,9 +2609,8 @@ Proof.
   split.
   - intros Hsub. eapply elem_of_submseteq; [|done].
     apply elem_of_list_singleton. done.
-  - intros [i Hlook]%elem_of_list_lookup.
-    eapply take_drop_middle in Hlook; rewrite <-Hlook.
-    eapply submseteq_cons_middle, submseteq_nil_l.
+  - intros (l1&l2&->)%elem_of_list_split.
+    apply submseteq_cons_middle, submseteq_nil_l.
 Qed.
 Lemma singleton_submseteq x y :
   [x] ⊆+ [y] ↔ x = y.

@@ -381,7 +381,7 @@ Proof.
   destruct (decide (i = j)) as [->|?];
     rewrite ?lookup_delete, ?lookup_delete_ne; tauto.
 Qed.
-Lemma delete_empty {A} i : delete i (∅ : M A) = ∅.
+Lemma delete_empty {A} i : delete i ∅ =@{M A} ∅.
 Proof. rewrite <-(partial_alter_self ∅) at 2. by rewrite lookup_empty. Qed.
 Lemma delete_commute {A} (m : M A) i j :
   delete i (delete j m) = delete j (delete i m).
@@ -476,7 +476,7 @@ Proof.
   - rewrite lookup_insert. destruct (m !! j); simpl; eauto.
   - rewrite lookup_insert_ne by done. by destruct (m !! j); simpl.
 Qed.
-Lemma insert_empty {A} i (x : A) : <[i:=x]>(∅ : M A) = {[i := x]}.
+Lemma insert_empty {A} i (x : A) : <[i:=x]> ∅ =@{M A} {[i := x]}.
 Proof. done. Qed.
 Lemma insert_non_empty {A} (m : M A) i x : <[i:=x]>m ≠ ∅.
 Proof.
@@ -571,35 +571,35 @@ Proof.
   - rewrite lookup_singleton_ne in Heq by done. naive_solver.
 Qed.
 
-Lemma map_non_empty_singleton {A} i (x : A) : {[i := x]} ≠ (∅ : M A).
+Lemma map_non_empty_singleton {A} i (x : A) : {[i := x]} ≠@{M A} ∅.
 Proof.
   intros Hix. apply (f_equal (.!! i)) in Hix.
   by rewrite lookup_empty, lookup_singleton in Hix.
 Qed.
-Lemma insert_singleton {A} i (x y : A) : <[i:=y]>({[i := x]} : M A) = {[i := y]}.
+Lemma insert_singleton {A} i (x y : A) : <[i:=y]> {[i := x]} =@{M A} {[i := y]}.
 Proof.
   unfold singletonM, map_singleton, insert, map_insert.
   by rewrite <-partial_alter_compose.
 Qed.
 Lemma alter_singleton {A} (f : A → A) i x :
-  alter f i ({[i := x]} : M A) = {[i := f x]}.
+  alter f i {[i := x]} =@{M A} {[i := f x]}.
 Proof.
   intros. apply map_eq. intros i'. destruct (decide (i = i')) as [->|?].
   - by rewrite lookup_alter, !lookup_singleton.
   - by rewrite lookup_alter_ne, !lookup_singleton_ne.
 Qed.
 Lemma alter_singleton_ne {A} (f : A → A) i j x :
-  i ≠ j → alter f i ({[j := x]} : M A) = {[j := x]}.
+  i ≠ j → alter f i {[j := x]}=@{M A} {[j := x]}.
 Proof.
   intros. apply map_eq; intros i'. by destruct (decide (i = i')) as [->|?];
     rewrite ?lookup_alter, ?lookup_singleton_ne, ?lookup_alter_ne by done.
 Qed.
-Lemma singleton_non_empty {A} i (x : A) : {[i:=x]} ≠ (∅ : M A).
+Lemma singleton_non_empty {A} i (x : A) : {[i:=x]} ≠@{M A} ∅.
 Proof. apply insert_non_empty. Qed.
-Lemma delete_singleton {A} i (x : A) : delete i {[i := x]} = (∅ : M A).
+Lemma delete_singleton {A} i (x : A) : delete i {[i := x]} =@{M A} ∅.
 Proof. setoid_rewrite <-partial_alter_compose. apply delete_empty. Qed.
 Lemma delete_singleton_ne {A} i j (x : A) :
-  i ≠ j → delete i ({[j := x]} : M A) = {[j := x]}.
+  i ≠ j → delete i {[j := x]} =@{M A} {[j := x]}.
 Proof. intro. apply delete_notin. by apply lookup_singleton_ne. Qed.
 
 (** ** Properties of the map operations *)
@@ -850,7 +850,7 @@ Proof.
   auto using list_to_map_proper, NoDup_fst_map_to_list.
 Qed.
 
-Lemma list_to_map_nil {A} : list_to_map [] = (∅ : M A).
+Lemma list_to_map_nil {A} : list_to_map [] =@{M A} ∅.
 Proof. done. Qed.
 Lemma list_to_map_cons {A} (l : list (K * A)) i x :
   list_to_map ((i, x) :: l) =@{M A} <[i:=x]>(list_to_map l).
@@ -1346,7 +1346,7 @@ Section map_filter_misc.
   Context {A} (P : K * A → Prop) `{!∀ x, Decision (P x)}.
   Implicit Types m : M A.
 
-  Lemma map_filter_empty : filter P (∅ : M A) = ∅.
+  Lemma map_filter_empty : filter P ∅ =@{M A} ∅.
   Proof. apply map_fold_empty. Qed.
 
   Lemma map_filter_alt m : filter P m = list_to_map (filter P (map_to_list m)).
@@ -1478,22 +1478,22 @@ Section merge.
   (** These instances can in many cases not be applied automatically due to Coq
   unification bug #6294. Hence there are many explicit derived instances for
   specific operations such as union or difference in the rest of this file. *)
-  Global Instance: LeftId (=) None f → LeftId (=) (∅ : M A) (merge f).
+  Global Instance: LeftId (=) None f → LeftId (=@{M A}) ∅ (merge f).
   Proof.
     intros ? m. apply map_eq; intros i.
     rewrite !lookup_merge, lookup_empty. destruct (m !! i); by simpl.
   Qed.
-  Global Instance: RightId (=) None f → RightId (=) (∅ : M A) (merge f).
+  Global Instance: RightId (=) None f → RightId (=@{M A}) ∅ (merge f).
   Proof.
     intros ? m. apply map_eq; intros i.
     rewrite !lookup_merge, lookup_empty. destruct (m !! i); by simpl.
   Qed.
-  Global Instance: LeftAbsorb (=) None f → LeftAbsorb (=) (∅ : M A) (merge f).
+  Global Instance: LeftAbsorb (=) None f → LeftAbsorb (=@{M A}) ∅ (merge f).
   Proof.
     intros ? m. apply map_eq; intros i.
     rewrite !lookup_merge, lookup_empty. destruct (m !! i); by simpl.
   Qed.
-  Global Instance: RightAbsorb (=) None f → RightAbsorb (=) (∅ : M A) (merge f).
+  Global Instance: RightAbsorb (=) None f → RightAbsorb (=@{M A}) ∅ (merge f).
   Proof.
     intros ? m. apply map_eq; intros i.
     rewrite !lookup_merge, lookup_empty. destruct (m !! i); by simpl.
@@ -1505,7 +1505,7 @@ Section merge.
     intros Hm. apply map_eq; intros i. specialize (Hm i).
     rewrite !lookup_merge. by destruct (m1 !! i), (m2 !! i).
   Qed.
-  Global Instance merge_comm' : Comm (=) f → Comm (=@{M _}) (merge f).
+  Global Instance merge_comm' : Comm (=) f → Comm (=@{M A}) (merge f).
   Proof. intros ???. apply merge_comm. intros. by apply (comm f). Qed.
   Lemma merge_assoc m1 m2 m3 :
     (∀ i, diag_None f (m1 !! i) (diag_None f (m2 !! i) (m3 !! i)) =
@@ -1521,7 +1521,7 @@ Section merge.
     intros Hm. apply map_eq; intros i. specialize (Hm i).
     rewrite !lookup_merge. by destruct (m1 !! i).
   Qed.
-  Global Instance merge_idemp' : IdemP (=) f → IdemP (=@{M _}) (merge f).
+  Global Instance merge_idemp' : IdemP (=) f → IdemP (=@{M A}) (merge f).
   Proof. intros ??. apply merge_idemp. intros. by apply (idemp f). Qed.
 End merge.
 
@@ -1535,7 +1535,7 @@ Section more_merge.
    intros. rewrite map_eq_iff. apply forall_proper; intros i.
    rewrite lookup_merge. destruct (m1 !! i), (m2 !! i); naive_solver congruence.
   Qed.
-  Lemma merge_empty : merge f (∅ : M A) (∅ : M B) = ∅.
+  Lemma merge_empty : merge f ∅ ∅ =@{M C} ∅.
   Proof. apply map_eq. intros. by rewrite !lookup_merge, !lookup_empty. Qed.
   Lemma partial_alter_merge g g1 g2 (m1 : M A) (m2 : M B) i :
     g (diag_None f (m1 !! i) (m2 !! i)) = diag_None f (g1 (m1 !! i)) (g2 (m2 !! i)) →
@@ -1571,7 +1571,7 @@ Section more_merge.
   Proof. intros; by apply partial_alter_merge. Qed.
   Lemma merge_singleton i x y z :
     f (Some y) (Some z) = Some x →
-    merge f ({[i := y]} : M A) ({[i := z]} : M B) = {[i := x]}.
+    merge f {[i := y]} {[i := z]} =@{M C} {[i := x]}.
   Proof.
     intros. by erewrite <-!insert_empty, <-insert_merge, merge_empty by eauto.
   Qed.
@@ -1637,7 +1637,7 @@ Lemma map_lookup_zip_Some {A B} (m1 : M A) (m2 : M B) i p :
 Proof. rewrite map_lookup_zip_with_Some. destruct p. naive_solver. Qed.
 
 Lemma map_zip_with_empty {A B C} (f : A → B → C) :
-  map_zip_with f (∅ : M A) (∅ : M B) = ∅.
+  map_zip_with f ∅ ∅ =@{M C} ∅.
 Proof. unfold map_zip_with. by rewrite merge_empty by done. Qed.
 Lemma map_insert_zip_with {A B C} (f : A → B → C) (m1 : M A) (m2 : M B) i y z :
   <[i:=f y z]>(map_zip_with f m1 m2) = map_zip_with f (<[i:=y]>m1) (<[i:=z]>m2).
@@ -1646,7 +1646,7 @@ Lemma map_delete_zip_with {A B C} (f : A → B → C) (m1 : M A) (m2 : M B) i :
   delete i (map_zip_with f m1 m2) = map_zip_with f (delete i m1) (delete i m2).
 Proof. unfold map_zip_with. by rewrite delete_merge. Qed.
 Lemma map_zip_with_singleton {A B C} (f : A → B → C) i x y :
-  map_zip_with f ({[ i := x ]} : M A) ({[ i := y ]} : M B) = {[ i := f x y ]}.
+  map_zip_with f {[ i := x ]} {[ i := y ]} =@{M C} {[ i := f x y ]}.
 Proof. unfold map_zip_with. by erewrite merge_singleton. Qed.
 
 Lemma map_zip_with_fmap {A' A B' B C} (f : A → B → C)
@@ -2500,7 +2500,7 @@ Proof.
   apply map_empty; intros i. rewrite lookup_difference_None.
   destruct (m !! i); eauto.
 Qed.
-Global Instance map_difference_right_id {A} : RightId (=) (∅:M A) (∖) := _.
+Global Instance map_difference_right_id {A} : RightId (=@{M A}) ∅ (∖) := _.
 Lemma map_difference_empty {A} (m : M A) : m ∖ ∅ = m.
 Proof. by rewrite (right_id _ _). Qed.
 

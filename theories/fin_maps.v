@@ -221,8 +221,12 @@ Lemma lookup_weaken_inv {A} (m1 m2 : M A) i x y :
 Proof. intros Hm1 ? Hm2. eapply lookup_weaken in Hm1; eauto. congruence. Qed.
 Lemma lookup_ne {A} (m : M A) i j : m !! i ≠ m !! j → i ≠ j.
 Proof. congruence. Qed.
-Lemma map_empty {A} (m : M A) : (∀ i, m !! i = None) → m = ∅.
-Proof. intros Hm. apply map_eq. intros. by rewrite Hm, lookup_empty. Qed.
+Lemma map_empty {A} (m : M A) : m = ∅ ↔ ∀ i, m !! i = None.
+Proof.
+  split.
+  - intros -> i. by rewrite lookup_empty.
+  - intros Hm. apply map_eq. intros i. by rewrite Hm, lookup_empty.
+Qed.
 Lemma lookup_empty_is_Some {A} i : ¬is_Some ((∅ : M A) !! i).
 Proof. rewrite lookup_empty. by inversion 1. Qed.
 Lemma lookup_empty_Some {A} i (x : A) : ¬(∅ : M A) !! i = Some x.
@@ -636,8 +640,9 @@ Proof. apply map_empty; intros i. by rewrite lookup_fmap, lookup_empty. Qed.
 Lemma omap_empty {A B} (f : A → option B) : omap f ∅ =@{M B} ∅.
 Proof. apply map_empty; intros i. by rewrite lookup_omap, lookup_empty. Qed.
 
-Lemma fmap_empty_inv {A B} (f : A → B) m : f <$> m =@{M B} ∅ → m = ∅.
+Lemma fmap_empty_iff {A B} (f : A → B) m : f <$> m =@{M B} ∅ ↔ m = ∅.
 Proof.
+  split; [|intros ->; by rewrite fmap_empty].
   intros Hm. apply map_eq; intros i. generalize (f_equal (lookup i) Hm).
   by rewrite lookup_fmap, !lookup_empty, fmap_None.
 Qed.
@@ -924,13 +929,11 @@ Proof.
   by rewrite <-list_to_map_fmap, map_to_list_to_map.
 Qed.
 
-Lemma map_to_list_empty_inv_alt {A}  (m : M A) : map_to_list m ≡ₚ [] → m = ∅.
-Proof. rewrite <-map_to_list_empty. apply map_to_list_inj. Qed.
-Lemma map_to_list_empty_inv {A} (m : M A) : map_to_list m = [] → m = ∅.
-Proof. intros Hm. apply map_to_list_empty_inv_alt. by rewrite Hm. Qed.
-Lemma map_to_list_empty' {A} (m : M A) : map_to_list m = [] ↔ m = ∅.
+Lemma map_to_list_empty_iff {A} (m : M A) : map_to_list m = [] ↔ m = ∅.
 Proof.
-  split; [apply map_to_list_empty_inv|]. intros ->. apply map_to_list_empty.
+  split.
+  - rewrite <-Permutation_nil_r, <-map_to_list_empty. apply map_to_list_inj.
+  - intros ->. apply map_to_list_empty.
 Qed.
 
 Lemma map_to_list_insert_inv {A} (m : M A) l i x :
@@ -946,15 +949,15 @@ Qed.
 
 Lemma map_choose {A} (m : M A) : m ≠ ∅ → ∃ i x, m !! i = Some x.
 Proof.
-  intros Hemp. destruct (map_to_list m) as [|[i x] l] eqn:Hm.
-  { destruct Hemp; eauto using map_to_list_empty_inv. }
+  rewrite <-map_to_list_empty_iff.
+  intros Hemp. destruct (map_to_list m) as [|[i x] l] eqn:Hm; [done|].
   exists i, x. rewrite <-elem_of_map_to_list, Hm. by left.
 Qed.
 
 Global Instance map_eq_dec_empty {A} (m : M A) : Decision (m = ∅) | 20.
 Proof.
   refine (cast_if (decide (map_to_list m = [])));
-    by rewrite <-?map_to_list_empty'.
+    by rewrite <-?map_to_list_empty_iff.
 Defined.
 
 (** Properties of the imap function *)
@@ -1035,14 +1038,9 @@ Proof. unfold map_imap. by rewrite map_to_list_empty. Qed.
 (** ** Properties of the size operation *)
 Lemma map_size_empty {A} : size (∅ : M A) = 0.
 Proof. unfold size, map_size. by rewrite map_to_list_empty. Qed.
-Lemma map_size_empty_inv {A} (m : M A) : size m = 0 → m = ∅.
-Proof.
-  unfold size, map_size. by rewrite length_zero_iff_nil, map_to_list_empty'.
-Qed.
 Lemma map_size_empty_iff {A} (m : M A) : size m = 0 ↔ m = ∅.
 Proof.
-  split; [apply map_size_empty_inv|].
-  by intros ->; rewrite map_size_empty.
+  unfold size, map_size. by rewrite length_zero_iff_nil, map_to_list_empty_iff.
 Qed.
 Lemma map_size_non_empty_iff {A} (m : M A) : size m ≠ 0 ↔ m ≠ ∅.
 Proof. by rewrite map_size_empty_iff. Qed.
@@ -1143,7 +1141,7 @@ Proof.
   { intros help m.
     apply (help (map_to_list m)); auto using NoDup_fst_map_to_list. }
   intros l. induction l as [|[i x] l IH]; intros Hnodup m Hml.
-  { apply map_to_list_empty_inv_alt in Hml. by subst. }
+  { rewrite Permutation_nil_r, map_to_list_empty_iff in Hml. by rewrite Hml. }
   inversion_clear Hnodup.
   apply map_to_list_insert_inv in Hml; subst m. apply Hins.
   - by apply not_elem_of_list_to_map_1.
@@ -1155,7 +1153,7 @@ Proof.
   revert m2. induction m1 as [|i x m ? IH] using map_ind.
   { intros m2 Hm2. rewrite map_to_list_empty. simpl.
     apply neq_0_lt. intros Hlen. symmetry in Hlen.
-    apply nil_length_inv, map_to_list_empty_inv in Hlen.
+    apply nil_length_inv, map_to_list_empty_iff in Hlen.
     rewrite Hlen in Hm2. destruct (irreflexivity (⊂) ∅ Hm2). }
   intros m2 Hm2.
   destruct (insert_subset_inv m m2 i x) as (m2'&?&?&?); auto; subst.
@@ -1359,6 +1357,15 @@ Section map_filter_misc.
 
   Lemma map_filter_empty : filter P ∅ =@{M A} ∅.
   Proof. apply map_fold_empty. Qed.
+
+  Lemma map_filter_empty_iff m :
+    filter P m = ∅ ↔ map_Forall (λ i x, ¬P (i,x)) m.
+  Proof.
+    rewrite map_empty. setoid_rewrite map_filter_lookup_None. split.
+    - intros Hm i x Hi. destruct (Hm i); naive_solver.
+    - intros Hm i. destruct (m !! i) as [x|] eqn:?; [|by auto].
+      right; intros ? [= <-]. by apply Hm.
+  Qed.
 
   Lemma map_filter_alt m : filter P m = list_to_map (filter P (map_to_list m)).
   Proof.
@@ -3027,11 +3034,8 @@ Section kmap.
 
   Lemma kmap_empty {A} : kmap f ∅ =@{M2 A} ∅.
   Proof. unfold kmap. by rewrite map_to_list_empty. Qed.
-  Lemma kmap_empty_inv {A} (m : M1 A) : kmap f m = ∅ → m = ∅.
-  Proof.
-    intros Hm. apply map_empty; intros i.
-    apply (lookup_kmap_None _ (f i)); [|done]. by rewrite Hm, lookup_empty.
-  Qed.
+  Lemma kmap_empty_iff {A} (m : M1 A) : kmap f m = ∅ ↔ m = ∅.
+  Proof. rewrite !map_empty. setoid_rewrite lookup_kmap_None. naive_solver. Qed.
 
   Lemma kmap_singleton {A} i (x : A) : kmap f {[ i := x ]} = {[ f i := x ]}.
   Proof. unfold kmap. by rewrite map_to_list_singleton. Qed.

@@ -183,8 +183,8 @@ Global Instance coPset_singleton : Singleton positive coPset := λ p,
   CoPset_ (coPset_singleton_raw p) (coPset_singleton_wf _).
 Global Instance coPset_elem_of : ElemOf positive coPset := λ p X,
   e_of p (coPset_car X).
-Global Instance coPset_empty : Empty coPset := CoPset_ (coPLeaf false) stt.
-Global Instance coPset_top : Top coPset := CoPset_ (coPLeaf true) stt.
+Global Instance coPset_empty : Empty coPset := CoPset_ (coPLeaf false) (squash I).
+Global Instance coPset_top : Top coPset := CoPset_ (coPLeaf true) (squash I).
 Global Instance coPset_union : Union coPset :=
   λ '(CoPset_ t1 Ht1) '(CoPset_ t2 Ht2),
     CoPset_ (t1 ∪ t2) (coPset_union_wf _ _ Ht1 Ht2).
@@ -359,7 +359,7 @@ Qed.
 
 (** * Conversion to and from gsets of positives *)
 Lemma coPset_to_gset_wf (m : Pmap ()) : gmap_wf positive m.
-Proof. unfold gmap_wf. apply SIs_true_intro. by rewrite bool_decide_spec. Qed.
+Proof. by apply squash. Qed.
 Definition coPset_to_gset (X : coPset) : gset positive :=
   let 'Mapset m := coPset_to_Pset X in
   Mapset (GMap m (coPset_to_gset_wf m)).

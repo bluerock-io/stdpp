@@ -21,7 +21,7 @@ Unset Default Proof Using.
 (** We pack a [Pmap] together with a proof that ensures that all keys correspond
 to codes of actual elements of the countable type. *)
 Definition gmap_wf K `{Countable K} {A} (m : Pmap A) : SProp :=
-  sprop_decide (map_Forall (λ p _, encode (A:=K) <$> decode p = Some p) m).
+  Squash (map_Forall (λ p _, encode (A:=K) <$> decode p = Some p) m).
 Record gmap K `{Countable K} A := GMap {
   gmap_car : Pmap A;
   gmap_prf : gmap_wf K gmap_car
@@ -42,7 +42,11 @@ Defined.
 (** * Operations on the data structure *)
 Global Instance gmap_lookup `{Countable K} {A} : Lookup K A (gmap K A) :=
   λ i '(GMap m _), m !! encode i.
-Global Instance gmap_empty `{Countable K} {A} : Empty (gmap K A) := GMap ∅ stt.
+
+Lemma gmap_empty_wf `{Countable K} {A} : gmap_wf (A:=A) K ∅.
+Proof. apply squash, map_Forall_empty. Qed.
+Global Instance gmap_empty `{Countable K} {A} : Empty (gmap K A) :=
+  GMap ∅ gmap_empty_wf.
 (** Block reduction, even on concrete [gmap]s.
 Marking [gmap_empty] as [simpl never] would not be enough, because of
 https://github.com/coq/coq/issues/2972 and
@@ -51,10 +55,11 @@ And marking [gmap] consumers as [simpl never] does not work either, see:
 https://gitlab.mpi-sws.org/iris/stdpp/-/merge_requests/171#note_53216
 *)
 Global Opaque gmap_empty.
+
 Lemma gmap_partial_alter_wf `{Countable K} {A} (f : option A → option A) m i :
   gmap_wf K m → gmap_wf K (partial_alter f (encode (A:=K) i) m).
 Proof.
-  intros Hm%sprop_decide_unpack. apply sprop_decide_pack.
+  intros Hm%(unsquash _). apply squash.
   intros p x. destruct (decide (encode i = p)) as [<-|?].
   - rewrite decode_encode; eauto.
   - rewrite lookup_partial_alter_ne by done. by apply Hm.
@@ -67,7 +72,7 @@ Global Instance gmap_partial_alter `{Countable K} {A} :
 Lemma gmap_fmap_wf `{Countable K} {A B} (f : A → B) m :
   gmap_wf K m → gmap_wf K (f <$> m).
 Proof.
-  intros Hm%sprop_decide_unpack. apply sprop_decide_pack.
+  intros Hm%(unsquash _). apply squash.
   intros p x. rewrite lookup_fmap, fmap_Some; intros (?&?&?); eauto.
 Qed.
 Global Instance gmap_fmap `{Countable K} : FMap (gmap K) := λ A B f '(GMap m Hm),
@@ -75,7 +80,7 @@ Global Instance gmap_fmap `{Countable K} : FMap (gmap K) := λ A B f '(GMap m Hm
 Lemma gmap_omap_wf `{Countable K} {A B} (f : A → option B) m :
   gmap_wf K m → gmap_wf K (omap f m).
 Proof.
-  intros Hm%sprop_decide_unpack. apply sprop_decide_pack.
+  intros Hm%(unsquash _). apply squash.
   intros p x; rewrite lookup_omap, bind_Some; intros (?&?&?); eauto.
 Qed.
 Global Instance gmap_omap `{Countable K} : OMap (gmap K) := λ A B f '(GMap m Hm),
@@ -84,7 +89,7 @@ Lemma gmap_merge_wf `{Countable K} {A B C}
     (f : option A → option B → option C) m1 m2 :
   gmap_wf K m1 → gmap_wf K m2 → gmap_wf K (merge f m1 m2).
 Proof.
-  intros Hm1%sprop_decide_unpack Hm2%sprop_decide_unpack. apply sprop_decide_pack.
+  intros Hm1%(unsquash _) Hm2%(unsquash _). apply squash.
   intros p z. rewrite lookup_merge by done.
   destruct (m1 !! _) eqn:?, (m2 !! _) eqn:?; naive_solver.
 Qed.
@@ -101,7 +106,7 @@ Proof.
   split.
   - unfold lookup; intros A [m1 Hm1] [m2 Hm2] Hm.
     apply gmap_eq, map_eq; intros i; simpl in *.
-    apply sprop_decide_unpack in Hm1; apply sprop_decide_unpack in Hm2.
+    apply (unsquash _) in Hm1; apply (unsquash _) in Hm2.
     apply option_eq; intros x; split; intros Hi.
     + pose proof (Hm1 i x Hi); simpl in *.
       by destruct (decode i); simplify_eq/=; rewrite <-Hm.
@@ -113,7 +118,7 @@ Proof.
     by contradict Hs; apply (inj encode).
   - intros A B f [m Hm] i; apply (lookup_fmap f m).
   - intros A [m Hm]; unfold map_to_list; simpl.
-    apply sprop_decide_unpack, map_Forall_to_list in Hm; revert Hm.
+    apply (unsquash _), map_Forall_to_list in Hm; revert Hm.
     induction (NoDup_map_to_list m) as [|[p x] l Hpx];
       inversion 1 as [|??? Hm']; simplify_eq/=; [by constructor|].
     destruct (decode p) as [i|] eqn:?; simplify_eq/=; constructor; eauto.
@@ -121,7 +126,7 @@ Proof.
     feed pose proof (proj1 (Forall_forall _ _) Hm' (p',x')); simpl in *; auto.
     by destruct (decode p') as [i'|]; simplify_eq/=.
   - intros A [m Hm] i x; unfold map_to_list, lookup; simpl.
-    apply sprop_decide_unpack in Hm; rewrite elem_of_list_omap; split.
+    apply (unsquash _) in Hm; rewrite elem_of_list_omap; split.
     + intros ([p' x']&Hp'&?); apply elem_of_map_to_list in Hp'.
       feed pose proof (Hm p' x'); simpl in *; auto.
       by destruct (decode p') as [i'|] eqn:?; simplify_eq/=.

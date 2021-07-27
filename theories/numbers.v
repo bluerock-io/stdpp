@@ -724,11 +724,11 @@ Local Close Scope Qc_scope.
 Definition Qp_red (q : positive * positive) : positive * positive :=
   (Pos.ggcd (q.1) (q.2)).2.
 Definition Qp_wf (q : positive * positive) : SProp :=
-  sprop_decide (Qp_red q = q).
+  Squash (Qp_red q = q).
 
 Lemma Qp_red_wf q : Qp_wf (Qp_red q).
 Proof.
-  apply sprop_decide_pack. unfold Qp_red. destruct q as [n d]; simpl.
+  apply squash. unfold Qp_red. destruct q as [n d]; simpl.
   pose proof (Pos.ggcd_greatest n d) as Hgreatest.
   destruct (Pos.ggcd n d) as [q [r1 r2]] eqn:?; simpl in *.
   pose proof (Pos.ggcd_correct_divisors r1 r2) as Hdiv.
@@ -789,7 +789,7 @@ Definition Qp_to_Q (q : Qp) : Q :=
 Lemma Qred_Qp_to_Q q : Qred (Qp_to_Q q) = Qp_to_Q q.
 Proof.
   destruct q as [[qn qd] Hq]; unfold Qred; simpl.
-  apply sprop_decide_unpack in Hq; unfold Qp_red in Hq; simpl in *.
+  apply (unsquash _) in Hq; unfold Qp_red in Hq; simpl in *.
   destruct (Pos.ggcd qn qd) as [? [??]]; by simplify_eq/=.
 Qed.
 Definition Qp_to_Qc (q : Qp) : Qc := Qcmake (Qp_to_Q q) (Qred_Qp_to_Q q).
@@ -894,7 +894,7 @@ Proof.
     by destruct (Pos.ggcd _ _) as [? [??]].
   - intros ->. destruct q as [[qn qd] Hq]; simpl.
     f_equal. unfold QP.
-    generalize (sprop_decide_unpack _ Hq). generalize (Qp_red_wf (qn, qd)).
+    generalize (unsquash _ Hq). generalize (Qp_red_wf (qn, qd)).
     generalize (Qp_red (qn, qd)). by intros ?? ->.
 Qed.
 

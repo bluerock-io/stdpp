@@ -284,7 +284,7 @@ Global Instance Pmap_eq_dec `{EqDecision A} : EqDecision (Pmap A) := λ m1 m2,
   | right H => right (H ∘ proj1 (Pmap_eq m1 m2))
   end.
 
-Global Instance Pempty {A} : Empty (Pmap A) := PMap ∅ stt.
+Global Instance Pempty {A} : Empty (Pmap A) := PMap ∅ (squash I).
 Global Instance Plookup {A} : Lookup positive A (Pmap A) := λ i m, pmap_car m !! i.
 Global Instance Ppartial_alter {A} : PartialAlter positive A (Pmap A) :=
   λ f i '(PMap t Ht),

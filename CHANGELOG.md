@@ -141,6 +141,11 @@ API-breaking change is listed.
   + Remove `map_to_list_empty_inv_alt`; chain `Permutation_nil_r` and
     `map_to_list_empty_iff` instead.
   + Add lemma `map_filter_empty_iff`.
+- Add generalized lemma `map_filter_insert` that covers both the True and False
+  case. Rename old `map_filter_insert` → `map_filter_insert_True` and
+  `map_filter_insert_not_delete` → `map_filter_insert_False`.
++ Weaken premise of `map_filter_delete_not` to make it consistent with
+  `map_filter_insert_not'`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).
@@ -195,6 +200,9 @@ s/\bsize_empty_inv\b/size_empty_iff/g
 s/\bdom_empty_inv(_L|)\b/dom_empty_iff\1/g
 s/\bgmultiset_elements_empty('|_inv)\b/gmultiset_elements_empty_iff/g
 s/\bgmultiset_size_empty_inv\b/gmultiset_size_empty_iff/g
+# map_filter_insert
+s/\bmap_filter_insert\b/map_filter_insert_True/g
+s/\bmap_filter_insert_not_delete\b/map_filter_insert_False/g
 EOF
 ```
 

@@ -221,8 +221,12 @@ Lemma lookup_weaken_inv {A} (m1 m2 : M A) i x y :
 Proof. intros Hm1 ? Hm2. eapply lookup_weaken in Hm1; eauto. congruence. Qed.
 Lemma lookup_ne {A} (m : M A) i j : m !! i ≠ m !! j → i ≠ j.
 Proof. congruence. Qed.
-Lemma map_empty {A} (m : M A) : (∀ i, m !! i = None) → m = ∅.
-Proof. intros Hm. apply map_eq. intros. by rewrite Hm, lookup_empty. Qed.
+Lemma map_empty {A} (m : M A) : m = ∅ ↔ ∀ i, m !! i = None.
+Proof.
+  split.
+  - intros -> i. by rewrite lookup_empty.
+  - intros Hm. apply map_eq. intros i. by rewrite Hm, lookup_empty.
+Qed.
 Lemma lookup_empty_is_Some {A} i : ¬is_Some ((∅ : M A) !! i).
 Proof. rewrite lookup_empty. by inversion 1. Qed.
 Lemma lookup_empty_Some {A} i (x : A) : ¬(∅ : M A) !! i = Some x.

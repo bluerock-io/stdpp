@@ -721,6 +721,11 @@ Qed.
 Local Close Scope Qc_scope.
 
 (** * Positive rationals *)
+(** We define the type [Qp] of positive rationals as fractions of positives with
+an [SProp]-based proof that ensures the fraction is in canonical form (i.e., its
+gcd is 1). Note that we do not define [Qp] as a subset (i.e., Sigma) of the
+standard library's [Qc]. The type [Qc] uses a [Prop]-based proof for canonicity
+of the fraction. *)
 Definition Qp_red (q : positive * positive) : positive * positive :=
   (Pos.ggcd (q.1) (q.2)).2.
 Definition Qp_wf (q : positive * positive) : SProp :=

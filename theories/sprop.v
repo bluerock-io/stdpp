@@ -2,6 +2,8 @@ From Coq Require Export Logic.StrictProp.
 From stdpp Require Import decidable.
 From stdpp Require Import options.
 
+(** [StrictProp] is enabled by default since Coq 8.12. To make prior versions
+of Coq happy we need to allow it explicitly. *)
 Global Set Allow StrictProp.
 
 Lemma unsquash (P : Prop) `{!Decision P} : Squash P → P.

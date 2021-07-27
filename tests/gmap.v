@@ -76,11 +76,13 @@ Definition pmap_insert_positives_rev (n : positive) : Pmap unit :=
   Pos.iter (λ rec p m,
     rec (p - 1)%positive (<[p:=tt]> m)) (λ _ m, m) n n ∅.
 
-(* Test that the time is approximately n-log-n. We cannot test this on CI since
-you get different timings all the time.
 Definition pmap_insert_positives_test (p : positive) : bool :=
   bool_decide (pmap_insert_positives p = pmap_insert_positives_rev p).
 
+(* Test that the time is approximately n-log-n. We cannot test this on CI since
+you get different timings all the time. Instead we just test for [256000], which
+likely takes forever if the complexity is not n-log-n. *)
+(*
 Time Eval vm_compute in pmap_insert_positives_test 1000.
 Time Eval vm_compute in pmap_insert_positives_test 2000.
 Time Eval vm_compute in pmap_insert_positives_test 4000.
@@ -93,6 +95,8 @@ Time Eval vm_compute in pmap_insert_positives_test 256000.
 Time Eval vm_compute in pmap_insert_positives_test 512000.
 Time Eval vm_compute in pmap_insert_positives_test 1000000.
 *)
+Check "pmap_insert_positives_test".
+Eval vm_compute in pmap_insert_positives_test 256000.
 
 Definition gmap_insert_positives (n : positive) : gmap positive unit :=
   Pos.iter (λ rec p m,
@@ -106,7 +110,9 @@ Definition gmap_insert_positives_test (p : positive) : bool :=
   bool_decide (gmap_insert_positives p = gmap_insert_positives_rev p).
 
 (* Test that the time is approximately n-log-n. We cannot test this on CI since
-you get different timings all the time.
+you get different timings all the time. Instead we just test for [256000], which
+likely takes forever if the complexity is not n-log-n. *)
+(*
 Time Eval vm_compute in gmap_insert_positives_test 1000.
 Time Eval vm_compute in gmap_insert_positives_test 2000.
 Time Eval vm_compute in gmap_insert_positives_test 4000.
@@ -119,6 +125,8 @@ Time Eval vm_compute in gmap_insert_positives_test 256000.
 Time Eval vm_compute in gmap_insert_positives_test 512000.
 Time Eval vm_compute in gmap_insert_positives_test 1000000.
 *)
+Check "gmap_insert_positives_test".
+Eval vm_compute in gmap_insert_positives_test 256000.
 
 Check "gmap_insert_comm".
 Theorem gmap_insert_comm :

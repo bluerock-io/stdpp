@@ -238,6 +238,14 @@ Ltac mk_evar T :=
   let _ := match goal with _ => clear e end in
   e'.
 
+(** The tactic [get_head t] returns the head function [f] when [t] is of the
+shape [f a1 ... aN]. This is purely syntactic, no unification is performed. *)
+Ltac get_head e :=
+  lazymatch e with
+  | ?h _ => get_head h
+  | _    => e
+  end.
+
 (** The tactic [eunify x y] succeeds if [x] and [y] can be unified, and fails
 otherwise. If it succeeds, it will instantiate necessary evars in [x] and [y].
 
@@ -412,17 +420,12 @@ Tactic Notation "f_equiv" "/=" := csimpl in *; f_equiv.
 we proceed by repeatedly using [f_equiv]. *)
 Ltac solve_proper_unfold :=
   (* Try unfolding the head symbol, which is the one we are proving a new property about *)
-  lazymatch goal with
-  | |- ?R (?f _ _ _ _ _ _ _ _ _ _) (?f _ _ _ _ _ _ _ _ _ _) => unfold f
-  | |- ?R (?f _ _ _ _ _ _ _ _ _) (?f _ _ _ _ _ _ _ _ _) => unfold f
-  | |- ?R (?f _ _ _ _ _ _ _ _) (?f _ _ _ _ _ _ _ _) => unfold f
-  | |- ?R (?f _ _ _ _ _ _ _) (?f _ _ _ _ _ _ _) => unfold f
-  | |- ?R (?f _ _ _ _ _ _) (?f _ _ _ _ _ _) => unfold f
-  | |- ?R (?f _ _ _ _ _) (?f _ _ _ _ _) => unfold f
-  | |- ?R (?f _ _ _ _) (?f _ _ _ _) => unfold f
-  | |- ?R (?f _ _ _) (?f _ _ _) => unfold f
-  | |- ?R (?f _ _) (?f _ _) => unfold f
-  | |- ?R (?f _) (?f _) => unfold f
+  try lazymatch goal with
+  | |- ?R ?t1 ?t2 =>
+    let h1 := get_head t1 in
+    let h2 := get_head t2 in
+    unify h1 h2;
+    unfold h1
   end.
 (** [solve_proper_prepare] does some preparation work before the main
 [solve_proper] loop.  Having this as a separate tactic is useful for debugging

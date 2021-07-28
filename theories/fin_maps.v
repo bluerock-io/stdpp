@@ -2043,13 +2043,6 @@ Proof. rewrite lookup_union. destruct (m1 !! i), (m2 !! i); naive_solver. Qed.
 Lemma lookup_union_None {A} (m1 m2 : M A) i :
   (m1 ∪ m2) !! i = None ↔ m1 !! i = None ∧ m2 !! i = None.
 Proof. rewrite lookup_union.  destruct (m1 !! i), (m2 !! i); naive_solver. Qed.
-Lemma map_positive_l {A} (m1 m2 : M A) : m1 ∪ m2 = ∅ → m1 = ∅.
-Proof.
-  intros Hm. apply map_empty. intros i. apply (f_equal (.!! i)) in Hm.
-  rewrite lookup_empty, lookup_union_None in Hm; tauto.
-Qed.
-Lemma map_positive_l_alt {A} (m1 m2 : M A) : m1 ≠ ∅ → m1 ∪ m2 ≠ ∅.
-Proof. eauto using map_positive_l. Qed.
 Lemma lookup_union_Some {A} (m1 m2 : M A) i x :
   m1 ##ₘ m2 → (m1 ∪ m2) !! i = Some x ↔ m1 !! i = Some x ∨ m2 !! i = Some x.
 Proof.
@@ -2062,12 +2055,34 @@ Proof. intro. rewrite lookup_union_Some_raw; intuition. Qed.
 Lemma lookup_union_Some_r {A} (m1 m2 : M A) i x :
   m1 ##ₘ m2 → m2 !! i = Some x → (m1 ∪ m2) !! i = Some x.
 Proof. intro. rewrite lookup_union_Some; intuition. Qed.
+Lemma lookup_union_Some_l_inv {A} (m1 m2 : M A) i x :
+  (m1 ∪ m2) !! i = Some x → m2 !! i = None → m1 !! i = Some x.
+Proof. rewrite lookup_union_Some_raw. naive_solver. Qed.
+Lemma lookup_union_Some_r_inv {A} (m1 m2 : M A) i x :
+  (m1 ∪ m2) !! i = Some x → m1 !! i = None → m2 !! i = Some x.
+Proof. rewrite lookup_union_Some_raw. naive_solver. Qed.
+Lemma lookup_union_is_Some {A} (m1 m2 : M A) i :
+  is_Some ((m1 ∪ m2) !! i) ↔ is_Some (m1 !! i) ∨ is_Some (m2 !! i).
+Proof.
+  unfold is_Some. setoid_rewrite lookup_union_Some_raw. split; [naive_solver|].
+  intros [[a Ha]|[a Ha]]; [naive_solver|].
+  destruct (m1 !! i); naive_solver.
+Qed.
+
 Lemma map_union_comm {A} (m1 m2 : M A) : m1 ##ₘ m2 → m1 ∪ m2 = m2 ∪ m1.
 Proof.
   intros Hdisjoint. apply (merge_comm (union_with (λ x _, Some x))).
   intros i. specialize (Hdisjoint i).
   destruct (m1 !! i), (m2 !! i); compute; naive_solver.
 Qed.
+
+Lemma map_positive_l {A} (m1 m2 : M A) : m1 ∪ m2 = ∅ → m1 = ∅.
+Proof.
+  intros Hm. apply map_empty. intros i. apply (f_equal (.!! i)) in Hm.
+  rewrite lookup_empty, lookup_union_None in Hm; tauto.
+Qed.
+Lemma map_positive_l_alt {A} (m1 m2 : M A) : m1 ≠ ∅ → m1 ∪ m2 ≠ ∅.
+Proof. eauto using map_positive_l. Qed.
 
 Lemma map_subseteq_union {A} (m1 m2 : M A) : m1 ⊆ m2 → m1 ∪ m2 = m2.
 Proof.
@@ -2525,6 +2540,9 @@ Proof.
   unfold difference, map_difference; rewrite lookup_difference_with.
   destruct (m1 !! i), (m2 !! i); compute; intuition congruence.
 Qed.
+Lemma lookup_difference_is_Some {A} (m1 m2 : M A) i :
+  is_Some ((m1 ∖ m2) !! i) ↔ is_Some (m1 !! i) ∧ m2 !! i = None.
+Proof. unfold is_Some. setoid_rewrite lookup_difference_Some. naive_solver. Qed.
 Lemma lookup_difference_None {A} (m1 m2 : M A) i :
   (m1 ∖ m2) !! i = None ↔ m1 !! i = None ∨ is_Some (m2 !! i).
 Proof.

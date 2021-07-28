@@ -19,6 +19,13 @@ Inductive binder := BAnon | BNamed :> string → binder.
 Bind Scope binder_scope with binder.
 Notation "<>" := BAnon : binder_scope.
 
+(** [binder_list] matches [option_list]. *)
+Definition binder_list (b : binder) : list string :=
+  match b with
+  | BAnon => []
+  | BNamed s => [s]
+  end.
+
 Global Instance binder_dec_eq : EqDecision binder.
 Proof. solve_decision. Defined.
 Global Instance binder_inhabited : Inhabited binder := populate BAnon.

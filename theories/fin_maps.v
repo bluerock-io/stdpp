@@ -2966,7 +2966,7 @@ Proof.
 Qed.
 End theorems.
 
-(** ** The seq operation *)
+(** ** The [map_seq] operation *)
 Section map_seq.
   Context `{FinMap nat M} {A : Type}.
   Implicit Types x : A.
@@ -3053,6 +3053,16 @@ Section map_seq.
     revert start. induction xs as [|x xs IH]; intros start; csimpl.
     { by rewrite fmap_empty. }
     by rewrite fmap_insert, IH.
+  Qed.
+
+  Lemma insert_map_seq_0 (xs : list A) i x:
+    i < length xs →
+    <[i:=x]> (map_seq (M:=M A) 0 xs) = map_seq 0 (<[i:=x]> xs).
+  Proof.
+    intros ?. apply map_eq. intros j. rewrite lookup_map_seq_0.
+    destruct (decide (i = j)) as [->|Hne].
+    - rewrite lookup_insert, list_lookup_insert; done.
+    - rewrite lookup_insert_ne, lookup_map_seq_0, list_lookup_insert_ne; done.
   Qed.
 End map_seq.
 

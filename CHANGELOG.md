@@ -151,6 +151,8 @@ API-breaking change is listed.
   `map_filter_singleton_False`, `map_filter_comm`, `map_union_least`,
   `map_subseteq_difference_l`, `insert_difference`, `insert_difference'`,
   `difference_insert`, `difference_insert_subseteq`. (by Hai Dang)
+- Tweak reduction on `gset`, so that `cbn` matches the behavior by `simpl` and
+  does not unfold `gset` operations. (by Paolo G. Giarrusso, BedRock Systems)
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

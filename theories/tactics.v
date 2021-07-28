@@ -239,7 +239,7 @@ Ltac mk_evar T :=
   e'.
 
 (** The tactic [get_head t] returns the head function [f] when [t] is of the
-shape [f a1 ... aN]. *)
+shape [f a1 ... aN]. This is purely syntactic, no unification is performed. *)
 Ltac get_head e :=
   lazymatch e with
   | ?h _ => get_head h

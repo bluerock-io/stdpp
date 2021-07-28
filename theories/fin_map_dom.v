@@ -76,6 +76,8 @@ Proof.
   intros E. apply map_empty. intros. apply not_elem_of_dom.
   rewrite E. set_solver.
 Qed.
+Lemma dom_empty_inv {A} (m : M A) : dom D m ≡ ∅ → m = ∅.
+Proof. apply dom_empty_iff. Qed.
 Lemma dom_alter {A} f (m : M A) i : dom D (alter f i m) ≡ dom D m.
 Proof.
   apply set_equiv; intros j; rewrite !elem_of_dom; unfold is_Some.
@@ -231,6 +233,8 @@ Section leibniz.
   Proof. unfold_leibniz; apply dom_empty. Qed.
   Lemma dom_empty_iff_L {A} (m : M A) : dom D m = ∅ ↔ m = ∅.
   Proof. unfold_leibniz. apply dom_empty_iff. Qed.
+  Lemma dom_empty_inv_L {A} (m : M A) : dom D m = ∅ → m = ∅.
+  Proof. by intros; apply dom_empty_inv; unfold_leibniz. Qed.
   Lemma dom_alter_L {A} f (m : M A) i : dom D (alter f i m) = dom D m.
   Proof. unfold_leibniz; apply dom_alter. Qed.
   Lemma dom_insert_L {A} (m : M A) i x : dom D (<[i:=x]>m) = {[ i ]} ∪ dom D m.

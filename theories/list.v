@@ -1195,6 +1195,7 @@ Lemma take_drop_commute l n m : take n (drop m l) = drop m (take (m + n) l).
 Proof.
   revert n m. induction l; intros [|?][|?]; simpl; auto using take_nil with lia.
 Qed.
+
 Lemma lookup_take l n i : i < n → take n l !! i = l !! i.
 Proof. revert n i. induction l; intros [|n] [|i] ?; simpl; auto with lia. Qed.
 Lemma lookup_total_take `{!Inhabited A} l n i : i < n → take n l !!! i = l !!! i.
@@ -1203,6 +1204,15 @@ Lemma lookup_take_ge l n i : n ≤ i → take n l !! i = None.
 Proof. revert n i. induction l; intros [|?] [|?] ?; simpl; auto with lia. Qed.
 Lemma lookup_total_take_ge `{!Inhabited A} l n i : n ≤ i → take n l !!! i = inhabitant.
 Proof. intros. by rewrite list_lookup_total_alt, lookup_take_ge. Qed.
+Lemma lookup_take_Some l n i a : take n l !! i = Some a ↔ l !! i = Some a ∧ i < n.
+Proof.
+  split.
+  - destruct (decide (i < n)).
+    + rewrite lookup_take; naive_solver.
+    + rewrite lookup_take_ge; [done|lia].
+  - intros [??]. by rewrite lookup_take.
+Qed.
+
 Lemma take_alter f l n i : n ≤ i → take n (alter f i l) = take n l.
 Proof.
   intros. apply list_eq. intros j. destruct (le_lt_dec n j).

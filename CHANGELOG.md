@@ -203,15 +203,10 @@ s/\bmap_union_subseteq_(r|l)_alt\b/map_union_subseteq_\1'/g
 # singleton
 s/\bgmultiset_elem_of_singleton_subseteq\b/gmultiset_singleton_subseteq_l/g
 # empty_iff
-s/\bfmap_empty_inv\b/fmap_empty_iff/g
 s/\bmap_to_list_empty('|_inv)\b/map_to_list_empty_iff/g
-s/\bmap_size_empty_inv\b/map_size_empty_iff/g
 s/\bkmap_empty_inv\b/kmap_empty_iff/g
-s/\belements_empty('|_inv)\b/elements_empty_iff/g
-s/\bsize_empty_inv\b/size_empty_iff/g
-s/\bdom_empty_inv(_L|)\b/dom_empty_iff\1/g
-s/\bgmultiset_elements_empty('|_inv)\b/gmultiset_elements_empty_iff/g
-s/\bgmultiset_size_empty_inv\b/gmultiset_size_empty_iff/g
+s/\belements_empty'\b/elements_empty_iff/g
+s/\bgmultiset_elements_empty'\b/gmultiset_elements_empty_iff/g
 # map_filter_insert
 s/\bmap_filter_insert\b/map_filter_insert_True/g
 s/\bmap_filter_insert_not_delete\b/map_filter_insert_False/g

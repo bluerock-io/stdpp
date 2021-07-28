@@ -146,6 +146,11 @@ API-breaking change is listed.
   `map_filter_insert_not_delete` → `map_filter_insert_False`.
 - Weaken premise of `map_filter_delete_not` to make it consistent with
   `map_filter_insert_not'`.
+- Add lemmas for maps: `map_filter_strong_subseteq_ext`, `map_filter_subseteq_ext`,
+  `map_filter_subseteq_mono`, `map_filter_singleton`, `map_filter_singleton_True`,
+  `map_filter_singleton_False`, `map_filter_comm`, `map_union_least`,
+  `map_subseteq_difference_l`, `insert_difference`, `insert_difference'`,
+  `difference_insert`, `difference_insert_subseteq`. (by Hai Dang)
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

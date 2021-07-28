@@ -646,6 +646,8 @@ Proof.
   intros Hm. apply map_eq; intros i. generalize (f_equal (lookup i) Hm).
   by rewrite lookup_fmap, !lookup_empty, fmap_None.
 Qed.
+Lemma fmap_empty_inv {A B} (f : A → B) m : f <$> m =@{M B} ∅ → m = ∅.
+Proof. apply fmap_empty_iff. Qed.
 
 Lemma fmap_insert {A B} (f: A → B) (m : M A) i x :
   f <$> <[i:=x]>m = <[i:=f x]>(f <$> m).
@@ -1042,6 +1044,8 @@ Lemma map_size_empty_iff {A} (m : M A) : size m = 0 ↔ m = ∅.
 Proof.
   unfold size, map_size. by rewrite length_zero_iff_nil, map_to_list_empty_iff.
 Qed.
+Lemma map_size_empty_inv {A} (m : M A) : size m = 0 → m = ∅.
+Proof. apply map_size_empty_iff. Qed.
 Lemma map_size_non_empty_iff {A} (m : M A) : size m ≠ 0 ↔ m ≠ ∅.
 Proof. by rewrite map_size_empty_iff. Qed.
 

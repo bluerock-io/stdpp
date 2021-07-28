@@ -414,6 +414,8 @@ Section more_lemmas.
     - by apply map_to_list_empty_iff.
     - naive_solver.
   Qed.
+  Lemma gmultiset_elements_empty_inv X : elements X = [] → X = ∅.
+  Proof. apply gmultiset_elements_empty_iff. Qed.
 
   Lemma gmultiset_elements_singleton x : elements ({[+ x +]} : gmultiset A) = [ x ].
   Proof.
@@ -480,6 +482,8 @@ Section more_lemmas.
     unfold size, gmultiset_size; simpl.
     by rewrite length_zero_iff_nil, gmultiset_elements_empty_iff.
   Qed.
+  Lemma gmultiset_size_empty_inv X : size X = 0 → X = ∅.
+  Proof. apply gmultiset_size_empty_iff. Qed.
   Lemma gmultiset_size_non_empty_iff X : size X ≠ 0 ↔ X ≠ ∅.
   Proof. by rewrite gmultiset_size_empty_iff. Qed.
 

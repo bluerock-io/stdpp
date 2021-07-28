@@ -83,6 +83,8 @@ Proof.
   intros HX. apply elem_of_equiv_empty; intros x.
   rewrite <-elem_of_elements, HX. apply not_elem_of_nil.
 Qed.
+Lemma elements_empty_inv X : elements X = [] → X ≡ ∅.
+Proof. apply elements_empty_iff. Qed.
 
 Lemma elements_union_singleton (X : C) x :
   x ∉ X → elements ({[ x ]} ∪ X) ≡ₚ x :: elements X.
@@ -129,6 +131,8 @@ Proof.
   intros; apply equiv_empty; intros x; rewrite <-elem_of_elements.
   by rewrite (nil_length_inv (elements X)), ?elem_of_nil.
 Qed.
+Lemma size_empty_inv (X : C) : size X = 0 → X ≡ ∅.
+Proof. apply size_empty_iff. Qed.
 Lemma size_non_empty_iff (X : C) : size X ≠ 0 ↔ X ≢ ∅.
 Proof. by rewrite size_empty_iff. Qed.
 

@@ -155,6 +155,8 @@ API-breaking change is listed.
   does not unfold `gset` operations. (by Paolo G. Giarrusso, BedRock Systems)
 - Add `get_head` tactic to determine the syntactic head of a function
   application term.
+- Add map lookup lemmas: `lookup_union_is_Some`, `lookup_difference_is_Some`,
+  `lookup_union_Some_l_inv`, `lookup_union_Some_r_inv`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

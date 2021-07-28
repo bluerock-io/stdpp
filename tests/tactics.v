@@ -82,3 +82,10 @@ Goal ∀ mx, mx = Some 10 → is_Some mx.
 Proof. done. Qed.
 Goal ∀ mx, Some 10 = mx → is_Some mx.
 Proof. done. Qed.
+
+(** get_head tests. *)
+Lemma test_get_head (f : nat → nat → nat → nat) : True.
+Proof.
+  let f' := get_head (f 0 1 2) in unify f f'.
+  let f' := get_head f in unify f f'.
+Abort.

@@ -2055,10 +2055,10 @@ Proof. intro. rewrite lookup_union_Some_raw; intuition. Qed.
 Lemma lookup_union_Some_r {A} (m1 m2 : M A) i x :
   m1 ##ₘ m2 → m2 !! i = Some x → (m1 ∪ m2) !! i = Some x.
 Proof. intro. rewrite lookup_union_Some; intuition. Qed.
-Lemma lookup_union_Some_l_inv {A} (m1 m2 : M A) i x :
+Lemma lookup_union_Some_inv_l {A} (m1 m2 : M A) i x :
   (m1 ∪ m2) !! i = Some x → m2 !! i = None → m1 !! i = Some x.
 Proof. rewrite lookup_union_Some_raw. naive_solver. Qed.
-Lemma lookup_union_Some_r_inv {A} (m1 m2 : M A) i x :
+Lemma lookup_union_Some_inv_r {A} (m1 m2 : M A) i x :
   (m1 ∪ m2) !! i = Some x → m1 !! i = None → m2 !! i = Some x.
 Proof. rewrite lookup_union_Some_raw. naive_solver. Qed.
 Lemma lookup_union_is_Some {A} (m1 m2 : M A) i :

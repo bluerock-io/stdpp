@@ -1305,34 +1305,6 @@ Section map_filter_insert_and_delete.
   Context {A} (P : K * A → Prop) `{!∀ x, Decision (P x)}.
   Implicit Types m : M A.
 
-  Lemma map_filter_insert m i x :
-    P (i, x) → filter P (<[i:=x]> m) = <[i:=x]> (filter P m).
-  Proof.
-    intros HP. apply map_eq. intros j. apply option_eq; intros y.
-    rewrite map_filter_lookup_Some. destruct (decide (i = j)) as [->|?].
-    - rewrite !lookup_insert. naive_solver.
-    - rewrite !lookup_insert_ne by done. symmetry. apply map_filter_lookup_Some.
-  Qed.
-
-  Lemma map_filter_insert_not' m i x :
-    ¬ P (i, x) → (∀ y, m !! i = Some y → ¬ P (i, y)) →
-    filter P (<[i:=x]> m) = filter P m.
-  Proof.
-    intros Hx HP. apply map_filter_strong_ext. intros j y.
-    rewrite lookup_insert_Some. naive_solver.
-  Qed.
-  Lemma map_filter_insert_not m i x :
-    (∀ y, ¬ P (i, y)) → filter P (<[i:=x]> m) = filter P m.
-  Proof. intros HP. by apply map_filter_insert_not'. Qed.
-
-  Lemma map_filter_insert_not_delete m i x :
-    ¬ P (i, x) → filter P (<[i:=x]> m) = filter P (delete i m).
-  Proof.
-    intros. rewrite <-insert_delete_insert by done.
-    rewrite map_filter_insert_not'; [done..|].
-    rewrite lookup_delete; done.
-  Qed.
-
   Lemma map_filter_delete m i : filter P (delete i m) = delete i (filter P m).
   Proof.
     apply map_eq. intros j. apply option_eq; intros y.
@@ -1341,14 +1313,40 @@ Section map_filter_insert_and_delete.
     - rewrite lookup_delete_ne, !map_filter_lookup_Some, lookup_delete_ne by done.
       naive_solver.
   Qed.
-
   Lemma map_filter_delete_not m i:
-    (∀ y, ¬ P (i, y)) → filter P (delete i m) = filter P m.
+    (∀ y, m !! i = Some y → ¬ P (i, y)) →
+    filter P (delete i m) = filter P m.
   Proof.
-    intros ?. case (m !! i) as [x|] eqn:?.
-    - by rewrite <-(map_filter_insert_not_delete _ _ x), insert_id by done.
-    - by rewrite delete_notin.
+    intros. apply map_filter_strong_ext. intros j y.
+    rewrite lookup_delete_Some. naive_solver.
   Qed.
+
+  Lemma map_filter_insert m i x :
+    filter P (<[i:=x]> m)
+    = if decide (P (i, x)) then <[i:=x]> (filter P m) else filter P (delete i m).
+  Proof.
+    apply map_eq. intros j. apply option_eq; intros y.
+    rewrite map_filter_lookup_Some, lookup_insert_Some. case_decide.
+    - rewrite lookup_insert_Some, map_filter_lookup_Some. naive_solver.
+    - rewrite map_filter_lookup_Some, lookup_delete_Some. naive_solver.
+  Qed.
+  Lemma map_filter_insert_True m i x :
+    P (i, x) → filter P (<[i:=x]> m) = <[i:=x]> (filter P m).
+  Proof. intros. by rewrite map_filter_insert, decide_True. Qed.
+  Lemma map_filter_insert_False m i x :
+    ¬ P (i, x) → filter P (<[i:=x]> m) = filter P (delete i m).
+  Proof. intros. by rewrite map_filter_insert, decide_False. Qed.
+
+  Lemma map_filter_insert_not' m i x :
+    ¬ P (i, x) → (∀ y, m !! i = Some y → ¬ P (i, y)) →
+    filter P (<[i:=x]> m) = filter P m.
+  Proof.
+    intros. rewrite map_filter_insert, decide_False by done.
+    by rewrite map_filter_delete_not.
+  Qed.
+  Lemma map_filter_insert_not m i x :
+    (∀ y, ¬ P (i, y)) → filter P (<[i:=x]> m) = filter P m.
+  Proof. intros. by apply map_filter_insert_not'. Qed.
 End map_filter_insert_and_delete.
 
 Section map_filter_misc.
@@ -1372,7 +1370,7 @@ Section map_filter_misc.
     apply list_to_map_flip. induction m as [|k x m ? IH] using map_ind.
     { by rewrite map_to_list_empty, map_filter_empty, map_to_list_empty. }
     rewrite map_to_list_insert, filter_cons by done. destruct (decide (P _)).
-    - rewrite map_filter_insert by done.
+    - rewrite map_filter_insert_True by done.
       by rewrite map_to_list_insert, IH by (rewrite map_filter_lookup_None; auto).
     - by rewrite map_filter_insert_not' by naive_solver.
   Qed.
@@ -2764,12 +2762,11 @@ Section setoid_inversion.
     revert m1. induction m2 as [|i x m2 ? IH] using map_ind; intros m1 Hm.
     { rewrite map_filter_empty in Hm. exists ∅.
       by rewrite map_filter_empty, <-map_empty_equiv_eq. }
-    destruct (decide (P (i,x))).
-    - rewrite map_filter_insert in Hm by done.
-      apply insert_equiv_eq in Hm as (x'&m2'&->&?&(m2''&->&?)%IH).
+    rewrite map_filter_insert in Hm. case_decide.
+    - apply insert_equiv_eq in Hm as (x'&m2'&->&?&(m2''&->&?)%IH).
       exists (<[i:=x']> m2''). split; [|by f_equiv].
-      by rewrite map_filter_insert by (by eapply HP).
-    - rewrite map_filter_insert_not' in Hm by naive_solver.
+      by rewrite map_filter_insert_True by (by eapply HP).
+    - rewrite delete_notin in Hm by done.
       apply IH in Hm as (m2'&->&Hm2). exists (<[i:=x]> m2'). split; [|by f_equiv].
       assert (m2' !! i = None).
       { by rewrite <-None_equiv_eq, Hm2, None_equiv_eq. }

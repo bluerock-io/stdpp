@@ -2064,8 +2064,7 @@ Proof. rewrite lookup_union_Some_raw. naive_solver. Qed.
 Lemma lookup_union_is_Some {A} (m1 m2 : M A) i :
   is_Some ((m1 ∪ m2) !! i) ↔ is_Some (m1 !! i) ∨ is_Some (m2 !! i).
 Proof.
-  unfold is_Some. setoid_rewrite lookup_union_Some_raw. split; [naive_solver|].
-  intros [[a Ha]|[a Ha]]; [naive_solver|].
+  rewrite <-!not_eq_None_Some, !lookup_union_None.
   destruct (m1 !! i); naive_solver.
 Qed.
 

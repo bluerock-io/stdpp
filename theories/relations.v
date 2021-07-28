@@ -225,6 +225,13 @@ Section general.
   Lemma tc_rtc x y : tc R x y → rtc R x y.
   Proof. induction 1; eauto. Qed.
 
+  Lemma red_tc x : red (tc R) x ↔ red R x.
+  Proof.
+    split.
+    - intros [y []]; eexists; eauto.
+    - intros [y HR]. exists y. by apply tc_once.
+  Qed.
+
   Lemma tc_congruence {B} (f : A → B) (R' : relation B) x y :
     (∀ x y, R x y → R' (f x) (f y)) → tc R x y → tc R' (f x) (f y).
   Proof. induction 2; econstructor; by eauto. Qed.
@@ -344,6 +351,12 @@ Section general.
     - intros (l&?&?&?&?). exists (pred (length l)).
       split; [lia|]. apply nsteps_list. exists l. eauto with lia.
   Qed.
+
+  Lemma ex_loop_inv x :
+    ex_loop R x →
+    ∃ x', R x x' ∧ ex_loop R x'.
+  Proof. inversion 1; eauto. Qed.
+
 End general.
 
 Section more_general.
@@ -365,6 +378,21 @@ Section more_general.
   Lemma rtsc_congruence {B} (f : A → B) (R' : relation B) x y :
     (∀ x y, R x y → R' (f x) (f y)) → rtsc R x y → rtsc R' (f x) (f y).
   Proof. unfold rtsc; eauto using rtc_congruence, sc_congruence. Qed.
+
+  Lemma ex_loop_tc x :
+    ex_loop (tc R) x ↔ ex_loop R x.
+  Proof.
+    split.
+    - revert x; cofix IH.
+      intros x (y & Hstep & Hloop')%ex_loop_inv.
+      destruct Hstep as [x y Hstep|x y z Hstep Hsteps].
+      + econstructor; eauto.
+      + econstructor; [by eauto|].
+        eapply IH. econstructor; eauto.
+    - revert x; cofix IH.
+      intros x (y & Hstep & Hloop')%ex_loop_inv.
+      econstructor; eauto using tc_once.
+  Qed.
 
 End more_general.
 

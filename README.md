@@ -40,6 +40,9 @@ Notably:
   [Coq bug #5039](https://github.com/coq/coq/issues/5039) the `omega` tactic
   becomes unreliable. We do not consider this an issue since we use `lia` (for
   which the aforementioned Coq bug was fixed) instead of `omega` everywhere.
+* `Set Allow StrictProp`: the type of strict propositions (`SProp`) is enabled
+  by default since Coq 8.12. To make prior versions of Coq happy we need to
+  allow it explicitly.
 
 ## Prerequisites
 

@@ -5,7 +5,6 @@
 theories/options.v
 theories/base.v
 theories/tactics.v
-theories/sprop.v
 theories/option.v
 theories/fin_map_dom.v
 theories/boolset.v

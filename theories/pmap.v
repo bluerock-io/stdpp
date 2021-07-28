@@ -8,7 +8,6 @@ Leibniz equality to become extensional. *)
 From Coq Require Import PArith.
 From stdpp Require Import mapset countable.
 From stdpp Require Export fin_maps.
-From stdpp Require Export sprop.
 From stdpp Require Import options.
 
 Local Open Scope positive_scope.

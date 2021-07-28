@@ -144,7 +144,7 @@ API-breaking change is listed.
 - Add generalized lemma `map_filter_insert` that covers both the True and False
   case. Rename old `map_filter_insert` → `map_filter_insert_True` and
   `map_filter_insert_not_delete` → `map_filter_insert_False`.
-+ Weaken premise of `map_filter_delete_not` to make it consistent with
+- Weaken premise of `map_filter_delete_not` to make it consistent with
   `map_filter_insert_not'`.
 
 The following `sed` script should perform most of the renaming

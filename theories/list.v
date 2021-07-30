@@ -939,6 +939,21 @@ Proof.
   destruct (nth_lookup_or_length l i d); [done | by lia].
 Qed.
 
+Lemma list_in_dec (P : A → Prop) (l : list A) :
+  (∀ x, Decision (P x)) →
+  Decision (∃ x, P x ∧ x ∈ l).
+Proof.
+  intros HdecP. induction l as [ | it l IH].
+  - right. intros (it & _ & []%elem_of_nil).
+  - destruct IH as [ IH | IH].
+    + left. destruct IH as (it' & Hit' & Hin).
+      exists it'. split; [done|]. right. done.
+    + destruct (HdecP it) as [Hit | Hnit].
+      { left. exists it. split; [done|]. by left. }
+      right. intros (it' & Hit' & [-> | Hin]%elem_of_cons); [done|].
+      apply IH. eauto.
+Qed.
+
 (** ** Properties of the [NoDup] predicate *)
 Lemma NoDup_nil : NoDup (@nil A) ↔ True.
 Proof. split; constructor. Qed.

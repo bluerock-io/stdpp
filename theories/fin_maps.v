@@ -2298,8 +2298,7 @@ Lemma map_size_disj_union {A} (m1 m2 : M A) :
   m1 ##ₘ m2 → size (m1 ∪ m2) = size m1 + size m2.
 Proof.
   intros Hdisj. induction m1 as [|k x m1 Hm1 IH] using map_ind.
-  { rewrite map_empty_union. (* FIXME: [rewrite left_id] leaves a goal *)
-    rewrite map_size_empty. done. }
+  { rewrite (left_id _ _), map_size_empty. done. }
   rewrite <-insert_union_l.
   rewrite map_size_insert.
   rewrite lookup_union_r by done.

@@ -152,7 +152,7 @@ API-breaking change is listed.
   `map_filter_singleton_False`, `map_filter_comm`, `map_union_least`,
   `map_subseteq_difference_l`, `insert_difference`, `insert_difference'`,
   `difference_insert`, `difference_insert_subseteq`. (by Hai Dang)
-- Add `map_size_disj_union`.
+- Add `map_size_disj_union`, `size_dom`, `size_list_to_set`.
 - Tweak reduction on `gset`, so that `cbn` matches the behavior by `simpl` and
   does not unfold `gset` operations. (by Paolo G. Giarrusso, BedRock Systems)
 - Add `get_head` tactic to determine the syntactic head of a function

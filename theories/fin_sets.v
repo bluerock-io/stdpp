@@ -203,7 +203,7 @@ Proof.
   by apply size_non_empty_iff, non_empty_difference.
 Qed.
 
-Lemma list_to_set_size l :
+Lemma size_list_to_set l :
   NoDup l → size (list_to_set (C:=C) l) = length l.
 Proof.
   intros Hl. unfold size, set_size. simpl.

@@ -177,7 +177,7 @@ Qed.
 Lemma size_dom `{!Elements K D, !FinSet K D} {A} (m : M A) :
   size (dom D m) = size m.
 Proof.
-  rewrite dom_alt, list_to_set_size.
+  rewrite dom_alt, size_list_to_set.
   2:{ apply NoDup_fst_map_to_list. }
   unfold size, map_size. rewrite fmap_length. done.
 Qed.

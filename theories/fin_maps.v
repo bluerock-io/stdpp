@@ -2294,6 +2294,19 @@ Proof.
   destruct (m1 !! i), (m2 !! i); simpl; repeat (destruct (f _)); naive_solver.
 Qed.
 
+Lemma map_size_disj_union {A} (m1 m2 : M A) :
+  m1 ##ₘ m2 → size (m1 ∪ m2) = size m1 + size m2.
+Proof.
+  intros Hdisj. induction m1 as [|k x m1 Hm1 IH] using map_ind.
+  { rewrite (left_id _ _), map_size_empty. done. }
+  rewrite <-insert_union_l.
+  rewrite map_size_insert.
+  rewrite lookup_union_r by done.
+  apply map_disjoint_insert_l in Hdisj as [-> Hdisj].
+  rewrite map_size_insert, Hm1.
+  rewrite IH by done. done.
+Qed.
+
 Lemma map_cross_split {A} (ma mb mc md : M A) :
   ma ##ₘ mb → mc ##ₘ md →
   ma ∪ mb = mc ∪ md →

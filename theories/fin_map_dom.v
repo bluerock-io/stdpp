@@ -165,6 +165,23 @@ Proof.
   - simpl. by rewrite dom_insert, IH.
 Qed.
 
+(** Alternative definition of [dom] in terms of [map_to_list]. *)
+Lemma dom_alt {A} (m : M A) :
+  dom D m ≡ list_to_set (map_to_list m).*1.
+Proof.
+  rewrite <-(list_to_map_to_list m) at 1.
+  rewrite dom_list_to_map.
+  done.
+Qed.
+
+Lemma size_dom `{!Elements K D, !FinSet K D} {A} (m : M A) :
+  size (dom D m) = size m.
+Proof.
+  rewrite dom_alt, size_list_to_set.
+  2:{ apply NoDup_fst_map_to_list. }
+  unfold size, map_size. rewrite fmap_length. done.
+Qed.
+
 Lemma dom_singleton_inv {A} (m : M A) i :
   dom D m ≡ {[i]} → ∃ x, m = {[i := x]}.
 Proof.

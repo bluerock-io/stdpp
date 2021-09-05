@@ -119,6 +119,15 @@ Proof. intros ?. rewrite elem_of_list_to_set. apply elem_of_elements. Qed.
 Lemma list_to_set_elements_L `{!LeibnizEquiv C} X : list_to_set (elements X) = X.
 Proof. unfold_leibniz. apply list_to_set_elements. Qed.
 
+Lemma elements_list_to_set l :
+  NoDup l → elements (list_to_set (C:=C) l) ≡ₚ l.
+Proof.
+  intros Hl. induction Hl.
+  { rewrite list_to_set_nil. rewrite elements_empty. done. }
+  rewrite list_to_set_cons, elements_disj_union by set_solver.
+  rewrite elements_singleton. apply Permutation_skip. done.
+Qed.
+
 (** * The [size] operation *)
 Global Instance set_size_proper: Proper ((≡) ==> (=)) (@size C _).
 Proof. intros ?? E. apply Permutation_length. by rewrite E. Qed.
@@ -192,6 +201,13 @@ Proof.
   rewrite size_union_alt, difference_twice.
   cut (size (Y ∖ X) ≠ 0); [lia |].
   by apply size_non_empty_iff, non_empty_difference.
+Qed.
+
+Lemma size_list_to_set l :
+  NoDup l → size (list_to_set (C:=C) l) = length l.
+Proof.
+  intros Hl. unfold size, set_size. simpl.
+  rewrite elements_list_to_set; done.
 Qed.
 
 (** * Induction principles *)

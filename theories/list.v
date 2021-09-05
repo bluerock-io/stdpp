@@ -2712,7 +2712,8 @@ Proof.
   end); clear go; intuition.
 Defined.
 
-(** Export the Coq stdlib constructors under different names. *)
+(** Export the Coq stdlib constructors under different names,
+because we use Forall_nil and Forall_cons for a version with a biimplication. *)
 Definition Forall_nil_2 := @Forall_nil A.
 Definition Forall_cons_2 := @Forall_cons A.
 Global Instance Forall_proper:
@@ -2984,7 +2985,8 @@ Lemma Forall2_Forall {A} P (l1 l2 : list A) :
   Forall2 P l1 l2 → Forall (uncurry P) (zip l1 l2).
 Proof. induction 1; constructor; auto. Qed.
 
-(** Export the Coq stdlib constructors under a different name *)
+(** Export the Coq stdlib constructors under a different name,
+because we use Forall_nil and Forall_cons for a version with a biimplication. *)
 Definition Forall2_nil_2 := @Forall2_nil.
 Definition Forall2_cons_2 := @Forall2_cons.
 Section Forall2.

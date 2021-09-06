@@ -2712,6 +2712,8 @@ Proof.
   end); clear go; intuition.
 Defined.
 
+(** Export the Coq stdlib constructors under different names,
+because we use [Forall_nil] and [Forall_cons] for a version with a biimplication. *)
 Definition Forall_nil_2 := @Forall_nil A.
 Definition Forall_cons_2 := @Forall_cons A.
 Global Instance Forall_proper:
@@ -2983,6 +2985,10 @@ Lemma Forall2_Forall {A} P (l1 l2 : list A) :
   Forall2 P l1 l2 → Forall (uncurry P) (zip l1 l2).
 Proof. induction 1; constructor; auto. Qed.
 
+(** Export the Coq stdlib constructors under a different name,
+because we use [Forall2_nil] and [Forall2_cons] for a version with a biimplication. *)
+Definition Forall2_nil_2 := @Forall2_nil.
+Definition Forall2_cons_2 := @Forall2_cons.
 Section Forall2.
   Context {A B} (P : A → B → Prop).
   Implicit Types x : A.
@@ -3033,8 +3039,10 @@ Section Forall2.
   Proof. by inversion 1. Qed.
   Lemma Forall2_nil_inv_r l : Forall2 P l [] → l = [].
   Proof. by inversion 1. Qed.
+  Lemma Forall2_nil : Forall2 P [] [] ↔ True.
+  Proof. done. Qed.
 
-  Lemma Forall2_cons_inv x l y k :
+  Lemma Forall2_cons_1 x l y k :
     Forall2 P (x :: l) (y :: k) → P x y ∧ Forall2 P l k.
   Proof. by inversion 1. Qed.
   Lemma Forall2_cons_inv_l x l k :
@@ -3047,6 +3055,12 @@ Section Forall2.
   Proof. by inversion 1. Qed.
   Lemma Forall2_nil_cons_inv y k : Forall2 P [] (y :: k) → False.
   Proof. by inversion 1. Qed.
+
+  Lemma Forall2_cons x l y k :
+    Forall2 P (x :: l) (y :: k) ↔ P x y ∧ Forall2 P l k.
+  Proof.
+    split; [by apply Forall2_cons_1|]. intros []. by apply Forall2_cons_2.
+  Qed.
 
   Lemma Forall2_app_l l1 l2 k :
     Forall2 P l1 (take (length l1) k) → Forall2 P l2 (drop (length l1) k) →
@@ -4825,7 +4839,7 @@ Ltac decompose_Forall_hyps :=
   | H : Forall2 _ [] ?k |- _ => apply Forall2_nil_inv_l in H
   | H : Forall2 _ ?l [] |- _ => apply Forall2_nil_inv_r in H
   | H : Forall2 _ (_ :: _) (_ :: _) |- _ =>
-    apply Forall2_cons_inv in H; destruct H
+    apply Forall2_cons_1 in H; destruct H
   | H : Forall2 _ (_ :: _) ?k |- _ =>
     let k_hd := fresh k "_hd" in let k_tl := fresh k "_tl" in
     apply Forall2_cons_inv_l in H; destruct H as (k_hd&k_tl&?&?&->);

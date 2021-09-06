@@ -159,6 +159,9 @@ API-breaking change is listed.
   application term.
 - Add map lookup lemmas: `lookup_union_is_Some`, `lookup_difference_is_Some`,
   `lookup_union_Some_l_inv`, `lookup_union_Some_r_inv`.
+- Make `Forall2_nil`, `Forall2_cons` bidirectional lemmas with `Forall2_nil_2`,
+  `Forall2_cons_2` being the original one-directional versions (matching
+  `Forall_nil` and `Forall_cons`). Rename `Forall2_cons_inv` to `Forall2_cons_1`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).
@@ -211,6 +214,8 @@ s/\bgmultiset_elements_empty'\b/gmultiset_elements_empty_iff/g
 # map_filter_insert
 s/\bmap_filter_insert\b/map_filter_insert_True/g
 s/\bmap_filter_insert_not_delete\b/map_filter_insert_False/g
+# Forall2
+s/\bForall2_cons_inv\b/Forall2_cons_1/g
 EOF
 ```
 

@@ -2935,6 +2935,17 @@ Section Forall_Exists.
     end.
 End Forall_Exists.
 
+Lemma list_exist_dec P l :
+  (∀ x, Decision (P x)) → Decision (∃ x, x ∈ l ∧ P x).
+Proof.
+  refine (λ _, cast_if (decide (Exists P l))); by rewrite <-Exists_exists.
+Defined.
+Lemma list_forall_dec P l :
+  (∀ x, Decision (P x)) → Decision (∀ x, x ∈ l → P x).
+Proof.
+  refine (λ _, cast_if (decide (Forall P l))); by rewrite <-Forall_forall.
+Defined.
+
 Lemma forallb_True (f : A → bool) xs : forallb f xs ↔ Forall f xs.
 Proof.
   split.

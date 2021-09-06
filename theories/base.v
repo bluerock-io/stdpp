@@ -10,6 +10,7 @@ we must export [Coq.Peano] later than any export of [Coq.Bool]. *)
 over the ones of [Coq.Peano] (see Coq PR#12950), so we import [Utf8] last. *)
 From Coq Require Export Morphisms RelationClasses List Bool Setoid Peano Utf8.
 From Coq Require Import Permutation.
+From Coq Require Export Logic.StrictProp.
 Export ListNotations.
 From Coq.Program Require Export Basics Syntax.
 From stdpp Require Import options.
@@ -48,6 +49,10 @@ Obligation Tactic := idtac.
 
 (** 3. Hide obligations from the results of the [Search] commands. *)
 Add Search Blacklist "_obligation_".
+
+(** 4. [StrictProp] is enabled by default since Coq 8.12. To make prior versions
+of Coq happy we need to allow it explicitly. *)
+Global Set Allow StrictProp.
 
 (** * Sealing off definitions *)
 Section seal.
@@ -644,6 +649,21 @@ Lemma negb_True b : negb b ↔ ¬b.
 Proof. destruct b; simpl; tauto. Qed.
 Lemma Is_true_false (b : bool) : b = false → ¬b.
 Proof. now intros -> ?. Qed.
+
+(** ** SProp *)
+Lemma unsquash (P : Prop) `{!Decision P} : Squash P → P.
+Proof.
+  intros HP. destruct (decide P) as [?|HnotP]; [assumption|].
+  assert sEmpty as []. destruct HP. destruct HnotP; assumption.
+Qed.
+
+Definition SIs_true (b : bool) : SProp := Squash (Is_true b).
+
+Lemma SIs_true_intro b : Is_true b → SIs_true b.
+Proof. apply squash. Qed.
+Lemma SIs_true_elim b : SIs_true b → Is_true b.
+Proof. apply unsquash. destruct b; [left|right]; simpl; tauto. Qed.
+
 
 (** ** Unit *)
 Global Instance unit_equiv : Equiv unit := λ _ _, True.

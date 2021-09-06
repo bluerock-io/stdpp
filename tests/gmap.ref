@@ -70,3 +70,23 @@ Failed to progress.
   
   ============================
   bool_decide (∅ ⊆ {[1; 2; 3]}) = true
+"pmap_insert_positives_test"
+     : string
+     = true
+     : bool
+"gmap_insert_positives_test"
+     : string
+     = true
+     : bool
+"gmap_insert_comm"
+     : string
+1 goal
+  
+  ============================
+  {[3 := false; 2 := true]} = {[2 := true; 3 := false]}
+"gmap_lookup_concrete"
+     : string
+1 goal
+  
+  ============================
+  {[3 := false; 2 := true]} !! 2 = Some true

@@ -162,14 +162,6 @@ API-breaking change is listed.
 - Make `Forall2_nil`, `Forall2_cons` bidirectional lemmas with `Forall2_nil_2`,
   `Forall2_cons_2` being the original one-directional versions (matching
   `Forall_nil` and `Forall_cons`). Rename `Forall2_cons_inv` to `Forall2_cons_1`.
-- Use `SProp` in the implementation of `pmap`, `gmap`, `gset`, `Qp`, and
-  `coPset`. This ensures that more equalities hold definitionally, and can thus
-  be proved by `reflexivity` or even by conversion as part of unification.
-  For example `1/4 + 3/4 = 1`, or `{[ 1 := 1; 2 := 2 ]} = {[ 2 := 2; 1 := 1 ]}`,
-  or `{[ 1 ]} ∖ {[ 1 ]} = ∅` hold definitionally. As part of this change, add
-  some basic infrastructure for `SProp`: the definition `SIs_true`, and the
-  lemmas `SIs_true_intro`, `SIs_true_elim`, and `unsquash`. The APIs of the
-  aforementioned data structures should be unaffected.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

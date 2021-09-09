@@ -523,3 +523,11 @@ Section infinite.
   Qed.
 End infinite.
 End fin_set.
+
+Lemma size_set_seq `{FinSet nat C} start len :
+  size (set_seq (C:=C) start len) = len.
+Proof.
+  rewrite <-list_to_set_seq, size_list_to_set.
+  2:{ apply NoDup_seq. }
+  rewrite seq_length. done.
+Qed.

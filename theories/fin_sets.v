@@ -193,6 +193,17 @@ Proof.
   rewrite <-union_difference, (comm (∪)); set_solver.
 Qed.
 
+Lemma size_difference X Y : Y ⊆ X → size (X ∖ Y) = size X - size Y.
+Proof.
+  intros. rewrite (union_difference Y X) at 2 by done.
+  rewrite size_union by set_solver. lia.
+Qed.
+Lemma size_difference_alt X Y : size (X ∖ Y) = size X - size (X ∩ Y).
+Proof.
+  intros. rewrite <-size_difference by set_solver.
+  apply set_size_proper. set_solver.
+Qed.
+
 Lemma subseteq_size X Y : X ⊆ Y → size X ≤ size Y.
 Proof. intros. rewrite (union_difference X Y), size_union_alt by done. lia. Qed.
 Lemma subset_size X Y : X ⊂ Y → size X < size Y.

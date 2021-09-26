@@ -21,6 +21,18 @@ Section tests.
     baz (bar (f 0)) (f 2).
   Goal Proper (pointwise_relation nat (≡) ==> (≡)) test3.
   Proof. solve_proper. Qed.
+
+  (* We mirror [discrete_fun] from Iris to have an equivalence on a function
+  space. *)
+  Definition discrete_fun {A} (B : A → Type) `{!∀ x, Equiv (B x)} := ∀ x : A, B x.
+  Local Instance discrete_fun_equiv  {A} {B : A → Type} `{!∀ x, Equiv (B x)} :
+      Equiv (discrete_fun B) :=
+    λ f g, ∀ x, f x ≡ g x.
+  Notation "A -d> B" :=
+    (@discrete_fun A (λ _, B) _) (at level 99, B at level 200, right associativity).
+  Definition test4 x (f : A -d> A) := f x.
+  Goal ∀ x, Proper ((≡) ==> (≡)) (test4 x).
+  Proof. solve_proper. Qed.
 End tests.
 
 Global Instance from_option_proper_test1 `{Equiv A} {B} (R : relation B) (f : A → B) :

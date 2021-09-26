@@ -406,12 +406,12 @@ Ltac f_equiv :=
   | |- ?R (?f _ _ _ _) _ => simple apply (_ : Proper (_ ==> _ ==> _ ==> _ ==> R) f)
   | |- ?R (?f _ _ _ _ _) _ => simple apply (_ : Proper (_ ==> _ ==> _ ==> _ ==> _ ==> R) f)
   (* In case the function symbol differs, but the arguments are the same,
-     maybe we have a pointwise_relation in our context. *)
+     maybe we have a relation about those functions in our context. *)
   (* TODO: If only some of the arguments are the same, we could also
-     query for "pointwise_relation"'s. But that leads to a combinatorial
+     query for such relations. But that leads to a combinatorial
      explosion about which arguments are and which are not the same. *)
-  | H : pointwise_relation _ ?R ?f ?g |- ?R (?f ?x) (?g ?x) => simple apply H
-  | H : pointwise_relation _ (pointwise_relation _ ?R) ?f ?g |- ?R (?f ?x ?y) (?g ?x ?y) => simple apply H
+  | H : _ ?f ?g |- ?R (?f ?x) (?g ?x) => solve [simple apply H]
+  | H : _ ?f ?g |- ?R (?f ?x ?y) (?g ?x ?y) => solve [simple apply H]
   end;
   try simple apply reflexivity.
 Tactic Notation "f_equiv" "/=" := csimpl in *; f_equiv.

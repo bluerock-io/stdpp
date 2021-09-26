@@ -413,7 +413,9 @@ Ltac f_equiv :=
   | H : _ ?f ?g |- ?R (?f ?x) (?g ?x) => solve [simple apply H]
   | H : _ ?f ?g |- ?R (?f ?x ?y) (?g ?x ?y) => solve [simple apply H]
   end;
-  try simple apply reflexivity.
+  (* Only try reflexivity if the terms are syntactically equal. This avoids
+     very expensive failing unification. *)
+  try match goal with  |- _ ?x ?x => simple apply reflexivity end.
 Tactic Notation "f_equiv" "/=" := csimpl in *; f_equiv.
 
 (** The tactic [solve_proper_unfold] unfolds the first head symbol, so that

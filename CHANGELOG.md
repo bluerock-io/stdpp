@@ -165,6 +165,11 @@ API-breaking change is listed.
 - Enable `f_equiv` (and by extension `solve_proper`) to handle goals of the form
   `f x ≡ g x` when `f ≡ g` is in scope, where `f` has a type like Iris's `-d>`
   and `-n>`.
+- Optimize `f_equiv` by doing more syntactic checking before handing off to
+  unification. This can make some uses 50x faster, but also makes the tactic
+  slightly weaker in case the left-hand side and right-hand side of the relation
+  call a function with arguments that are convertible but not syntactically
+  equal.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

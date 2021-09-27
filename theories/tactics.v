@@ -374,7 +374,9 @@ Ltac f_equiv :=
     destruct x
   | H : ?R ?x ?y |- ?R2 (match ?x with _ => _ end) (match ?y with _ => _ end) =>
      destruct H
-  (* First assume that the arguments need the same relation as the result *)
+  (* First assume that the arguments need the same relation as the result. We
+  check the most restrictive pattern first: [(?f _) (?f _)] requires all but the
+  last argument to be syntactically equal. *)
   | |- ?R (?f _) (?f _) => simple apply (_ : Proper (R ==> R) f)
   | |- ?R (?f _ _) (?f _ _) => simple apply (_ : Proper (R ==> R ==> R) f)
   | |- ?R (?f _ _ _) (?f _ _ _) => simple apply (_ : Proper (R ==> R ==> R ==> R) f)
@@ -401,21 +403,27 @@ Ltac f_equiv :=
   | |- (?R _) (?f _ _ _ _ _) (?f _ _ _ _ _) => simple apply (_ : Proper (R _ ==> R _ ==> R _ ==> R _ ==> R _ ==> R _) f)
   | |- (?R _ _) (?f _ _ _ _ _) (?f _ _ _ _ _) => simple apply (_ : Proper (R _ _ ==> R _ _ ==> R _ _ ==> R _ _ ==> R _ _ ==> R _ _) f)
   | |- (?R _ _ _) (?f _ _ _ _ _) (?f _ _ _ _ _) => simple apply (_ : Proper (R _ _ _ ==> R _ _ _ ==> R _ _ _ ==> R _ _ _ ==> R _ _ _ ==> R _ _ _) f)
-  (* Next, try to infer the relation. Unfortunately, very often, it will turn
-     the goal into a Leibniz equality so we get stuck. *)
-  (* TODO: Can we exclude that instance? *)
-  | |- ?R (?f _) (?f _) => simple apply (_ : Proper (_ ==> R) f)
-  | |- ?R (?f _ _) (?f _ _) => simple apply (_ : Proper (_ ==> _ ==> R) f)
-  | |- ?R (?f _ _ _) (?f _ _ _) => simple apply (_ : Proper (_ ==> _ ==> _ ==> R) f)
-  | |- ?R (?f _ _ _ _) (?f _ _ _ _) => simple apply (_ : Proper (_ ==> _ ==> _ ==> _ ==> R) f)
-  | |- ?R (?f _ _ _ _ _) (?f _ _ _ _ _) => simple apply (_ : Proper (_ ==> _ ==> _ ==> _ ==> _ ==> R) f)
-  (* In case the function symbol differs, but the arguments are the same,
-     maybe we have a relation about those functions in our context. *)
-  (* TODO: If only some of the arguments are the same, we could also
-     query for such relations. But that leads to a combinatorial
-     explosion about which arguments are and which are not the same. *)
+  (* In case the function symbol differs, but the arguments are the same, maybe
+     we have a relation about those functions in our context that we can simply
+     apply. (The case where the arguments differ is a lot more complicated; with
+     the way we typically define the relations on function spaces it further
+     requires [Proper]ness of [f] or [g]). *)
   | H : _ ?f ?g |- ?R (?f ?x) (?g ?x) => solve [simple apply H]
   | H : _ ?f ?g |- ?R (?f ?x ?y) (?g ?x ?y) => solve [simple apply H]
+
+  (* Fallback case: try to infer the relation, and allow the function to not be
+     syntactically the same on both sides. Unfortunately, very often, it will
+     turn the goal into a Leibniz equality so we get stuck. Furthermore, looking
+     for instances in this order will mean that Coq will try to unify the
+     remaining arguments that we have not explicitly generalized, which can be
+     very slow -- but if we go for the opposite order, we will hit the Leibniz
+     equality fallback instance even more often. *)
+  (* TODO: Can we exclude that Leibniz equality instance? *)
+  | |- ?R (?f _) _ => simple apply (_ : Proper (_ ==> R) f)
+  | |- ?R (?f _ _) _ => simple apply (_ : Proper (_ ==> _ ==> R) f)
+  | |- ?R (?f _ _ _) _ => simple apply (_ : Proper (_ ==> _ ==> _ ==> R) f)
+  | |- ?R (?f _ _ _ _) _ => simple apply (_ : Proper (_ ==> _ ==> _ ==> _ ==> R) f)
+  | |- ?R (?f _ _ _ _ _) _ => simple apply (_ : Proper (_ ==> _ ==> _ ==> _ ==> _ ==> R) f)
   end;
   (* Only try reflexivity if the terms are syntactically equal. This avoids
      very expensive failing unification. *)

@@ -162,6 +162,9 @@ API-breaking change is listed.
 - Make `Forall2_nil`, `Forall2_cons` bidirectional lemmas with `Forall2_nil_2`,
   `Forall2_cons_2` being the original one-directional versions (matching
   `Forall_nil` and `Forall_cons`). Rename `Forall2_cons_inv` to `Forall2_cons_1`.
+- Enable `f_equiv` (and by extension `solve_proper`) to handle goals of the form
+  `f x ≡ g x` when `f ≡ g` is in scope, where `f` has a type like Iris's `-d>`
+  and `-n>`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

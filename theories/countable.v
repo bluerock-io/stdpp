@@ -1,5 +1,6 @@
 From Coq.QArith Require Import QArith_base Qcanon.
 From stdpp Require Export list numbers list_numbers fin.
+From stdpp Require Import well_founded.
 From stdpp Require Import options.
 Local Open Scope positive.
 
@@ -88,6 +89,25 @@ Section choice.
     choose H1 = choose H2 := choose_go_pi _ _.
   Definition choice (HA : ∃ x, P x) : { x | P x } := _↾choose_correct HA.
 End choice.
+
+Section choice_proper.
+  Context `{Countable A}.
+  Context (P1 P2 : A → Prop) `{∀ x, Decision (P1 x)} `{∀ x, Decision (P2 x)}.
+  Context (Heq : ∀ x, P1 x ↔ P2 x).
+
+  Lemma choose_go_proper {i} (acc1 acc2 : Acc (choose_step _) i) :
+    choose_go P1 acc1 = choose_go P2 acc2.
+  Proof using Heq.
+    induction acc1 as [i a1 IH] using Acc_dep_ind;
+      destruct acc2 as [acc2]; simpl.
+    destruct (Some_dec _) as [[x Hx]|]; [|done].
+    do 2 case_decide; done || exfalso; naive_solver.
+  Qed.
+
+  Lemma choose_proper p1 p2 :
+    choose P1 p1 = choose P2 p2.
+  Proof using Heq. apply choose_go_proper. Qed.
+End choice_proper.
 
 Lemma surj_cancel `{Countable A} `{EqDecision B}
   (f : A → B) `{!Surj (=) f} : { g : B → A & Cancel (=) f g }.

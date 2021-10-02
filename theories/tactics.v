@@ -76,7 +76,7 @@ Ltac done_if b :=
   | false => idtac
   end.
 
-(** Aliases for trans and etrans that are easier to type *)
+(** Aliases for transitivity and etransitivity that are easier to type *)
 Tactic Notation "trans" constr(A) := transitivity A.
 Tactic Notation "etrans" := etransitivity.
 

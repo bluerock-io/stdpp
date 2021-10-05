@@ -10,9 +10,11 @@ Set Default Proof Using "Type*".
 
 (** Operations *)
 Global Instance set_size `{Elements A C} : Size C := length ∘ elements.
+Typeclasses Opaque set_size.
 
 Definition set_fold `{Elements A C} {B}
   (f : A → B → B) (b : B) : C → B := foldr f b ∘ elements.
+Typeclasses Opaque set_fold.
 
 Global Instance set_filter
     `{Elements A C, Empty C, Singleton A C, Union C} : Filter A C := λ P _ X,

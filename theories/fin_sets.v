@@ -23,10 +23,11 @@ Definition set_map `{Elements A C, Singleton B D, Empty D, Union D}
     (f : A → B) (X : C) : D :=
   list_to_set (f <$> elements X).
 Typeclasses Opaque set_map.
+Global Instance: Params (@set_map) 8 := {}.
 
 Global Instance set_fresh `{Elements A C, Fresh A (list A)} : Fresh A C :=
   fresh ∘ elements.
-Typeclasses Opaque set_filter.
+Typeclasses Opaque set_fresh.
 
 (** We generalize the [fresh] operation on sets to generate lists of fresh
 elements w.r.t. a set [X]. *)

@@ -533,6 +533,14 @@ Lemma Acc_impl {A} (R1 R2 : relation A) x :
 Proof. induction 1; constructor; naive_solver. Qed.
 
 Notation wf := well_founded.
+
+(** The function [wf_guard n wfR] adds [2 ^ n - 1] times an [Acc_intro]
+constructor ahead of the [wfR] proof. This definition can be used to make
+opaque [wf] proofs "compute". For big enough [n], say [32], computation will
+reach implementation limits before running into the opaque [wf] proof.
+
+This trick is originally due to Georges Gonthier, see
+https://sympa.inria.fr/sympa/arc/coq-club/2007-07/msg00013.html *)
 Definition wf_guard `{R : relation A} (n : nat) (wfR : wf R) : wf R :=
   Acc_intro_generator n wfR.
 

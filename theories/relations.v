@@ -1,7 +1,6 @@
 (** This file collects definitions and theorems on abstract rewriting systems.
 These are particularly useful as we define the operational semantics as a
 small step semantics. *)
-From Coq Require Import Wf_nat.
 From stdpp Require Export sets.
 From stdpp Require Import options.
 

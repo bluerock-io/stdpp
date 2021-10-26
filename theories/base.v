@@ -672,7 +672,7 @@ Global Instance: Params (@fst) 2 := {}.
 Global Instance: Params (@snd) 2 := {}.
 
 (** The Coq standard library swapped the names of curry/uncurry, see
-https://github.com/coq/coq/pull/12716/ 
+https://github.com/coq/coq/pull/12716/
 FIXME: Remove this workaround once the lowest Coq version we support is 8.13. *)
 Notation curry := prod_uncurry.
 Global Instance: Params (@curry) 3 := {}.
@@ -1449,9 +1449,11 @@ Global Instance: Params (@size) 2 := {}.
 (** The class [MonadSet M] axiomatizes a type constructor [M] that can be
 used to construct a set [M A] with elements of type [A]. The advantage
 of this class, compared to [Set_], is that it also axiomatizes the
-the monadic operations. The disadvantage, is that not many inhabits are
-possible (we will only provide an inhabitant using unordered lists without
-duplicates). More interesting implementations typically need
+the monadic operations. The disadvantage is that not many inhabitants are
+possible: we will only provide as inhabitants [propset] and [listset], which are
+represented respectively using Boolean functions and lists with duplicates.
+
+More interesting implementations typically need
 decidable equality, or a total order on the elements, which do not fit
 in a type constructor of type [Type → Type]. *)
 Class MonadSet M `{∀ A, ElemOf A (M A),

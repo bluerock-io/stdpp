@@ -22,6 +22,7 @@ theories/countable.v
 theories/orders.v
 theories/natmap.v
 theories/strings.v
+theories/well_founded.v
 theories/relations.v
 theories/sets.v
 theories/listset.v

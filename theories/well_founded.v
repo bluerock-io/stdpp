@@ -1,10 +1,10 @@
 (** * Theorems on well founded relations *)
-From stdpp Require Import base tactics.
+From stdpp Require Import base.
 From stdpp Require Import options.
 
 Lemma Acc_impl {A} (R1 R2 : relation A) x :
   Acc R1 x → (∀ y1 y2, R2 y1 y2 → R1 y1 y2) → Acc R2 x.
-Proof. induction 1; constructor; naive_solver. Qed.
+Proof. induction 1; constructor; auto. Qed.
 
 Notation wf := well_founded.
 

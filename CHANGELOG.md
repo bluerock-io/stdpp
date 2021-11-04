@@ -170,6 +170,10 @@ API-breaking change is listed.
   slightly weaker in case the left-hand side and right-hand side of the relation
   call a function with arguments that are convertible but not syntactically
   equal.
+- Add lemma `choose_proper` showing that `choose P` respects predicate
+  equivalence. (by Paolo G. Giarrusso, BedRock Systems)
+- Well-founded definitions: Add induction principle `Acc_dep_ind`, a dependent
+  version of `Acc_ind`. (by Paolo G. Giarrusso, BedRock Systems)
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

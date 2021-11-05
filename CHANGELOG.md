@@ -172,11 +172,11 @@ API-breaking change is listed.
   equal.
 - Add lemma `choose_proper` showing that `choose P` respects predicate
   equivalence. (by Paolo G. Giarrusso, BedRock Systems)
-- Well-founded definitions: Add induction principle `Acc_dep_ind`, a dependent
-  version of `Acc_ind`. This lives in a new module `well_founded` together with
-  some things that were previously found in `relations`: `Acc_impl`, `wf_guard`,
-  `wf_guard`, `wf_projected`, `Fix_F_proper`, `Fix_unfold_rel`.
-  (by Paolo G. Giarrusso, BedRock Systems)
+- Extract module `well_founded` from `relations`, and re-export it for
+  compatibility. This contains `Acc_impl`, `wf_guard`, `wf_guard`,
+  `wf_projected`, `Fix_F_proper`, `Fix_unfold_rel`.
+- Add induction principle `relations.Acc_dep_ind`, a dependent
+  version of `Acc_ind`. (by Paolo G. Giarrusso, BedRock Systems)
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

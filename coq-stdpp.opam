@@ -28,6 +28,9 @@ The key features of this library are as follows:
   `set_solver` for goals involving set operations.
 - It is entirely dependency- and axiom-free.
 """
+tags: [
+  "logpath:stdpp"
+]
 
 depends: [
   "coq" { (>= "8.10.2" & < "8.15~") | (= "dev") }

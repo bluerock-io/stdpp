@@ -3,6 +3,17 @@ API-breaking change is listed.
 
 ## std++ master
 
+## std++ 1.6.0
+
+Coq 8.14 is newly supported by this release, and Coq 8.10 to 8.13 remain
+supported.
+
+This release of std++ was managed by Ralf Jung, Robbert Krebbers, and Tej
+Chajed, with contributions from Alix Trieu, Andrej Dudenhefner, Dan Frumin,
+Fengmin Zhu, Hoang-Hai Dang, Jan, Lennard Gäher, Michael Sammler, Paolo G.
+Giarrusso, Ralf Jung, Robbert Krebbers, Simon Friis Vindum, Simon Gregersen,
+and Tej Chajed. Thanks a lot to everyone involved!
+
 - Remove singleton notations `{[ x,y ]}` and `{[ x,y,z ]}` for `{[ (x,y) ]}`
   and `{[ (x,y,z) ]}`. They date back to the time we used the `singleton` class
   with a product for maps (there's now the `singletonM` class).

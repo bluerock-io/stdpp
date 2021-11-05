@@ -3,7 +3,7 @@ API-breaking change is listed.
 
 ## std++ master
 
-## std++ 1.6.0
+## std++ 1.6.0 (2021-11-05)
 
 Coq 8.14 is newly supported by this release, and Coq 8.10 to 8.13 remain
 supported.

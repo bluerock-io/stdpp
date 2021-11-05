@@ -173,9 +173,9 @@ API-breaking change is listed.
 - Add lemma `choose_proper` showing that `choose P` respects predicate
   equivalence. (by Paolo G. Giarrusso, BedRock Systems)
 - Extract module `well_founded` from `relations`, and re-export it for
-  compatibility. This contains `Acc_impl`, `wf_guard`, `wf_guard`,
+  compatibility. This contains `wf`, `Acc_impl`, `wf_guard`,
   `wf_projected`, `Fix_F_proper`, `Fix_unfold_rel`.
-- Add induction principle `relations.Acc_dep_ind`, a dependent
+- Add induction principle `well_founded.Acc_dep_ind`, a dependent
   version of `Acc_ind`. (by Paolo G. Giarrusso, BedRock Systems)
 
 The following `sed` script should perform most of the renaming

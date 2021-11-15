@@ -1,6 +1,8 @@
 -Q theories stdpp
 # 'Global Hint Rewrite' not supported before Coq 8.14.
 -arg -w -arg -deprecated-hint-rewrite-without-locality
+# Fixing this one requires Coq 8.15.
+-arg -w -arg -deprecated-typeclasses-transparency-without-locality
 
 theories/options.v
 theories/base.v

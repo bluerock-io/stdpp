@@ -2646,6 +2646,15 @@ Proof.
   by rewrite lookup_difference_Some, map_filter_lookup_Some.
 Qed.
 
+(** ** Misc properties about the order *)
+Lemma map_subseteq_inv {A} (m1 m2 : M A) : m1 ⊆ m2 → m1 ⊂ m2 ∨ m1 = m2.
+Proof.
+  intros. destruct (decide (m2 ∖ m1 = ∅)) as [Hm21|(i&x&Hi)%map_choose].
+  - right. by rewrite <-(map_difference_union m1 m2), Hm21, (right_id_L _ _).
+  - left. apply lookup_difference_Some in Hi as [??].
+    apply map_subset_alt; eauto.
+Qed.
+
 (** ** Setoids *)
 Section setoid.
   Context `{Equiv A}.

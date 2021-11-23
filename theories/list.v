@@ -4474,6 +4474,11 @@ Section zip_with.
   Lemma zip_with_take_r n l k :
     length l ≤ n → zip_with f l (take n k) = zip_with f l k.
   Proof. revert n k. induction l; intros [] [] ?; f_equal/=; auto with lia. Qed.
+  Lemma zip_with_take_both l k :
+    zip_with f (take (length k) l) (take (length l) k) = zip_with f l k.
+  Proof.
+    rewrite zip_with_take_l; [apply zip_with_take_r | rewrite take_length]; lia.
+  Qed.
   Lemma Forall_zip_with_fst (P : A → Prop) (Q : C → Prop) l k :
     Forall P l → Forall (λ y, ∀ x, P x → Q (f x y)) k →
     Forall Q (zip_with f l k).

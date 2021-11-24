@@ -3,6 +3,18 @@ API-breaking change is listed.
 
 ## std++ master
 
+- Rename `Is_true_false` → `Is_true_false_2` and `eq_None_ne_Some` → `eq_None_ne_Some_1`.
+
+The following `sed` script should perform most of the renaming
+(on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).
+Note that the script is not idempotent, do not run it twice.
+```
+sed -i -E -f- $(find theories -name "*.v") <<EOF
+s/\bIs_true_false\b/Is_true_false_2/g
+s/\beq_None_ne_Some\b/eq_None_ne_Some_1/g
+EOF
+```
+
 ## std++ 1.6.0 (2021-11-05)
 
 Coq 8.14 is newly supported by this release, and Coq 8.10 to 8.13 remain

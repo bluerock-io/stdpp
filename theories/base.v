@@ -642,8 +642,18 @@ Lemma orb_True b1 b2 : b1 || b2 ↔ b1 ∨ b2.
 Proof. destruct b1, b2; simpl; tauto. Qed.
 Lemma negb_True b : negb b ↔ ¬b.
 Proof. destruct b; simpl; tauto. Qed.
-Lemma Is_true_false (b : bool) : b = false → ¬b.
-Proof. now intros -> ?. Qed.
+Lemma Is_true_true (b : bool) : b ↔ b = true.
+Proof. now destruct b. Qed.
+Lemma Is_true_true_1 (b : bool) : b → b = true.
+Proof. apply Is_true_true. Qed.
+Lemma Is_true_true_2 (b : bool) : b = true → b.
+Proof. apply Is_true_true. Qed.
+Lemma Is_true_false (b : bool) : ¬ b ↔ b = false.
+Proof. now destruct b; simpl. Qed.
+Lemma Is_true_false_1 (b : bool) : ¬b → b = false.
+Proof. apply Is_true_false. Qed.
+Lemma Is_true_false_2 (b : bool) : b = false → ¬b.
+Proof. apply Is_true_false. Qed.
 
 (** ** Unit *)
 Global Instance unit_equiv : Equiv unit := λ _ _, True.

@@ -1082,6 +1082,26 @@ Lemma reverse_length l : length (reverse l) = length l.
 Proof. unfold reverse. rewrite <-!rev_alt. apply rev_length. Qed.
 Lemma reverse_involutive l : reverse (reverse l) = l.
 Proof. unfold reverse. rewrite <-!rev_alt. apply rev_involutive. Qed.
+Lemma reverse_lookup l i :
+  i < length l →
+  reverse l !! i = l !! (length l - S i).
+Proof.
+  revert i. induction l as [|x l IH]; simpl; intros i Hi; [done|].
+  rewrite reverse_cons.
+  destruct (decide (i = length l)); subst.
+  + by rewrite list_lookup_middle, Nat.sub_diag by by rewrite reverse_length.
+  + rewrite lookup_app_l by (rewrite reverse_length; lia).
+    rewrite IH by lia.
+    by assert (length l - i = S (length l - S i)) as -> by lia.
+Qed.
+Lemma reverse_lookup_Some l i x :
+  reverse l !! i = Some x ↔ l !! (length l - S i) = Some x ∧ i < length l.
+Proof.
+  split.
+  - destruct (decide (i < length l)); [ by rewrite reverse_lookup|].
+    rewrite lookup_ge_None_2; [done|]. rewrite reverse_length. lia.
+  - intros [??]. by rewrite reverse_lookup.
+Qed.
 Lemma elem_of_reverse_2 x l : x ∈ l → x ∈ reverse l.
 Proof.
   induction 1; rewrite reverse_cons, elem_of_app,
@@ -1610,6 +1630,9 @@ Qed.
 Lemma sublist_lookup_Some l i n :
   i + n ≤ length l → sublist_lookup i n l = Some (take n (drop i l)).
 Proof. by unfold sublist_lookup; intros; simplify_option_eq. Qed.
+Lemma sublist_lookup_Some' l i n l' :
+  sublist_lookup i n l = Some l' ↔ l' = take n (drop i l) ∧ i + n ≤ length l.
+Proof. unfold sublist_lookup. case_option_guard; naive_solver lia. Qed.
 Lemma sublist_lookup_None l i n :
   length l < i + n → sublist_lookup i n l = None.
 Proof. by unfold sublist_lookup; intros; simplify_option_eq by lia. Qed.

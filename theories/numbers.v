@@ -535,6 +535,13 @@ Proof.
   - etrans; [|apply Z.pow_pos_nonneg]; lia.
 Qed.
 
+Lemma Z_add_nocarry_lor a b :
+  Z.land a b = 0 →
+  a + b = Z.lor a b.
+Proof. intros ?. rewrite <-Z.lxor_lor by done. by rewrite Z.add_nocarry_lxor. Qed.
+
+Lemma Z_opp_lnot a : -a - 1 = Z.lnot a.
+Proof. pose proof (Z.add_lnot_diag a). lia. Qed.
 
 Local Close Scope Z_scope.
 

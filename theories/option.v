@@ -13,8 +13,12 @@ Lemma None_ne_Some {A} (x : A) : None ≠ Some x.
 Proof. congruence. Qed.
 Lemma Some_ne_None {A} (x : A) : Some x ≠ None.
 Proof. congruence. Qed.
-Lemma eq_None_ne_Some {A} (mx : option A) x : mx = None → mx ≠ Some x.
-Proof. congruence. Qed.
+Lemma eq_None_ne_Some {A} (mx : option A) : (∀ x, mx ≠ Some x) ↔ mx = None.
+Proof. destruct mx; split; congruence. Qed.
+Lemma eq_None_ne_Some_1 {A} (mx : option A) x : mx = None → mx ≠ Some x.
+Proof. intros ?. by apply eq_None_ne_Some. Qed.
+Lemma eq_None_ne_Some_2 {A} (mx : option A) : (∀ x, mx ≠ Some x) → mx = None.
+Proof. intros ?. by apply eq_None_ne_Some. Qed.
 Global Instance Some_inj {A} : Inj (=) (=) (@Some A).
 Proof. congruence. Qed.
 

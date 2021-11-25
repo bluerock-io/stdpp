@@ -210,7 +210,59 @@ Section sum_list.
   Qed.
   Lemma sum_list_replicate n m : sum_list (replicate m n) = m * n.
   Proof. induction m; simpl; auto. Qed.
+  Lemma sum_list_fmap_same n l f :
+    Forall (λ x, f x = n) l →
+    sum_list (f <$> l) = length l * n.
+  Proof. induction 1; csimpl; lia. Qed.
+  Lemma sum_list_fmap_const l n :
+    sum_list ((λ _, n) <$> l) = length l * n.
+  Proof. by apply sum_list_fmap_same, Forall_true. Qed.
 End sum_list.
+
+(** ** Properties of the [mjoin] function that rely on [sum_list] *)
+Section mjoin.
+  Context {A : Type}.
+  Implicit Types x y z : A.
+  Implicit Types l k : list A.
+  Implicit Types ls : list (list A).
+
+  Lemma join_lookup_Some ls i x :
+    mjoin ls !! i = Some x ↔ ∃ j l i', ls !! j = Some l ∧ l !! i' = Some x
+                                     ∧ i = sum_list (length <$> take j ls) + i'.
+  Proof.
+    revert i. induction ls as [|l ls IH]; csimpl; intros i.
+    { setoid_rewrite lookup_nil. naive_solver. }
+    rewrite lookup_app_Some, IH. split.
+    - destruct 1 as [?|(?&?&?&?&?&?&?)].
+      + eexists 0. naive_solver.
+      + eexists (S _); naive_solver lia.
+    - destruct 1 as [[|?] ?]; naive_solver lia.
+  Qed.
+
+  Lemma join_lookup_Some_same_length n ls i x :
+    Forall (λ l, length l = n) ls →
+    mjoin ls !! i = Some x ↔ ∃ j l i', ls !! j = Some l ∧ l !! i' = Some x
+                                     ∧ i = j * n + i'.
+  Proof.
+    intros Hl. rewrite join_lookup_Some.
+    f_equiv; intros j. f_equiv; intros l. f_equiv; intros i'.
+    assert (ls !! j = Some l → j < length ls) by eauto using lookup_lt_Some.
+    rewrite (sum_list_fmap_same n), take_length by auto using Forall_take.
+    naive_solver lia.
+  Qed.
+
+  Lemma join_lookup_Some_same_length' n ls j i x :
+    Forall (λ l, length l = n) ls →
+    i < n →
+    mjoin ls !! (j * n + i) = Some x ↔ ∃ l, ls !! j = Some l ∧ l !! i = Some x.
+  Proof.
+    intros. rewrite join_lookup_Some_same_length by done.
+    split; [|naive_solver].
+    destruct 1 as (j'&l'&i'&?&?&Hj); decompose_Forall.
+    assert (i' < length l') by eauto using lookup_lt_Some.
+    apply Nat_mul_split_l in Hj; naive_solver.
+  Qed.
+End mjoin.
 
 (** ** Properties of the [max_list] function *)
 Section max_list.

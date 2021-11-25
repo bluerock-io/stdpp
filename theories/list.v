@@ -1233,6 +1233,11 @@ Proof.
   - intros [??]. by rewrite lookup_take.
 Qed.
 
+Lemma elem_of_take x n l : x ∈ take n l ↔ ∃ i, l !! i = Some x ∧ i < n.
+Proof.
+  rewrite elem_of_list_lookup. setoid_rewrite lookup_take_Some. naive_solver.
+Qed.
+
 Lemma take_alter f l n i : n ≤ i → take n (alter f i l) = take n l.
 Proof.
   intros. apply list_eq. intros j. destruct (le_lt_dec n j).

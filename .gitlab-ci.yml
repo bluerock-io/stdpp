@@ -43,16 +43,16 @@ variables:
 
 build-coq.8.14.1:
   <<: *template
-  interruptible: false
   variables:
     OPAM_PINS: "coq version 8.14.1"
     MANGLE_NAMES: "1"
-    CI_COQCHK: "1"
     DENY_WARNINGS: "1"
+    CI_COQCHK: "1"
     OPAM_PKG: "1"
     DOC_DIR: "coqdoc@center.mpi-sws.org:stdpp"
   tags:
   - fp-timing
+  interruptible: false
 
 # Separate MR job that does not run on fp-timing.
 build-coq.8.14.1-mr:
@@ -80,9 +80,11 @@ build-coq.8.11.2:
   <<: *template
   variables:
     OPAM_PINS: "coq version 8.11.2"
+    DENY_WARNINGS: "1"
 
 build-coq.8.10.2:
   <<: *template
   <<: *branches_and_mr
   variables:
     OPAM_PINS: "coq version 8.10.2"
+    DENY_WARNINGS: "1"

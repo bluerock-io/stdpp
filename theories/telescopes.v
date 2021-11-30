@@ -45,7 +45,9 @@ Definition tele_app {TT : tele} {T} (f : TT -t> T) : tele_arg TT → T :=
      | TargO => λ t : T, t
      | TargS x a => λ f, rec a (f x)
      end) TT a f.
-Global Arguments tele_app {!_ _} _ !_ /.
+(* The bidirectionality hint [&] simplifies defining tele_app-based notation
+such as the atomic updates and atomic triples in Iris. *)
+Global Arguments tele_app {!_ _} & _ !_ /.
 
 Coercion tele_arg : tele >-> Sortclass.
 (* This is a local coercion because otherwise, the "λ.." notation stops working. *)

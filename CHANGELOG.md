@@ -3,7 +3,8 @@ API-breaking change is listed.
 
 ## std++ master
 
-- Add lemmas for lookup on `mjoin` for lists (by Michael Sammler).
+- Add `bool_to_Z` that converts true to 1 and false to 0. (by Michael Sammler)
+- Add lemmas for lookup on `mjoin` for lists. (by Michael Sammler)
 - Rename `Is_true_false` → `Is_true_false_2` and `eq_None_ne_Some` → `eq_None_ne_Some_1`.
 
 The following `sed` script should perform most of the renaming

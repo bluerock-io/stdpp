@@ -543,6 +543,21 @@ Proof. intros ?. rewrite <-Z.lxor_lor by done. by rewrite Z.add_nocarry_lxor. Qe
 Lemma Z_opp_lnot a : -a - 1 = Z.lnot a.
 Proof. pose proof (Z.add_lnot_diag a). lia. Qed.
 
+(** ** [bool_to_Z] *)
+Definition bool_to_Z (b : bool) : Z :=
+  if b then 1 else 0.
+
+Lemma bool_to_Z_bound b : 0 ≤ bool_to_Z b < 2.
+Proof. destruct b; simpl; lia. Qed.
+Lemma bool_to_Z_eq_0 b : bool_to_Z b = 0 ↔ b = false.
+Proof. destruct b; naive_solver. Qed.
+Lemma bool_to_Z_neq_0 b : bool_to_Z b ≠ 0 ↔ b = true.
+Proof. destruct b; naive_solver. Qed.
+Lemma bool_to_Z_spec b n:
+  Z.testbit (bool_to_Z b) n = bool_decide (n = 0) && b.
+Proof. by destruct b, n. Qed.
+
+
 Local Close Scope Z_scope.
 
 (** * Injectivity of casts *)

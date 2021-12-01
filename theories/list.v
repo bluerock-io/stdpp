@@ -4284,8 +4284,8 @@ Section permutations.
   Qed.
 End permutations.
 
-(** ** Properties of the folding functions
-Note that [foldr] has much better support, so when in doubt, it should be
+(** ** Properties of the folding functions *)
+(** Note that [foldr] has much better support, so when in doubt, it should be
 preferred over [foldl]. *)
 Definition foldr_app := @fold_right_app.
 Lemma foldr_snoc {A B} (f : B → A → A) (a : A) l x :
@@ -4330,14 +4330,14 @@ Proof.
 Qed.
 Lemma foldr_cons_permute {A} (R : relation A) `{!PreOrder R}
     (f : A → A → A) (a : A) `{!∀ a, Proper (R ==> R) (f a), !Assoc R f, !Comm R f} x l :
-  R (foldr f a (x::l)) (foldr f (f x a) l).
+  R (foldr f a (x :: l)) (foldr f (f x a) l).
 Proof.
   rewrite <-foldr_snoc.
   eapply foldr_permutation_proper'; [done..|].
   rewrite Permutation_app_comm. done.
 Qed.
 Lemma foldr_cons_permute_eq {A} (f : A → A → A) (a : A) `{!Assoc (=) f, !Comm (=) f} x l :
-  foldr f a (x::l) = foldr f (f x a) l.
+  foldr f a (x :: l) = foldr f (f x a) l.
 Proof. eapply (foldr_cons_permute eq); apply _. Qed.
 
 Lemma foldl_app {A B} (f : A → B → A) (l k : list B) (a : A) :

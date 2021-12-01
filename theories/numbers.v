@@ -553,8 +553,7 @@ Lemma bool_to_Z_eq_0 b : bool_to_Z b = 0 ↔ b = false.
 Proof. destruct b; naive_solver. Qed.
 Lemma bool_to_Z_neq_0 b : bool_to_Z b ≠ 0 ↔ b = true.
 Proof. destruct b; naive_solver. Qed.
-Lemma bool_to_Z_spec b n:
-  Z.testbit (bool_to_Z b) n = bool_decide (n = 0) && b.
+Lemma bool_to_Z_spec b n : Z.testbit (bool_to_Z b) n = bool_decide (n = 0) && b.
 Proof. by destruct b, n. Qed.
 
 

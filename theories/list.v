@@ -4285,10 +4285,12 @@ Section permutations.
 End permutations.
 
 (** ** Properties of the folding functions *)
+(** Note that [foldr] has much better support, so when in doubt, it should be
+preferred over [foldl]. *)
 Definition foldr_app := @fold_right_app.
-Lemma foldl_app {A B} (f : A → B → A) (l k : list B) (a : A) :
-  foldl f a (l ++ k) = foldl f (foldl f a l) k.
-Proof. revert a. induction l; simpl; auto. Qed.
+Lemma foldr_snoc {A B} (f : B → A → A) (a : A) l x :
+  foldr f a (l ++ [x]) = foldr f (f x a) l.
+Proof. rewrite foldr_app. done. Qed.
 Lemma foldr_fmap {A B C} (f : B → A → A) x (l : list C) g :
   foldr f x (g <$> l) = foldr (λ b a, f (g b) a) x l.
 Proof. induction l; f_equal/=; auto. Qed.
@@ -4326,6 +4328,27 @@ Proof.
   intros a1 a2 b.
   by rewrite (assoc f), (comm f _ b), (assoc f), (comm f b), (comm f _ a2).
 Qed.
+Lemma foldr_cons_permute {A} (R : relation A) `{!PreOrder R}
+    (f : A → A → A) (a : A) `{!∀ a, Proper (R ==> R) (f a), !Assoc R f, !Comm R f} x l :
+  R (foldr f a (x :: l)) (foldr f (f x a) l).
+Proof.
+  rewrite <-foldr_snoc.
+  eapply foldr_permutation_proper'; [done..|].
+  rewrite Permutation_app_comm. done.
+Qed.
+Lemma foldr_cons_permute_eq {A} (f : A → A → A) (a : A) `{!Assoc (=) f, !Comm (=) f} x l :
+  foldr f a (x :: l) = foldr f (f x a) l.
+Proof. eapply (foldr_cons_permute eq); apply _. Qed.
+
+Lemma foldl_app {A B} (f : A → B → A) (l k : list B) (a : A) :
+  foldl f a (l ++ k) = foldl f (foldl f a l) k.
+Proof. revert a. induction l; simpl; auto. Qed.
+Lemma foldl_snoc {A B} (f : A → B → A) (a : A) l x :
+  foldl f a (l ++ [x]) = f (foldl f a l) x.
+Proof. rewrite foldl_app. done. Qed.
+Lemma foldl_fmap {A B C} (f : A → B → A) x (l : list C) g :
+  foldl f x (g <$> l) = foldl (λ a b, f a (g b)) x l.
+Proof. revert x. induction l; f_equal/=; auto. Qed.
 
 (** ** Properties of the [zip_with] and [zip] functions *)
 Section zip_with.

@@ -3,6 +3,8 @@ API-breaking change is listed.
 
 ## std++ master
 
+- Add `list.zip_with_take_both` and `list.zip_with_take_both'`
+- Specialize `list.zip_with_take_{l,r}`, add generalized lemmas `list.zip_with_take_{l,r}'`
 - Add `bool_to_Z` that converts true to 1 and false to 0. (by Michael Sammler)
 - Add lemmas for lookup on `mjoin` for lists. (by Michael Sammler)
 - Rename `Is_true_false` → `Is_true_false_2` and `eq_None_ne_Some` → `eq_None_ne_Some_1`.

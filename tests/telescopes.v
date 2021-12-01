@@ -31,3 +31,13 @@ Proof.
 Qed.
 End tests.
 End accessor.
+
+(* Type inference for tele_app-based notation.
+(Relies on [&] bidirectionality hint of tele_app.) *)
+Definition test {TT : tele} (t : TT → Prop) : Prop :=
+  ∀.. x, t x ∧ t x.
+Notation "'[TEST'  x .. z ,  P ']'" :=
+  (test (TT:=(TeleS (fun x => .. (TeleS (fun z => TeleO)) ..)))
+        (tele_app (λ x, .. (λ z, P) ..)))
+  (x binder, z binder).
+Check [TEST (x y : nat), x = y].

@@ -4491,12 +4491,28 @@ Section zip_with.
   Proof.
     revert n k. induction l; intros [] []; f_equal/=; auto using zip_with_nil_r.
   Qed.
-  Lemma zip_with_take_l n l k :
-    length k ≤ n → zip_with f (take n l) k = zip_with f l k.
+  Lemma zip_with_take_l' n l k :
+    length l `min` length k ≤ n → zip_with f (take n l) k = zip_with f l k.
   Proof. revert n k. induction l; intros [] [] ?; f_equal/=; auto with lia. Qed.
-  Lemma zip_with_take_r n l k :
-    length l ≤ n → zip_with f l (take n k) = zip_with f l k.
+  Lemma zip_with_take_l l k :
+    zip_with f (take (length k) l) k = zip_with f l k.
+  Proof. apply zip_with_take_l'; lia. Qed.
+  Lemma zip_with_take_r' n l k :
+    length l `min` length k ≤ n → zip_with f l (take n k) = zip_with f l k.
   Proof. revert n k. induction l; intros [] [] ?; f_equal/=; auto with lia. Qed.
+  Lemma zip_with_take_r l k :
+    zip_with f l (take (length l) k) = zip_with f l k.
+  Proof. apply zip_with_take_r'; lia. Qed.
+  Lemma zip_with_take_both' n1 n2 l k :
+    length l `min` length k ≤ n1 → length l `min` length k ≤ n2 →
+    zip_with f (take n1 l) (take n2 k) = zip_with f l k.
+  Proof.
+    intros.
+    rewrite zip_with_take_l'; [apply zip_with_take_r' | rewrite take_length]; lia.
+  Qed.
+  Lemma zip_with_take_both l k :
+    zip_with f (take (length k) l) (take (length l) k) = zip_with f l k.
+  Proof. apply zip_with_take_both'; lia. Qed.
   Lemma Forall_zip_with_fst (P : A → Prop) (Q : C → Prop) l k :
     Forall P l → Forall (λ y, ∀ x, P x → Q (f x y)) k →
     Forall Q (zip_with f l k).

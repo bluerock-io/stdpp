@@ -321,12 +321,11 @@ Section Z_little_endian.
       rewrite orb_false_l. f_equal. lia.
   Qed.
 
-  (* TODO: replace the calls to [nia] by [lia] after dropping support for Coq 8.10.2. *)
   Lemma little_endian_to_Z_to_little_endian m n z:
     0 ≤ n → 0 ≤ m →
     little_endian_to_Z n (Z_to_little_endian m n z) = z `mod` 2 ^ (m * n).
   Proof.
-    intros ? Hm. rewrite <-Z.land_ones by nia.
+    intros ? Hm. rewrite <-Z.land_ones by lia.
     revert z.
     induction m as [|m ? IH|] using (Z_succ_pred_induction 0); intros z; [..|lia].
     { Z.bitwise. by rewrite andb_false_r. }
@@ -335,10 +334,10 @@ Section Z_little_endian.
     rewrite Z.land_spec, Z.lor_spec, Z.shiftl_spec, !Z.land_spec by lia.
     rewrite (Z_ones_spec n z') by lia. case_bool_decide.
     - rewrite andb_true_r, (Z.testbit_neg_r _ (z' - n)), orb_false_r by lia. simpl.
-      by rewrite Z_ones_spec, bool_decide_true, andb_true_r by nia.
+      by rewrite Z_ones_spec, bool_decide_true, andb_true_r by lia.
     - rewrite andb_false_r, orb_false_l.
       rewrite Z.shiftr_spec by lia. f_equal; [f_equal; lia|].
-      rewrite !Z_ones_spec by nia. apply bool_decide_iff. lia.
+      rewrite !Z_ones_spec by lia. apply bool_decide_iff. lia.
   Qed.
 
   Lemma Z_to_little_endian_length m n z :
@@ -368,11 +367,11 @@ Section Z_little_endian.
     0 ≤ little_endian_to_Z n bs < 2 ^ (Z.of_nat (length bs) * n).
   Proof.
     intros ?. induction 1 as [|b bs Hb ? IH]; [done|]; simpl.
-    apply Z_bounded_iff_bits_nonneg'; [nia|..].
+    apply Z_bounded_iff_bits_nonneg'; [lia|..].
     { apply Z.lor_nonneg. split; [lia|]. apply Z.shiftl_nonneg. lia. }
     intros z' ?. rewrite Z.lor_spec.
     rewrite Z_bounded_iff_bits_nonneg' in Hb by lia.
-    rewrite Hb, orb_false_l, Z.shiftl_spec by nia.
-    apply (Z_bounded_iff_bits_nonneg' (Z.of_nat (length bs) * n)); nia.
+    rewrite Hb, orb_false_l, Z.shiftl_spec by lia.
+    apply (Z_bounded_iff_bits_nonneg' (Z.of_nat (length bs) * n)); lia.
   Qed.
 End Z_little_endian.

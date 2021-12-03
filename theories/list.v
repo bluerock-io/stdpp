@@ -3757,7 +3757,7 @@ Section fmap.
     intros [|??]; intros; f_equal/=; simplify_eq; auto.
   Qed.
 
-  Lemma list_fmap_inj1 (f1 f2 : A → B) l x :
+  Lemma list_fmap_inj_1 (f1 f2 : A → B) l x :
     f1 <$> l = f2 <$> l → x ∈ l → f1 x = f2 x.
   Proof. intros Hf Hin. induction Hin; naive_solver. Qed.
 

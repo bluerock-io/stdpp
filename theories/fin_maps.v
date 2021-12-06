@@ -1156,7 +1156,7 @@ Lemma map_to_list_length {A} (m1 m2 : M A) :
 Proof.
   revert m2. induction m1 as [|i x m ? IH] using map_ind.
   { intros m2 Hm2. rewrite map_to_list_empty. simpl.
-    apply neq_0_lt. intros Hlen. symmetry in Hlen.
+    apply Nat.neq_0_lt_0, Nat.neq_sym. intros Hlen. symmetry in Hlen.
     apply nil_length_inv, map_to_list_empty_iff in Hlen.
     rewrite Hlen in Hm2. destruct (irreflexivity (⊂) ∅ Hm2). }
   intros m2 Hm2.

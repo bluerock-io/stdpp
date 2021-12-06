@@ -1204,13 +1204,13 @@ Proof. revert n. induction l; intros [|?] ?; f_equal/=; auto with lia. Qed.
 Lemma take_take l n m : take n (take m l) = take (min n m) l.
 Proof. revert n m. induction l; intros [|?] [|?]; f_equal/=; auto. Qed.
 Lemma take_idemp l n : take n (take n l) = take n l.
-Proof. by rewrite take_take, Min.min_idempotent. Qed.
+Proof. by rewrite take_take, Nat.min_id. Qed.
 Lemma take_length l n : length (take n l) = min n (length l).
 Proof. revert n. induction l; intros [|?]; f_equal/=; done. Qed.
 Lemma take_length_le l n : n ≤ length l → length (take n l) = n.
-Proof. rewrite take_length. apply Min.min_l. Qed.
+Proof. rewrite take_length. apply Nat.min_l. Qed.
 Lemma take_length_ge l n : length l ≤ n → length (take n l) = length l.
-Proof. rewrite take_length. apply Min.min_r. Qed.
+Proof. rewrite take_length. apply Nat.min_r. Qed.
 Lemma take_drop_commute l n m : take n (drop m l) = drop m (take (m + n) l).
 Proof.
   revert n m. induction l; intros [|?][|?]; simpl; auto using take_nil with lia.
@@ -1483,9 +1483,9 @@ Proof.
   revert n m. induction l; intros [|?][|?]; f_equal/=; auto using take_replicate.
 Qed.
 Lemma take_resize_le l n m x : n ≤ m → take n (resize m x l) = resize n x l.
-Proof. intros. by rewrite take_resize, Min.min_l. Qed.
+Proof. intros. by rewrite take_resize, Nat.min_l. Qed.
 Lemma take_resize_eq l n x : take n (resize n x l) = resize n x l.
-Proof. intros. by rewrite take_resize, Min.min_l. Qed.
+Proof. intros. by rewrite take_resize, Nat.min_l. Qed.
 Lemma take_resize_plus l n m x : take n (resize (n + m) x l) = resize n x l.
 Proof. by rewrite take_resize, min_l by lia. Qed.
 Lemma drop_resize_le l n m x :
@@ -1699,7 +1699,7 @@ Proof.
     repeat match goal with
     | H : _ ≤ length _ |- _ => rewrite take_length, drop_length in H
     end; rewrite ?take_drop_commute, ?drop_drop, ?take_take,
-      ?Min.min_l, Nat.add_assoc by lia; auto with lia.
+      ?Nat.min_l, Nat.add_assoc by lia; auto with lia.
 Qed.
 Lemma sublist_alter_length f l i n k :
   sublist_lookup i n l = Some k → length (f k) = n →
@@ -3256,7 +3256,7 @@ Section Forall2.
     { rewrite <-(resize_resize l m n) by done. by apply Forall2_resize. }
     intros. assert (n = length k); subst.
     { by rewrite <-(Forall2_length (resize n x l) k), resize_length. }
-    rewrite (le_plus_minus (length k) m), !resize_plus,
+    rewrite (nat_le_plus_minus (length k) m), !resize_plus,
       resize_all, drop_all, resize_nil by lia.
     auto using Forall2_app, Forall2_replicate_r,
       Forall_resize, Forall_drop, resize_length.
@@ -3269,7 +3269,7 @@ Section Forall2.
     { rewrite <-(resize_resize k m n) by done. by apply Forall2_resize. }
     assert (n = length l); subst.
     { by rewrite (Forall2_length l (resize n y k)), resize_length. }
-    rewrite (le_plus_minus (length l) m), !resize_plus,
+    rewrite (nat_le_plus_minus (length l) m), !resize_plus,
       resize_all, drop_all, resize_nil by lia.
     auto using Forall2_app, Forall2_replicate_l,
       Forall_resize, Forall_drop, resize_length.
@@ -3318,7 +3318,7 @@ Section Forall2.
     apply Forall2_app_l;
       rewrite ?take_length_le by lia; auto using Forall2_take.
     apply Forall2_app_l; erewrite Forall2_length, take_length,
-      drop_length, <-Forall2_length, Min.min_l by eauto with lia; [done|].
+      drop_length, <-Forall2_length, Nat.min_l by eauto with lia; [done|].
     rewrite drop_drop; auto using Forall2_drop.
   Qed.
 
@@ -3652,7 +3652,7 @@ Section find.
           naive_solver eauto using lookup_app_l_Some with lia. }
         apply list_find_Some. split_and!; [done..|].
         intros j z ??. eapply (Hleast (length l1 + j)); [|lia].
-        by rewrite lookup_app_r, minus_plus by lia.
+        by rewrite lookup_app_r, nat_minus_plus by lia.
     - intros [(?&?&Hleast)%list_find_Some|(?&Hl1&(?&?&Hleast)%list_find_Some)].
       + apply list_find_Some. split_and!; [by auto using lookup_app_l_Some..|].
         assert (i < length l1) by eauto using lookup_lt_Some.

@@ -192,8 +192,6 @@ Proof. case_bool_decide; intuition discriminate. Qed.
 Lemma bool_decide_iff (P Q : Prop) `{Decision P, Decision Q} :
   (P ↔ Q) → bool_decide P = bool_decide Q.
 Proof. repeat case_bool_decide; tauto. Qed.
-Lemma bool_decide_negb P `{Decision P} : negb (bool_decide P) = bool_decide (not P).
-Proof. repeat case_bool_decide; intuition. Qed.
 
 Lemma bool_decide_eq_true_1 P `{!Decision P}: bool_decide P = true → P.
 Proof. apply bool_decide_eq_true. Qed.
@@ -204,6 +202,16 @@ Lemma bool_decide_eq_false_1 P `{!Decision P}: bool_decide P = false → ¬P.
 Proof. apply bool_decide_eq_false. Qed.
 Lemma bool_decide_eq_false_2 P `{!Decision P}: ¬P → bool_decide P = false.
 Proof. apply bool_decide_eq_false. Qed.
+
+Lemma bool_decide_not P `{Decision P} :
+  bool_decide (¬ P) = negb (bool_decide P).
+Proof. repeat case_bool_decide; intuition. Qed.
+Lemma bool_decide_or P Q `{Decision P, Decision Q} :
+  bool_decide (P ∨ Q) = bool_decide P || bool_decide Q.
+Proof. repeat case_bool_decide; intuition. Qed.
+Lemma bool_decide_and P Q `{Decision P, Decision Q} :
+  bool_decide (P ∧ Q) = bool_decide P && bool_decide Q.
+Proof. repeat case_bool_decide; intuition. Qed.
 
 (** The tactic [compute_done] solves the following kinds of goals:
 - Goals [P] where [Decidable P] can be derived.

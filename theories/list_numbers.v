@@ -291,6 +291,9 @@ Section Z_little_endian.
   Local Open Scope Z_scope.
   Implicit Types m n z : Z.
 
+  Lemma Z_to_little_endian_0 n z : Z_to_little_endian 0 n z = [].
+  Proof. done. Qed.
+
   Lemma Z_to_little_endian_succ m n z :
     0 ≤ m →
     Z_to_little_endian (Z.succ m) n z
@@ -300,7 +303,7 @@ Section Z_little_endian.
     by rewrite !iter_nat_of_Z, Zabs2Nat.inj_succ by lia.
   Qed.
 
-  Lemma Z_to_little_endian_to_Z m n bs:
+  Lemma Z_to_little_endian_to_Z m n bs :
     m = Z.of_nat (length bs) → 0 ≤ n →
     Forall (λ b, 0 ≤ b < 2 ^ n) bs →
     Z_to_little_endian m n (little_endian_to_Z n bs) = bs.
@@ -321,7 +324,7 @@ Section Z_little_endian.
       rewrite orb_false_l. f_equal. lia.
   Qed.
 
-  Lemma little_endian_to_Z_to_little_endian m n z:
+  Lemma little_endian_to_Z_to_little_endian m n z :
     0 ≤ n → 0 ≤ m →
     little_endian_to_Z n (Z_to_little_endian m n z) = z `mod` 2 ^ (m * n).
   Proof.
@@ -349,7 +352,7 @@ Section Z_little_endian.
     rewrite Z_to_little_endian_succ by lia. simpl. by rewrite Nat2Z.inj_succ, IH.
   Qed.
 
-  Lemma Z_to_little_endian_bound m n z:
+  Lemma Z_to_little_endian_bound m n z :
     0 ≤ n → 0 ≤ m →
     Forall (λ b, 0 ≤ b < 2 ^ n) (Z_to_little_endian m n z).
   Proof.
@@ -361,7 +364,7 @@ Section Z_little_endian.
     apply Z.mod_pos_bound, Z.pow_pos_nonneg; lia.
   Qed.
 
-  Lemma little_endian_to_Z_bound n bs:
+  Lemma little_endian_to_Z_bound n bs :
     0 ≤ n →
     Forall (λ b, 0 ≤ b < 2 ^ n) bs →
     0 ≤ little_endian_to_Z n bs < 2 ^ (Z.of_nat (length bs) * n).
@@ -373,5 +376,42 @@ Section Z_little_endian.
     rewrite Z_bounded_iff_bits_nonneg' in Hb by lia.
     rewrite Hb, orb_false_l, Z.shiftl_spec by lia.
     apply (Z_bounded_iff_bits_nonneg' (Z.of_nat (length bs) * n)); lia.
+  Qed.
+
+  Lemma Z_to_little_endian_lookup_Some m n z (i : nat) x :
+    0 ≤ m → 0 ≤ n →
+    Z_to_little_endian m n z !! i = Some x ↔
+    Z.of_nat i < m ∧ x = Z.land (z ≫ (Z.of_nat i * n)) (Z.ones n).
+  Proof.
+    revert z i. induction m as [|m ? IH|] using (Z_succ_pred_induction 0);
+      intros z i ??; [..|lia].
+    { destruct i; simpl; naive_solver lia. }
+    rewrite Z_to_little_endian_succ by lia. destruct i as [|i]; simpl.
+    { naive_solver lia. }
+    rewrite IH, Z.shiftr_shiftr by lia.
+    naive_solver auto with f_equal lia.
+  Qed.
+
+  Lemma little_endian_to_Z_spec n bs i b :
+    0 ≤ i → 0 < n →
+    Forall (λ b, 0 ≤ b < 2 ^ n) bs →
+    bs !! Z.to_nat (i `div` n) = Some b →
+    Z.testbit (little_endian_to_Z n bs) i = Z.testbit b (i `mod` n).
+  Proof.
+    intros Hi Hn Hbs. revert i Hi.
+    induction Hbs as [|b' bs [??] ? IH]; intros i ? Hlookup; simplify_eq/=.
+    destruct (decide (i < n)).
+    - rewrite Z.div_small in Hlookup by lia. simplify_eq/=.
+      rewrite Z.lor_spec, Z.shiftl_spec, Z.mod_small by lia.
+      by rewrite (Z.testbit_neg_r _ (i - n)), orb_false_r by lia.
+    - assert (Z.to_nat (i `div` n) = S (Z.to_nat ((i - n) `div` n))) as Hdiv.
+      { rewrite <-Z2Nat.inj_succ by (apply Z.div_pos; lia).
+        rewrite <-Z.add_1_r, <-Z.div_add by lia.
+        do 2 f_equal. lia. }
+      rewrite Hdiv in Hlookup; simplify_eq/=.
+      rewrite Z.lor_spec, Z.shiftl_spec, IH by auto with lia.
+      assert (Z.testbit b' i = false) as ->.
+      { apply (Z_bounded_iff_bits_nonneg n); lia. }
+      by rewrite <-Zminus_mod_idemp_r, Z_mod_same_full, Z.sub_0_r.
   Qed.
 End Z_little_endian.

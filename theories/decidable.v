@@ -192,12 +192,8 @@ Proof. case_bool_decide; intuition discriminate. Qed.
 Lemma bool_decide_iff (P Q : Prop) `{Decision P, Decision Q} :
   (P ↔ Q) → bool_decide P = bool_decide Q.
 Proof. repeat case_bool_decide; tauto. Qed.
-Lemma bool_decide_negb (P : Prop) `{Decision P} : negb (bool_decide P) = bool_decide (not P).
-Proof.
-  case_bool_decide.
-  - simpl. symmetry. apply bool_decide_eq_false. auto.
-  - simpl. symmetry. apply bool_decide_eq_true. auto.
-Qed.
+Lemma bool_decide_negb P `{Decision P} : negb (bool_decide P) = bool_decide (not P).
+Proof. repeat case_bool_decide; intuition. Qed.
 
 Lemma bool_decide_eq_true_1 P `{!Decision P}: bool_decide P = true → P.
 Proof. apply bool_decide_eq_true. Qed.

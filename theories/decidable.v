@@ -203,6 +203,10 @@ Proof. apply bool_decide_eq_false. Qed.
 Lemma bool_decide_eq_false_2 P `{!Decision P}: ¬P → bool_decide P = false.
 Proof. apply bool_decide_eq_false. Qed.
 
+Lemma bool_decide_True : bool_decide True = true.
+Proof. reflexivity. Qed.
+Lemma bool_decide_False : bool_decide False = false.
+Proof. reflexivity. Qed.
 Lemma bool_decide_not P `{Decision P} :
   bool_decide (¬ P) = negb (bool_decide P).
 Proof. repeat case_bool_decide; intuition. Qed.
@@ -211,6 +215,12 @@ Lemma bool_decide_or P Q `{Decision P, Decision Q} :
 Proof. repeat case_bool_decide; intuition. Qed.
 Lemma bool_decide_and P Q `{Decision P, Decision Q} :
   bool_decide (P ∧ Q) = bool_decide P && bool_decide Q.
+Proof. repeat case_bool_decide; intuition. Qed.
+Lemma bool_decide_impl P Q `{Decision P, Decision Q} :
+  bool_decide (P → Q) = implb (bool_decide P) (bool_decide Q).
+Proof. repeat case_bool_decide; intuition. Qed.
+Lemma bool_decide_iff P Q `{Decision P, Decision Q} :
+  bool_decide (P ↔ Q) = eqb (bool_decide P) (bool_decide Q).
 Proof. repeat case_bool_decide; intuition. Qed.
 
 (** The tactic [compute_done] solves the following kinds of goals:

@@ -18,7 +18,7 @@ Section map_notations.
   Definition test_4 : M (M nat) := {[ 10 := {[ 10 := 1 ]}; 20 := {[ 20 := 2]};
     30 := {[ 30 := 3]}; 40 := {[ 40 := 4 ]} ]}.
 
-  Definition test_op_2 : M (M nat) := {[ 10 := {[pow 10 2 := 99]};
+  Definition test_op_2 : M (M nat) := {[ 10 := {[Nat.pow 10 2 := 99]};
     10 + 1 := {[ 10 - 100 := 42 * 1337 ]} ]}.
 
   Definition test_op_3 : M (M (list nat)) := {[ 10 := {[ 20 - 2 := [11]; 1 := [22] ]};

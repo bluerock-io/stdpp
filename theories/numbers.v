@@ -65,6 +65,13 @@ Proof. unfold lt. apply _. Qed.
 Lemma nat_le_sum (x y : nat) : x ≤ y ↔ ∃ z, y = x + z.
 Proof. split; [exists (y - x); lia | intros [z ->]; lia]. Qed.
 
+(** [Arith.Minus.minus_plus] is deprecated starting in 8.16 *)
+Lemma nat_minus_plus n m : n + m - n = m.
+Proof. lia. Qed.
+(** [Arith.Minus.le_plus_minus] is deprecated starting in 8.16 *)
+Lemma nat_le_plus_minus n m : n ≤ m → m = n + (m - n).
+Proof. lia. Qed.
+
 Lemma Nat_lt_succ_succ n : n < S (S n).
 Proof. auto with arith. Qed.
 Lemma Nat_mul_split_l n x1 x2 y1 y2 :
@@ -1371,7 +1378,7 @@ Lemma rotate_nat_add_add base offset len n:
 Proof.
   intros ?. unfold rotate_nat_add.
   rewrite !Z2Nat_inj_mod, !Z2Nat.inj_add, !Nat2Z.id by lia.
-  by rewrite plus_assoc, Nat.add_mod_idemp_l by lia.
+  by rewrite Nat.add_assoc, Nat.add_mod_idemp_l by lia.
 Qed.
 
 Lemma rotate_nat_add_S base offset len:

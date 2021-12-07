@@ -5,6 +5,8 @@ API-breaking change is listed.
 
 Coq 8.10 is no longer supported by this release.
 
+- Add `is_closed_term` tactic for determining whether a term depends on variables bound
+  in the context. (by Michael Sammler)
 - Add `list.zip_with_take_both` and `list.zip_with_take_both'`
 - Specialize `list.zip_with_take_{l,r}`, add generalized lemmas `list.zip_with_take_{l,r}'`
 - Add `bool_to_Z` that converts true to 1 and false to 0. (by Michael Sammler)

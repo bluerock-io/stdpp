@@ -85,93 +85,6 @@ Notation cast_if_or3 S1 S2 S3 := (if S1 then left _ else cast_if_or S2 S3).
 Notation cast_if_not_or S1 S2 := (if S1 then cast_if S2 else left _).
 Notation cast_if_not S := (if S then right _ else left _).
 
-(** We can convert decidable propositions to booleans. *)
-Definition bool_decide (P : Prop) {dec : Decision P} : bool :=
-  if dec then true else false.
-
-Lemma bool_decide_reflect P `{dec : Decision P} : reflect P (bool_decide P).
-Proof. unfold bool_decide. destruct dec; [left|right]; assumption. Qed.
-
-Lemma bool_decide_decide P `{!Decision P} :
-  bool_decide P = if decide P then true else false.
-Proof. reflexivity. Qed.
-Lemma decide_bool_decide P {Hdec: Decision P} {X : Type} (x1 x2 : X):
-  (if decide P then x1 else x2) = (if bool_decide P then x1 else x2).
-Proof. unfold bool_decide, decide. destruct Hdec; reflexivity. Qed.
-
-Tactic Notation "case_bool_decide" "as" ident(Hd) :=
-  match goal with
-  | H : context [@bool_decide ?P ?dec] |- _ =>
-    destruct_decide (@bool_decide_reflect P dec) as Hd
-  | |- context [@bool_decide ?P ?dec] =>
-    destruct_decide (@bool_decide_reflect P dec) as Hd
-  end.
-Tactic Notation "case_bool_decide" :=
-  let H := fresh in case_bool_decide as H.
-
-Lemma bool_decide_spec (P : Prop) {dec : Decision P} : bool_decide P ↔ P.
-Proof. unfold bool_decide. destruct dec; simpl; tauto. Qed.
-Lemma bool_decide_unpack (P : Prop) {dec : Decision P} : bool_decide P → P.
-Proof. rewrite bool_decide_spec; trivial. Qed.
-Lemma bool_decide_pack (P : Prop) {dec : Decision P} : P → bool_decide P.
-Proof. rewrite bool_decide_spec; trivial. Qed.
-Global Hint Resolve bool_decide_pack : core.
-
-Lemma bool_decide_eq_true (P : Prop) `{Decision P} : bool_decide P = true ↔ P.
-Proof. case_bool_decide; intuition discriminate. Qed.
-Lemma bool_decide_eq_false (P : Prop) `{Decision P} : bool_decide P = false ↔ ¬P.
-Proof. case_bool_decide; intuition discriminate. Qed.
-Lemma bool_decide_iff (P Q : Prop) `{Decision P, Decision Q} :
-  (P ↔ Q) → bool_decide P = bool_decide Q.
-Proof. repeat case_bool_decide; tauto. Qed.
-
-Lemma bool_decide_eq_true_1 P `{!Decision P}: bool_decide P = true → P.
-Proof. apply bool_decide_eq_true. Qed.
-Lemma bool_decide_eq_true_2 P `{!Decision P}: P → bool_decide P = true.
-Proof. apply bool_decide_eq_true. Qed.
-
-Lemma bool_decide_eq_false_1 P `{!Decision P}: bool_decide P = false → ¬P.
-Proof. apply bool_decide_eq_false. Qed.
-Lemma bool_decide_eq_false_2 P `{!Decision P}: ¬P → bool_decide P = false.
-Proof. apply bool_decide_eq_false. Qed.
-
-(** The tactic [compute_done] solves the following kinds of goals:
-- Goals [P] where [Decidable P] can be derived.
-- Goals that compute to [True] or [x = x].
-
-The goal must be a ground term for this, i.e., not contain variables (that do
-not compute away). The goal is solved by using [vm_compute] and then using a
-trivial proof term ([I]/[eq_refl]). *)
-Tactic Notation "compute_done" :=
-  try apply (bool_decide_unpack _);
-  vm_compute;
-  first [ exact I | exact eq_refl ].
-Tactic Notation "compute_by" tactic(tac) :=
-  tac; compute_done.
-
-(** Backwards compatibility notations. *)
-Notation bool_decide_true := bool_decide_eq_true_2.
-Notation bool_decide_false := bool_decide_eq_false_2.
-
-(** * Decidable Sigma types *)
-(** Leibniz equality on Sigma types requires the equipped proofs to be
-equal as Coq does not support proof irrelevance. For decidable we
-propositions we define the type [dsig P] whose Leibniz equality is proof
-irrelevant. That is [∀ x y : dsig P, x = y ↔ `x = `y]. *)
-Definition dsig `(P : A → Prop) `{∀ x : A, Decision (P x)} :=
-  { x | bool_decide (P x) }.
-
-Definition proj2_dsig `{∀ x : A, Decision (P x)} (x : dsig P) : P (`x) :=
-  bool_decide_unpack _ (proj2_sig x).
-Definition dexist `{∀ x : A, Decision (P x)} (x : A) (p : P x) : dsig P :=
-  x↾bool_decide_pack _ p.
-Lemma dsig_eq `(P : A → Prop) `{∀ x, Decision (P x)}
-  (x y : dsig P) : x = y ↔ `x = `y.
-Proof. apply (sig_eq_pi _). Qed.
-Lemma dexists_proj1 `(P : A → Prop) `{∀ x, Decision (P x)} (x : dsig P) p :
-  dexist (`x) p = x.
-Proof. apply dsig_eq; reflexivity. Qed.
-
 (** * Instances of [Decision] *)
 (** Instances of [Decision] for operators of propositional logic. *)
 Global Instance True_dec: Decision True := left I.
@@ -239,3 +152,100 @@ Definition flip_dec {A} (R : relation A) `{!RelDecision R} :
 with any relation. Coq's standard library is carrying out the same approach for
 the [Reflexive], [Transitive], etc, instance of [flip]. *)
 Global Hint Extern 3 (RelDecision (flip _)) => apply flip_dec : typeclass_instances.
+
+(** We can convert decidable propositions to booleans. *)
+Definition bool_decide (P : Prop) {dec : Decision P} : bool :=
+  if dec then true else false.
+
+Lemma bool_decide_reflect P `{dec : Decision P} : reflect P (bool_decide P).
+Proof. unfold bool_decide. destruct dec; [left|right]; assumption. Qed.
+
+Lemma bool_decide_decide P `{!Decision P} :
+  bool_decide P = if decide P then true else false.
+Proof. reflexivity. Qed.
+Lemma decide_bool_decide P {Hdec: Decision P} {X : Type} (x1 x2 : X):
+  (if decide P then x1 else x2) = (if bool_decide P then x1 else x2).
+Proof. unfold bool_decide, decide. destruct Hdec; reflexivity. Qed.
+
+Tactic Notation "case_bool_decide" "as" ident(Hd) :=
+  match goal with
+  | H : context [@bool_decide ?P ?dec] |- _ =>
+    destruct_decide (@bool_decide_reflect P dec) as Hd
+  | |- context [@bool_decide ?P ?dec] =>
+    destruct_decide (@bool_decide_reflect P dec) as Hd
+  end.
+Tactic Notation "case_bool_decide" :=
+  let H := fresh in case_bool_decide as H.
+
+Lemma bool_decide_spec (P : Prop) {dec : Decision P} : bool_decide P ↔ P.
+Proof. unfold bool_decide. destruct dec; simpl; tauto. Qed.
+Lemma bool_decide_unpack (P : Prop) {dec : Decision P} : bool_decide P → P.
+Proof. rewrite bool_decide_spec; trivial. Qed.
+Lemma bool_decide_pack (P : Prop) {dec : Decision P} : P → bool_decide P.
+Proof. rewrite bool_decide_spec; trivial. Qed.
+Global Hint Resolve bool_decide_pack : core.
+
+Lemma bool_decide_eq_true (P : Prop) `{Decision P} : bool_decide P = true ↔ P.
+Proof. case_bool_decide; intuition discriminate. Qed.
+Lemma bool_decide_eq_false (P : Prop) `{Decision P} : bool_decide P = false ↔ ¬P.
+Proof. case_bool_decide; intuition discriminate. Qed.
+Lemma bool_decide_iff (P Q : Prop) `{Decision P, Decision Q} :
+  (P ↔ Q) → bool_decide P = bool_decide Q.
+Proof. repeat case_bool_decide; tauto. Qed.
+
+Lemma bool_decide_eq_true_1 P `{!Decision P}: bool_decide P = true → P.
+Proof. apply bool_decide_eq_true. Qed.
+Lemma bool_decide_eq_true_2 P `{!Decision P}: P → bool_decide P = true.
+Proof. apply bool_decide_eq_true. Qed.
+
+Lemma bool_decide_eq_false_1 P `{!Decision P}: bool_decide P = false → ¬P.
+Proof. apply bool_decide_eq_false. Qed.
+Lemma bool_decide_eq_false_2 P `{!Decision P}: ¬P → bool_decide P = false.
+Proof. apply bool_decide_eq_false. Qed.
+
+Lemma bool_decide_not P `{Decision P} :
+  bool_decide (¬ P) = negb (bool_decide P).
+Proof. repeat case_bool_decide; intuition. Qed.
+Lemma bool_decide_or P Q `{Decision P, Decision Q} :
+  bool_decide (P ∨ Q) = bool_decide P || bool_decide Q.
+Proof. repeat case_bool_decide; intuition. Qed.
+Lemma bool_decide_and P Q `{Decision P, Decision Q} :
+  bool_decide (P ∧ Q) = bool_decide P && bool_decide Q.
+Proof. repeat case_bool_decide; intuition. Qed.
+
+(** The tactic [compute_done] solves the following kinds of goals:
+- Goals [P] where [Decidable P] can be derived.
+- Goals that compute to [True] or [x = x].
+
+The goal must be a ground term for this, i.e., not contain variables (that do
+not compute away). The goal is solved by using [vm_compute] and then using a
+trivial proof term ([I]/[eq_refl]). *)
+Tactic Notation "compute_done" :=
+  try apply (bool_decide_unpack _);
+  vm_compute;
+  first [ exact I | exact eq_refl ].
+Tactic Notation "compute_by" tactic(tac) :=
+  tac; compute_done.
+
+(** Backwards compatibility notations. *)
+Notation bool_decide_true := bool_decide_eq_true_2.
+Notation bool_decide_false := bool_decide_eq_false_2.
+
+(** * Decidable Sigma types *)
+(** Leibniz equality on Sigma types requires the equipped proofs to be
+equal as Coq does not support proof irrelevance. For decidable we
+propositions we define the type [dsig P] whose Leibniz equality is proof
+irrelevant. That is [∀ x y : dsig P, x = y ↔ `x = `y]. *)
+Definition dsig `(P : A → Prop) `{∀ x : A, Decision (P x)} :=
+  { x | bool_decide (P x) }.
+
+Definition proj2_dsig `{∀ x : A, Decision (P x)} (x : dsig P) : P (`x) :=
+  bool_decide_unpack _ (proj2_sig x).
+Definition dexist `{∀ x : A, Decision (P x)} (x : A) (p : P x) : dsig P :=
+  x↾bool_decide_pack _ p.
+Lemma dsig_eq `(P : A → Prop) `{∀ x, Decision (P x)}
+  (x y : dsig P) : x = y ↔ `x = `y.
+Proof. apply (sig_eq_pi _). Qed.
+Lemma dexists_proj1 `(P : A → Prop) `{∀ x, Decision (P x)} (x : dsig P) p :
+  dexist (`x) p = x.
+Proof. apply dsig_eq; reflexivity. Qed.

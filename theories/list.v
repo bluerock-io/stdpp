@@ -12,9 +12,6 @@ premises). *)
 Global Remove Hints Permutation_cons Permutation_app' : typeclass_instances.
 Global Existing Instances Permutation_cons Permutation_app'.
 
-(* Pick up extra assumptions from section parameters. *)
-Set Default Proof Using "Type*".
-
 Global Arguments length {_} _ : assert.
 Global Arguments cons {_} _ _ : assert.
 Global Arguments app {_} _ _ : assert.
@@ -356,7 +353,7 @@ Global Instance list_subseteq {A} : SubsetEq (list A) := λ l1 l2, ∀ x, x ∈ 
 Section list_set.
   Context `{dec : EqDecision A}.
   Global Instance elem_of_list_dec : RelDecision (∈@{list A}).
-  Proof.
+  Proof using Type*.
    refine (
     fix go x l :=
     match l return Decision (x ∈ l) with
@@ -2701,12 +2698,12 @@ Section submseteq_dec.
       rewrite submseteq_cons_l. eauto using list_remove_Some.
   Qed.
   Global Instance submseteq_dec : RelDecision (submseteq : relation (list A)).
-  Proof.
+  Proof using Type*.
    refine (λ l1 l2, cast_if (decide (is_Some (list_remove_list l1 l2))));
     abstract (rewrite list_remove_list_submseteq; tauto).
   Defined.
   Global Instance Permutation_dec : RelDecision (≡ₚ@{A}).
-  Proof.
+  Proof using Type*.
    refine (λ l1 l2, cast_if_and
     (decide (length l1 = length l2)) (decide (l1 ⊆+ l2)));
     abstract (rewrite Permutation_alt; tauto).
@@ -2945,9 +2942,9 @@ Section Forall_Exists.
 
   Context {dec : ∀ x, Decision (P x)}.
   Lemma not_Forall_Exists l : ¬Forall P l → Exists (not ∘ P) l.
-  Proof. intro. by destruct (Forall_Exists_dec P (not ∘ P) dec l). Qed.
+  Proof using Type*. intro. by destruct (Forall_Exists_dec P (not ∘ P) dec l). Qed.
   Lemma not_Exists_Forall l : ¬Exists P l → Forall (not ∘ P) l.
-  Proof.
+  Proof using Type*.
     by destruct (Forall_Exists_dec (not ∘ P) P
         (λ x : A, swap_if (decide (P x))) l).
   Qed.
@@ -3757,8 +3754,8 @@ Section fmap.
     intros [|??]; intros; f_equal/=; simplify_eq; auto.
   Qed.
 
-  Lemma list_fmap_inj_1 (f1 f2 : A → B) l x :
-    f1 <$> l = f2 <$> l → x ∈ l → f1 x = f2 x.
+  Lemma list_fmap_inj_1 f' l x :
+    f <$> l = f' <$> l → x ∈ l → f x = f' x.
   Proof. intros Hf Hin. induction Hin; naive_solver. Qed.
 
   Definition fmap_nil : f <$> [] = [] := eq_refl.

@@ -340,7 +340,7 @@ Section Z_little_endian.
       by rewrite Z_ones_spec, bool_decide_true, andb_true_r by lia.
     - rewrite andb_false_r, orb_false_l.
       rewrite Z.shiftr_spec by lia. f_equal; [f_equal; lia|].
-      rewrite !Z_ones_spec by lia. apply bool_decide_iff. lia.
+      rewrite !Z_ones_spec by lia. apply bool_decide_ext. lia.
   Qed.
 
   Lemma Z_to_little_endian_length m n z :

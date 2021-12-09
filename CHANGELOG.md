@@ -12,6 +12,7 @@ Coq 8.10 is no longer supported by this release.
 - Add `bool_to_Z` that converts true to 1 and false to 0. (by Michael Sammler)
 - Add lemmas for lookup on `mjoin` for lists. (by Michael Sammler)
 - Rename `Is_true_false` → `Is_true_false_2` and `eq_None_ne_Some` → `eq_None_ne_Some_1`.
+- Rename `decide_iff` → `decide_ext` and `bool_decide_iff` → `bool_decide_ext`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).
@@ -20,6 +21,8 @@ Note that the script is not idempotent, do not run it twice.
 sed -i -E -f- $(find theories -name "*.v") <<EOF
 s/\bIs_true_false\b/Is_true_false_2/g
 s/\beq_None_ne_Some\b/eq_None_ne_Some_1/g
+# bool decide
+s/\b(bool_|)decide_iff\b/\1decide_ext/g
 EOF
 ```
 

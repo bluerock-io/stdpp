@@ -1990,7 +1990,7 @@ Lemma list_filter_filter (P1 P2 : A → Prop)
 Proof.
   induction l as [|x l IH]; [done|].
   rewrite !filter_cons. case (decide (P2 x)) as [HP2|HP2].
-  - rewrite filter_cons, IH. apply decide_iff. naive_solver.
+  - rewrite filter_cons, IH. apply decide_ext. naive_solver.
   - rewrite IH. symmetry. apply decide_False. by intros [_ ?].
 Qed.
 
@@ -3724,7 +3724,7 @@ Section find.
     list_find P l = list_find Q l.
   Proof.
     intros HPQ. induction l as [|x l IH]; simpl; [done|].
-    by rewrite (decide_iff (P x) (Q x)), IH by done.
+    by rewrite (decide_ext (P x) (Q x)), IH by done.
   Qed.
 End find.
 

@@ -373,6 +373,34 @@ Qed.
 Lemma fin_card n : card (fin n) = n.
 Proof. unfold card; simpl. induction n; simpl; rewrite ?fmap_length; auto. Qed.
 
+Lemma finite_dec (P : Prop) `{Hfin : Finite P} : Decision P.
+Proof.
+  destruct Hfin as [[ | p proofs'] _ Hproofs].
+  { right. intros p. specialize (Hproofs p) as ?%not_elem_of_nil. naive_solver. }
+  { left. done. }
+Qed.
+
+(* shouldn’t be an instance (cycle with [sig_finite]): *)
+Lemma finite_sig_dec {A} {Heqdec : EqDecision A} (P : A → Prop) `{Hfin : Finite (sig P)} :
+  ∀ x, Decision (P x).
+Proof.
+  intros x. destruct Hfin as [elems _ Helems'].
+  assert (∀ px, (x ↾ px) ∈ elems) as Helems by done; clear Helems'.
+  assert (Decision {px | (x ↾ px) ∈ elems}) as [[px ?] | no_px].
+  {
+    induction elems as [ | [y py] elems' IH].
+    { right. intros [? ?%not_elem_of_nil]. naive_solver. }
+    { destruct (decide (x = y)) as [-> | ?].
+      { left. by exists py. }
+      { destruct IH as [[px ?] | no_px].
+        { intros px. specialize (Helems px) as ?%elem_of_cons. naive_solver. }
+        { left. by exists px. }
+        { right. intros [px ?%elem_of_cons]. naive_solver. } } }
+  }
+  { by left. }
+  { right. intros px. apply no_px. by exists px. }
+Qed.
+
 Section sig_finite.
   Context {A} (P : A → Prop) `{∀ x, Decision (P x)}.
 

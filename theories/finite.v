@@ -373,13 +373,6 @@ Qed.
 Lemma fin_card n : card (fin n) = n.
 Proof. unfold card; simpl. induction n; simpl; rewrite ?fmap_length; auto. Qed.
 
-Lemma finite_dec (P : Prop) `{Hfin : Finite P} : Decision P.
-Proof.
-  destruct Hfin as [[ | p proofs'] _ Hproofs].
-  { right. intros p. specialize (Hproofs p) as ?%not_elem_of_nil. naive_solver. }
-  { left. done. }
-Qed.
-
 (* shouldn’t be an instance (cycle with [sig_finite]): *)
 Lemma finite_sig_dec `{!EqDecision A} (P : A → Prop) `{Finite (sig P)} x :
   Decision (P x).

@@ -1169,23 +1169,11 @@ Proof.
   intros xs. exists (fresh xs). split; [set_solver|]. apply infinite_is_fresh.
 Qed.
 
-Lemma dec_pred_finite {A} (P : A → Prop) {Hdec : ∀ x, Decision (P x)} :
-  pred_finite P ↔ ∃ (xs : list A), ∀ x, P x ↔ x ∈ xs.
+Lemma dec_pred_finite {A} (P : A → Prop) `{!∀ x, Decision (P x)} :
+  pred_finite P ↔ ∃ xs : list A, ∀ x, P x ↔ x ∈ xs.
 Proof.
   split; intros [xs Hxs]; [|exists xs; set_solver].
-  cut (∀ n, ∃ ys, (∀ x, P x → x ∈ ys ++ drop n xs) ∧ (∀ x, x ∈ ys → P x)).
-  { intros H. specialize (H (length xs)) as (ys & H1 & H2).
-    rewrite drop_all, app_nil_r in H1. exists ys. set_solver. }
-  intros n. induction n as [ | n (ys & IH1 & IH2)].
-  { exists []. rewrite drop_0. set_solver. }
-  destruct (decide (n < length xs)) as [[y Hn]%lookup_lt_is_Some | ?].
-  { destruct (decide (P y)) as [Hy | Hy].
-    { exists (ys ++ [y]). pose proof (assoc app) as <-. cbn.
-      rewrite <-drop_S; set_solver. }
-    { exists ys. split; [|done]. intros x Hx.
-      specialize (IH1 x Hx) as [? | Hx_elem_of]%elem_of_app; [set_solver|].
-      erewrite drop_S in Hx_elem_of; set_solver. } }
-  { exists ys. revert IH1. rewrite !drop_ge, app_nil_r; [done|lia..]. }
+  exists (filter P xs). intros x. rewrite elem_of_list_filter. naive_solver.
 Qed.
 
 Lemma finite_sig_pred_finite {A} (P : A → Prop) `{Finite (sig P)} :

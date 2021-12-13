@@ -1188,24 +1188,24 @@ Proof.
   { exists ys. revert IH1. rewrite !drop_ge, app_nil_r; [done|lia..]. }
 Qed.
 
-Lemma finite_sig_pred_finite {A} (P : A → Prop) `{Hfin : Finite (sig P)} :
+Lemma finite_sig_pred_finite {A} (P : A → Prop) `{Finite (sig P)} :
   pred_finite P.
 Proof.
   exists (proj1_sig <$> enum _). intros x px.
   apply elem_of_list_fmap_1_alt with (x ↾ px); [apply elem_of_enum|]; done.
 Qed.
 
-Lemma pred_finite_arg2 {A B} (P : A → B → Prop) :
-  pred_finite (uncurry P) → ∀ x, pred_finite (P x).
+Lemma pred_finite_arg2 {A B} (P : A → B → Prop) x :
+  pred_finite (uncurry P) → pred_finite (P x).
 Proof.
-  intros [xys ?] x. exists (xys.*2). intros y ?.
+  intros [xys ?]. exists (xys.*2). intros y ?.
   apply elem_of_list_fmap_1_alt with (x, y); by auto.
 Qed.
 
-Lemma pred_finite_arg1 {A B} (P : A → B → Prop) :
-  pred_finite (uncurry P) → ∀ y, pred_finite (flip P y).
+Lemma pred_finite_arg1 {A B} (P : A → B → Prop) y :
+  pred_finite (uncurry P) → pred_finite (flip P y).
 Proof.
-  intros [xys ?] y. exists (xys.*1). intros x ?.
+  intros [xys ?]. exists (xys.*1). intros x ?.
   apply elem_of_list_fmap_1_alt with (x, y); by auto.
 Qed.
 

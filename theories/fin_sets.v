@@ -475,10 +475,10 @@ Proof.
   - intros [X Hfin]. exists (elements X). set_solver.
 Qed.
 
-Lemma dec_pred_finite_set (P : A → Prop) `{!∀ x : A, Decision (P x)} :
+Lemma dec_pred_finite_set_alt (P : A → Prop) `{!∀ x : A, Decision (P x)} :
   pred_finite P ↔ (∃ X : C, ∀ x, P x ↔ x ∈ X).
 Proof.
-  rewrite dec_pred_finite; [|done]. split.
+  rewrite dec_pred_finite_alt; [|done]. split.
   - intros [xs Hfin]. exists (list_to_set xs). set_solver.
   - intros [X Hfin]. exists (elements X). set_solver.
 Qed.

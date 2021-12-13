@@ -1169,11 +1169,32 @@ Proof.
   intros xs. exists (fresh xs). split; [set_solver|]. apply infinite_is_fresh.
 Qed.
 
-Lemma dec_pred_finite {A} (P : A → Prop) `{!∀ x, Decision (P x)} :
+(** For decidable predicates, we have an alternative formulation for [pred_finite]. *)
+Lemma dec_pred_finite_alt {A} (P : A → Prop) `{!∀ x, Decision (P x)} :
   pred_finite P ↔ ∃ xs : list A, ∀ x, P x ↔ x ∈ xs.
 Proof.
-  split; intros [xs Hxs]; [|exists xs; set_solver].
-  exists (filter P xs). intros x. rewrite elem_of_list_filter. naive_solver.
+  split; intros [xs ?].
+  - exists (filter P xs). intros x. rewrite elem_of_list_filter. naive_solver.
+  - exists xs. naive_solver.
+Qed.
+
+(** Conversely (if equality is decidable), the alternative formulation makes the
+    predicate decidable; so it is stronger than [pred_finite] (there are finite
+    which are undecidable, for instance [λ (), Q] where [Q] is undecidable). *)
+Lemma pred_finite_alt_dec {A} `{!EqDecision A} (P : A → Prop) :
+  {xs : list A | ∀ x, P x ↔ x ∈ xs} → pred_finite P * (∀ x, Decision (P x)).
+Proof.
+  intros [xs ?]. split.
+  - exists xs. naive_solver.
+  - intros x. destruct (decide (x ∈ xs)); [left | right]; naive_solver.
+Qed.
+
+Lemma finite_sig_pred_finite_alt {A} (P : A → Prop) `{Finite (sig P)} :
+  {xs : list A | ∀ x, P x ↔ x ∈ xs}.
+Proof.
+  exists (proj1_sig <$> enum _). intros x. split.
+  - intros px. apply elem_of_list_fmap_1_alt with (x ↾ px); [apply elem_of_enum|]; done.
+  - intros Hx. apply elem_of_list_fmap in Hx as [[x' px'] [-> _]]. done.
 Qed.
 
 Lemma finite_sig_pred_finite {A} (P : A → Prop) `{Finite (sig P)} :

@@ -13,6 +13,7 @@ Coq 8.10 is no longer supported by this release.
 - Add lemmas for lookup on `mjoin` for lists. (by Michael Sammler)
 - Rename `Is_true_false` → `Is_true_false_2` and `eq_None_ne_Some` → `eq_None_ne_Some_1`.
 - Rename `decide_iff` → `decide_ext` and `bool_decide_iff` → `bool_decide_ext`.
+- Remove a spurious `Global Arguments Pos.of_nat : simpl never`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

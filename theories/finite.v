@@ -19,7 +19,6 @@ Program Definition finite_countable `{Finite A} : Countable A := {|
     Pos.of_nat $ S $ default 0 $ fst <$> list_find (x =.) (enum A);
   decode := λ p, enum A !! pred (Pos.to_nat p)
 |}.
-Global Arguments Pos.of_nat : simpl never.
 Next Obligation.
   intros ?? [xs Hxs HA] x; unfold encode, decode; simpl.
   destruct (list_find_elem_of (x =.) xs x) as [[i y] Hi]; auto.

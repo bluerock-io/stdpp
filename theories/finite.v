@@ -377,18 +377,11 @@ Proof. unfold card; simpl. induction n; simpl; rewrite ?fmap_length; auto. Qed.
 Lemma finite_sig_dec `{!EqDecision A} (P : A → Prop) `{Finite (sig P)} x :
   Decision (P x).
 Proof.
-  assert (∀ px, (x ↾ px) ∈ enum (sig P)) as Helems by auto using elem_of_enum.
-  assert (Decision {px | (x ↾ px) ∈ enum (sig P)}) as [[px ?]|Hno_px].
-  { induction (enum _) as [ | [y py] elems IH].
-    { right. by intros [? ?%not_elem_of_nil]. }
-    destruct (decide (x = y)) as [-> | ?].
-    { left. exists py. by left. }
-    destruct IH as [[px ?]|?].
-    { intros px. specialize (Helems px) as ?%elem_of_cons. naive_solver. }
-    - left. by exists px.
-    - right. intros [px ?%elem_of_cons]. naive_solver. }
-  - by left.
-  - right. intros px. apply Hno_px. by exists px.
+  assert {xs : list A | ∀ x, P x ↔ x ∈ xs} as [xs ?].
+  { clear x. exists (proj1_sig <$> enum _). intros x. split; intros Hx.
+    - apply elem_of_list_fmap_1_alt with (x ↾ Hx); [apply elem_of_enum|]; done.
+    - apply elem_of_list_fmap in Hx as [[x' Hx'] [-> _]]; done. }
+  destruct (decide (x ∈ xs)); [left | right]; naive_solver.
 Qed.
 
 Section sig_finite.

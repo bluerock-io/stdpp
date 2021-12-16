@@ -55,6 +55,17 @@ Proof. intros ?. rename select nat into m. exists m. done. Qed.
 Goal ∀ (P : nat → Prop), P 3 → P 4 → P 4.
 Proof. intros P **. rename select (P _) into HP4. apply HP4. Qed.
 
+Goal ∀ P Q : Prop, True ∨ True → P ∨ Q → Q ∨ P.
+Proof.
+  intros P Q ??. (* should select the last hypothesis *)
+  destruct select (_ ∨ _); by constructor.
+Restart.
+  intros P Q ??. (* should select the last hypothesis *)
+  destruct select (_ ∨ _) as [H1|H2].
+  - right. exact H1.
+  - left. exact H2.
+Qed.
+
 (** Regression tests for [naive_solver]. *)
 Lemma naive_solver_issue_115 (P : nat → Prop) (x : nat) :
   (∀ x', P x' → x' = 10) → P x → x + 1 = 11.

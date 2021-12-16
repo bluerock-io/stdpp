@@ -599,6 +599,11 @@ Tactic Notation "revert" "select" open_constr(pat) := select pat (fun H => rever
 Tactic Notation "rename" "select" open_constr(pat) "into" ident(name) :=
   select pat (fun H => rename H into name).
 
+Tactic Notation "destruct" "select" open_constr(pat) :=
+  select pat (fun H => destruct H).
+Tactic Notation "destruct" "select" open_constr(pat) "as" simple_intropattern(ipat) :=
+  select pat (fun H => destruct H as ipat).
+
 (** The tactic [is_closed_term t] succeeds if [t] is a closed term and fails otherwise.
 By closed we mean that [t] does not depend on any variable bound in the context.
 axioms are considered closed terms by this tactic (but Section

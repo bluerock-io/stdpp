@@ -382,7 +382,7 @@ Proof.
     - apply elem_of_list_fmap_1_alt with (x ↾ Hx); [apply elem_of_enum|]; done.
     - apply elem_of_list_fmap in Hx as [[x' Hx'] [-> _]]; done. }
   destruct (decide (x ∈ xs)); [left | right]; naive_solver.
-Qed.
+Qed. (* <- could be Defined but this lemma will probably not be used for computing *)
 
 Section sig_finite.
   Context {A} (P : A → Prop) `{∀ x, Decision (P x)}.

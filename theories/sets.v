@@ -1169,6 +1169,37 @@ Proof.
   intros xs. exists (fresh xs). split; [set_solver|]. apply infinite_is_fresh.
 Qed.
 
+(** This formulation of finiteness is stronger than [pred_finite]: when equality
+    is decidable, it is equivalent to the predicate being finite AND decidable. *)
+Lemma dec_pred_finite_alt {A} (P : A → Prop) `{!∀ x, Decision (P x)} :
+  pred_finite P ↔ ∃ xs : list A, ∀ x, P x ↔ x ∈ xs.
+Proof.
+  split; intros [xs ?].
+  - exists (filter P xs). intros x. rewrite elem_of_list_filter. naive_solver.
+  - exists xs. naive_solver.
+Qed.
+
+Lemma finite_sig_pred_finite {A} (P : A → Prop) `{Finite (sig P)} :
+  pred_finite P.
+Proof.
+  exists (proj1_sig <$> enum _). intros x px.
+  apply elem_of_list_fmap_1_alt with (x ↾ px); [apply elem_of_enum|]; done.
+Qed.
+
+Lemma pred_finite_arg2 {A B} (P : A → B → Prop) x :
+  pred_finite (uncurry P) → pred_finite (P x).
+Proof.
+  intros [xys ?]. exists (xys.*2). intros y ?.
+  apply elem_of_list_fmap_1_alt with (x, y); by auto.
+Qed.
+
+Lemma pred_finite_arg1 {A B} (P : A → B → Prop) y :
+  pred_finite (uncurry P) → pred_finite (flip P y).
+Proof.
+  intros [xys ?]. exists (xys.*1). intros x ?.
+  apply elem_of_list_fmap_1_alt with (x, y); by auto.
+Qed.
+
 (** Sets of sequences of natural numbers *)
 (* The set [seq_seq start len] of natural numbers contains the sequence
 [start, start + 1, ..., start + (len-1)]. *)

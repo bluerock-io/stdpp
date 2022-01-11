@@ -250,6 +250,13 @@ Class Equiv A := equiv: relation A.
 (* No Hint Mode set because of Coq bug #14441.
 Global Hint Mode Equiv ! : typeclass_instances. *)
 
+(** We instruct setoid rewriting to infer [equiv] as a relation on 
+type [A] when needed. This allows setoid_rewrite to solve constraints 
+of shape  [Proper (eq ==> ?R) f] using [Proper (eq ==> (equiv (A:=A))) f] 
+when an equivalence relation is available on type [A]. *)
+Global Instance equiv_rewrite_relation `{Equiv A} :
+  RewriteRelation (@equiv A _) := {}.   
+
 Infix "≡" := equiv (at level 70, no associativity) : stdpp_scope.
 Infix "≡@{ A }" := (@equiv A _)
   (at level 70, only parsing, no associativity) : stdpp_scope.

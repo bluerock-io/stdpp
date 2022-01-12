@@ -1279,6 +1279,13 @@ Section map_filter_lookup.
     m !! i = None ∨ (∀ x : A, m !! i = Some x → ¬ P (i, x)) →
     filter P m !! i = None.
   Proof. apply map_filter_lookup_None. Qed.
+
+  Lemma map_filter_empty_not_lookup m i x :
+    filter P m = ∅ → P (i,x) → m !! i ≠ Some x.
+  Proof.
+    rewrite map_empty. setoid_rewrite map_filter_lookup_None. intros Hm ?.
+    destruct (Hm i); naive_solver.
+  Qed.
 End map_filter_lookup.
 
 Section map_filter_ext.

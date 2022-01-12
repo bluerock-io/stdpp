@@ -353,6 +353,9 @@ Section filter.
   Lemma filter_singleton_not x : ¬P x → filter P ({[ x ]} : C) ≡ ∅.
   Proof. set_solver. Qed.
 
+  Lemma filter_empty_not_elem_of X x : filter P X ≡ ∅ → P x → x ∉ X.
+  Proof. set_solver. Qed.
+
   Lemma disjoint_filter X Y : X ## Y → filter P X ## filter P Y.
   Proof. set_solver. Qed.
   Lemma filter_union X Y : filter P (X ∪ Y) ≡ filter P X ∪ filter P Y.
@@ -370,6 +373,9 @@ Section filter.
     Proof. unfold_leibniz. apply filter_singleton. Qed.
     Lemma filter_singleton_not_L x : ¬P x → filter P ({[ x ]} : C) = ∅.
     Proof. unfold_leibniz. apply filter_singleton_not. Qed.
+
+    Lemma filter_empty_not_elem_of_L X x : filter P X = ∅ → P x → x ∉ X.
+    Proof. unfold_leibniz. apply filter_empty_not_elem_of. Qed.
 
     Lemma filter_union_L X Y : filter P (X ∪ Y) = filter P X ∪ filter P Y.
     Proof. unfold_leibniz. apply filter_union. Qed.

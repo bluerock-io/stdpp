@@ -1971,19 +1971,9 @@ Section filter.
     intros [k ->]%elem_of_Permutation ?; simpl.
     rewrite decide_False, Nat.lt_succ_r by done. apply filter_length.
   Qed.
-  Lemma not_elem_of_filter_nil `{EqDecision A} l x :
-    filter P l = [] → P x → x ∉ l.
-  Proof.
-    intros Hfilter HP Hin.
-    induction l as [|y l IHl]; [by inversion Hin|].
-    destruct (decide (x = y)) as [<-|Hneq].
-    { by rewrite filter_cons_True in Hfilter. }
-    apply elem_of_cons in Hin.
-    destruct Hin as [<-|Hin]; [done|].
-    destruct (decide (P y)); [by rewrite filter_cons_True in Hfilter|].
-    apply IHl; [|done]. by rewrite filter_cons_False in Hfilter.
-  Qed.
 
+  Lemma filter_nil_not_elem_of l x : filter P l = [] → P x → x ∉ l.
+  Proof. induction 3; simplify_eq/=; case_decide; naive_solver. Qed.
 End filter.
 
 Lemma list_filter_iff (P1 P2 : A → Prop)

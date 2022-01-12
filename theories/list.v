@@ -2053,6 +2053,12 @@ Lemma prefix_length l1 l2 : l1 `prefix_of` l2 → length l1 ≤ length l2.
 Proof. intros [? ->]. rewrite app_length. lia. Qed.
 Lemma prefix_snoc_not l x : ¬l ++ [x] `prefix_of` l.
 Proof. intros [??]. discriminate_list. Qed.
+Lemma elem_of_prefix l1 l2 x :
+  x ∈ l1 → l1 `prefix_of` l2 → x ∈ l2.
+Proof. intros Hin [l' ->]. apply elem_of_app. by left. Qed.
+Lemma elem_of_suffix l1 l2 x :
+  x ∈ l1 → l1 `suffix_of` l2 → x ∈ l2.
+Proof. intros Hin [l' ->]. apply elem_of_app. by right. Qed.
 (* [prefix] is not a total order, but [l1] and [l2] are always comparable if
   they are both prefixes of some [l3]. *)
 Lemma prefix_weak_total l1 l2 l3 :

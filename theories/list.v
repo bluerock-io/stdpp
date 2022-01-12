@@ -2743,25 +2743,25 @@ Proof.
   rewrite <-(elem_of_nil x).
   apply Hl, elem_of_cons. by left.
 Qed.
-Lemma list_subseteq_cons x l1 l2 : l1 ⊆ l2 → x :: l1 ⊆ x :: l2 .
+Lemma list_subseteq_skip x l1 l2 : l1 ⊆ l2 → x :: l1 ⊆ x :: l2.
 Proof.
   intros Hin y Hy%elem_of_cons.
   destruct Hy as [-> | Hy]; [by left|]. right. by apply Hin.
 Qed.
-Lemma list_subseteq_cons_r x l1 l2 : l1 ⊆ l2 → l1 ⊆ x :: l2.
+Lemma list_subseteq_cons x l1 l2 : l1 ⊆ l2 → l1 ⊆ x :: l2.
 Proof. intros Hin y Hy. right. by apply Hin. Qed.
 Lemma list_delete_subseteq i l : delete i l ⊆ l.
 Proof.
   revert i. induction l as [|x l IHl]; intros i; [done|].
   destruct i as [|i];
-    [by apply list_subseteq_cons_r|by apply list_subseteq_cons].
+    [by apply list_subseteq_cons|by apply list_subseteq_skip].
 Qed.
-Lemma filter_subseteq P `{! ∀ x : A, Decision (P x)} l :
+Lemma list_filter_subseteq P `{! ∀ x : A, Decision (P x)} l :
   filter P l ⊆ l.
 Proof.
   induction l as [|x l IHl]; [done|]. rewrite filter_cons.
   destruct (decide (P x));
-    [by apply list_subseteq_cons|by apply list_subseteq_cons_r].
+    [by apply list_subseteq_skip|by apply list_subseteq_cons].
 Qed.
 
 Global Instance list_subseteq_Permutation: Proper ((≡ₚ) ==> (≡ₚ) ==> (↔)) (⊆@{list A}) .

@@ -16,6 +16,8 @@ Coq 8.10 is no longer supported by this release.
 - Remove a spurious `Global Arguments Pos.of_nat : simpl never`.
 - Add tactics `destruct select <pat>` and `destruct select <pat> as <intro_pat>`.
 - Add some more lemmas about `Finite` and `pred_finite`.
+- Add lemmas about `last`: `last_app_cons`, `last_app`, `last_Some`, and
+  `last_Some_elem_of`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

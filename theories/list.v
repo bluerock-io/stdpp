@@ -1122,29 +1122,45 @@ Lemma last_singleton x : last [x] = Some x.
 Proof. done. Qed.
 Lemma last_cons_cons x1 x2 l : last (x1 :: x2 :: l) = last (x2 :: l).
 Proof. done. Qed.
-
+Lemma last_app_cons l1 l2 x :
+  last (l1 ++ x :: l2) = last (x :: l2).
+Proof. induction l1 as [|y [|y' l1] IHl]; done. Qed.
+Lemma last_snoc x l : last (l ++ [x]) = Some x.
+Proof. induction l as [|? []]; simpl; auto. Qed.
 Lemma last_None l : last l = None ↔ l = [].
 Proof.
   split; [|by intros ->].
   induction l as [|x1 [|x2 l] IH]; naive_solver.
 Qed.
+Lemma last_Some l x : last l = Some x ↔ ∃ l', l = l' ++ [x].
+Proof.
+  split.
+  - destruct l as [|x' l'] using rev_ind; [done|].
+    rewrite last_snoc. naive_solver.
+  - intros [l' ->]. by rewrite last_snoc.
+Qed.
 Lemma last_is_Some l : is_Some (last l) ↔ l ≠ [].
 Proof. rewrite <-not_eq_None_Some, last_None. naive_solver. Qed.
-
+Lemma last_app l1 l2 :
+  last (l1 ++ l2) = match last l2 with Some y => Some y | None => last l1 end.
+Proof.
+  destruct l2 as [|x l2 _] using rev_ind.
+  - by rewrite (right_id_L _ (++)).
+  - by rewrite (assoc_L (++)), !last_snoc.
+Qed.
 Lemma last_cons x l :
   last (x :: l) = match last l with Some y => Some y | None => Some x end.
-Proof.
-  destruct l as [|x' l]; simpl; [done|].
-  destruct (last (x' :: l)) eqn:Hlast; [done|].
-  by apply last_None in Hlast.
-Qed.
-Lemma last_snoc x l : last (l ++ [x]) = Some x.
-Proof. induction l as [|? []]; simpl; auto. Qed.
+Proof. by apply (last_app [x]). Qed.
 Lemma last_lookup l : last l = l !! pred (length l).
 Proof. by induction l as [| ?[]]. Qed.
-
 Lemma last_reverse l : last (reverse l) = head l.
 Proof. destruct l as [|x l]; simpl; by rewrite ?reverse_cons, ?last_snoc. Qed.
+Lemma last_Some_elem_of l x :
+  last l = Some x → x ∈ l.
+Proof.
+  rewrite last_Some. intros [l' ->]. apply elem_of_app. right.
+  by apply elem_of_list_singleton.
+Qed.
 
 (** ** Properties of the [head] function *)
 Lemma head_nil : head [] =@{option A} None.

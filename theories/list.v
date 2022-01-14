@@ -1151,6 +1151,9 @@ Qed.
 Lemma last_cons x l :
   last (x :: l) = match last l with Some y => Some y | None => Some x end.
 Proof. by apply (last_app [x]). Qed.
+Lemma last_cons_Some_ne x y l :
+  x ≠ y → last (x :: l) = Some y → last l = Some y.
+Proof. rewrite last_cons. destruct (last l); naive_solver. Qed.
 Lemma last_lookup l : last l = l !! pred (length l).
 Proof. by induction l as [| ?[]]. Qed.
 Lemma last_reverse l : last (reverse l) = head l.

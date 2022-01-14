@@ -1987,6 +1987,9 @@ Section filter.
     intros [k ->]%elem_of_Permutation ?; simpl.
     rewrite decide_False, Nat.lt_succ_r by done. apply filter_length.
   Qed.
+
+  Lemma filter_nil_not_elem_of l x : filter P l = [] → P x → x ∉ l.
+  Proof. induction 3; simplify_eq/=; case_decide; naive_solver. Qed.
 End filter.
 
 Lemma list_filter_iff (P1 P2 : A → Prop)

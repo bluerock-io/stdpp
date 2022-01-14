@@ -1359,7 +1359,8 @@ Notation "(.⊑ y )" := (λ x, sqsubseteq x y) (only parsing) : stdpp_scope.
 Infix "⊑@{ A }" := (@sqsubseteq A _) (at level 70, only parsing) : stdpp_scope.
 Notation "(⊑@{ A } )" := (@sqsubseteq A _) (only parsing) : stdpp_scope.
 
-Global Instance sqsubseteq_rewrite `{SqSubsetEq A} : RewriteRelation (⊑@{A}) := {}.
+(** [sqsubseteq] does not take precedence over the stdlib's instances or [equiv]. *)
+Global Instance sqsubseteq_rewrite `{SqSubsetEq A} : RewriteRelation (⊑@{A}) | 160 := {}.
 
 Global Hint Extern 0 (_ ⊑ _) => reflexivity : core.
 

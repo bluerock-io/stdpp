@@ -2756,7 +2756,7 @@ Proof.
   destruct i as [|i];
     [by apply list_subseteq_cons|by apply list_subseteq_skip].
 Qed.
-Lemma list_filter_subseteq P `{! ∀ x : A, Decision (P x)} l :
+Lemma list_filter_subseteq P `{!∀ x : A, Decision (P x)} l :
   filter P l ⊆ l.
 Proof.
   induction l as [|x l IHl]; [done|]. rewrite filter_cons.

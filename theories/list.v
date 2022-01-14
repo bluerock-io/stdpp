@@ -846,6 +846,47 @@ Proof.
   rewrite list_inserts_cons. simpl. by rewrite IH.
 Qed.
 
+(** ** Properties of the [reverse] function *)
+Lemma reverse_nil : reverse [] =@{list A} [].
+Proof. done. Qed.
+Lemma reverse_singleton x : reverse [x] = [x].
+Proof. done. Qed.
+Lemma reverse_cons l x : reverse (x :: l) = reverse l ++ [x].
+Proof. unfold reverse. by rewrite <-!rev_alt. Qed.
+Lemma reverse_snoc l x : reverse (l ++ [x]) = x :: reverse l.
+Proof. unfold reverse. by rewrite <-!rev_alt, rev_unit. Qed.
+Lemma reverse_app l1 l2 : reverse (l1 ++ l2) = reverse l2 ++ reverse l1.
+Proof. unfold reverse. rewrite <-!rev_alt. apply rev_app_distr. Qed.
+Lemma reverse_length l : length (reverse l) = length l.
+Proof. unfold reverse. rewrite <-!rev_alt. apply rev_length. Qed.
+Lemma reverse_involutive l : reverse (reverse l) = l.
+Proof. unfold reverse. rewrite <-!rev_alt. apply rev_involutive. Qed.
+Lemma reverse_lookup l i :
+  i < length l →
+  reverse l !! i = l !! (length l - S i).
+Proof.
+  revert i. induction l as [|x l IH]; simpl; intros i Hi; [done|].
+  rewrite reverse_cons.
+  destruct (decide (i = length l)); subst.
+  + by rewrite list_lookup_middle, Nat.sub_diag by by rewrite reverse_length.
+  + rewrite lookup_app_l by (rewrite reverse_length; lia).
+    rewrite IH by lia.
+    by assert (length l - i = S (length l - S i)) as -> by lia.
+Qed.
+Lemma reverse_lookup_Some l i x :
+  reverse l !! i = Some x ↔ l !! (length l - S i) = Some x ∧ i < length l.
+Proof.
+  split.
+  - destruct (decide (i < length l)); [ by rewrite reverse_lookup|].
+    rewrite lookup_ge_None_2; [done|]. rewrite reverse_length. lia.
+  - intros [??]. by rewrite reverse_lookup.
+Qed.
+Global Instance: Inj (=) (=) (@reverse A).
+Proof.
+  intros l1 l2 Hl.
+  by rewrite <-(reverse_involutive l1), <-(reverse_involutive l2), Hl.
+Qed.
+
 (** ** Properties of the [elem_of] predicate *)
 Lemma not_elem_of_nil x : x ∉ [].
 Proof. by inversion 1. Qed.
@@ -869,6 +910,17 @@ Lemma not_elem_of_app l1 l2 x : x ∉ l1 ++ l2 ↔ x ∉ l1 ∧ x ∉ l2.
 Proof. rewrite elem_of_app. tauto. Qed.
 Lemma elem_of_list_singleton x y : x ∈ [y] ↔ x = y.
 Proof. rewrite elem_of_cons, elem_of_nil. tauto. Qed.
+Lemma elem_of_reverse_2 x l : x ∈ l → x ∈ reverse l.
+Proof.
+  induction 1; rewrite reverse_cons, elem_of_app,
+    ?elem_of_list_singleton; intuition.
+Qed.
+Lemma elem_of_reverse x l : x ∈ reverse l ↔ x ∈ l.
+Proof.
+  split; auto using elem_of_reverse_2.
+  intros. rewrite <-(reverse_involutive l). by apply elem_of_reverse_2.
+Qed.
+
 Lemma elem_of_list_lookup_1 l x : x ∈ l → ∃ i, l !! i = Some x.
 Proof.
   induction 1 as [|???? IH]; [by exists 0 |].
@@ -934,6 +986,27 @@ Lemma nth_elem_of l i d : i < length l → nth i l d ∈ l.
 Proof.
   intros; eapply elem_of_list_lookup_2.
   destruct (nth_lookup_or_length l i d); [done | by lia].
+Qed.
+
+Lemma app_cons_eq_inv_l x y l1 l2 k1 k2 :
+  x ∉ k1 → y ∉ l1 →
+  l1 ++ x :: l2 = k1 ++ y :: k2 →
+  l1 = k1 ∧ x = y ∧ l2 = k2.
+Proof.
+  revert k1. induction l1 as [|x' l1 IH]; intros [|y' k1] Hx Hy ?; simplify_eq/=;
+    try apply not_elem_of_cons in Hx as [??];
+    try apply not_elem_of_cons in Hy as [??]; naive_solver.
+Qed.
+Lemma app_cons_eq_inv_r x y l1 l2 k1 k2 :
+  x ∉ k2 → y ∉ l2 →
+  l1 ++ x :: l2 = k1 ++ y :: k2 →
+  l1 = k1 ∧ x = y ∧ l2 = k2.
+Proof.
+  intros. destruct (app_cons_eq_inv_l x y (reverse l2) (reverse l1)
+    (reverse k2) (reverse k1)); [..|naive_solver].
+  - by rewrite elem_of_reverse.
+  - by rewrite elem_of_reverse.
+  - rewrite <-!reverse_snoc, <-!reverse_app, <-!(assoc_L (++)). by f_equal.
 Qed.
 
 (** ** Properties of the [NoDup] predicate *)
@@ -1063,57 +1136,6 @@ Section list_set.
     - done.
   Qed.
 End list_set.
-
-(** ** Properties of the [reverse] function *)
-Lemma reverse_nil : reverse [] =@{list A} [].
-Proof. done. Qed.
-Lemma reverse_singleton x : reverse [x] = [x].
-Proof. done. Qed.
-Lemma reverse_cons l x : reverse (x :: l) = reverse l ++ [x].
-Proof. unfold reverse. by rewrite <-!rev_alt. Qed.
-Lemma reverse_snoc l x : reverse (l ++ [x]) = x :: reverse l.
-Proof. unfold reverse. by rewrite <-!rev_alt, rev_unit. Qed.
-Lemma reverse_app l1 l2 : reverse (l1 ++ l2) = reverse l2 ++ reverse l1.
-Proof. unfold reverse. rewrite <-!rev_alt. apply rev_app_distr. Qed.
-Lemma reverse_length l : length (reverse l) = length l.
-Proof. unfold reverse. rewrite <-!rev_alt. apply rev_length. Qed.
-Lemma reverse_involutive l : reverse (reverse l) = l.
-Proof. unfold reverse. rewrite <-!rev_alt. apply rev_involutive. Qed.
-Lemma reverse_lookup l i :
-  i < length l →
-  reverse l !! i = l !! (length l - S i).
-Proof.
-  revert i. induction l as [|x l IH]; simpl; intros i Hi; [done|].
-  rewrite reverse_cons.
-  destruct (decide (i = length l)); subst.
-  + by rewrite list_lookup_middle, Nat.sub_diag by by rewrite reverse_length.
-  + rewrite lookup_app_l by (rewrite reverse_length; lia).
-    rewrite IH by lia.
-    by assert (length l - i = S (length l - S i)) as -> by lia.
-Qed.
-Lemma reverse_lookup_Some l i x :
-  reverse l !! i = Some x ↔ l !! (length l - S i) = Some x ∧ i < length l.
-Proof.
-  split.
-  - destruct (decide (i < length l)); [ by rewrite reverse_lookup|].
-    rewrite lookup_ge_None_2; [done|]. rewrite reverse_length. lia.
-  - intros [??]. by rewrite reverse_lookup.
-Qed.
-Lemma elem_of_reverse_2 x l : x ∈ l → x ∈ reverse l.
-Proof.
-  induction 1; rewrite reverse_cons, elem_of_app,
-    ?elem_of_list_singleton; intuition.
-Qed.
-Lemma elem_of_reverse x l : x ∈ reverse l ↔ x ∈ l.
-Proof.
-  split; auto using elem_of_reverse_2.
-  intros. rewrite <-(reverse_involutive l). by apply elem_of_reverse_2.
-Qed.
-Global Instance: Inj (=) (=) (@reverse A).
-Proof.
-  intros l1 l2 Hl.
-  by rewrite <-(reverse_involutive l1), <-(reverse_involutive l2), Hl.
-Qed.
 
 (** ** Properties of the [last] function *)
 Lemma last_nil : last [] =@{option A} None.

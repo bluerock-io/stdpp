@@ -988,6 +988,27 @@ Proof.
   destruct (nth_lookup_or_length l i d); [done | by lia].
 Qed.
 
+Lemma app_cons_eq_inv_l x y l1 l2 k1 k2 :
+  x ∉ k1 → y ∉ l1 →
+  l1 ++ x :: l2 = k1 ++ y :: k2 →
+  l1 = k1 ∧ x = y ∧ l2 = k2.
+Proof.
+  revert k1. induction l1 as [|x' l1 IH]; intros [|y' k1] Hx Hy ?; simplify_eq/=;
+    try apply not_elem_of_cons in Hx as [??];
+    try apply not_elem_of_cons in Hy as [??]; naive_solver.
+Qed.
+Lemma app_cons_eq_inv_r x y l1 l2 k1 k2 :
+  x ∉ k2 → y ∉ l2 →
+  l1 ++ x :: l2 = k1 ++ y :: k2 →
+  l1 = k1 ∧ x = y ∧ l2 = k2.
+Proof.
+  intros. destruct (app_cons_eq_inv_l x y (reverse l2) (reverse l1)
+    (reverse k2) (reverse k1)); [..|naive_solver].
+  - by rewrite elem_of_reverse.
+  - by rewrite elem_of_reverse.
+  - rewrite <-!reverse_snoc, <-!reverse_app, <-!(assoc_L (++)). by f_equal.
+Qed.
+
 (** ** Properties of the [NoDup] predicate *)
 Lemma NoDup_nil : NoDup (@nil A) ↔ True.
 Proof. split; constructor. Qed.

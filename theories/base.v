@@ -256,10 +256,7 @@ of shape [Proper (eq ==> ?R) f] using [Proper (eq ==> (equiv (A:=A))) f]
 when an equivalence relation is available on type [A]. We put this instance
 at level 150 so it does not take precedence over Coq's stdlib instances,
 favoring inference of [eq] (all Coq functions are automatically morphisms
-for [eq]).
-  [eq] (at 100) < [≡] (at 150) < [⊑] (at 200).  
-
-*)
+for [eq]). We have [eq] (at 100) < [≡] (at 150) < [⊑] (at 200). *)
 Global Instance equiv_rewrite_relation `{Equiv A} :
   RewriteRelation (@equiv A _) | 150 := {}.
 
@@ -1362,9 +1359,9 @@ Notation "(.⊑ y )" := (λ x, sqsubseteq x y) (only parsing) : stdpp_scope.
 Infix "⊑@{ A }" := (@sqsubseteq A _) (at level 70, only parsing) : stdpp_scope.
 Notation "(⊑@{ A } )" := (@sqsubseteq A _) (only parsing) : stdpp_scope.
 
-(** [sqsubseteq] does not take precedence over the stdlib's instances or [equiv].
-  [eq] (at 100) < [≡] (at 150) < [⊑] (at 200).  
-*)
+(** [sqsubseteq] does not take precedence over the stdlib's instances (like [eq],
+[impl], [iff]) or std++'s [equiv].
+We have [eq] (at 100) < [≡] (at 150) < [⊑] (at 200). *)
 Global Instance sqsubseteq_rewrite `{SqSubsetEq A} : RewriteRelation (⊑@{A}) | 200 := {}.
 
 Global Hint Extern 0 (_ ⊑ _) => reflexivity : core.

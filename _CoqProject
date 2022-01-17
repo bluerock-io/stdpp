@@ -3,6 +3,8 @@
 -arg -w -arg -deprecated-hint-rewrite-without-locality
 # Fixing this one requires Coq 8.15.
 -arg -w -arg -deprecated-typeclasses-transparency-without-locality
+# Fixing this one requires Coq 8.13.
+-arg -w -arg -deprecated-syntactic-definition
 
 theories/options.v
 theories/base.v

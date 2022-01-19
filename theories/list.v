@@ -988,7 +988,7 @@ Proof.
   destruct (nth_lookup_or_length l i d); [done | by lia].
 Qed.
 
-Lemma app_cons_eq_inv_l x y l1 l2 k1 k2 :
+Lemma not_elem_of_app_cons_inv_l x y l1 l2 k1 k2 :
   x ∉ k1 → y ∉ l1 →
   l1 ++ x :: l2 = k1 ++ y :: k2 →
   l1 = k1 ∧ x = y ∧ l2 = k2.
@@ -997,12 +997,12 @@ Proof.
     try apply not_elem_of_cons in Hx as [??];
     try apply not_elem_of_cons in Hy as [??]; naive_solver.
 Qed.
-Lemma app_cons_eq_inv_r x y l1 l2 k1 k2 :
+Lemma not_elem_of_app_cons_inv_r x y l1 l2 k1 k2 :
   x ∉ k2 → y ∉ l2 →
   l1 ++ x :: l2 = k1 ++ y :: k2 →
   l1 = k1 ∧ x = y ∧ l2 = k2.
 Proof.
-  intros. destruct (app_cons_eq_inv_l x y (reverse l2) (reverse l1)
+  intros. destruct (not_elem_of_app_cons_inv_l x y (reverse l2) (reverse l1)
     (reverse k2) (reverse k1)); [..|naive_solver].
   - by rewrite elem_of_reverse.
   - by rewrite elem_of_reverse.
@@ -2096,6 +2096,11 @@ Proof. intros [k' ->]. exists k'. by rewrite (assoc_L (++)). Qed.
 Lemma prefix_app_alt k1 k2 l1 l2 :
   k1 = k2 → l1 `prefix_of` l2 → k1 ++ l1 `prefix_of` k2 ++ l2.
 Proof. intros ->. apply prefix_app. Qed.
+Lemma prefix_app_inv k l1 l2 :
+  k ++ l1 `prefix_of` k ++ l2 → l1 `prefix_of` l2.
+Proof.
+  intros [k' E]. exists k'. rewrite <-(assoc_L (++)) in E. by simplify_list_eq.
+Qed.
 Lemma prefix_app_l l1 l2 l3 : l1 ++ l3 `prefix_of` l2 → l1 `prefix_of` l2.
 Proof. intros [k ->]. exists (l3 ++ k). by rewrite (assoc_L (++)). Qed.
 Lemma prefix_app_r l1 l2 l3 : l1 `prefix_of` l2 → l1 `prefix_of` l2 ++ l3.
@@ -2140,6 +2145,14 @@ Global Instance prefix_dec `{!EqDecision A} : RelDecision prefix :=
     | right Hxy => right (Hxy ∘ prefix_cons_inv_1 _ _ _ _)
     end
   end.
+Lemma prefix_not_elem_of_app_cons_inv x y l1 l2 k1 k2 :
+  x ∉ k1 → y ∉ l1 →
+  (l1 ++ x :: l2) `prefix_of` (k1 ++ y :: k2) →
+  l1 = k1 ∧ x = y ∧ l2 `prefix_of` k2.
+Proof.
+  intros Hin1 Hin2 [k Hle]. rewrite <-(assoc_L (++)) in Hle.
+  apply not_elem_of_app_cons_inv_l in Hle; [|done..]. unfold prefix. naive_solver.
+Qed.
 
 Section prefix_ops.
   Context `{!EqDecision A}.
@@ -2275,6 +2288,14 @@ Proof.
   refine (λ l1 l2, cast_if (decide_rel prefix (reverse l1) (reverse l2)));
    abstract (by rewrite suffix_prefix_reverse).
 Defined.
+Lemma suffix_not_elem_of_app_cons_inv x y l1 l2 k1 k2 :
+  x ∉ k2 → y ∉ l2 →
+  (l1 ++ x :: l2) `suffix_of` (k1 ++ y :: k2) →
+  l1 `suffix_of` k1 ∧ x = y ∧ l2 = k2.
+Proof.
+  intros Hin1 Hin2 [k Hle]. rewrite (assoc_L (++)) in Hle.
+  apply not_elem_of_app_cons_inv_r in Hle; [|done..]. unfold suffix. naive_solver.
+Qed.
 
 Section max_suffix.
   Context `{!EqDecision A}.

@@ -1195,6 +1195,8 @@ Proof. done. Qed.
 
 Lemma head_None l : head l = None ↔ l = [].
 Proof. split; [|by intros ->]. by destruct l. Qed.
+Lemma head_Some l x : head l = Some x ↔ ∃ l', l = x :: l'.
+Proof. split; [destruct l as [|x' l]; naive_solver | by intros [l' ->]]. Qed.
 Lemma head_is_Some l : is_Some (head l) ↔ l ≠ [].
 Proof. rewrite <-not_eq_None_Some, head_None. naive_solver. Qed.
 
@@ -1209,6 +1211,9 @@ Proof. by destruct l. Qed.
 
 Lemma head_reverse l : head (reverse l) = last l.
 Proof. by rewrite <-last_reverse, reverse_involutive. Qed.
+Lemma head_Some_elem_of l x :
+  head l = Some x → x ∈ l.
+Proof. rewrite head_Some. intros [l' ->]. left. Qed.
 
 (** ** Properties of the [take] function *)
 Definition take_drop i l : take i l ++ drop i l = l := firstn_skipn i l.
@@ -2012,9 +2017,14 @@ Section filter.
     intros [k ->]%elem_of_Permutation ?; simpl.
     rewrite decide_False, Nat.lt_succ_r by done. apply filter_length.
   Qed.
-
   Lemma filter_nil_not_elem_of l x : filter P l = [] → P x → x ∉ l.
   Proof. induction 3; simplify_eq/=; case_decide; naive_solver. Qed.
+  Lemma filter_reverse l : filter P (reverse l) = reverse (filter P l).
+  Proof.
+    induction l as [|x l IHl]; [done|].
+    rewrite reverse_cons, filter_app, IHl, !filter_cons.
+    case_decide; [by rewrite reverse_cons|by rewrite filter_nil, app_nil_r].
+  Qed.
 End filter.
 
 Lemma list_filter_iff (P1 P2 : A → Prop)
@@ -3028,7 +3038,29 @@ Section Forall_Exists.
     | left H => right (Forall_not_Exists _ H)
     | right H => left H
     end.
+
 End Forall_Exists.
+
+Lemma head_filter_Some P `{!∀ x : A, Decision (P x)} l x :
+  head (filter P l) = Some x →
+  ∃ l1 l2, l = l1 ++ x :: l2 ∧ Forall (λ z, ¬P z) l1.
+Proof.
+  intros Hl. induction l as [|x' l IH]; [done|].
+  rewrite filter_cons in Hl. case_decide; simplify_eq/=.
+  - exists [], l. repeat constructor.
+  - destruct IH as (l1&l2&->&?); [done|].
+    exists (x' :: l1), l2. by repeat constructor.
+Qed.
+Lemma last_filter_Some P `{!∀ x : A, Decision (P x)} l x :
+  last (filter P l) = Some x →
+  ∃ l1 l2, l = l1 ++ x :: l2 ∧ Forall (λ z, ¬P z) l2.
+Proof.
+  rewrite <-(reverse_involutive (filter P l)), last_reverse, <-filter_reverse.
+  intros (l1&l2&Heq&Hl)%head_filter_Some.
+  exists (reverse l2), (reverse l1).
+  rewrite <-(reverse_involutive l), Heq, reverse_app, reverse_cons, <-(assoc_L (++)).
+  split; [done|by apply Forall_reverse].
+Qed.
 
 Lemma list_exist_dec P l :
   (∀ x, Decision (P x)) → Decision (∃ x, x ∈ l ∧ P x).

@@ -1,9 +1,15 @@
 This file lists "large-ish" changes to the std++ Coq library, but not every
 API-breaking change is listed.
 
-## std++ master
+## std++ 1.7.0 (2022-01-22)
 
-Coq 8.10 is no longer supported by this release.
+Coq 8.15 is newly supported by this release, and Coq 8.11 to 8.14 remain
+supported. Coq 8.10 is no longer supported.
+
+This release of std++ was managed by Ralf Jung, Robbert Krebbers, and Tej
+Chajed, with contributions from Glen Mével, Jonas Kastberg Hinrichsen, Matthieu
+Sozeau, Michael Sammler, Ralf Jung, Robbert Krebbers, and Tej Chajed. Thanks a
+lot to everyone involved!
 
 - Add `is_closed_term` tactic for determining whether a term depends on variables bound
   in the context. (by Michael Sammler)

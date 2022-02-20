@@ -308,6 +308,10 @@ Section set_unfold_list.
     SetUnfoldElemOf x l P → SetUnfoldElemOf x (rotate n l) P.
   Proof. constructor. by rewrite elem_of_rotate, (set_unfold_elem_of x l P). Qed.
 
+  Global Instance set_unfold_list_bind {B} (f : A → list B) l P Q y :
+    (∀ x, SetUnfoldElemOf x l (P x)) → (∀ x, SetUnfoldElemOf y (f x) (Q x)) →
+    SetUnfoldElemOf y (l ≫= f) (∃ x, Q x ∧ P x).
+  Proof. constructor. rewrite elem_of_list_bind. naive_solver. Qed.
 End set_unfold_list.
 
 Tactic Notation "set_unfold" :=

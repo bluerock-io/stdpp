@@ -251,7 +251,11 @@ Section gset.
   Global Instance gset_elem_of_dec : RelDecision (∈@{gset K}) | 1 := _.
   Global Instance gset_disjoint_dec : RelDecision (##@{gset K}) := _.
   Global Instance gset_subseteq_dec : RelDecision (⊆@{gset K}) := _.
-  Global Instance gset_dom {A} : Dom (gmap K A) (gset K) := mapset_dom.
+
+  (** We put in an eta expansion to avoid [injection] from unfolding equalities
+  like [dom (gset _) m1 = dom (gset _) m2]. *)
+  Global Instance gset_dom {A} : Dom (gmap K A) (gset K) := λ m,
+    let '(GMap m Hm) := m in mapset_dom (GMap m Hm).
 
   Global Arguments gset_elem_of : simpl never.
   Global Arguments gset_empty : simpl never.
@@ -273,7 +277,11 @@ Section gset.
   Global Instance gset_semi_set : SemiSet K (gset K) | 1 := _.
   Global Instance gset_set : Set_ K (gset K) | 1 := _.
   Global Instance gset_fin_set : FinSet K (gset K) := _.
-  Global Instance gset_dom_spec : FinMapDom K (gmap K) (gset K) := mapset_dom_spec.
+  Global Instance gset_dom_spec : FinMapDom K (gmap K) (gset K).
+  Proof.
+    pose proof (mapset_dom_spec (M:=gmap K)) as [?? Hdom]; split; auto.
+    intros A m. specialize (Hdom A m). by destruct m.
+  Qed.
 
   (** If you are looking for a lemma showing that [gset] is extensional, see
   [sets.set_eq]. *)

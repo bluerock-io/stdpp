@@ -68,3 +68,17 @@ Proof.
   Show.
   reflexivity.
 Qed.
+
+Lemma should_not_unfold (m1 m2 : gmap nat nat) k x :
+  dom (gset nat) m1 = dom (gset nat) m2 →
+  <[k:=x]> m1 = <[k:=x]> m2 →
+  True.
+Proof.
+  (** Make sure that [injection]/[simplify_eq] does not unfold constructs on
+  [gmap] and [gset]. *)
+  intros Hdom Hinsert.
+  Fail injection Hdom.
+  Fail injection Hinsert.
+  Fail progress simplify_eq.
+  done.
+Qed.

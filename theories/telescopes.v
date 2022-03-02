@@ -36,9 +36,10 @@ Global Arguments tele_fold {_ _ !_} _ _ _ /.
 
 (** A duplication of the type [sigT] to avoid any connection to other universes
  *)
-Record tS [X : Type] (f : X -> Type) : Type :=
+Record tS {X : Type} (f : X -> Type) : Type :=
   { head : X;
     rest : f head }.
+Global Arguments tS [X] _ : assert.
 
 (** A sigma-like type for an "element" of a telescope, i.e. the data it
   takes to get a [T] from a [TT -t> T]. *)

@@ -41,3 +41,14 @@ Notation "'[TEST'  x .. z ,  P ']'" :=
         (tele_app (λ x, .. (λ z, P) ..)))
   (x binder, z binder).
 Check [TEST (x y : nat), x = y].
+
+Local Set Printing Universes.
+Check tele_arg.
+Local Unset Printing Universes.
+
+(* [tele_arg t] should live at the same universe
+   as the types inside of [t] because [tele_arg t]
+   is essentially just a (dependent) product.
+ *)
+Definition no_bump@{u} (t : tele@{u}) : tele@{u} :=
+  TeleS (fun _ : tele_arg@{u} t => TeleO).

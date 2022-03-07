@@ -20,3 +20,6 @@
   γ1 x ∨ γ2 x
 [TEST x y : nat, x = y]
      : Prop
+tele_arg@{Top.70}
+     : tele@{Top.70} → Type@{Top.70}
+(* {Top.70} |=  *)

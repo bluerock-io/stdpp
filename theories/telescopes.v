@@ -3,10 +3,9 @@ From stdpp Require Import options.
 
 Local Set Universe Polymorphism.
 Local Unset Universe Minimization ToSet.
-Local Set Primitive Projections.
 
 (** Telescopes *)
-Cumulative Inductive tele : Type :=
+Inductive tele : Type :=
   | TeleO : tele
   | TeleS {X} (binder : X → tele) : tele.
 
@@ -36,33 +35,34 @@ Global Arguments tele_fold {_ _ !_} _ _ _ /.
 
 (** A duplication of the type [sigT] to avoid any connection to other universes
  *)
-Record tS {X : Type} (f : X -> Type) : Type :=
-  { head : X;
-    rest : f head }.
-Global Arguments tS [X] _ : assert.
+Record tele_arg_cons (X : Type) (f : X -> Type) : Type := TeleArgCons
+  { tele_arg_head : X;
+    tele_arg_tail : f tele_arg_head }.
+Global Arguments tele_arg_cons [_] _.
+Global Arguments TeleArgCons [X] _.
 
 (** A sigma-like type for an "element" of a telescope, i.e. the data it
   takes to get a [T] from a [TT -t> T]. *)
 Fixpoint tele_arg@{u} (t : tele@{u}) : Type@{u} :=
   match t with
   | TeleO => unit
-  | TeleS f => tS (fun x => tele_arg (f x))
+  | TeleS f => tele_arg_cons (fun x => tele_arg (f x))
   end.
 Global Arguments tele_arg _ : simpl never.
 Notation TargO := tt (only parsing).
-Notation TargS a b := (@Build_tS _ (fun x => tele_arg (_ x)) a b) (only parsing).
+Notation TargS a b := (@TeleArgCons _ (fun x => tele_arg (_ x)) a b) (only parsing).
+Coercion tele_arg : tele >-> Sortclass.
 
-Fixpoint tele_app {TT : tele} {U} : (TT -t> U) -> tele_arg TT → U :=
-  match TT as TT return (TT -t> U) -> tele_arg TT → U with
+Fixpoint tele_app {TT : tele} {U} : (TT -t> U) -> TT → U :=
+  match TT as TT return (TT -t> U) -> TT → U with
   | TeleO => λ F _, F
-  | @TeleS X b => λ (F : TeleS b -t> U) '(Build_tS _ _ x b), (* b x -t> U *)
+  | @TeleS X b => λ (F : TeleS b -t> U) '(TeleArgCons _ x b), (* b x -t> U *)
       tele_app (F x) b
   end.
 (* The bidirectionality hint [&] simplifies defining tele_app-based notation
 such as the atomic updates and atomic triples in Iris. *)
 Global Arguments tele_app {!_ _} & _ !_ /.
 
-Coercion tele_arg : tele >-> Sortclass.
 (* This is a local coercion because otherwise, the "λ.." notation stops working. *)
 Local Coercion tele_app : tele_fun >-> Funclass.
 
@@ -74,13 +74,13 @@ Local Coercion tele_app : tele_fun >-> Funclass.
 Lemma tele_arg_inv@{u+} {TT : tele@{u}} (a : tele_arg@{u} TT) :
   match TT as TT return tele_arg@{u} TT → Prop with
   | TeleO => λ a, a = tt
-  | @TeleS t f => λ a, ∃ x a', a = {| head := x ; rest := a' |}
+  | @TeleS t f => λ a, ∃ x a', a = {| tele_arg_head := x ; tele_arg_tail := a' |}
   end a.
 Proof. destruct TT; destruct a; eauto. Qed.
 Lemma tele_arg_O_inv (a : TeleO) : a = ().
 Proof. exact (tele_arg_inv a). Qed.
 Lemma tele_arg_S_inv {X} {f : X → tele} (a : TeleS f) :
-  ∃ x a', a = {| head := x ; rest := a' |}.
+  ∃ x a', a = {| tele_arg_head := x ; tele_arg_tail := a' |}.
 Proof. exact (tele_arg_inv a). Qed.
 
 (** Map below a tele_fun *)
@@ -93,12 +93,11 @@ Fixpoint tele_map {T U} {TT : tele} : (T → U) → (TT -t> T) → TT -t> U :=
 Global Arguments tele_map {_ _ !_} _ _ /.
 
 Lemma tele_map_app {T U} {TT : tele} (F : T → U) (t : TT -t> T) (x : TT) :
-  tele_app (tele_map F t) x = F (tele_app t x).
+  (tele_map F t) x = F (t x).
 Proof.
   induction TT as [|X f IH]; simpl in *.
   - rewrite (tele_arg_O_inv x). done.
   - destruct (tele_arg_S_inv x) as [x' [a' ->]]. simpl.
-    unfold tele_app.
     rewrite <-IH. done.
 Qed.
 
@@ -109,17 +108,17 @@ Lemma tele_fmap_app {T U} {TT : tele} (F : T → U) (t : TT -t> T) (x : TT) :
 Proof. apply tele_map_app. Qed.
 
 (** Operate below [tele_fun]s with argument telescope [TT]. *)
-Fixpoint tele_bind {U} {TT : tele} : (tele_arg TT → U) → TT -t> U :=
-  match TT as TT return (tele_arg TT → U) → TT -t> U with
+Fixpoint tele_bind {U} {TT : tele} : (TT → U) → TT -t> U :=
+  match TT as TT return (TT → U) → TT -t> U with
   | TeleO => λ F, F tt
-  | @TeleS X b => λ (F : tele_arg (TeleS b) → U) (x : X), (* b x -t> U *)
-      tele_bind (λ a, F {| head := x ; rest := a |})
+  | @TeleS X b => λ (F : TeleS b → U) (x : X), (* b x -t> U *)
+      tele_bind (λ a, F {| tele_arg_head := x ; tele_arg_tail := a |})
   end.
 Global Arguments tele_bind {_ !_} _ /.
 
 (* Show that tele_app ∘ tele_bind is the identity. *)
 Lemma tele_app_bind {U} {TT : tele} (f : TT → U) x :
-  (tele_app $ tele_bind f) x = f x.
+  (tele_bind f) x = f x.
 Proof.
   induction TT as [|X b IH]; simpl in *.
   - rewrite (tele_arg_O_inv x). done.

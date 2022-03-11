@@ -53,7 +53,7 @@ Fixpoint tele_arg@{u} (t : tele@{u}) : Type@{u} :=
   end.
 Global Arguments tele_arg _ : simpl never.
 Notation TargO := tt (only parsing).
-Notation TargS a b := (@TeleArgCons _ (fun x => tele_arg (_ x)) a b) (only parsing).
+Notation TargS a b := (@TeleArgCons _ (fun x => tele_arg _) a b) (only parsing).
 Coercion tele_arg : tele >-> Sortclass.
 
 Fixpoint tele_app {TT : tele} {U} : (TT -t> U) -> TT → U :=
@@ -76,14 +76,14 @@ Local Coercion tele_app : tele_fun >-> Funclass.
  *)
 Lemma tele_arg_inv@{u+} {TT : tele@{u}} (a : tele_arg@{u} TT) :
   match TT as TT return tele_arg@{u} TT → Prop with
-  | TeleO => λ a, a = tt
-  | @TeleS t f => λ a, ∃ x a', a = {| tele_arg_head := x ; tele_arg_tail := a' |}
+  | TeleO => λ a, a = TargO
+  | @TeleS t f => λ a, ∃ x a', a = TargS x a'
   end a.
 Proof. destruct TT; destruct a; eauto. Qed.
 Lemma tele_arg_O_inv (a : TeleO) : a = ().
 Proof. exact (tele_arg_inv a). Qed.
 Lemma tele_arg_S_inv {X} {f : X → tele} (a : TeleS f) :
-  ∃ x a', a = {| tele_arg_head := x ; tele_arg_tail := a' |}.
+  ∃ x a', a = TargS x a'.
 Proof. exact (tele_arg_inv a). Qed.
 
 (** Map below a tele_fun *)
@@ -115,7 +115,7 @@ Fixpoint tele_bind {U} {TT : tele} : (TT → U) → TT -t> U :=
   match TT as TT return (TT → U) → TT -t> U with
   | TeleO => λ F, F tt
   | @TeleS X b => λ (F : TeleS b → U) (x : X), (* b x -t> U *)
-      tele_bind (λ a, F {| tele_arg_head := x ; tele_arg_tail := a |})
+      tele_bind (λ a, F (TargS x a))
   end.
 Global Arguments tele_bind {_ !_} _ /.
 

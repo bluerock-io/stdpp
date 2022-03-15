@@ -8,7 +8,7 @@ From stdpp Require Import options.
 locally (or things moved out of sections) as no default works well enough. *)
 Unset Default Proof Using.
 
-(** Given a type of maps [M : Type → Type], we constructs sets as [M ()], i.e.,
+(** Given a type of maps [M : Type → Type], we construct sets as [M ()], i.e.,
 maps with unit values. To avoid unnecessary universe constraints, we first
 define [mapset' Munit] with [Munit : Type] as a record, and then [mapset M] with
 [M : Type → Type] as a notation. See [tests/universes.v] for a test case that

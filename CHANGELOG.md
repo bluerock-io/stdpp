@@ -1,6 +1,10 @@
 This file lists "large-ish" changes to the std++ Coq library, but not every
 API-breaking change is listed.
 
+## std++ master
+
+- Make sure that `gset` and `mapset` do not bump the universe.
+
 ## std++ 1.7.0 (2022-01-22)
 
 Coq 8.15 is newly supported by this release, and Coq 8.11 to 8.14 remain

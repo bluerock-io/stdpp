@@ -8,8 +8,9 @@ From stdpp Require Import options.
 locally (or things moved out of sections) as no default works well enough. *)
 Unset Default Proof Using.
 
-Record mapset (M : Type → Type) : Type :=
-  Mapset { mapset_car: M (unit : Type) }.
+Record mapset' (M : Type) : Type :=
+  Mapset { mapset_car: M }.
+Notation mapset M := (mapset' (M unit)).
 Global Arguments Mapset {_} _ : assert.
 Global Arguments mapset_car {_} _ : assert.
 

@@ -8,8 +8,14 @@ From stdpp Require Import options.
 locally (or things moved out of sections) as no default works well enough. *)
 Unset Default Proof Using.
 
-Record mapset (M : Type → Type) : Type :=
-  Mapset { mapset_car: M (unit : Type) }.
+(** Given a type of maps [M : Type → Type], we construct sets as [M ()], i.e.,
+maps with unit values. To avoid unnecessary universe constraints, we first
+define [mapset' Munit] with [Munit : Type] as a record, and then [mapset M] with
+[M : Type → Type] as a notation. See [tests/universes.v] for a test case that
+fails otherwise. *)
+Record mapset' (Munit : Type) : Type :=
+  Mapset { mapset_car: Munit }.
+Notation mapset M := (mapset' (M unit)).
 Global Arguments Mapset {_} _ : assert.
 Global Arguments mapset_car {_} _ : assert.
 

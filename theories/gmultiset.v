@@ -397,14 +397,9 @@ Section more_lemmas.
   Lemma list_to_set_disj_app l1 l2 :
     list_to_set_disj (l1 ++ l2) =@{gmultiset A} list_to_set_disj l1 ⊎ list_to_set_disj l2.
   Proof. induction l1; multiset_solver. Qed.
-  Lemma elem_of_list_to_set_disj x l:
+  Lemma elem_of_list_to_set_disj x l :
     x ∈@{gmultiset A} list_to_set_disj l ↔ x ∈ l.
-  Proof.
-    induction l as [|?? IH]; [set_solver|split].
-    - intros [->%gmultiset_elem_of_singleton| Hin]%gmultiset_elem_of_disj_union;
-        [set_solver|by right; apply IH].
-    - intros [-> |]%elem_of_cons; rewrite ?list_to_set_disj_cons; multiset_solver.
-  Qed.
+  Proof. induction l; set_solver. Qed.
   Global Instance list_to_set_disj_perm :
     Proper ((≡ₚ) ==> (=)) (list_to_set_disj (C:=gmultiset A)).
   Proof. induction 1; multiset_solver. Qed.

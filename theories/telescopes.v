@@ -38,28 +38,27 @@ Global Arguments tele_fold {_ _ !_} _ _ _ /.
 
 (** A duplication of the type [sigT] to avoid any connection to other universes
  *)
-Record tele_arg_cons (X : Type) (f : X -> Type) : Type := TeleArgCons
+Record tele_arg_cons {X : Type} (f : X → Type) : Type := TeleArgCons
   { tele_arg_head : X;
     tele_arg_tail : f tele_arg_head }.
-Global Arguments tele_arg_cons [_] _.
-Global Arguments TeleArgCons [X] _.
+Global Arguments TeleArgCons {_ _} _ _.
 
 (** A sigma-like type for an "element" of a telescope, i.e. the data it
   takes to get a [T] from a [TT -t> T]. *)
 Fixpoint tele_arg@{u} (t : tele@{u}) : Type@{u} :=
   match t with
   | TeleO => unit
-  | TeleS f => tele_arg_cons (fun x => tele_arg (f x))
+  | TeleS f => tele_arg_cons (λ x, tele_arg (f x))
   end.
 Global Arguments tele_arg _ : simpl never.
 Notation TargO := tt (only parsing).
-Notation TargS a b := (@TeleArgCons _ (fun x => tele_arg _) a b) (only parsing).
+Notation TargS a b := (@TeleArgCons _ (λ x, tele_arg _) a b) (only parsing).
 Coercion tele_arg : tele >-> Sortclass.
 
 Fixpoint tele_app {TT : tele} {U} : (TT -t> U) -> TT → U :=
   match TT as TT return (TT -t> U) -> TT → U with
   | TeleO => λ F _, F
-  | @TeleS X b => λ (F : TeleS b -t> U) '(TeleArgCons _ x b), (* b x -t> U *)
+  | TeleS r => λ (F : TeleS r -t> U) '(TeleArgCons x b),
       tele_app (F x) b
   end.
 (* The bidirectionality hint [&] simplifies defining tele_app-based notation
@@ -69,15 +68,11 @@ Global Arguments tele_app {!_ _} & _ !_ /.
 (* This is a local coercion because otherwise, the "λ.." notation stops working. *)
 Local Coercion tele_app : tele_fun >-> Funclass.
 
-(** Inversion lemma for [tele_arg]
-    Note the explicit universe annotation prevents this from being minimized
-    to [Set]. The + is needed to satisfy a bug in Coq, the resulting definition
-    only requires a single universe.
- *)
-Lemma tele_arg_inv@{u+} {TT : tele@{u}} (a : tele_arg@{u} TT) :
-  match TT as TT return tele_arg@{u} TT → Prop with
+(** Inversion lemma for [tele_arg] *)
+Lemma tele_arg_inv {TT : tele} (a : tele_arg TT) :
+  match TT as TT return tele_arg TT → Prop with
   | TeleO => λ a, a = TargO
-  | @TeleS t f => λ a, ∃ x a', a = TargS x a'
+  | TeleS f => λ a, ∃ x a', a = TargS x a'
   end a.
 Proof. destruct TT; destruct a; eauto. Qed.
 Lemma tele_arg_O_inv (a : TeleO) : a = ().

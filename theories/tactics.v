@@ -27,7 +27,7 @@ Global Hint Extern 1001 => progress subst : subst. (** backtracking on this one 
 be very bad, so use with care! *)
 
 (** The tactic [intuition] expands to [intuition auto with *] by default. This
-is rather efficient when having big hint databases, or expensive [Hint Extern]
+is rather inefficient when having big hint databases, or expensive [Hint Extern]
 declarations as the ones above. *)
 Tactic Notation "intuition" := intuition auto.
 

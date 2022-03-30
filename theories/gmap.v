@@ -286,6 +286,11 @@ Section gset.
   (** If you are looking for a lemma showing that [gset] is extensional, see
   [sets.set_eq]. *)
 
+  (** The function [gset_to_gmap x X] converts a set [X] to a map with domain
+  [X] where each key has value [x]. Compared to the generic conversion
+  [set_to_map], the function [gset_to_gmap] has [O(n)] instead of [O(n log n)]
+  complexity and has an easier and better developed theory. *)
+
   Definition gset_to_gmap {A} (x : A) (X : gset K) : gmap K A :=
     (λ _, x) <$> mapset_car X.
 
@@ -341,6 +346,13 @@ Section gset.
     induction X as [| y X not_in IH] using set_ind_L.
     - rewrite gset_to_gmap_empty, dom_empty_L; done.
     - rewrite gset_to_gmap_union_singleton, dom_insert_L, IH; done.
+  Qed.
+
+  Lemma gset_to_gmap_set_to_map {A} (X : gset K) (x : A) :
+    gset_to_gmap x X = set_to_map (.,x) X.
+  Proof.
+    apply map_eq; intros k. apply option_eq; intros y.
+    rewrite lookup_gset_to_gmap_Some, lookup_set_to_map; naive_solver.
   Qed.
 End gset.
 

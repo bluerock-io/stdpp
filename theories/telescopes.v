@@ -3,8 +3,9 @@ From stdpp Require Import options.
 
 Local Set Universe Polymorphism.
 
-(* Without this flag, Coq minimizes some universes to [Set] when they
-   should not be, e.g. in [texist_exist]. *)
+(** Without this flag, Coq minimizes some universes to [Set] when they
+    should not be, e.g. in [texist_exist].
+    See the [texist_exist_universes] test. *)
 Local Unset Universe Minimization ToSet.
 
 (** Telescopes *)
@@ -75,7 +76,7 @@ Lemma tele_arg_inv {TT : tele} (a : tele_arg TT) :
   | TeleS f => λ a, ∃ x a', a = TargS x a'
   end a.
 Proof. destruct TT; destruct a; eauto. Qed.
-Lemma tele_arg_O_inv (a : TeleO) : a = ().
+Lemma tele_arg_O_inv (a : TeleO) : a = TargO.
 Proof. exact (tele_arg_inv a). Qed.
 Lemma tele_arg_S_inv {X} {f : X → tele} (a : TeleS f) :
   ∃ x a', a = TargS x a'.

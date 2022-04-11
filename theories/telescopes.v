@@ -3,6 +3,11 @@ From stdpp Require Import options.
 
 Local Set Universe Polymorphism.
 
+(** Without this flag, Coq minimizes some universes to [Set] when they
+    should not be, e.g. in [texist_exist].
+    See the [texist_exist_universes] test. *)
+Local Unset Universe Minimization ToSet.
+
 (** Telescopes *)
 Inductive tele : Type :=
   | TeleO : tele
@@ -32,34 +37,45 @@ Definition tele_fold {X Y} {TT : tele} (step : ∀ {A : Type}, (A → Y) → Y) 
      end) TT.
 Global Arguments tele_fold {_ _ !_} _ _ _ /.
 
+(** A duplication of the type [sigT] to avoid any connection to other universes
+ *)
+Record tele_arg_cons {X : Type} (f : X → Type) : Type := TeleArgCons
+  { tele_arg_head : X;
+    tele_arg_tail : f tele_arg_head }.
+Global Arguments TeleArgCons {_ _} _ _.
+
 (** A sigma-like type for an "element" of a telescope, i.e. the data it
   takes to get a [T] from a [TT -t> T]. *)
-Inductive tele_arg : tele → Type :=
-| TargO : tele_arg TeleO
-(* the [x] is the only relevant data here *)
-| TargS {X} {binder} (x : X) : tele_arg (binder x) → tele_arg (TeleS binder).
+Fixpoint tele_arg@{u} (t : tele@{u}) : Type@{u} :=
+  match t with
+  | TeleO => unit
+  | TeleS f => tele_arg_cons (λ x, tele_arg (f x))
+  end.
+Global Arguments tele_arg _ : simpl never.
+Notation TargO := tt (only parsing).
+Notation TargS a b := (@TeleArgCons _ (λ x, tele_arg _) a b) (only parsing).
+Coercion tele_arg : tele >-> Sortclass.
 
-Definition tele_app {TT : tele} {T} (f : TT -t> T) : tele_arg TT → T :=
-  λ a, (fix rec {TT} (a : tele_arg TT) : (TT -t> T) → T :=
-     match a in tele_arg TT return (TT -t> T) → T with
-     | TargO => λ t : T, t
-     | TargS x a => λ f, rec a (f x)
-     end) TT a f.
+Fixpoint tele_app {TT : tele} {U} : (TT -t> U) -> TT → U :=
+  match TT as TT return (TT -t> U) -> TT → U with
+  | TeleO => λ F _, F
+  | TeleS r => λ (F : TeleS r -t> U) '(TeleArgCons x b),
+      tele_app (F x) b
+  end.
 (* The bidirectionality hint [&] simplifies defining tele_app-based notation
 such as the atomic updates and atomic triples in Iris. *)
 Global Arguments tele_app {!_ _} & _ !_ /.
 
-Coercion tele_arg : tele >-> Sortclass.
 (* This is a local coercion because otherwise, the "λ.." notation stops working. *)
 Local Coercion tele_app : tele_fun >-> Funclass.
 
 (** Inversion lemma for [tele_arg] *)
-Lemma tele_arg_inv {TT : tele} (a : TT) :
-  match TT as TT return TT → Prop with
+Lemma tele_arg_inv {TT : tele} (a : tele_arg TT) :
+  match TT as TT return tele_arg TT → Prop with
   | TeleO => λ a, a = TargO
   | TeleS f => λ a, ∃ x a', a = TargS x a'
   end a.
-Proof. induction a; eauto. Qed.
+Proof. destruct TT; destruct a; eauto. Qed.
 Lemma tele_arg_O_inv (a : TeleO) : a = TargO.
 Proof. exact (tele_arg_inv a). Qed.
 Lemma tele_arg_S_inv {X} {f : X → tele} (a : TeleS f) :
@@ -93,15 +109,15 @@ Proof. apply tele_map_app. Qed.
 (** Operate below [tele_fun]s with argument telescope [TT]. *)
 Fixpoint tele_bind {U} {TT : tele} : (TT → U) → TT -t> U :=
   match TT as TT return (TT → U) → TT -t> U with
-  | TeleO => λ F, F TargO
+  | TeleO => λ F, F tt
   | @TeleS X b => λ (F : TeleS b → U) (x : X), (* b x -t> U *)
-                  tele_bind (λ a, F (TargS x a))
+      tele_bind (λ a, F (TargS x a))
   end.
 Global Arguments tele_bind {_ !_} _ /.
 
 (* Show that tele_app ∘ tele_bind is the identity. *)
 Lemma tele_app_bind {U} {TT : tele} (f : TT → U) x :
-  (tele_app $ tele_bind f) x = f x.
+  (tele_bind f) x = f x.
 Proof.
   induction TT as [|X b IH]; simpl in *.
   - rewrite (tele_arg_O_inv x). done.

@@ -41,3 +41,14 @@ Notation "'[TEST'  x .. z ,  P ']'" :=
         (tele_app (λ x, .. (λ z, P) ..)))
   (x binder, z binder).
 Check [TEST (x y : nat), x = y].
+
+(** [tele_arg t] should live at the same universe
+as the types inside of [t] because [tele_arg t]
+is essentially just a (dependent) product.
+ *)
+Definition no_bump@{u} (t : tele@{u}) : Type@{u} := tele_arg@{u} t.
+
+(** This test would fail without [Unset Universe Minimization ToSet] in [telescopes.v]. *)
+Lemma texist_exist_universes (X : Type) (P : TeleS (λ _ : X, TeleO) → Prop) :
+  texist P ↔ ex P.
+Proof. by rewrite texist_exist. Qed.

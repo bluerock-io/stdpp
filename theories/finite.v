@@ -419,3 +419,11 @@ Section sig_finite.
   Lemma sig_card : card (sig P) = length (filter P (enum A)).
   Proof. by rewrite <-list_filter_sig_filter, fmap_length. Qed.
 End sig_finite.
+
+Lemma finite_pigeon_hole `{Finite A} `{Finite B} (f : A → B) :
+  card B < card A → ∃ x1 x2, x1 ≠ x2 ∧ f x1 = f x2.
+Proof.
+  intros. apply dec_stable; intros Heq.
+  cut (Inj eq eq f); [intros ?%inj_card; lia|].
+  intros x1 x2 ?. apply dec_stable. naive_solver.
+Qed.

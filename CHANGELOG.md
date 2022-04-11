@@ -4,6 +4,7 @@ API-breaking change is listed.
 ## std++ master
 
 - Make sure that `gset` and `mapset` do not bump the universe.
+- A rewrite of `tele_arg` to make it not bump universes.
 
 ## std++ 1.7.0 (2022-01-22)
 

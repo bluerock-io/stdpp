@@ -427,3 +427,15 @@ Proof.
   cut (Inj eq eq f); [intros ?%inj_card; lia|].
   intros x1 x2 ?. apply dec_stable. naive_solver.
 Qed.
+
+Lemma nat_pigeon_hole (f : nat → nat) (n1 n2 : nat) :
+  n2 < n1 →
+  (∀ i, i < n1 → f i < n2) →
+  ∃ i1 i2, i1 < i2 ∧ f i1 = f i2.
+Proof.
+  intros Hn Hf. pose (f' (i : fin n1) := nat_to_fin (Hf _ (fin_to_nat_lt i))).
+  destruct (finite_pigeon_hole f') as (i1&i2&Hi&Hf'); [by rewrite !fin_card|].
+  apply (not_inj (f:=fin_to_nat)) in Hi. apply (f_equal fin_to_nat) in Hf'.
+  unfold f' in Hf'. rewrite !fin_to_nat_to_fin in Hf'.
+  destruct (decide (i1 < i2)); [exists i1, i2|exists i2, i1]; lia.
+Qed.

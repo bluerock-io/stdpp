@@ -29,6 +29,8 @@ lot to everyone involved!
 - Add some more lemmas about `Finite` and `pred_finite`.
 - Add lemmas about `last`: `last_app_cons`, `last_app`, `last_Some`, and
   `last_Some_elem_of`.
+- Add versions of Pigeonhole principle for Finite types, natural numbers, and
+  lists.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

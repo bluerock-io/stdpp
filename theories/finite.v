@@ -419,3 +419,46 @@ Section sig_finite.
   Lemma sig_card : card (sig P) = length (filter P (enum A)).
   Proof. by rewrite <-list_filter_sig_filter, fmap_length. Qed.
 End sig_finite.
+
+Lemma finite_pigeonhole `{Finite A} `{Finite B} (f : A → B) :
+  card B < card A → ∃ x1 x2, x1 ≠ x2 ∧ f x1 = f x2.
+Proof.
+  intros. apply dec_stable; intros Heq.
+  cut (Inj eq eq f); [intros ?%inj_card; lia|].
+  intros x1 x2 ?. apply dec_stable. naive_solver.
+Qed.
+
+Lemma nat_pigeonhole (f : nat → nat) (n1 n2 : nat) :
+  n2 < n1 →
+  (∀ i, i < n1 → f i < n2) →
+  ∃ i1 i2, i1 < i2 < n1 ∧ f i1 = f i2.
+Proof.
+  intros Hn Hf. pose (f' (i : fin n1) := nat_to_fin (Hf _ (fin_to_nat_lt i))).
+  destruct (finite_pigeonhole f') as (i1&i2&Hi&Hf'); [by rewrite !fin_card|].
+  apply (not_inj (f:=fin_to_nat)) in Hi. apply (f_equal fin_to_nat) in Hf'.
+  unfold f' in Hf'. rewrite !fin_to_nat_to_fin in Hf'.
+  pose proof (fin_to_nat_lt i1); pose proof (fin_to_nat_lt i2).
+  destruct (decide (i1 < i2)); [exists i1, i2|exists i2, i1]; lia.
+Qed.
+
+Lemma list_pigeonhole {A} (l1 l2 : list A) :
+  l1 ⊆ l2 →
+  length l2 < length l1 →
+  ∃ i1 i2 x, i1 < i2 ∧ l1 !! i1 = Some x ∧ l1 !! i2 = Some x.
+Proof.
+  intros Hl Hlen.
+  assert (∀ i : fin (length l1), ∃ (j : fin (length l2)) x,
+    l1 !! (fin_to_nat i) = Some x ∧
+    l2 !! (fin_to_nat j) = Some x) as [f Hf]%fin_choice.
+  { intros i. destruct (lookup_lt_is_Some_2 l1 i)
+      as [x Hix]; [apply fin_to_nat_lt|].
+    assert (x ∈ l2) as [j Hjx]%elem_of_list_lookup_1
+      by (by eapply Hl, elem_of_list_lookup_2).
+    exists (nat_to_fin (lookup_lt_Some _ _ _ Hjx)), x.
+    by rewrite fin_to_nat_to_fin. }
+  destruct (finite_pigeonhole f) as (i1&i2&Hi&Hf'); [by rewrite !fin_card|].
+  destruct (Hf i1) as (x1&?&?), (Hf i2) as (x2&?&?).
+  assert (x1 = x2) as -> by congruence.
+  apply (not_inj (f:=fin_to_nat)) in Hi. apply (f_equal fin_to_nat) in Hf'.
+  destruct (decide (i1 < i2)); [exists i1, i2|exists i2, i1]; eauto with lia.
+Qed.

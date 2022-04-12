@@ -56,6 +56,16 @@ Notation TargO := tt (only parsing).
 Notation TargS a b := (@TeleArgCons _ (λ x, tele_arg _) a b) (only parsing).
 Coercion tele_arg : tele >-> Sortclass.
 
+Lemma tele_arg_ind (P : ∀ TT, tele_arg TT → Prop) :
+  P TeleO TargO →
+  (∀ T (b : T → tele) x xs, P (b x) xs → P (TeleS b) (TargS x xs)) →
+  ∀ TT (xs : tele_arg TT), P TT xs.
+Proof.
+  intros H0 HS TT. induction TT as [|T b IH]; simpl.
+  - by intros [].
+  - intros [x xs]. by apply HS.
+Qed.
+
 Fixpoint tele_app {TT : tele} {U} : (TT -t> U) -> TT → U :=
   match TT as TT return (TT -t> U) -> TT → U with
   | TeleO => λ F _, F

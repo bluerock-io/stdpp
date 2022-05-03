@@ -52,8 +52,20 @@ Fixpoint tele_arg@{u} (t : tele@{u}) : Type@{u} :=
   | TeleS f => tele_arg_cons (λ x, tele_arg (f x))
   end.
 Global Arguments tele_arg _ : simpl never.
-Notation TargO := tt (only parsing).
-Notation TargS a b := (@TeleArgCons _ (λ x, tele_arg _) a b) (only parsing).
+
+(* Coq has no idea that [unit] and [tele_arg_cons] have anything to do with
+   telescopes. This only becomes a problem when concrete telescope arguments
+   (of concrete telescopes) need to be typechecked. To work around this, we
+   annotate the notations below with extra information to guide unification.
+ *)
+
+(* The cast in the notation below is necessary to make Coq understand that
+   [TargO] can be unified with [tele_arg TeleO]. *)
+Notation TargO := (tt : tele_arg TeleO) (only parsing).
+(* The casts and annotations are necessary for Coq to typecheck nested [TargS]
+   as well as the final [TargO] in a chain of [TargS]. *)
+Notation TargS a b :=
+  ((@TeleArgCons _ (λ x, tele_arg (_ x)) a b) : (tele_arg (TeleS _))) (only parsing).
 Coercion tele_arg : tele >-> Sortclass.
 
 Lemma tele_arg_ind (P : ∀ TT, tele_arg TT → Prop) :

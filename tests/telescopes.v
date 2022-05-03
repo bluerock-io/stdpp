@@ -52,3 +52,27 @@ Definition no_bump@{u} (t : tele@{u}) : Type@{u} := tele_arg@{u} t.
 Lemma texist_exist_universes (X : Type) (P : TeleS (λ _ : X, TeleO) → Prop) :
   texist P ↔ ex P.
 Proof. by rewrite texist_exist. Qed.
+
+(** [tele_arg ..] notation tests.
+    These tests mainly test type annotations and casts in the [tele_arg]
+    notations.
+ *)
+Example tele_arg_notation_0 : [tele].
+assert_succeeds exact [tele_arg].
+assert_succeeds refine [tele_arg].
+Abort.
+
+Example tele_arg_notation_1 : [tele (_:nat)].
+assert_succeeds exact [tele_arg 0].
+assert_succeeds refine [tele_arg 0].
+Abort.
+
+Example tele_arg_notation_2 : [tele (_ : bool) (_ : nat)].
+assert_succeeds exact [tele_arg true; 0].
+assert_succeeds refine [tele_arg true; 0].
+Abort.
+
+Example tele_arg_notation_2_dep : [tele (b : bool) (_ : if b then nat else False)].
+assert_succeeds exact [tele_arg true; 0].
+assert_succeeds refine [tele_arg true; 0].
+Abort.

@@ -56,6 +56,9 @@ Proof. by rewrite texist_exist. Qed.
 (** [tele_arg ..] notation tests.
     These tests mainly test type annotations and casts in the [tele_arg]
     notations.
+    We test that Coq can typecheck literal telescope arguments in two ways:
+    - tactic unification/old unification using [exact]
+    - evarconv/new unification using [refine]
  *)
 Example tele_arg_notation_0 : [tele].
 assert_succeeds exact [tele_arg].

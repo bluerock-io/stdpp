@@ -192,15 +192,5 @@ Lemma elem_of_coGset_to_top_set `{Countable A, TopSet A C} X x :
   x ∈@{C} coGset_to_top_set X ↔ x ∈ X.
 Proof. destruct X; set_solver. Qed.
 
-(** * Domain of finite maps *)
-Global Instance coGset_dom `{Countable K} {A} : Dom (gmap K A) (coGset K) := λ m,
-  gset_to_coGset (dom _ m).
-Global Instance coGset_dom_spec `{Countable K} : FinMapDom K (gmap K) (coGset K).
-Proof.
-  split; try apply _. intros B m i. unfold dom, coGset_dom.
-  by rewrite elem_of_gset_to_coGset, elem_of_dom.
-Qed.
-
 Typeclasses Opaque coGset_elem_of coGset_empty coGset_top coGset_singleton.
 Typeclasses Opaque coGset_union coGset_intersection coGset_difference.
-Typeclasses Opaque coGset_dom.

@@ -1304,10 +1304,10 @@ Global Instance: Params (@partial_alter) 4 := {}.
 Global Arguments partial_alter _ _ _ _ _ !_ !_ / : simpl nomatch, assert.
 
 (** The function [dom m] should yield the domain of [m]. That is a finite
-set of type [C] that contains the keys that are a member of [m].
-[C] is an output of the typeclass, i.e., there can be only one instance per map
+set of type [D] that contains the keys that are a member of [m].
+[D] is an output of the typeclass, i.e., there can be only one instance per map
 type [M]. *)
-Class Dom (M C : Type) := dom: M → C.
+Class Dom (M D : Type) := dom: M → D.
 Global Hint Mode Dom ! - : typeclass_instances.
 Global Instance: Params (@dom) 3 := {}.
 Global Arguments dom : clear implicits.

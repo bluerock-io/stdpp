@@ -29,7 +29,7 @@ Failed to progress.
 1 goal
   
   ============================
-  1 ∈ dom (gset nat) (<[1:=2]> ∅)
+  1 ∈ dom (<[1:=2]> ∅)
 The command has indeed failed with message:
 Failed to progress.
 The command has indeed failed with message:

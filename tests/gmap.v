@@ -22,7 +22,7 @@ Proof.
   Show.
 Abort.
 
-Goal 1 ∈ dom (M := gmap nat nat) (gset nat) (<[ 1 := 2 ]> ∅).
+Goal 1 ∈ dom (M := gmap nat nat) (<[ 1 := 2 ]> ∅).
 Proof.
   Fail progress simpl.
   Fail progress cbn.
@@ -70,7 +70,7 @@ Proof.
 Qed.
 
 Lemma should_not_unfold (m1 m2 : gmap nat nat) k x :
-  dom (gset nat) m1 = dom (gset nat) m2 →
+  dom m1 = dom m2 →
   <[k:=x]> m1 = <[k:=x]> m2 →
   True.
 Proof.

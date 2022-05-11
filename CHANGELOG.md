@@ -3,6 +3,8 @@ API-breaking change is listed.
 
 ## std++ master
 
+Coq 8.11 is no longer supported.
+
 - Make sure that `gset` and `mapset` do not bump the universe.
 - Rewrite `tele_arg` to make it not bump universes. (by Gregory Malecha, BedRock Systems)
 

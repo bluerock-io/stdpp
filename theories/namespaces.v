@@ -8,17 +8,17 @@ Typeclasses Opaque namespace.
 
 Definition nroot : namespace := nil.
 
-Definition ndot_def `{Countable A} (N : namespace) (x : A) : namespace :=
+Local Definition ndot_def `{Countable A} (N : namespace) (x : A) : namespace :=
   encode x :: N.
-Definition ndot_aux : seal (@ndot_def). by eexists. Qed.
+Local Definition ndot_aux : seal (@ndot_def). by eexists. Qed.
 Definition ndot {A A_dec A_count}:= unseal ndot_aux A A_dec A_count.
-Definition ndot_eq : @ndot = @ndot_def := seal_eq ndot_aux.
+Local Definition ndot_unseal : @ndot = @ndot_def := seal_eq ndot_aux.
 
-Definition nclose_def (N : namespace) : coPset :=
+Local Definition nclose_def (N : namespace) : coPset :=
   coPset_suffixes (positives_flatten N).
-Definition nclose_aux : seal (@nclose_def). by eexists. Qed.
+Local Definition nclose_aux : seal (@nclose_def). by eexists. Qed.
 Global Instance nclose : UpClose namespace coPset := unseal nclose_aux.
-Definition nclose_eq : @nclose = @nclose_def := seal_eq nclose_aux.
+Local Definition nclose_unseal : @nclose = @nclose_def := seal_eq nclose_aux.
 
 Notation "N .@ x" := (ndot N x)
   (at level 19, left associativity, format "N .@ x") : stdpp_scope.
@@ -33,14 +33,14 @@ Section namespace.
   Implicit Types E : coPset.
 
   Global Instance ndot_inj : Inj2 (=) (=) (=) (@ndot A _ _).
-  Proof. intros N1 x1 N2 x2; rewrite !ndot_eq; naive_solver. Qed.
+  Proof. intros N1 x1 N2 x2; rewrite !ndot_unseal; naive_solver. Qed.
 
   Lemma nclose_nroot : ↑nroot = (⊤:coPset).
-  Proof. rewrite nclose_eq. by apply (sig_eq_pi _). Qed.
+  Proof. rewrite nclose_unseal. by apply (sig_eq_pi _). Qed.
 
   Lemma nclose_subseteq N x : ↑N.@x ⊆ (↑N : coPset).
   Proof.
-    intros p. unfold up_close. rewrite !nclose_eq, !ndot_eq.
+    intros p. unfold up_close. rewrite !nclose_unseal, !ndot_unseal.
     unfold nclose_def, ndot_def; rewrite !elem_coPset_suffixes.
     intros [q ->]. destruct (positives_flatten_suffix N (ndot_def N x)) as [q' ?].
     { by exists [encode x]. }
@@ -51,11 +51,11 @@ Section namespace.
   Proof. intros. etrans; eauto using nclose_subseteq. Qed.
 
   Lemma nclose_infinite N : ¬set_finite (↑ N : coPset).
-  Proof. rewrite nclose_eq. apply coPset_suffixes_infinite. Qed.
+  Proof. rewrite nclose_unseal. apply coPset_suffixes_infinite. Qed.
 
   Lemma ndot_ne_disjoint N x y : x ≠ y → N.@x ## N.@y.
   Proof.
-    intros Hxy a. unfold up_close. rewrite !nclose_eq, !ndot_eq.
+    intros Hxy a. unfold up_close. rewrite !nclose_unseal, !ndot_unseal.
     unfold nclose_def, ndot_def; rewrite !elem_coPset_suffixes.
     intros [qx ->] [qy Hqy].
     revert Hqy. by intros [= ?%(inj encode)]%positives_flatten_suffix_eq.

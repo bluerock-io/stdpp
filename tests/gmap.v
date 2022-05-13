@@ -82,3 +82,10 @@ Proof.
   Fail progress simplify_eq.
   done.
 Qed.
+
+(** Test case for issue #139 *)
+
+Lemma test_issue_139 (m : gmap nat nat) : ∃ x, x ∉ dom m.
+Proof.
+  destruct (exist_fresh (dom m)); eauto.
+Qed.

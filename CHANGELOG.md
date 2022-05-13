@@ -18,7 +18,7 @@ Coq 8.11 is no longer supported.
 - Rename "unsealing" lemmas from `_eq` to `_unseal`. This affects `ndot_eq` and
   `nclose_eq`. These unsealing lemmas are internal, so in principle you should
   not rely on them.
-- Declare hint mode for `FinSet A C` so that `C` is input, and `A` is output
+- Declare `Hint Mode` for `FinSet A C` so that `C` is input, and `A` is output
   (i.e., inferred from `C`).
 
 ## std++ 1.7.0 (2022-01-22)

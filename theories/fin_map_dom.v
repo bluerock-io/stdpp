@@ -66,6 +66,7 @@ Lemma dom_filter_subseteq {A} (P : K * A → Prop) `{!∀ x, Decision (P x)} (m 
   dom (filter P m) ⊆ dom m.
 Proof. apply subseteq_dom, map_filter_subseteq. Qed.
 
+(* FIXME: Once [Equiv] has [Mode !], we can remove all these [D] type annotations at [≡]. *)
 Lemma dom_empty {A} : dom (@empty (M A) _) ≡@{D} ∅.
 Proof.
   intros x. rewrite elem_of_dom, lookup_empty, <-not_eq_None_Some. set_solver.

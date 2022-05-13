@@ -46,8 +46,10 @@ introduces all variables and gives them fresh names. As such, it becomes
 impossible to refer to hypotheses in a robust way. *)
 Obligation Tactic := idtac.
 
-(** 3. Hide obligations from the results of the [Search] commands. *)
+(** 3. Hide obligations and unsealing lemmas from the results of the [Search]
+commands. *)
 Add Search Blacklist "_obligation_".
+Add Search Blacklist "_unseal".
 
 (** * Sealing off definitions *)
 Section seal.

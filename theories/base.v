@@ -1468,6 +1468,8 @@ Class FinSet A C `{ElemOf A C, Empty C, Singleton A C, Union C,
   elem_of_elements (X : C) x : x ∈ elements X ↔ x ∈ X;
   NoDup_elements (X : C) : NoDup (elements X)
 }.
+Global Hint Mode FinSet - ! - - - - - - - - : typeclass_instances.
+
 Class Size C := size: C → nat.
 Global Hint Mode Size ! : typeclass_instances.
 Global Arguments size {_ _} !_ / : simpl nomatch, assert.

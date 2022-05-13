@@ -333,7 +333,7 @@ Section gset.
     by simplify_option_eq.
   Qed.
   Lemma gset_to_gmap_dom {A B} (m : gmap K A) (y : B) :
-    gset_to_gmap y (dom _ m) = const y <$> m.
+    gset_to_gmap y (dom m) = const y <$> m.
   Proof.
     apply map_eq; intros j. rewrite lookup_fmap, lookup_gset_to_gmap.
     destruct (m !! j) as [x|] eqn:?.
@@ -341,7 +341,7 @@ Section gset.
     - by rewrite option_guard_False by (rewrite not_elem_of_dom; eauto).
   Qed.
   Lemma dom_gset_to_gmap {A} (X : gset K) (x : A) :
-    dom _ (gset_to_gmap x X) = X.
+    dom (gset_to_gmap x X) = X.
   Proof.
     induction X as [| y X not_in IH] using set_ind_L.
     - rewrite gset_to_gmap_empty, dom_empty_L; done.

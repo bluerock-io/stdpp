@@ -1303,13 +1303,15 @@ Global Hint Mode PartialAlter - - ! : typeclass_instances.
 Global Instance: Params (@partial_alter) 4 := {}.
 Global Arguments partial_alter _ _ _ _ _ !_ !_ / : simpl nomatch, assert.
 
-(** The function [dom C m] should yield the domain of [m]. That is a finite
-set of type [C] that contains the keys that are a member of [m]. *)
-Class Dom (M C : Type) := dom: M → C.
-Global Hint Mode Dom ! ! : typeclass_instances.
+(** The function [dom m] should yield the domain of [m]. That is a finite
+set of type [D] that contains the keys that are a member of [m].
+[D] is an output of the typeclass, i.e., there can be only one instance per map
+type [M]. *)
+Class Dom (M D : Type) := dom: M → D.
+Global Hint Mode Dom ! - : typeclass_instances.
 Global Instance: Params (@dom) 3 := {}.
 Global Arguments dom : clear implicits.
-Global Arguments dom {_} _ {_} !_ / : simpl nomatch, assert.
+Global Arguments dom {_ _ _} !_ / : simpl nomatch, assert.
 
 (** The function [merge f m1 m2] should merge the maps [m1] and [m2] by
 constructing a new map whose value at key [k] is [f (m1 !! k) (m2 !! k)].*)

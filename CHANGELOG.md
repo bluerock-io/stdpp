@@ -7,6 +7,13 @@ Coq 8.11 is no longer supported.
 
 - Make sure that `gset` and `mapset` do not bump the universe.
 - Rewrite `tele_arg` to make it not bump universes. (by Gregory Malecha, BedRock Systems)
+- Change `dom D M` (where `D` is the domain type) to `dom M`; the domain type is
+  now inferred automatically. To make this possible, getting the domain of a
+  `gmap` as a `coGset` and of a `Pmap` as a `coPset` is no longer supported. Use
+  `gset_to_coGset`/`Pset_to_coPset` instead.
+  When combining `dom` with `≡`, this can run into an old issue (due to a Coq
+  issue, `Equiv` does not the desired `Hint Mode !`), which can make it
+  necessary to annotate the set type at the `≡` via `≡@{D}`.
 
 ## std++ 1.7.0 (2022-01-22)
 

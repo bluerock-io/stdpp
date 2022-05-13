@@ -50,7 +50,7 @@ Section definitions.
       let z := x - y in guard (0 < z); Some (pred z)) X Y.
 
   Global Instance gmultiset_dom : Dom (gmultiset A) (gset A) := λ X,
-    let (X) := X in dom _ X.
+    let (X) := X in dom X.
 End definitions.
 
 Typeclasses Opaque gmultiset_elem_of gmultiset_subseteq.
@@ -454,7 +454,7 @@ Section more_lemmas.
       exists (x,n); split; [|by apply elem_of_map_to_list].
       apply elem_of_replicate; auto with lia.
   Qed.
-  Lemma gmultiset_elem_of_dom x X : x ∈ dom (gset A) X ↔ x ∈ X.
+  Lemma gmultiset_elem_of_dom x X : x ∈ dom X ↔ x ∈ X.
   Proof.
     unfold dom, gmultiset_dom, elem_of at 2, gmultiset_elem_of, multiplicity.
     destruct X as [X]; simpl; rewrite elem_of_dom, <-not_eq_None_Some.

@@ -358,21 +358,6 @@ Proof.
   refine (cast_if (decide (¬set_finite X))); by rewrite coPset_infinite_finite.
 Defined.
 
-(** * Domain of finite maps *)
-Global Instance Pmap_dom_coPset {A} : Dom (Pmap A) coPset := λ m, Pset_to_coPset (dom _ m).
-Global Instance Pmap_dom_coPset_spec: FinMapDom positive Pmap coPset.
-Proof.
-  split; try apply _; intros A m i; unfold dom, Pmap_dom_coPset.
-  by rewrite elem_of_Pset_to_coPset, elem_of_dom.
-Qed.
-Global Instance gmap_dom_coPset {A} : Dom (gmap positive A) coPset := λ m,
-  gset_to_coPset (dom _ m).
-Global Instance gmap_dom_coPset_spec: FinMapDom positive (gmap positive) coPset.
-Proof.
-  split; try apply _; intros A m i; unfold dom, gmap_dom_coPset.
-  by rewrite elem_of_gset_to_coPset, elem_of_dom.
-Qed.
-
 (** * Suffix sets *)
 Fixpoint coPset_suffixes_raw (p : positive) : coPset_raw :=
   match p with

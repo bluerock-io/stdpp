@@ -16,9 +16,9 @@ Section map_dom.
   Context `{FinMapDom K M D}.
 
   Lemma set_solver_dom_subseteq {A} (i j : K) (x y : A) :
-    {[i; j]} ⊆ dom D (<[i:=x]> (<[j:=y]> (∅ : M A))).
+    {[i; j]} ⊆ dom (<[i:=x]> (<[j:=y]> (∅ : M A))).
   Proof. set_solver. Qed.
 
-  Lemma set_solver_dom_disjoint {A} (X : D) : dom D (∅ : M A) ## X.
+  Lemma set_solver_dom_disjoint {A} (X : D) : dom (∅ : M A) ## X.
   Proof. set_solver. Qed.
 End map_dom.

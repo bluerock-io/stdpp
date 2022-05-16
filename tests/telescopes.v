@@ -2,10 +2,27 @@ From stdpp Require Import tactics telescopes.
 
 Local Unset Mangle Names. (* for stable goal printing *)
 
+Section universes.
 (** This test would fail without [Unset Universe Minimization ToSet] in [telescopes.v]. *)
 Lemma texist_exist_universes (X : Type) (P : TeleS (λ _ : X, TeleO) → Prop) :
   texist P ↔ ex P.
 Proof. by rewrite texist_exist. Qed.
+
+(** [tele_arg t] should live at the same universe
+as the types inside of [t] because [tele_arg t]
+is essentially just a (dependent) product.
+ *)
+Definition no_bump@{u} (t : tele@{u}) : Type@{u} := tele_arg@{u} t.
+
+(* Assert that telescopes are cumulatively universe polymorphic.
+   See https://gitlab.mpi-sws.org/iris/iris/-/issues/461
+ *)
+Section cumulativity.
+Monomorphic Universes Quant local.
+Monomorphic Constraint local < Quant.
+Example cumul (t : tele@{local}) : tele@{Quant} := t.
+End cumulativity.
+End universes.
 
 Section accessor.
 (* This is like Iris' accessors, but in Prop.  Just to play with telescopes. *)
@@ -47,12 +64,6 @@ Notation "'[TEST'  x .. z ,  P ']'" :=
   (x binder, z binder).
 Check [TEST (x y : nat), x = y].
 
-(** [tele_arg t] should live at the same universe
-as the types inside of [t] because [tele_arg t]
-is essentially just a (dependent) product.
- *)
-Definition no_bump@{u} (t : tele@{u}) : Type@{u} := tele_arg@{u} t.
-
 (** [tele_arg ..] notation tests.
     These tests mainly test type annotations and casts in the [tele_arg]
     notations.
@@ -79,12 +90,3 @@ Example tele_arg_notation_2_dep : [tele (b : bool) (_ : if b then nat else False
 assert_succeeds exact [tele_arg true; 0].
 assert_succeeds refine [tele_arg true; 0].
 Abort.
-
-(* Assert that telescopes are cumulatively universe polymorphic.
-   See https://gitlab.mpi-sws.org/iris/iris/-/issues/461
- *)
-Section Cumulativity.
-  Monomorphic Universes Quant local.
-  Monomorphic Constraint local < Quant.
-  Example cumul (t : tele@{local}) : tele@{Quant} := t.
-End Cumulativity.

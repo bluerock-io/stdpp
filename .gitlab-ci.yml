@@ -5,7 +5,7 @@ stages:
 
 variables:
   CPU_CORES: "10"
-  OCAML: "ocaml-base-compiler.4.14.0"
+  OCAML: "ocaml-variants.4.14.0+options ocaml-option-flambda"
 
 .only_branches: &only_branches
   only:
@@ -47,13 +47,6 @@ build-coq.8.15.0:
   variables:
     OPAM_PINS: "coq version 8.15.0"
     DENY_WARNINGS: "1"
-
-build-coq.8.14.1:
-  <<: *template
-  variables:
-    OPAM_PINS: "coq version 8.14.1"
-    MANGLE_NAMES: "1"
-    DENY_WARNINGS: "1"
     CI_COQCHK: "1"
     OPAM_PKG: "1"
     DOC_DIR: "coqdoc@center.mpi-sws.org:stdpp"
@@ -61,14 +54,14 @@ build-coq.8.14.1:
   - fp-timing
   interruptible: false
 
-# Separate MR job that does not run on fp-timing.
-build-coq.8.14.1-mr:
+build-coq.8.14.1:
   <<: *template
-  <<: *only_mr
+  <<: *branches_and_mr
   variables:
     OPAM_PINS: "coq version 8.14.1"
     MANGLE_NAMES: "1"
     DENY_WARNINGS: "1"
+    OCAML: "ocaml-base-compiler.4.07.1"
 
 build-coq.8.13.2:
   <<: *template
@@ -76,6 +69,7 @@ build-coq.8.13.2:
     OPAM_PINS: "coq version 8.13.2"
     MANGLE_NAMES: "1"
     DENY_WARNINGS: "1"
+    OCAML: "ocaml-base-compiler.4.07.1"
 
 build-coq.8.12.2:
   <<: *template

@@ -2,6 +2,7 @@ From stdpp Require Import base tactics.
 From stdpp Require Import options.
 
 Local Set Universe Polymorphism.
+Local Set Polymorphic Inductive Cumulativity.
 
 (** Without this flag, Coq minimizes some universes to [Set] when they
     should not be, e.g. in [texist_exist].

@@ -79,3 +79,12 @@ Example tele_arg_notation_2_dep : [tele (b : bool) (_ : if b then nat else False
 assert_succeeds exact [tele_arg true; 0].
 assert_succeeds refine [tele_arg true; 0].
 Abort.
+
+(* Assert that telescopes are cumulatively universe polymorphic.
+   See https://gitlab.mpi-sws.org/iris/iris/-/issues/461
+ *)
+Section Cumulativity.
+  Monomorphic Universes Quant local.
+  Monomorphic Constraint local < Quant.
+  Example cumul (t : tele@{local}) : tele@{Quant} := t.
+End Cumulativity.

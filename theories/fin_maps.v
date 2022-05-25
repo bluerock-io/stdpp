@@ -176,8 +176,7 @@ and [DK:=gset K]. *)
 Definition map_preimage `{FinMapToList K A MKA, Empty MADK,
     PartialAlter A DK MADK, Empty DK, Singleton K DK, Union DK}
     (m : MKA) : MADK :=
-  map_fold
-    (λ i x, partial_alter (λ mX, Some ({[ i ]} ∪ default ∅ mX)) x) ∅ m.
+  map_fold (λ i, partial_alter (λ mX, Some $ {[ i ]} ∪ default ∅ mX)) ∅ m.
 Typeclasses Opaque map_preimage.
 
 (** * Theorems *)

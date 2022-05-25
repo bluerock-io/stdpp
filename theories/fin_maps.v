@@ -168,6 +168,11 @@ Global Instance map_lookup_total `{!Lookup K A (M A), !Inhabited A} :
   LookupTotal K A (M A) | 20 := λ i m, default inhabitant (m !! i).
 Typeclasses Opaque map_lookup_total.
 
+(** Given a finite map [m] with keys [K] and values [A], the preimage
+[map_preimage m] gives a finite map with keys [A] and values set [A]. The type
+of [map_preimage] is very generic to support different map and set
+implementations. A possible instance is [MKA:=gmap K A], [MADK:=gmap A (gset K)],
+and [DK:=gset K]. *)
 Definition map_preimage `{FinMapToList K A MKA, Empty MADK,
     PartialAlter A DK MADK, Empty DK, Singleton K DK, Union DK}
     (m : MKA) : MADK :=
@@ -3272,6 +3277,10 @@ Section kmap.
 End kmap.
 
 Section preimage.
+  (** We restrict the theory to finite sets with Leibniz equality, which is
+  sufficient for [gset], but not for [boolset] or [propset]. The result of the
+  pre-image is a map of sets. To support general sets, we need setoid equality
+  on sets, and thus setoid equality on maps. *)
   Context `{FinMap K MK, FinMap A MA, FinSet K DK, !LeibnizEquiv DK}.
   Local Notation map_preimage :=
     (map_preimage (K:=K) (A:=A) (MKA:=MK A) (MADK:=MA DK) (DK:=DK)).

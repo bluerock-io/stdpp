@@ -3299,7 +3299,9 @@ Section preimage.
     - by apply partial_alter_commute.
   Qed.
 
-  Lemma lookup_preimage_Some_empty m x :
+  (** The [preimage] function never returns an empty set (we represent that case
+  via [None]). *)
+  Lemma lookup_preimage_Some_non_empty m x :
     map_preimage m !! x ≠ Some ∅.
   Proof.
     induction m as [|i x' m ? IH] using map_ind.
@@ -3339,7 +3341,7 @@ Section preimage.
     split; [by eauto using lookup_preimage_None_1|].
     intros Hm. apply eq_None_not_Some; intros [X ?].
     destruct (set_choose_L X) as [i ?].
-    { intros ->. by eapply lookup_preimage_Some_empty. }
+    { intros ->. by eapply lookup_preimage_Some_non_empty. }
     by eapply (Hm i), lookup_preimage_Some_1.
   Qed.
 
@@ -3347,7 +3349,7 @@ Section preimage.
     map_preimage m !! x = Some X ↔ X ≠ ∅ ∧ ∀ i, i ∈ X ↔ m !! i = Some x.
   Proof.
     split.
-    - intros HxX. split; [intros ->; by eapply lookup_preimage_Some_empty|].
+    - intros HxX. split; [intros ->; by eapply lookup_preimage_Some_non_empty|].
       intros j. by apply lookup_preimage_Some_1.
     - intros [HXne HX]. destruct (map_preimage m !! x) as [X'|] eqn:HX'.
       + f_equal; apply set_eq; intros i. rewrite HX.

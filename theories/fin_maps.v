@@ -3355,6 +3355,14 @@ Section preimage.
       + apply set_choose_L in HXne as [j ?].
         apply (lookup_preimage_None_1 _ _ j) in HX'. naive_solver.
   Qed.
+
+  Lemma lookup_total_preimage m x i :
+    i ∈ map_preimage m !!! x ↔ m !! i = Some x.
+  Proof.
+    rewrite lookup_total_alt. destruct (map_preimage m !! x) as [X|] eqn:HX.
+    - by apply lookup_preimage_Some.
+    - rewrite lookup_preimage_None in HX. set_solver.
+  Qed.
 End preimage.
 
 (** * Tactics *)

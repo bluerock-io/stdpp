@@ -20,6 +20,7 @@ Coq 8.11 is no longer supported.
   not rely on them.
 - Declare `Hint Mode` for `FinSet A C` so that `C` is input, and `A` is output
   (i.e., inferred from `C`).
+- Add function `map_preimage` to compute the preimage of a finite map.
 
 ## std++ 1.7.0 (2022-01-22)
 

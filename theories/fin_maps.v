@@ -3278,8 +3278,8 @@ End kmap.
 Section preimage.
   (** We restrict the theory to finite sets with Leibniz equality, which is
   sufficient for [gset], but not for [boolset] or [propset]. The result of the
-  pre-image is a map of sets. To support general sets, we need setoid equality
-  on sets, and thus setoid equality on maps. *)
+  pre-image is a map of sets. To support general sets, we would need setoid
+  equality on sets, and thus setoid equality on maps. *)
   Context `{FinMap K MK, FinMap A MA, FinSet K DK, !LeibnizEquiv DK}.
   Local Notation map_preimage :=
     (map_preimage (K:=K) (A:=A) (MKA:=MK A) (MADK:=MA DK) (DK:=DK)).

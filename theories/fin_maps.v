@@ -169,13 +169,13 @@ Global Instance map_lookup_total `{!Lookup K A (M A), !Inhabited A} :
 Typeclasses Opaque map_lookup_total.
 
 (** Given a finite map [m] with keys [K] and values [A], the preimage
-[map_preimage m] gives a finite map with keys [A] and values set [A]. The type
-of [map_preimage] is very generic to support different map and set
-implementations. A possible instance is [MKA:=gmap K A], [MADK:=gmap A (gset K)],
-and [DK:=gset K]. *)
-Definition map_preimage `{FinMapToList K A MKA, Empty MADK,
-    PartialAlter A DK MADK, Empty DK, Singleton K DK, Union DK}
-    (m : MKA) : MADK :=
+[map_preimage m] gives a finite map with keys [A] and values being sets of [K].
+The type of [map_preimage] is very generic to support different map and set
+implementations. A possible instance is [MKA:=gmap K A], [MASK:=gmap A (gset K)],
+and [SK:=gset K]. *)
+Definition map_preimage `{FinMapToList K A MKA, Empty MASK,
+    PartialAlter A SK MASK, Empty SK, Singleton K SK, Union SK}
+    (m : MKA) : MASK :=
   map_fold (λ i, partial_alter (λ mX, Some $ {[ i ]} ∪ default ∅ mX)) ∅ m.
 Typeclasses Opaque map_preimage.
 
@@ -3280,9 +3280,9 @@ Section preimage.
   sufficient for [gset], but not for [boolset] or [propset]. The result of the
   pre-image is a map of sets. To support general sets, we would need setoid
   equality on sets, and thus setoid equality on maps. *)
-  Context `{FinMap K MK, FinMap A MA, FinSet K DK, !LeibnizEquiv DK}.
+  Context `{FinMap K MK, FinMap A MA, FinSet K SK, !LeibnizEquiv SK}.
   Local Notation map_preimage :=
-    (map_preimage (K:=K) (A:=A) (MKA:=MK A) (MADK:=MA DK) (DK:=DK)).
+    (map_preimage (K:=K) (A:=A) (MKA:=MK A) (MASK:=MA SK) (SK:=SK)).
   Implicit Types m : MK A.
 
   Lemma map_preimage_empty : map_preimage ∅ = ∅.

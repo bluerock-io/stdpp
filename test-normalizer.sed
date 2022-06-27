@@ -6,5 +6,3 @@ s/subgoal/goal/g
 /^File/d
 # extra space removed in https://github.com/coq/coq/pull/16130
 s/= $/=/
-# delete "uses section variable" lines (https://github.com/coq/coq/pull/16208)
-/^[^ ]+ uses section variables? .*\.$/d

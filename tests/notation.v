@@ -1,4 +1,4 @@
-From stdpp Require Import base tactics fin_maps gmultiset.
+From stdpp Require Import base tactics fin_maps gmap gmultiset.
 
 (** Test parsing of variants of [(≡)] notation. *)
 Lemma test_equiv_annot_sections `{!Equiv A, !Equivalence (≡@{A})} (x : A) :
@@ -10,7 +10,9 @@ Proof. naive_solver. Qed.
 
 (** Test that notations for maps with multiple elements can be parsed and printed correctly. *)
 Section map_notations.
-  Context `{FinMap nat M}.
+  (* Avoiding section variables so output is not affected by
+  https://github.com/coq/coq/pull/16208 *)
+  Let M := gmap nat.
 
   Definition test_2 : M (M nat) := {[ 10 := {[ 10 := 1 ]}; 20 := {[ 20 := 2]} ]}.
   Definition test_3 : M (M nat) := {[ 10 := {[ 10 := 1 ]}; 20 := {[ 20 := 2]};

@@ -12,7 +12,7 @@ Proof. naive_solver. Qed.
 Section map_notations.
   (* Avoiding section variables so output is not affected by
   https://github.com/coq/coq/pull/16208 *)
-  Let M := gmap nat.
+  Notation M := (gmap nat).
 
   Definition test_2 : M (M nat) := {[ 10 := {[ 10 := 1 ]}; 20 := {[ 20 := 2]} ]}.
   Definition test_3 : M (M nat) := {[ 10 := {[ 10 := 1 ]}; 20 := {[ 20 := 2]};

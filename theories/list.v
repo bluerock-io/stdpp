@@ -4274,7 +4274,7 @@ Section imap.
   Lemma imap_app l1 l2 :
     imap f (l1 ++ l2) = imap f l1 ++ imap (λ n, f (length l1 + n)) l2.
   Proof.
-    revert f. induction l1 as [|x l1 IH]; intros f; f_equal/=; auto.
+    revert f. induction l1 as [|x l1 IH]; intros f; f_equal/=.
     by rewrite IH.
   Qed.
   Lemma imap_cons x l : imap f (x :: l) = f 0 x :: imap (f ∘ S) l.

@@ -528,7 +528,7 @@ Proof. revert i. induction l; intros [|?] ?; naive_solver auto with arith. Qed.
 Lemma lookup_lt_is_Some_1 l i : is_Some (l !! i) → i < length l.
 Proof. intros [??]; eauto using lookup_lt_Some. Qed.
 Lemma lookup_lt_is_Some_2 l i : i < length l → is_Some (l !! i).
-Proof. revert i. induction l; intros [|?] ?; naive_solver eauto with lia. Qed.
+Proof. revert i. induction l; intros [|?] ?; naive_solver auto with lia. Qed.
 Lemma lookup_lt_is_Some l i : is_Some (l !! i) ↔ i < length l.
 Proof. split; auto using lookup_lt_is_Some_1, lookup_lt_is_Some_2. Qed.
 Lemma lookup_ge_None l i : l !! i = None ↔ length l ≤ i.

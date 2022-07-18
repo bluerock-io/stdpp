@@ -327,7 +327,7 @@ Infix "⊆+" := submseteq (at level 70) : stdpp_scope.
 Global Hint Extern 0 (_ ⊆+ _) => reflexivity : core.
 
 (** Removes [x] from the list [l]. The function returns a [Some] when the
-+removal succeeds and [None] when [x] is not in [l]. *)
+removal succeeds and [None] when [x] is not in [l]. *)
 Fixpoint list_remove `{EqDecision A} (x : A) (l : list A) : option (list A) :=
   match l with
   | [] => None

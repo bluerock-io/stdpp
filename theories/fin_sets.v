@@ -31,6 +31,7 @@ Definition set_bind `{Elements A SA, Empty SB, Union SB}
     (f : A → SB) (X : SA) : SB :=
   ⋃ (f <$> elements X).
 Typeclasses Opaque set_bind.
+Global Instance: Params (@set_bind) 6 := {}.
 
 Global Instance set_fresh `{Elements A C, Fresh A (list A)} : Fresh A C :=
   fresh ∘ elements.
@@ -463,17 +464,15 @@ Section set_bind.
     rewrite elem_of_set_bind. set_solver.
   Qed.
 
+  Global Instance set_bind_proper : Proper (pointwise_relation _ (≡) ==> (≡) ==> (≡)) set_bind.
+  Proof. unfold pointwise_relation; intros f1 f2 Hf X1 X2 HX. set_solver. Qed.
+
+  Global Instance set_bind_subset : Proper (pointwise_relation _ (⊆) ==> (⊆) ==> (⊆)) set_bind.
+  Proof. unfold pointwise_relation; intros f1 f2 Hf X1 X2 HX. set_solver. Qed.
+
   Lemma set_bind_ext (f g : A → SB) (X Y : C) :
     (∀ x, x ∈ X → x ∈ Y → f x ≡ g x) → X ≡ Y → set_bind f X ≡ set_bind g Y.
-  Proof.
-    intros Hfg HXY b. rewrite !elem_of_set_bind. set_solver.
-  Qed.
-
-  Global Instance set_bind_proper : Proper (pointwise_relation _ (≡) ==> (≡) ==> (≡)) set_bind.
-  Proof. intros f1 f2 Hf X1 X2 HX. by apply set_bind_ext. Qed.
-
-  Global Instance set_bind_subset f : Proper ((⊆) ==> (⊆)) (set_bind f).
-  Proof. intros X Y HXY. set_solver. Qed.
+  Proof. set_solver. Qed.
 
   Lemma set_bind_singleton f x : set_bind f {[x]} ≡ f x.
   Proof. set_solver. Qed.

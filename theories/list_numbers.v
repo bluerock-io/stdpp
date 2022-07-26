@@ -106,7 +106,7 @@ End seq.
 (** ** Properties of the [seqZ] function *)
 Section seqZ.
   Implicit Types (m n : Z) (i j : nat).
-  Local Open Scope Z.
+  Local Open Scope Z_scope.
 
   Lemma seqZ_nil m n : n ≤ 0 → seqZ m n = [].
   Proof. by destruct n. Qed.

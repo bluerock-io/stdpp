@@ -169,6 +169,12 @@ Fixpoint map_seq `{Insert nat A M, Empty M} (start : nat) (xs : list A) : M :=
   | x :: xs => <[start:=x]> (map_seq (S start) xs)
   end.
 
+Fixpoint map_seqZ `{Insert Z A M, Empty M} (start : Z) (xs : list A) : M :=
+  match xs with
+  | [] => ∅
+  | x :: xs => <[start:=x]> (map_seqZ (Z.succ start) xs)
+  end.
+
 Global Instance map_lookup_total `{!Lookup K A (M A), !Inhabited A} :
   LookupTotal K A (M A) | 20 := λ i m, default inhabitant (m !! i).
 Typeclasses Opaque map_lookup_total.
@@ -3285,17 +3291,27 @@ Section map_seq.
     rewrite lookup_map_seq.
     case_option_guard; rewrite ?lookup_ge_None; naive_solver lia.
   Qed.
+  Lemma lookup_map_seq_is_Some start xs i x :
+    is_Some (map_seq (M:=M A) start xs !! i) ↔ start ≤ i < start + length xs.
+  Proof. rewrite <-not_eq_None_Some, lookup_map_seq_None. lia. Qed.
 
   Lemma map_seq_singleton start x :
     map_seq (M:=M A) start [x] = {[ start := x ]}.
   Proof. done. Qed.
 
+  (** [map_seq_disjoint] uses [length xs = 0] instead of [xs = []] as
+  [lia] can handle the former but not the latter. *)
+  Lemma map_seq_disjoint start1 start2 xs1 xs2 :
+    map_seq (M:=M A) start1 xs1 ##ₘ map_seq start2 xs2 ↔
+      start1 + length xs1 ≤ start2 ∨ start2 + length xs2 ≤ start1
+      ∨ length xs1 = 0 ∨ length xs2 = 0.
+  Proof.
+    rewrite map_disjoint_alt. setoid_rewrite lookup_map_seq_None.
+    split; intros Hi; [|lia]. pose proof (Hi start1). pose proof (Hi start2). lia.
+  Qed.
   Lemma map_seq_app_disjoint start xs1 xs2 :
     map_seq (M:=M A) start xs1 ##ₘ map_seq (start + length xs1) xs2.
-  Proof.
-    apply map_disjoint_spec; intros i x1 x2. rewrite !lookup_map_seq_Some.
-    intros [??%lookup_lt_Some] [??%lookup_lt_Some]; lia.
-  Qed.
+  Proof. apply map_seq_disjoint. lia. Qed.
   Lemma map_seq_app start xs1 xs2 :
     map_seq start (xs1 ++ xs2)
     =@{M A} map_seq start xs1 ∪ map_seq (start + length xs1) xs2.
@@ -3330,7 +3346,7 @@ Section map_seq.
     by rewrite fmap_insert, IH.
   Qed.
 
-  Lemma insert_map_seq_0 (xs : list A) i x:
+  Lemma insert_map_seq_0 xs i x:
     i < length xs →
     <[i:=x]> (map_seq (M:=M A) 0 xs) = map_seq 0 (<[i:=x]> xs).
   Proof.
@@ -3340,6 +3356,134 @@ Section map_seq.
     - rewrite lookup_insert_ne, lookup_map_seq_0, list_lookup_insert_ne; done.
   Qed.
 End map_seq.
+
+(** ** The [map_seqZ] operation *)
+Section map_seqZ.
+  Context `{FinMap Z M} {A : Type}.
+  Implicit Types x : A.
+  Implicit Types xs : list A.
+  Local Open Scope Z_scope.
+
+  Global Instance map_seqZ_proper `{Equiv A} start :
+    Proper ((≡) ==> (≡)) (map_seqZ (M:=M A) start).
+  Proof.
+    intros l1 l2 Hl. revert start.
+    induction Hl as [|x1 x2 l1 l2 ?? IH]; intros start; simpl.
+    - intros ?. rewrite lookup_empty; constructor.
+    - repeat (done || f_equiv).
+  Qed.
+
+  Lemma lookup_map_seqZ start xs i :
+    map_seqZ (M:=M A) start xs !! i = guard (start ≤ i); xs !! Z.to_nat (i - start).
+  Proof.
+    revert start. induction xs as [|x' xs IH]; intros start; simpl.
+    { rewrite lookup_empty; simplify_option_eq; by rewrite ?lookup_nil. }
+    destruct (decide (start = i)) as [->|?].
+    - by rewrite lookup_insert, option_guard_True, Z.sub_diag by lia.
+    - rewrite lookup_insert_ne, IH by done.
+      simplify_option_eq; try done || lia.
+      replace (i - start) with (Z.succ (i - Z.succ start)) by lia.
+      by rewrite Z2Nat.inj_succ; [|lia].
+  Qed.
+  Lemma lookup_map_seqZ_0 xs i :
+    0 ≤ i →
+    map_seqZ (M:=M A) 0 xs !! i = xs !! Z.to_nat i.
+  Proof. intros ?. by rewrite lookup_map_seqZ, option_guard_True, Z.sub_0_r. Qed.
+
+  Lemma lookup_map_seqZ_Some_inv start xs i x :
+    xs !! i = Some x ↔ map_seqZ (M:=M A) start xs !! (start + Z.of_nat i) = Some x.
+  Proof.
+    rewrite ->lookup_map_seqZ, option_guard_True by lia.
+    assert (Z.to_nat (start + Z.of_nat i - start) = i) as -> by lia.
+    done.
+  Qed.
+  Lemma lookup_map_seqZ_Some start xs i x :
+    map_seqZ (M:=M A) start xs !! i = Some x ↔
+      start ≤ i ∧ xs !! Z.to_nat (i - start) = Some x.
+  Proof. rewrite lookup_map_seqZ. case_option_guard; naive_solver. Qed.
+  Lemma lookup_map_seqZ_None start xs i :
+    map_seqZ (M:=M A) start xs !! i = None ↔
+      i < start ∨ start + Z.of_nat (length xs) ≤ i.
+  Proof.
+    rewrite lookup_map_seqZ.
+    case_option_guard; rewrite ?lookup_ge_None; naive_solver lia.
+  Qed.
+  Lemma lookup_map_seqZ_is_Some start xs i :
+    is_Some (map_seqZ (M:=M A) start xs !! i) ↔
+      start ≤ i < start + Z.of_nat (length xs).
+  Proof. rewrite <-not_eq_None_Some, lookup_map_seqZ_None. lia. Qed.
+
+  Lemma map_seqZ_singleton start x :
+    map_seqZ (M:=M A) start [x] = {[ start := x ]}.
+  Proof. done. Qed.
+
+  (** [map_seqZ_disjoint] uses [length xs = 0] instead of [xs = []] as
+  [lia] can handle the former but not the latter. *)
+  Lemma map_seqZ_disjoint start1 start2 xs1 xs2 :
+    map_seqZ (M:=M A) start1 xs1 ##ₘ map_seqZ (M:=M A) start2 xs2 ↔
+     start1 + Z.of_nat (length xs1) ≤ start2 ∨ start2 + Z.of_nat (length xs2) ≤ start1
+     ∨ length xs1 = 0%nat ∨ length xs2 = 0%nat.
+  Proof.
+    rewrite map_disjoint_alt. setoid_rewrite lookup_map_seqZ_None.
+    split; intros Hi; [|lia]. pose proof (Hi start1). pose proof (Hi start2). lia.
+  Qed.
+  Lemma map_seqZ_app_disjoint start xs1 xs2 :
+    map_seqZ (M:=M A) start xs1 ##ₘ map_seqZ (start + Z.of_nat (length xs1)) xs2.
+  Proof. apply map_seqZ_disjoint. lia. Qed.
+  Lemma map_seqZ_app start xs1 xs2 :
+    map_seqZ start (xs1 ++ xs2)
+    =@{M A} map_seqZ start xs1 ∪ map_seqZ (start + Z.of_nat (length xs1)) xs2.
+  Proof.
+    revert start. induction xs1 as [|x1 xs1 IH]; intros start; simpl.
+    - by rewrite ->(left_id_L _ _), Z.add_0_r.
+    - by rewrite IH, Nat2Z.inj_succ, Z.add_succ_r, Z.add_succ_l,
+        !insert_union_singleton_l, (assoc_L _).
+  Qed.
+
+  Lemma map_seqZ_cons_disjoint start xs :
+    map_seqZ (M:=M A) (Z.succ start) xs !! start = None.
+  Proof. rewrite lookup_map_seqZ_None. lia. Qed.
+  Lemma map_seqZ_cons start xs x :
+    map_seqZ start (x :: xs) =@{M A} <[start:=x]> (map_seqZ (Z.succ start) xs).
+  Proof. done. Qed.
+
+  Lemma map_seqZ_snoc_disjoint start xs :
+    map_seqZ (M:=M A) start xs !! (start + Z.of_nat (length xs)) = None.
+  Proof. rewrite lookup_map_seqZ_None. lia. Qed.
+  Lemma map_seqZ_snoc start xs x :
+    map_seqZ start (xs ++ [x])
+    =@{M A} <[(start + Z.of_nat (length xs)):=x]> (map_seqZ start xs).
+  Proof.
+    rewrite map_seqZ_app, map_seqZ_singleton.
+    by rewrite insert_union_singleton_r by (by rewrite map_seqZ_snoc_disjoint).
+  Qed.
+
+  Lemma fmap_map_seqZ {B} (f : A → B) start xs :
+    f <$> map_seqZ start xs =@{M B} map_seqZ start (f <$> xs).
+  Proof.
+    revert start. induction xs as [|x xs IH]; intros start; csimpl.
+    { by rewrite fmap_empty. }
+    by rewrite fmap_insert, IH.
+  Qed.
+
+  Lemma insert_to_nat_map_seqZ_0 xs i x:
+    0 ≤ i < Z.of_nat (length xs) →
+    <[i:=x]> (map_seqZ (M:=M A) 0 xs) = map_seqZ 0 (<[Z.to_nat i:=x]> xs).
+  Proof.
+    intros ?. apply map_eq. intros j.
+    destruct (decide (i = j)) as [->|Hne].
+    - rewrite lookup_map_seqZ_0, lookup_insert, list_lookup_insert by lia; done.
+    - rewrite lookup_insert_ne by done.
+       destruct (decide (0 ≤ j)).
+       + rewrite !lookup_map_seqZ_0, list_lookup_insert_ne by lia; done.
+       + apply option_eq. intros ?. rewrite !lookup_map_seqZ_Some. lia.
+  Qed.
+
+  Lemma insert_of_nat_map_seqZ_0 xs i x:
+    (i < length xs)%nat →
+    <[Z.of_nat i:=x]> (map_seqZ (M:=M A) 0 xs) = map_seqZ 0 (<[i:=x]> xs).
+  Proof. intros ?. rewrite insert_to_nat_map_seqZ_0, Nat2Z.id by lia. done. Qed.
+End map_seqZ.
 
 Section kmap.
   Context `{FinMap K1 M1} `{FinMap K2 M2}.

@@ -108,6 +108,8 @@ Definition map_relation `{∀ A, Lookup K A (M A)} {A B} (R : A → B → Prop)
   option_relation R P Q (m1 !! i) (m2 !! i).
 Definition map_included `{∀ A, Lookup K A (M A)} {A}
   (R : relation A) : relation (M A) := map_relation R (λ _, False) (λ _, True).
+Definition map_agree `{∀ A, Lookup K A (M A)} {A} : relation (M A) :=
+  map_relation (=) (λ _, True) (λ _, True).
 Definition map_disjoint `{∀ A, Lookup K A (M A)} {A} : relation (M A) :=
   map_relation (λ _ _, False) (λ _, True) (λ _, True).
 Infix "##ₘ" := map_disjoint (at level 70) : stdpp_scope.
@@ -1971,6 +1973,102 @@ Section Forall2.
   Qed.
 End Forall2.
 
+(** ** Properties of the [map_agree] operation *)
+Lemma map_agree_spec {A} (m1 m2 : M A) :
+  map_agree m1 m2 ↔ ∀ i x y, m1 !! i = Some x → m2 !! i = Some y → x = y.
+Proof.
+  split; intros Hm i; specialize (Hm i);
+    destruct (m1 !! i), (m2 !! i); naive_solver.
+Qed.
+Lemma map_agree_alt {A} (m1 m2 : M A) :
+  map_agree m1 m2 ↔ ∀ i, m1 !! i = None ∨ m2 !! i = None ∨ m1 !! i = m2 !! i.
+Proof.
+  split; intros Hm1m2 i; specialize (Hm1m2 i);
+    destruct (m1 !! i), (m2 !! i); naive_solver.
+Qed.
+Lemma map_not_agree {A} (m1 m2 : M A) `{!EqDecision A}:
+  ¬map_agree m1 m2 ↔ ∃ i x1 x2, m1 !! i = Some x1 ∧ m2 !! i = Some x2 ∧ x1 ≠ x2.
+Proof.
+  unfold map_agree. rewrite map_not_Forall2 by solve_decision.
+  split; [|naive_solver].
+  intros [i[(x&y&?&?&?)|[(x&?&?&[])|(y&?&?&[])]]]; naive_solver.
+Qed.
+Global Instance map_agree_refl {A} : Reflexive (map_agree : relation (M A)).
+Proof. intros ?. rewrite !map_agree_spec. naive_solver. Qed.
+Global Instance map_agree_sym {A} : Symmetric (map_agree : relation (M A)).
+Proof.
+  intros m1 m2. rewrite !map_agree_spec.
+  intros Hm i x y Hm1 Hm2. symmetry. naive_solver. Qed.
+Lemma map_agree_empty_l {A} (m : M A) : map_agree ∅ m.
+Proof. rewrite !map_agree_spec. intros i x y. by rewrite lookup_empty. Qed.
+Lemma map_agree_empty_r {A} (m : M A) : map_agree m ∅.
+Proof. rewrite !map_agree_spec. intros i x y. by rewrite lookup_empty. Qed.
+Lemma map_agree_weaken {A} (m1 m1' m2 m2' : M A) :
+  map_agree m1' m2' → m1 ⊆ m1' → m2 ⊆ m2' → map_agree m1 m2.
+Proof. rewrite !map_subseteq_spec, !map_agree_spec. eauto. Qed.
+Lemma map_agree_weaken_l {A} (m1 m1' m2  : M A) :
+  map_agree m1' m2 → m1 ⊆ m1' → map_agree m1 m2.
+Proof. eauto using map_agree_weaken. Qed.
+Lemma map_agree_weaken_r {A} (m1 m2 m2' : M A) :
+  map_agree m1 m2' → m2 ⊆ m2' → map_agree m1 m2.
+Proof. eauto using map_agree_weaken. Qed.
+Lemma map_agree_Some_l {A} (m1 m2 : M A) i x:
+  map_agree m1 m2 → m1 !! i = Some x → m2 !! i = Some x ∨ m2 !! i = None.
+Proof. rewrite map_agree_spec. destruct (m2 !! i) eqn: ?; naive_solver. Qed.
+Lemma map_agree_Some_r {A} (m1 m2 : M A) i x:
+  map_agree m1 m2 → m2 !! i = Some x → m1 !! i = Some x ∨ m1 !! i = None.
+Proof. rewrite (symmetry_iff map_agree). apply map_agree_Some_l. Qed.
+Lemma map_agree_singleton_l {A} (m: M A) i x :
+  map_agree {[i:=x]} m ↔ m !! i = Some x ∨ m !! i = None.
+Proof.
+  split; [|rewrite !map_agree_spec].
+  - intro. apply (map_agree_Some_l {[i := x]} _ _ x);
+      auto using lookup_singleton.
+  - intros ? j y1 y2. destruct (decide (i = j)) as [->|].
+    + rewrite lookup_singleton. intuition congruence.
+    + by rewrite lookup_singleton_ne.
+Qed.
+Lemma map_agree_singleton_r {A} (m : M A) i x :
+  map_agree m {[i := x]} ↔ m !! i = Some x ∨ m !! i = None.
+Proof. by rewrite (symmetry_iff map_agree), map_agree_singleton_l. Qed.
+Lemma map_agree_delete_l {A} (m1 m2 : M A) i :
+  map_agree m1 m2 → map_agree (delete i m1) m2.
+Proof.
+  rewrite !map_agree_alt. intros Hagree j. rewrite lookup_delete_None.
+  destruct (Hagree j) as [|[|<-]]; auto.
+  destruct (decide (i = j)); [naive_solver|].
+  rewrite lookup_delete_ne; naive_solver.
+Qed.
+Lemma map_agree_delete_r {A} (m1 m2 : M A) i :
+  map_agree m1 m2 → map_agree m1 (delete i m2).
+Proof. symmetry. by apply map_agree_delete_l. Qed.
+
+Lemma map_agree_filter {A} (P : K * A → Prop)
+    `{!∀ x, Decision (P x)} (m1 m2 : M A) :
+  map_agree m1 m2 → map_agree (filter P m1) (filter P m2).
+Proof.
+  rewrite !map_agree_spec. intros ? i x y.
+  rewrite !map_filter_lookup_Some. naive_solver.
+Qed.
+
+Lemma map_agree_fmap_1 {A B} (f : A → B) (m1 m2 : M A) `{!Inj (=) (=) f}:
+  map_agree (f <$> m1) (f <$> m2) → map_agree m1 m2.
+Proof.
+  rewrite !map_agree_spec. setoid_rewrite lookup_fmap_Some. naive_solver.
+Qed.
+Lemma map_agree_fmap_2 {A B} (f : A → B) (m1 m2 : M A):
+  map_agree m1 m2 → map_agree (f <$> m1) (f <$> m2).
+Proof.
+  rewrite !map_agree_spec. setoid_rewrite lookup_fmap_Some. naive_solver.
+Qed.
+Lemma map_agree_fmap {A B} (f : A → B) (m1 m2 : M A) `{!Inj (=) (=) f}:
+  map_agree (f <$> m1) (f <$> m2) ↔ map_agree m1 m2.
+Proof. naive_solver eauto using map_agree_fmap_1, map_agree_fmap_2. Qed.
+
+Lemma map_agree_omap {A B} (f : A → option B) (m1 m2 : M A) :
+  map_agree m1 m2 → map_agree (omap f m1) (omap f m2).
+Proof. rewrite !map_agree_spec. setoid_rewrite lookup_omap_Some. naive_solver. Qed.
+
 (** ** Properties on the disjoint maps *)
 Lemma map_disjoint_spec {A} (m1 m2 : M A) :
   m1 ##ₘ m2 ↔ ∀ i x y, m1 !! i = Some x → m2 !! i = Some y → False.
@@ -2063,6 +2161,10 @@ Lemma map_disjoint_omap {A B} (f1 f2 : A → option B) (m1 m2 : M A) :
 Proof.
   rewrite !map_disjoint_spec. setoid_rewrite lookup_omap_Some. naive_solver.
 Qed.
+
+Lemma map_disjoint_agree {A} (m1 m2 : M A) :
+  m1 ##ₘ m2 → map_agree m1 m2.
+Proof. rewrite !map_disjoint_spec, !map_agree_spec. naive_solver. Qed.
 
 (** ** Properties of the [union_with] operation *)
 Section union_with.
@@ -2527,6 +2629,12 @@ Proof. induction is; simpl; auto using map_disjoint_delete_l. Qed.
 Lemma map_disjoint_foldr_delete_r {A} (m1 m2 : M A) is :
   m1 ##ₘ m2 → m1 ##ₘ foldr delete m2 is.
 Proof. induction is; simpl; auto using map_disjoint_delete_r. Qed.
+Lemma map_agree_foldr_delete_l {A} (m1 m2 : M A) is :
+  map_agree m1 m2 → map_agree (foldr delete m1 is) m2.
+Proof. induction is; simpl; auto using map_agree_delete_l. Qed.
+Lemma map_agree_foldr_delete_r {A} (m1 m2 : M A) is :
+  map_agree m1 m2 → map_agree m1 (foldr delete m2 is).
+Proof. induction is; simpl; auto using map_agree_delete_r. Qed.
 Lemma foldr_delete_union {A} (m1 m2 : M A) is :
   foldr delete (m1 ∪ m2) is = foldr delete m1 is ∪ foldr delete m2 is.
 Proof. apply foldr_delete_union_with. Qed.
@@ -3381,6 +3489,11 @@ Section kmap.
     kmap f m1 ##ₘ kmap f m2 ↔ m1 ##ₘ m2.
   Proof.
     rewrite !map_disjoint_spec. setoid_rewrite lookup_kmap_Some. naive_solver.
+  Qed.
+  Lemma map_agree_kmap {A} (m1 m2 : M1 A) :
+    map_agree (kmap f m1) (kmap f m2) ↔ map_agree m1 m2.
+  Proof.
+    rewrite !map_agree_spec. setoid_rewrite lookup_kmap_Some. naive_solver.
   Qed.
   Lemma kmap_subseteq {A} (m1 m2 : M1 A) :
     kmap f m1 ⊆ kmap f m2 ↔ m1 ⊆ m2.

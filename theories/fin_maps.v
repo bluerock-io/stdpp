@@ -2054,7 +2054,7 @@ Proof.
 Qed.
 
 Lemma map_disjoint_fmap {A B} (f1 f2 : A → B) (m1 m2 : M A) :
-  m1 ##ₘ m2 ↔ f1 <$> m1 ##ₘ f2 <$> m2.
+  f1 <$> m1 ##ₘ f2 <$> m2 ↔ m1 ##ₘ m2.
 Proof.
   rewrite !map_disjoint_spec. setoid_rewrite lookup_fmap_Some. naive_solver.
 Qed.

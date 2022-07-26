@@ -26,6 +26,7 @@ Coq 8.11 is no longer supported.
 - Add `map_Exists` as an analogue to `map_Forall`. (by Michael Sammler)
 - Add `case_match eqn:H` that behaves like `case_match` but allows naming the
   generated equality. (by Michael Sammler)
+- Flip direction of `map_disjoint_fmap`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

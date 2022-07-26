@@ -3902,6 +3902,9 @@ Section fmap.
     intros [|x l] ?; simplify_eq/=.
     destruct (IH l) as (l1&l2&->&->&->); [done|]. by exists (x :: l1), l2.
   Qed.
+  Lemma fmap_option_list mx :
+    f <$> (option_list mx) = option_list (f <$> mx).
+  Proof. by destruct mx. Qed.
 
   Lemma list_fmap_alt l :
     f <$> l = omap (λ x, Some (f x)) l.
@@ -3949,6 +3952,11 @@ Section fmap.
   Lemma list_alter_fmap (g : A → A) (h : B → B) l i :
     Forall (λ x, f (g x) = h (f x)) l → f <$> alter g i l = alter h i (f <$> l).
   Proof. intros Hl. revert i. by induction Hl; intros [|i]; f_equal/=. Qed.
+  Lemma list_fmap_delete l i : f <$> (delete i l) = delete i (f <$> l).
+  Proof.
+    revert i. induction l; intros i; destruct i; csimpl; eauto.
+    naive_solver congruence.
+  Qed.
 
   Lemma elem_of_list_fmap_1 l x : x ∈ l → f x ∈ f <$> l.
   Proof. induction 1; csimpl; rewrite elem_of_cons; intuition. Qed.
@@ -4088,6 +4096,13 @@ Section omap.
   Qed.
   Global Instance omap_Permutation : Proper ((≡ₚ) ==> (≡ₚ)) (omap f).
   Proof. induction 1; simpl; repeat case_match; econstructor; eauto. Qed.
+
+  Lemma omap_app l1 l2 :
+    omap f (l1 ++ l2) = omap f l1 ++ omap f l2.
+  Proof. induction l1; csimpl; repeat case_match; naive_solver congruence. Qed.
+  Lemma omap_option_list mx :
+    omap f (option_list mx) = option_list (mx ≫= f).
+  Proof. by destruct mx. Qed.
 End omap.
 
 Section bind.

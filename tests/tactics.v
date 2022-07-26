@@ -49,6 +49,22 @@ Proof.
   destruct_and?. Fail destruct_and!. assumption.
 Qed.
 
+(** Tests for [case_match] *)
+Goal ∀ n : nat, match n with | 0 => n = 0 | S n' => n = S n' end.
+Proof.
+  intros. by case_match.
+Restart.
+  intros. by case_match eqn:Heq; revert Heq. (* [revert Heq] checks that [Heq] exists *)
+Qed.
+
+Goal ∀ n m : nat, match n with | 0 => m = 0 | S n' => m = S n' end → n = m.
+Proof.
+  intros. by case_match.
+Restart.
+  intros. by case_match eqn:Heq; revert Heq. (* [revert Heq] checks that [Heq] exists *)
+Qed.
+
+(** Tests for [select] tactics *)
 Goal ∀ (n : nat), ∃ m : nat, True.
 Proof. intros ?. rename select nat into m. exists m. done. Qed.
 

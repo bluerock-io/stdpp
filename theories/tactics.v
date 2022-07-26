@@ -163,11 +163,14 @@ Tactic Notation "destruct_or" "!" :=
 (** The tactic [case_match] destructs an arbitrary match in the conclusion or
 assumptions, and generates a corresponding equality. This tactic is best used
 together with the [repeat] tactical. *)
-Ltac case_match :=
+Tactic Notation "case_match" "eqn" ":" ident(Hd) :=
   match goal with
-  | H : context [ match ?x with _ => _ end ] |- _ => destruct x eqn:?
-  | |- context [ match ?x with _ => _ end ] => destruct x eqn:?
+  | H : context [ match ?x with _ => _ end ] |- _ => destruct x eqn:Hd
+  | |- context [ match ?x with _ => _ end ] => destruct x eqn:Hd
   end.
+Ltac case_match :=
+  let H := fresh in case_match eqn:H.
+
 
 (** The tactic [unless T by tac_fail] succeeds if [T] is not provable by
 the tactic [tac_fail]. *)

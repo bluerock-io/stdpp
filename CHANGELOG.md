@@ -21,6 +21,17 @@ Coq 8.11 is no longer supported.
 - Declare `Hint Mode` for `FinSet A C` so that `C` is input, and `A` is output
   (i.e., inferred from `C`).
 - Add function `map_preimage` to compute the preimage of a finite map.
+- Rename `map_disjoint_subseteq` → `kmap_subseteq` and
+  `map_disjoint_subset` → `kmap_subset`.
+
+The following `sed` script should perform most of the renaming
+(on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).
+```
+sed -i -E -f- $(find theories -name "*.v") <<EOF
+s/\bmap_disjoint_subseteq\b/kmap_subseteq/g
+s/\bmap_disjoint_subset\b/kmap_subset/g
+EOF
+```
 
 ## std++ 1.7.0 (2022-01-22)
 

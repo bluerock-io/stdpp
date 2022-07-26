@@ -3265,14 +3265,14 @@ Section kmap.
   Proof.
     rewrite !map_disjoint_spec. setoid_rewrite lookup_kmap_Some. naive_solver.
   Qed.
-  Lemma map_disjoint_subseteq {A} (m1 m2 : M1 A) :
+  Lemma kmap_subseteq {A} (m1 m2 : M1 A) :
     kmap f m1 ⊆ kmap f m2 ↔ m1 ⊆ m2.
   Proof.
     rewrite !map_subseteq_spec. setoid_rewrite lookup_kmap_Some. naive_solver.
   Qed.
-  Lemma map_disjoint_subset {A} (m1 m2 : M1 A) :
+  Lemma kmap_subset {A} (m1 m2 : M1 A) :
     kmap f m1 ⊂ kmap f m2 ↔ m1 ⊂ m2.
-  Proof. unfold strict. by rewrite !map_disjoint_subseteq. Qed.
+  Proof. unfold strict. by rewrite !kmap_subseteq. Qed.
 End kmap.
 
 Section preimage.

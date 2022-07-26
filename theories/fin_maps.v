@@ -100,6 +100,9 @@ Global Instance map_equiv `{∀ A, Lookup K A (M A), Equiv A} : Equiv (M A) | 20
 Definition map_Forall `{Lookup K A M} (P : K → A → Prop) : M → Prop :=
   λ m, ∀ i x, m !! i = Some x → P i x.
 
+Definition map_Exists `{Lookup K A M} (P : K → A → Prop) : M → Prop :=
+  λ m, ∃ i x, m !! i = Some x ∧ P i x.
+
 Definition map_relation `{∀ A, Lookup K A (M A)} {A B} (R : A → B → Prop)
     (P : A → Prop) (Q : B → Prop) (m1 : M A) (m2 : M B) : Prop := ∀ i,
   option_relation R P Q (m1 !! i) (m2 !! i).
@@ -1536,6 +1539,67 @@ Section map_Forall.
     destruct Hm as ([i x]&?&?). exists i, x. by rewrite <-elem_of_map_to_list.
   Qed.
 End map_Forall.
+
+(** ** Properties of the [map_Exists] predicate *)
+Section map_Exists.
+  Context {A} (P : K → A → Prop).
+  Implicit Types m : M A.
+
+  Lemma map_Exists_to_list m : map_Exists P m ↔ Exists (uncurry P) (map_to_list m).
+  Proof.
+    rewrite Exists_exists. split.
+    - intros [? [? [? ?]]]. eexists (_, _). by rewrite elem_of_map_to_list.
+    - intros [[??] [??]]. eexists _, _. by rewrite <-elem_of_map_to_list.
+  Qed.
+  Lemma map_Exists_empty : ¬ map_Exists P (∅ : M A).
+  Proof. intros [?[?[Hm ?]]]. by rewrite lookup_empty in Hm. Qed.
+  Lemma map_Exists_impl (Q : K → A → Prop) m :
+    map_Exists P m → (∀ i x, P i x → Q i x) → map_Exists Q m.
+  Proof. unfold map_Exists; naive_solver. Qed.
+  Lemma map_Exists_insert_1 m i x :
+    map_Exists P (<[i:=x]>m) → P i x ∨ map_Exists P m.
+  Proof. intros [j[y[?%lookup_insert_Some ?]]]. unfold map_Exists. naive_solver. Qed.
+  Lemma map_Exists_insert_2_1 m i x : P i x → map_Exists P (<[i:=x]>m).
+  Proof. intros Hm. exists i, x. by rewrite lookup_insert. Qed.
+  Lemma map_Exists_insert_2_2 m i x :
+    m !! i = None → map_Exists P m → map_Exists P (<[i:=x]>m).
+  Proof.
+    intros Hm [j[y[??]]]. exists j, y. by rewrite lookup_insert_ne by congruence.
+  Qed.
+  Lemma map_Exists_insert m i x :
+    m !! i = None → map_Exists P (<[i:=x]>m) ↔ P i x ∨ map_Exists P m.
+  Proof.
+    naive_solver eauto using map_Exists_insert_1,
+      map_Exists_insert_2_1, map_Exists_insert_2_2.
+  Qed.
+  Lemma map_Exists_singleton (i : K) (x : A) :
+    map_Exists P ({[i := x]} : M A) ↔ P i x.
+  Proof.
+    unfold map_Exists. setoid_rewrite lookup_singleton_Some. naive_solver.
+  Qed.
+  Lemma map_Exists_delete m i : map_Exists P (delete i m) → map_Exists P m.
+  Proof.
+    intros [j [y [Hm ?]]]. rewrite lookup_delete_Some in Hm.
+    unfold map_Exists. naive_solver.
+  Qed.
+  Lemma map_Exists_lookup m :
+    map_Exists P m ↔ ∃ i x, m !! i = Some x ∧ P i x.
+  Proof. done. Qed.
+  Lemma map_Exists_foldr_delete m is :
+    map_Exists P (foldr delete m is) → map_Exists P m.
+  Proof. induction is; eauto using map_Exists_delete. Qed.
+
+  Lemma map_not_Exists (m : M A) :
+    ¬map_Exists P m ↔ map_Forall (λ i x, ¬ P i x) m.
+  Proof. unfold map_Exists, map_Forall; naive_solver. Qed.
+
+  Context `{∀ i x, Decision (P i x)}.
+  Global Instance map_Exists_dec m : Decision (map_Exists P m).
+  Proof.
+    refine (cast_if (decide (Exists (uncurry P) (map_to_list m))));
+      by rewrite map_Exists_to_list.
+  Defined.
+End map_Exists.
 
 (** ** Properties of the [merge] operation *)
 Section merge.

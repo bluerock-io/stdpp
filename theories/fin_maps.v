@@ -1595,6 +1595,22 @@ Section map_Exists.
     map_Exists P (foldr delete m is) → map_Exists P m.
   Proof. induction is; eauto using map_Exists_delete. Qed.
 
+  Lemma map_Exists_ind (Q : M A → Prop) :
+    (∀ i x, P i x → Q {[ i := x ]}) →
+    (∀ m i x, m !! i = None → map_Exists P m → Q m → Q (<[i:=x]>m)) →
+    ∀ m, map_Exists P m → Q m.
+  Proof.
+    intros Hsingleton Hinsert m Hm. induction m as [|i x m Hi IH] using map_ind.
+    { by destruct map_Exists_empty. }
+    apply map_Exists_insert in Hm as [?|?]; [|by eauto..].
+    clear IH. induction m as [|j y m Hj IH] using map_ind; [by eauto|].
+    apply lookup_insert_None in Hi as [??].
+    rewrite insert_commute by done. apply Hinsert.
+    - by apply lookup_insert_None.
+    - apply map_Exists_insert; by eauto.
+    - eauto.
+  Qed.
+
   Lemma map_not_Exists (m : M A) :
     ¬map_Exists P m ↔ map_Forall (λ i x, ¬ P i x) m.
   Proof. unfold map_Exists, map_Forall; naive_solver. Qed.

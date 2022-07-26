@@ -1585,6 +1585,12 @@ Section map_Exists.
   Lemma map_Exists_lookup m :
     map_Exists P m ↔ ∃ i x, m !! i = Some x ∧ P i x.
   Proof. done. Qed.
+  Lemma map_Exists_lookup_1 m :
+    map_Exists P m → ∃ i x, m !! i = Some x ∧ P i x.
+  Proof. by rewrite map_Exists_lookup. Qed.
+  Lemma map_Exists_lookup_2 m i x :
+    m !! i = Some x → P i x → map_Exists P m.
+  Proof. rewrite map_Exists_lookup. by eauto. Qed.
   Lemma map_Exists_foldr_delete m is :
     map_Exists P (foldr delete m is) → map_Exists P m.
   Proof. induction is; eauto using map_Exists_delete. Qed.

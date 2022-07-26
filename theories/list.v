@@ -3932,6 +3932,9 @@ Section fmap.
   Proof. intros; induction l; f_equal/=; auto. Qed.
   Lemma list_lookup_fmap l i : (f <$> l) !! i = f <$> (l !! i).
   Proof. revert i. induction l; intros [|n]; by try revert n. Qed.
+  Lemma list_lookup_fmap_Some l i x :
+    (f <$> l) !! i =  Some x ↔ ∃ y, l !! i = Some y ∧ x = f y.
+  Proof. by rewrite list_lookup_fmap, fmap_Some. Qed.
   Lemma list_lookup_total_fmap `{!Inhabited A, !Inhabited B} l i :
     i < length l → (f <$> l) !!! i = f (l !!! i).
   Proof.
@@ -4290,6 +4293,9 @@ Section imap.
     revert f i. induction l as [|x l IH]; intros f [|i]; f_equal/=; auto.
     by rewrite IH.
   Qed.
+  Lemma list_lookup_imap_Some l i x :
+    imap f l !! i = Some x ↔ ∃ y, l !! i = Some y ∧ x = f i y.
+  Proof. by rewrite list_lookup_imap, fmap_Some. Qed.
   Lemma list_lookup_total_imap `{!Inhabited A, !Inhabited B} l i :
     i < length l → imap f l !!! i = f i (l !!! i).
   Proof.

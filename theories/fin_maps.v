@@ -2261,6 +2261,9 @@ Lemma lookup_union_r {A} (m1 m2 : M A) i :
   m1 !! i = None → (m1 ∪ m2) !! i = m2 !! i.
 Proof. intros Hi. by rewrite lookup_union, Hi, (left_id_L _ _).  Qed.
 Lemma lookup_union_l {A} (m1 m2 : M A) i :
+  m2 !! i = None → (m1 ∪ m2) !! i = m1 !! i.
+Proof. intros Hi. rewrite lookup_union, Hi. by destruct (m1 !! i). Qed.
+Lemma lookup_union_l' {A} (m1 m2 : M A) i :
   is_Some (m1 !! i) → (m1 ∪ m2) !! i = m1 !! i.
 Proof. intros [x Hi]. rewrite lookup_union, Hi. by destruct (m2 !! i). Qed.
 Lemma lookup_union_Some_raw {A} (m1 m2 : M A) i x :

@@ -29,13 +29,17 @@ Coq 8.11 is no longer supported.
 - Flip direction of `map_disjoint_fmap`.
 - Add `map_agree` as a weaker version of `##ₘ` which requires the maps to agree
   on keys contained in both maps. (by Michael Sammler)
+- Rename `lookup_union_l` → `lookup_union_l'` and add `lookup_union_l`
+  as the dual to `lookup_union_r`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).
+Note that the script is not idempotent, do not run it twice.
 ```
 sed -i -E -f- $(find theories -name "*.v") <<EOF
 s/\bmap_disjoint_subseteq\b/kmap_subseteq/g
 s/\bmap_disjoint_subset\b/kmap_subset/g
+s/\blookup_union_l\b/lookup_union_l'/g
 EOF
 ```
 

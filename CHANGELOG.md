@@ -23,6 +23,7 @@ Coq 8.11 is no longer supported.
 - Add function `map_preimage` to compute the preimage of a finite map.
 - Rename `map_disjoint_subseteq` → `kmap_subseteq` and
   `map_disjoint_subset` → `kmap_subset`.
+- Add `map_Exists` as an analogue to `map_Forall`. (by Michael Sammler)
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

@@ -2791,41 +2791,6 @@ Section submseteq_dec.
   Defined.
 End submseteq_dec.
 
-(** ** Properties of [included] *)
-Global Instance list_subseteq_po : PreOrder (⊆@{list A}).
-Proof. split; firstorder. Qed.
-Lemma list_subseteq_nil l : [] ⊆ l.
-Proof. intros x. by rewrite elem_of_nil. Qed.
-Lemma list_nil_subseteq l : l ⊆ [] → l = [].
-Proof.
-  intro Hl. destruct l as [|x l1]; [done|]. exfalso.
-  rewrite <-(elem_of_nil x).
-  apply Hl, elem_of_cons. by left.
-Qed.
-Lemma list_subseteq_skip x l1 l2 : l1 ⊆ l2 → x :: l1 ⊆ x :: l2.
-Proof.
-  intros Hin y Hy%elem_of_cons.
-  destruct Hy as [-> | Hy]; [by left|]. right. by apply Hin.
-Qed.
-Lemma list_subseteq_cons x l1 l2 : l1 ⊆ l2 → l1 ⊆ x :: l2.
-Proof. intros Hin y Hy. right. by apply Hin. Qed.
-Lemma list_delete_subseteq i l : delete i l ⊆ l.
-Proof.
-  revert i. induction l as [|x l IHl]; intros i; [done|].
-  destruct i as [|i];
-    [by apply list_subseteq_cons|by apply list_subseteq_skip].
-Qed.
-Lemma list_filter_subseteq P `{!∀ x : A, Decision (P x)} l :
-  filter P l ⊆ l.
-Proof.
-  induction l as [|x l IHl]; [done|]. rewrite filter_cons.
-  destruct (decide (P x));
-    [by apply list_subseteq_skip|by apply list_subseteq_cons].
-Qed.
-
-Global Instance list_subseteq_Permutation: Proper ((≡ₚ) ==> (≡ₚ) ==> (↔)) (⊆@{list A}) .
-Proof. intros l1 l2 Hl k1 k2 Hk. apply forall_proper; intros x. by rewrite Hl, Hk. Qed.
-
 (** ** Properties of the [Forall] and [Exists] predicate *)
 Lemma Forall_Exists_dec (P Q : A → Prop) (dec : ∀ x, {P x} + {Q x}) :
   ∀ l, {Forall P l} + {Exists Q l}.
@@ -3602,6 +3567,52 @@ Section Forall3.
     Forall3 P (alter f i l) (alter g i k) k'.
   Proof. intros Hl. revert i. induction Hl; intros [|]; auto. Qed.
 End Forall3.
+
+(** ** Properties of [subseteq] *)
+Section subseteq.
+Context {A : Type}.
+Implicit Types x y z : A.
+Implicit Types l k : list A.
+
+Global Instance list_subseteq_po : PreOrder (⊆@{list A}).
+Proof. split; firstorder. Qed.
+Lemma list_subseteq_nil l : [] ⊆ l.
+Proof. intros x. by rewrite elem_of_nil. Qed.
+Lemma list_nil_subseteq l : l ⊆ [] → l = [].
+Proof.
+  intro Hl. destruct l as [|x l1]; [done|]. exfalso.
+  rewrite <-(elem_of_nil x).
+  apply Hl, elem_of_cons. by left.
+Qed.
+Lemma list_subseteq_skip x l1 l2 : l1 ⊆ l2 → x :: l1 ⊆ x :: l2.
+Proof.
+  intros Hin y Hy%elem_of_cons.
+  destruct Hy as [-> | Hy]; [by left|]. right. by apply Hin.
+Qed.
+Lemma list_subseteq_cons x l1 l2 : l1 ⊆ l2 → l1 ⊆ x :: l2.
+Proof. intros Hin y Hy. right. by apply Hin. Qed.
+Lemma list_delete_subseteq i l : delete i l ⊆ l.
+Proof.
+  revert i. induction l as [|x l IHl]; intros i; [done|].
+  destruct i as [|i];
+    [by apply list_subseteq_cons|by apply list_subseteq_skip].
+Qed.
+Lemma list_filter_subseteq P `{!∀ x : A, Decision (P x)} l :
+  filter P l ⊆ l.
+Proof.
+  induction l as [|x l IHl]; [done|]. rewrite filter_cons.
+  destruct (decide (P x));
+    [by apply list_subseteq_skip|by apply list_subseteq_cons].
+Qed.
+
+Global Instance list_subseteq_Permutation: Proper ((≡ₚ) ==> (≡ₚ) ==> (↔)) (⊆@{list A}) .
+Proof. intros l1 l2 Hl k1 k2 Hk. apply forall_proper; intros x. by rewrite Hl, Hk. Qed.
+
+Global Program Instance list_subseteq_dec `{!EqDecision A} : RelDecision (⊆@{list A}) :=
+  λ xs ys, cast_if (decide (Forall (λ x, x ∈ ys) xs)).
+Next Obligation. intros ???. by rewrite Forall_forall. Qed.
+Next Obligation. intros ???. by rewrite Forall_forall. Qed.
+End subseteq.
 
 (** Setoids *)
 Section setoid.

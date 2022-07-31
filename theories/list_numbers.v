@@ -226,6 +226,10 @@ Section mjoin.
   Implicit Types l k : list A.
   Implicit Types ls : list (list A).
 
+  Lemma join_length ls:
+    length (mjoin ls) = sum_list (length <$> ls).
+  Proof. induction ls; [done|]; csimpl. rewrite app_length. lia. Qed.
+
   Lemma join_lookup_Some ls i x :
     mjoin ls !! i = Some x ↔ ∃ j l i', ls !! j = Some l ∧ l !! i' = Some x
                                      ∧ i = sum_list (length <$> take j ls) + i'.

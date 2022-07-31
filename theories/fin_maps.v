@@ -323,7 +323,8 @@ Proof.
   - rewrite lookup_partial_alter. naive_solver.
   - rewrite lookup_partial_alter_ne; naive_solver.
 Qed.
-Lemma lookup_total_partial_alter {A} `{Inhabited A} (f : option A → option A) (m : M A) i:
+Lemma lookup_total_partial_alter {A} `{Inhabited A}
+    (f : option A → option A) (m : M A) i:
   partial_alter f i m !!! i = default inhabitant (f (m !! i)).
 Proof. by rewrite lookup_total_alt, lookup_partial_alter. Qed.
 
@@ -347,11 +348,14 @@ Lemma alter_commute {A} (f g : A → A) (m : M A) i j :
 Proof. apply partial_alter_commute. Qed.
 Lemma alter_insert {A} (m : M A) i f x :
   alter f i (<[i := x]> m) = <[i := f x]> m.
-Proof. by setoid_rewrite <-partial_alter_compose. Qed.
+Proof.
+  unfold alter, insert, map_alter, map_insert.
+  by rewrite <-partial_alter_compose.
+Qed.
 Lemma alter_insert_ne {A} (m : M A) i j f x :
   i ≠ j →
   alter f i (<[j := x]> m) = <[j := x]> (alter f i m).
-Proof. intros ?. by setoid_rewrite <-partial_alter_commute at 1. Qed.
+Proof. intros. symmetry. by apply partial_alter_commute. Qed.
 Lemma lookup_alter_Some {A} (f : A → A) (m : M A) i j y :
   alter f i m !! j = Some y ↔
     (i = j ∧ ∃ x, m !! j = Some x ∧ y = f x) ∨ (i ≠ j ∧ m !! j = Some y).
@@ -449,7 +453,10 @@ Lemma delete_insert_ne {A} (m : M A) i j x :
 Proof. intro. by apply partial_alter_commute. Qed.
 Lemma delete_alter {A} (m : M A) i f :
   delete i (alter f i m) = delete i m.
-Proof. by setoid_rewrite <-partial_alter_compose. Qed.
+Proof.
+  unfold delete, alter, map_delete, map_alter.
+  by rewrite <-partial_alter_compose.
+Qed.
 Lemma delete_alter_ne {A} (m : M A) i j f :
   i ≠ j → delete i (alter f j m) = alter f j (delete i m).
 Proof. intro. by apply partial_alter_commute. Qed.

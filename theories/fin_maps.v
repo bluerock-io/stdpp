@@ -315,6 +315,18 @@ Proof.
   intros Hi Hfi. apply map_subset_alt; split; [by apply partial_alter_subseteq|].
   exists i. by rewrite lookup_partial_alter.
 Qed.
+Lemma lookup_partial_alter_Some {A} (f : option A → option A) (m : M A) i j x :
+  partial_alter f i m !! j = Some x ↔
+    (i = j ∧ f (m !! i) = Some x) ∨ (i ≠ j ∧ m !! j = Some x).
+Proof.
+  destruct (decide (i = j)); subst.
+  - rewrite lookup_partial_alter. naive_solver.
+  - rewrite lookup_partial_alter_ne; naive_solver.
+Qed.
+Lemma lookup_total_partial_alter {A} `{Inhabited A}
+    (f : option A → option A) (m : M A) i:
+  partial_alter f i m !!! i = default inhabitant (f (m !! i)).
+Proof. by rewrite lookup_total_alt, lookup_partial_alter. Qed.
 
 (** ** Properties of the [alter] operation *)
 Lemma lookup_alter {A} (f : A → A) (m : M A) i : alter f i m !! i = f <$> m !! i.
@@ -334,6 +346,16 @@ Qed.
 Lemma alter_commute {A} (f g : A → A) (m : M A) i j :
   i ≠ j → alter f i (alter g j m) = alter g j (alter f i m).
 Proof. apply partial_alter_commute. Qed.
+Lemma alter_insert {A} (m : M A) i f x :
+  alter f i (<[i := x]> m) = <[i := f x]> m.
+Proof.
+  unfold alter, insert, map_alter, map_insert.
+  by rewrite <-partial_alter_compose.
+Qed.
+Lemma alter_insert_ne {A} (m : M A) i j f x :
+  i ≠ j →
+  alter f i (<[j := x]> m) = <[j := x]> (alter f i m).
+Proof. intros. symmetry. by apply partial_alter_commute. Qed.
 Lemma lookup_alter_Some {A} (f : A → A) (m : M A) i j y :
   alter f i m !! j = Some y ↔
     (i = j ∧ ∃ x, m !! j = Some x ∧ y = f x) ∨ (i ≠ j ∧ m !! j = Some y).
@@ -406,9 +428,6 @@ Lemma delete_commute {A} (m : M A) i j :
 Proof.
   destruct (decide (i = j)) as [->|]; [done|]. by apply partial_alter_commute.
 Qed.
-Lemma delete_insert_ne {A} (m : M A) i j x :
-  i ≠ j → delete i (<[j:=x]>m) = <[j:=x]>(delete i m).
-Proof. intro. by apply partial_alter_commute. Qed.
 Lemma delete_notin {A} (m : M A) i : m !! i = None → delete i m = m.
 Proof.
   intros. apply map_eq. intros j. by destruct (decide (i = j)) as [->|?];
@@ -429,6 +448,18 @@ Proof. apply delete_partial_alter. Qed.
 Lemma delete_insert_delete {A} (m : M A) i x :
   delete i (<[i:=x]>m) = delete i m.
 Proof. by setoid_rewrite <-partial_alter_compose. Qed.
+Lemma delete_insert_ne {A} (m : M A) i j x :
+  i ≠ j → delete i (<[j:=x]>m) = <[j:=x]>(delete i m).
+Proof. intro. by apply partial_alter_commute. Qed.
+Lemma delete_alter {A} (m : M A) i f :
+  delete i (alter f i m) = delete i m.
+Proof.
+  unfold delete, alter, map_delete, map_alter.
+  by rewrite <-partial_alter_compose.
+Qed.
+Lemma delete_alter_ne {A} (m : M A) i j f :
+  i ≠ j → delete i (alter f j m) = alter f j (delete i m).
+Proof. intro. by apply partial_alter_commute. Qed.
 Lemma delete_subseteq {A} (m : M A) i : delete i m ⊆ m.
 Proof.
   rewrite !map_subseteq_spec. intros j x. rewrite lookup_delete_Some. tauto.

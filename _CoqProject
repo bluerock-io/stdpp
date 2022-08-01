@@ -1,4 +1,7 @@
--Q theories stdpp
+# Search paths for all packages. They must all match the regex
+# `-Q $PACKAGE[/ ]` so that we can filter out the right ones for each package.
+-Q stdpp stdpp
+-Q stdpp_unstable stdpp.unstable
 # 'Global Hint Rewrite' not supported before Coq 8.14.
 -arg -w -arg -deprecated-hint-rewrite-without-locality
 # Fixing this one requires Coq 8.15.
@@ -6,51 +9,53 @@
 # Fixing this one requires Coq 8.13.
 -arg -w -arg -deprecated-syntactic-definition
 
-theories/options.v
-theories/base.v
-theories/tactics.v
-theories/option.v
-theories/fin_map_dom.v
-theories/boolset.v
-theories/fin_maps.v
-theories/fin.v
-theories/vector.v
-theories/pmap.v
-theories/stringmap.v
-theories/fin_sets.v
-theories/mapset.v
-theories/proof_irrel.v
-theories/hashset.v
-theories/pretty.v
-theories/countable.v
-theories/orders.v
-theories/natmap.v
-theories/strings.v
-theories/well_founded.v
-theories/relations.v
-theories/sets.v
-theories/listset.v
-theories/streams.v
-theories/gmap.v
-theories/gmultiset.v
-theories/prelude.v
-theories/listset_nodup.v
-theories/finite.v
-theories/numbers.v
-theories/nmap.v
-theories/zmap.v
-theories/coPset.v
-theories/coGset.v
-theories/lexico.v
-theories/propset.v
-theories/decidable.v
-theories/list.v
-theories/list_numbers.v
-theories/functions.v
-theories/hlist.v
-theories/sorting.v
-theories/infinite.v
-theories/nat_cancel.v
-theories/namespaces.v
-theories/telescopes.v
-theories/binders.v
+stdpp/options.v
+stdpp/base.v
+stdpp/tactics.v
+stdpp/option.v
+stdpp/fin_map_dom.v
+stdpp/boolset.v
+stdpp/fin_maps.v
+stdpp/fin.v
+stdpp/vector.v
+stdpp/pmap.v
+stdpp/stringmap.v
+stdpp/fin_sets.v
+stdpp/mapset.v
+stdpp/proof_irrel.v
+stdpp/hashset.v
+stdpp/pretty.v
+stdpp/countable.v
+stdpp/orders.v
+stdpp/natmap.v
+stdpp/strings.v
+stdpp/well_founded.v
+stdpp/relations.v
+stdpp/sets.v
+stdpp/listset.v
+stdpp/streams.v
+stdpp/gmap.v
+stdpp/gmultiset.v
+stdpp/prelude.v
+stdpp/listset_nodup.v
+stdpp/finite.v
+stdpp/numbers.v
+stdpp/nmap.v
+stdpp/zmap.v
+stdpp/coPset.v
+stdpp/coGset.v
+stdpp/lexico.v
+stdpp/propset.v
+stdpp/decidable.v
+stdpp/list.v
+stdpp/list_numbers.v
+stdpp/functions.v
+stdpp/hlist.v
+stdpp/sorting.v
+stdpp/infinite.v
+stdpp/nat_cancel.v
+stdpp/namespaces.v
+stdpp/telescopes.v
+stdpp/binders.v
+
+stdpp_unstable/bitblast.v

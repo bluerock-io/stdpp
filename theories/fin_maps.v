@@ -1977,28 +1977,25 @@ End Forall2.
 Lemma map_agree_spec {A} (m1 m2 : M A) :
   map_agree m1 m2 ↔ ∀ i x y, m1 !! i = Some x → m2 !! i = Some y → x = y.
 Proof.
-  split; intros Hm i; specialize (Hm i);
-    destruct (m1 !! i), (m2 !! i); naive_solver.
+  apply forall_proper; intros i; destruct (m1 !! i), (m2 !! i); naive_solver.
 Qed.
 Lemma map_agree_alt {A} (m1 m2 : M A) :
   map_agree m1 m2 ↔ ∀ i, m1 !! i = None ∨ m2 !! i = None ∨ m1 !! i = m2 !! i.
 Proof.
-  split; intros Hm1m2 i; specialize (Hm1m2 i);
-    destruct (m1 !! i), (m2 !! i); naive_solver.
+  apply forall_proper; intros i; destruct (m1 !! i), (m2 !! i); naive_solver.
 Qed.
 Lemma map_not_agree {A} (m1 m2 : M A) `{!EqDecision A}:
   ¬map_agree m1 m2 ↔ ∃ i x1 x2, m1 !! i = Some x1 ∧ m2 !! i = Some x2 ∧ x1 ≠ x2.
 Proof.
-  unfold map_agree. rewrite map_not_Forall2 by solve_decision.
-  split; [|naive_solver].
-  intros [i[(x&y&?&?&?)|[(x&?&?&[])|(y&?&?&[])]]]; naive_solver.
+  unfold map_agree. rewrite map_not_Forall2 by solve_decision. naive_solver.
 Qed.
 Global Instance map_agree_refl {A} : Reflexive (map_agree : relation (M A)).
 Proof. intros ?. rewrite !map_agree_spec. naive_solver. Qed.
 Global Instance map_agree_sym {A} : Symmetric (map_agree : relation (M A)).
 Proof.
   intros m1 m2. rewrite !map_agree_spec.
-  intros Hm i x y Hm1 Hm2. symmetry. naive_solver. Qed.
+  intros Hm i x y Hm1 Hm2. symmetry. naive_solver.
+Qed.
 Lemma map_agree_empty_l {A} (m : M A) : map_agree ∅ m.
 Proof. rewrite !map_agree_spec. intros i x y. by rewrite lookup_empty. Qed.
 Lemma map_agree_empty_r {A} (m : M A) : map_agree m ∅.
@@ -2021,12 +2018,8 @@ Proof. rewrite (symmetry_iff map_agree). apply map_agree_Some_l. Qed.
 Lemma map_agree_singleton_l {A} (m: M A) i x :
   map_agree {[i:=x]} m ↔ m !! i = Some x ∨ m !! i = None.
 Proof.
-  split; [|rewrite !map_agree_spec].
-  - intro. apply (map_agree_Some_l {[i := x]} _ _ x);
-      auto using lookup_singleton.
-  - intros ? j y1 y2. destruct (decide (i = j)) as [->|].
-    + rewrite lookup_singleton. intuition congruence.
-    + by rewrite lookup_singleton_ne.
+  rewrite map_agree_spec. setoid_rewrite lookup_singleton_Some.
+  destruct (m !! i) eqn:?; naive_solver.
 Qed.
 Lemma map_agree_singleton_r {A} (m : M A) i x :
   map_agree m {[i := x]} ↔ m !! i = Some x ∨ m !! i = None.
@@ -2073,21 +2066,18 @@ Proof. rewrite !map_agree_spec. setoid_rewrite lookup_omap_Some. naive_solver. Q
 Lemma map_disjoint_spec {A} (m1 m2 : M A) :
   m1 ##ₘ m2 ↔ ∀ i x y, m1 !! i = Some x → m2 !! i = Some y → False.
 Proof.
-  split; intros Hm i; specialize (Hm i);
-    destruct (m1 !! i), (m2 !! i); naive_solver.
+  apply forall_proper; intros i; destruct (m1 !! i), (m2 !! i); naive_solver.
 Qed.
 Lemma map_disjoint_alt {A} (m1 m2 : M A) :
   m1 ##ₘ m2 ↔ ∀ i, m1 !! i = None ∨ m2 !! i = None.
 Proof.
-  split; intros Hm1m2 i; specialize (Hm1m2 i);
-    destruct (m1 !! i), (m2 !! i); naive_solver.
+  apply forall_proper; intros i; destruct (m1 !! i), (m2 !! i); naive_solver.
 Qed.
 Lemma map_not_disjoint {A} (m1 m2 : M A) :
   ¬m1 ##ₘ m2 ↔ ∃ i x1 x2, m1 !! i = Some x1 ∧ m2 !! i = Some x2.
 Proof.
   unfold disjoint, map_disjoint. rewrite map_not_Forall2 by solve_decision.
-  split; [|naive_solver].
-  intros [i[(x&y&?&?&?)|[(x&?&?&[])|(y&?&?&[])]]]; naive_solver.
+  naive_solver.
 Qed.
 Global Instance map_disjoint_sym {A} : Symmetric (map_disjoint : relation (M A)).
 Proof. intros m1 m2. rewrite !map_disjoint_spec. naive_solver. Qed.
@@ -2112,12 +2102,8 @@ Lemma map_disjoint_Some_r {A} (m1 m2 : M A) i x:
 Proof. rewrite (symmetry_iff map_disjoint). apply map_disjoint_Some_l. Qed.
 Lemma map_disjoint_singleton_l {A} (m: M A) i x : {[i:=x]} ##ₘ m ↔ m !! i = None.
 Proof.
-  split; [|rewrite !map_disjoint_spec].
-  - intro. apply (map_disjoint_Some_l {[i := x]} _ _ x);
-      auto using lookup_singleton.
-  - intros ? j y1 y2. destruct (decide (i = j)) as [->|].
-    + rewrite lookup_singleton. intuition congruence.
-    + by rewrite lookup_singleton_ne.
+  rewrite !map_disjoint_spec. setoid_rewrite lookup_singleton_Some.
+  destruct (m !! i) eqn:?; naive_solver.
 Qed.
 Lemma map_disjoint_singleton_r {A} (m : M A) i x :
   m ##ₘ {[i := x]} ↔ m !! i = None.

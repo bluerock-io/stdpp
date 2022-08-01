@@ -27,6 +27,8 @@ Coq 8.11 is no longer supported.
 - Add `case_match eqn:H` that behaves like `case_match` but allows naming the
   generated equality. (by Michael Sammler)
 - Flip direction of `map_disjoint_fmap`.
+- Add `map_agree` as a weaker version of `##ₘ` which requires the maps to agree
+  on keys contained in both maps. (by Michael Sammler)
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

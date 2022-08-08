@@ -11,7 +11,7 @@ Global Instance comparison_eq_dec : EqDecision comparison.
 Proof. solve_decision. Defined.
 
 (** * Notations and properties of [nat] *)
-Global Arguments minus !_ !_ / : assert.
+Global Arguments Nat.sub !_ !_ / : assert.
 Global Arguments Nat.max : simpl nomatch.
 
 Typeclasses Opaque lt.
@@ -66,10 +66,10 @@ Lemma nat_le_sum (x y : nat) : x ≤ y ↔ ∃ z, y = x + z.
 Proof. split; [exists (y - x); lia | intros [z ->]; lia]. Qed.
 
 (** [Arith.Minus.minus_plus] is deprecated starting in 8.16 *)
-Lemma nat_minus_plus n m : n + m - n = m.
+Lemma nat_sub_add n m : n + m - n = m.
 Proof. lia. Qed.
 (** [Arith.Minus.le_plus_minus] is deprecated starting in 8.16 *)
-Lemma nat_le_plus_minus n m : n ≤ m → m = n + (m - n).
+Lemma nat_le_add_sub n m : n ≤ m → m = n + (m - n).
 Proof. lia. Qed.
 
 Lemma Nat_lt_succ_succ n : n < S (S n).

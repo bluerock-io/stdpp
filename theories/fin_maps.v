@@ -2273,6 +2273,12 @@ Proof. rewrite lookup_union. destruct (m1 !! i), (m2 !! i); naive_solver. Qed.
 Lemma lookup_union_None {A} (m1 m2 : M A) i :
   (m1 ∪ m2) !! i = None ↔ m1 !! i = None ∧ m2 !! i = None.
 Proof. rewrite lookup_union.  destruct (m1 !! i), (m2 !! i); naive_solver. Qed.
+Lemma lookup_union_None_1 {A} (m1 m2 : M A) i :
+  (m1 ∪ m2) !! i = None → m1 !! i = None ∧ m2 !! i = None.
+Proof. apply lookup_union_None. Qed.
+Lemma lookup_union_None_2 {A} (m1 m2 : M A) i :
+  m1 !! i = None → m2 !! i = None → (m1 ∪ m2) !! i = None.
+Proof. intros. by apply lookup_union_None. Qed.
 Lemma lookup_union_Some {A} (m1 m2 : M A) i x :
   m1 ##ₘ m2 → (m1 ∪ m2) !! i = Some x ↔ m1 !! i = Some x ∨ m2 !! i = Some x.
 Proof.

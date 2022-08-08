@@ -42,6 +42,10 @@ Lemma elem_of_dom_2 {A} (m : M A) i x : m !! i = Some x → i ∈ dom m.
 Proof. rewrite elem_of_dom; eauto. Qed.
 Lemma not_elem_of_dom {A} (m : M A) i : i ∉ dom m ↔ m !! i = None.
 Proof. by rewrite elem_of_dom, eq_None_not_Some. Qed.
+Lemma not_elem_of_dom_1 {A} (m : M A) i : i ∉ dom m → m !! i = None.
+Proof. apply not_elem_of_dom. Qed.
+Lemma not_elem_of_dom_2 {A} (m : M A) i : m !! i = None → i ∉ dom m.
+Proof. apply not_elem_of_dom. Qed.
 Lemma subseteq_dom {A} (m1 m2 : M A) : m1 ⊆ m2 → dom m1 ⊆ dom m2.
 Proof.
   rewrite map_subseteq_spec.

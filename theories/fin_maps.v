@@ -3346,15 +3346,25 @@ Section map_seq.
     by rewrite fmap_insert, IH.
   Qed.
 
+  Lemma insert_map_seq start xs i x:
+    start ≤ i < start + length xs →
+    <[i:=x]> (map_seq start xs) =@{M A} map_seq start (<[i - start:=x]> xs).
+  Proof.
+    intros. apply map_eq. intros j. destruct (decide (i = j)) as [->|?].
+    - rewrite lookup_insert, lookup_map_seq, option_guard_True by lia.
+      by rewrite list_lookup_insert by lia.
+    - rewrite lookup_insert_ne, !lookup_map_seq by done.
+      case_option_guard; [|done]. by rewrite list_lookup_insert_ne by lia.
+  Qed.
+  Lemma map_seq_insert start xs i x:
+    i < length xs →
+    map_seq start (<[i:=x]> xs) =@{M A} <[start + i:=x]> (map_seq start xs).
+  Proof. intros. rewrite insert_map_seq by lia. auto with f_equal lia. Qed.
+
   Lemma insert_map_seq_0 xs i x:
     i < length xs →
-    <[i:=x]> (map_seq (M:=M A) 0 xs) = map_seq 0 (<[i:=x]> xs).
-  Proof.
-    intros ?. apply map_eq. intros j. rewrite lookup_map_seq_0.
-    destruct (decide (i = j)) as [->|Hne].
-    - rewrite lookup_insert, list_lookup_insert; done.
-    - rewrite lookup_insert_ne, lookup_map_seq_0, list_lookup_insert_ne; done.
-  Qed.
+    <[i:=x]> (map_seq 0 xs) =@{M A} map_seq 0 (<[i:=x]> xs).
+  Proof. intros. rewrite insert_map_seq by lia. auto with f_equal lia. Qed.
 End map_seq.
 
 (** ** The [map_seqZ] operation *)
@@ -3466,23 +3476,31 @@ Section map_seqZ.
     by rewrite fmap_insert, IH.
   Qed.
 
-  Lemma insert_to_nat_map_seqZ_0 xs i x:
-    0 ≤ i < Z.of_nat (length xs) →
-    <[i:=x]> (map_seqZ (M:=M A) 0 xs) = map_seqZ 0 (<[Z.to_nat i:=x]> xs).
+  Lemma insert_map_seqZ start xs i x:
+    start ≤ i < start + Z.of_nat (length xs) →
+    <[i:=x]> (map_seqZ start xs)
+    =@{M A} map_seqZ start (<[Z.to_nat (i - start):=x]> xs).
   Proof.
-    intros ?. apply map_eq. intros j.
-    destruct (decide (i = j)) as [->|Hne].
-    - rewrite lookup_map_seqZ_0, lookup_insert, list_lookup_insert by lia; done.
-    - rewrite lookup_insert_ne by done.
-       destruct (decide (0 ≤ j)).
-       + rewrite !lookup_map_seqZ_0, list_lookup_insert_ne by lia; done.
-       + apply option_eq. intros ?. rewrite !lookup_map_seqZ_Some. lia.
+    intros. apply map_eq. intros j. destruct (decide (i = j)) as [->|?].
+    - rewrite lookup_insert, lookup_map_seqZ, option_guard_True by lia.
+      by rewrite list_lookup_insert by lia.
+    - rewrite lookup_insert_ne, !lookup_map_seqZ by done.
+      case_option_guard; [|done]. by rewrite list_lookup_insert_ne by lia.
   Qed.
-
-  Lemma insert_of_nat_map_seqZ_0 xs i x:
+  Lemma map_seqZ_insert start xs i x:
     (i < length xs)%nat →
-    <[Z.of_nat i:=x]> (map_seqZ (M:=M A) 0 xs) = map_seqZ 0 (<[i:=x]> xs).
-  Proof. intros ?. rewrite insert_to_nat_map_seqZ_0, Nat2Z.id by lia. done. Qed.
+    map_seqZ start (<[i:=x]> xs) =@{M A}
+    <[start + Z.of_nat i:=x]> (map_seqZ start xs).
+  Proof. intros. rewrite insert_map_seqZ by lia. auto with lia f_equal. Qed.
+
+  Lemma insert_map_seqZ_0 xs i x:
+    0 ≤ i < Z.of_nat (length xs) →
+    <[i:=x]> (map_seqZ 0 xs) =@{M A} map_seqZ 0 (<[Z.to_nat i:=x]> xs).
+  Proof. intros. rewrite insert_map_seqZ by lia. auto with lia f_equal. Qed.
+  Lemma map_seqZ_insert_0 xs i x:
+    (i < length xs)%nat →
+    map_seqZ 0 (<[i:=x]> xs) =@{M A} <[Z.of_nat i:=x]> (map_seqZ 0 xs).
+  Proof. intros. by rewrite map_seqZ_insert. Qed.
 End map_seqZ.
 
 Section kmap.

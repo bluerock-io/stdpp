@@ -455,7 +455,7 @@ Section set_bind.
   Qed.
 
   Global Instance set_unfold_set_bind (f : A → SB) (X : C)
-         (y : B) (P : A → B → Prop) (Q : A → Prop) :
+       (y : B) (P : A → B → Prop) (Q : A → Prop) :
     (∀ x y, SetUnfoldElemOf y (f x) (P x y)) →
     (∀ x, SetUnfoldElemOf x X (Q x)) →
     SetUnfoldElemOf y (set_bind f X) (∃ x, Q x ∧ P x y).
@@ -464,10 +464,12 @@ Section set_bind.
     rewrite elem_of_set_bind. set_solver.
   Qed.
 
-  Global Instance set_bind_proper : Proper (pointwise_relation _ (≡) ==> (≡) ==> (≡)) set_bind.
+  Global Instance set_bind_proper :
+    Proper (pointwise_relation _ (≡) ==> (≡) ==> (≡)) set_bind.
   Proof. unfold pointwise_relation; intros f1 f2 Hf X1 X2 HX. set_solver. Qed.
 
-  Global Instance set_bind_mono : Proper (pointwise_relation _ (⊆) ==> (⊆) ==> (⊆)) set_bind.
+  Global Instance set_bind_mono :
+    Proper (pointwise_relation _ (⊆) ==> (⊆) ==> (⊆)) set_bind.
   Proof. unfold pointwise_relation; intros f1 f2 Hf X1 X2 HX. set_solver. Qed.
 
   Lemma set_bind_ext (f g : A → SB) (X Y : C) :

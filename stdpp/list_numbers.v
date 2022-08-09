@@ -264,7 +264,7 @@ Section mjoin.
     split; [|naive_solver].
     destruct 1 as (j'&l'&i'&?&?&Hj); decompose_Forall.
     assert (i' < length l') by eauto using lookup_lt_Some.
-    apply Nat_mul_split_l in Hj; naive_solver.
+    apply Nat.mul_split_l in Hj; naive_solver.
   Qed.
 End mjoin.
 

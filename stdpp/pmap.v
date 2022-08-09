@@ -85,7 +85,7 @@ Fixpoint Pto_list_raw {A} (j : positive) (t : Pmap_raw A)
     (acc : list (positive * A)) : list (positive * A) :=
   match t with
   | PLeaf => acc
-  | PNode o l r => from_option (λ x, [(Preverse j, x)]) [] o ++
+  | PNode o l r => from_option (λ x, [(Pos.reverse j, x)]) [] o ++
      Pto_list_raw (j~0) l (Pto_list_raw (j~1) r acc)
   end%list.
 Fixpoint Pomap_raw {A B} (f : A → option B) (t : Pmap_raw A) : Pmap_raw B :=
@@ -170,7 +170,7 @@ Lemma Plookup_fmap {A B} (f : A → B) t i : (Pfmap_raw f t) !! i = f <$> t !! i
 Proof. revert i. by induction t; intros [?|?|]; simpl. Qed.
 Lemma Pelem_of_to_list {A} (t : Pmap_raw A) j i acc x :
   (i,x) ∈ Pto_list_raw j t acc ↔
-    (∃ i', i = i' ++ Preverse j ∧ t !! i' = Some x) ∨ (i,x) ∈ acc.
+    (∃ i', i = i' ++ Pos.reverse j ∧ t !! i' = Some x) ∨ (i,x) ∈ acc.
 Proof.
   split.
   { revert j acc. induction t as [|[y|] l IHl r IHr]; intros j acc; simpl.
@@ -178,14 +178,14 @@ Proof.
     - rewrite elem_of_cons. intros [?|?]; simplify_eq.
       { left; exists 1. by rewrite (left_id_L 1 (++))%positive. }
       destruct (IHl (j~0) (Pto_list_raw j~1 r acc)) as [(i'&->&?)|?]; auto.
-      { left; exists (i' ~ 0). by rewrite Preverse_xO, (assoc_L _). }
+      { left; exists (i' ~ 0). by rewrite Pos.reverse_xO, (assoc_L _). }
       destruct (IHr (j~1) acc) as [(i'&->&?)|?]; auto.
-      left; exists (i' ~ 1). by rewrite Preverse_xI, (assoc_L _).
+      left; exists (i' ~ 1). by rewrite Pos.reverse_xI, (assoc_L _).
     - intros.
       destruct (IHl (j~0) (Pto_list_raw j~1 r acc)) as [(i'&->&?)|?]; auto.
-      { left; exists (i' ~ 0). by rewrite Preverse_xO, (assoc_L _). }
+      { left; exists (i' ~ 0). by rewrite Pos.reverse_xO, (assoc_L _). }
       destruct (IHr (j~1) acc) as [(i'&->&?)|?]; auto.
-      left; exists (i' ~ 1). by rewrite Preverse_xI, (assoc_L _). }
+      left; exists (i' ~ 1). by rewrite Pos.reverse_xI, (assoc_L _). }
   revert t j i acc. assert (∀ t j i acc,
     (i, x) ∈ acc → (i, x) ∈ Pto_list_raw j t acc) as help.
   { intros t; induction t as [|[y|] l IHl r IHr]; intros j i acc;
@@ -195,45 +195,45 @@ Proof.
   - done.
   - rewrite elem_of_cons. destruct i as [i|i|]; simplify_eq/=.
     + right. apply help. specialize (IHr (j~1) i).
-      rewrite Preverse_xI, (assoc_L _) in IHr. by apply IHr.
+      rewrite Pos.reverse_xI, (assoc_L _) in IHr. by apply IHr.
     + right. specialize (IHl (j~0) i).
-      rewrite Preverse_xO, (assoc_L _) in IHl. by apply IHl.
+      rewrite Pos.reverse_xO, (assoc_L _) in IHl. by apply IHl.
     + left. by rewrite (left_id_L 1 (++))%positive.
   - destruct i as [i|i|]; simplify_eq/=.
     + apply help. specialize (IHr (j~1) i).
-      rewrite Preverse_xI, (assoc_L _) in IHr. by apply IHr.
+      rewrite Pos.reverse_xI, (assoc_L _) in IHr. by apply IHr.
     + specialize (IHl (j~0) i).
-      rewrite Preverse_xO, (assoc_L _) in IHl. by apply IHl.
+      rewrite Pos.reverse_xO, (assoc_L _) in IHl. by apply IHl.
 Qed.
 Lemma Pto_list_nodup {A} j (t : Pmap_raw A) acc :
-  (∀ i x, (i ++ Preverse j, x) ∈ acc → t !! i = None) →
+  (∀ i x, (i ++ Pos.reverse j, x) ∈ acc → t !! i = None) →
   NoDup acc → NoDup (Pto_list_raw j t acc).
 Proof.
   revert j acc. induction t as [|[y|] l IHl r IHr]; simpl; intros j acc Hin ?.
   - done.
   - repeat constructor.
     { rewrite Pelem_of_to_list. intros [(i&Hi&?)|Hj].
-      { apply (f_equal Plength) in Hi.
-        rewrite Preverse_xO, !Papp_length in Hi; simpl in *; lia. }
+      { apply (f_equal Pos.length) in Hi.
+        rewrite Pos.reverse_xO, !Pos.app_length in Hi; simpl in *; lia. }
       rewrite Pelem_of_to_list in Hj. destruct Hj as [(i&Hi&?)|Hj].
-      { apply (f_equal Plength) in Hi.
-        rewrite Preverse_xI, !Papp_length in Hi; simpl in *; lia. }
+      { apply (f_equal Pos.length) in Hi.
+        rewrite Pos.reverse_xI, !Pos.app_length in Hi; simpl in *; lia. }
       specialize (Hin 1 y). rewrite (left_id_L 1 (++))%positive in Hin.
       discriminate (Hin Hj). }
     apply IHl.
     { intros i x. rewrite Pelem_of_to_list. intros [(?&Hi&?)|Hi].
-      + rewrite Preverse_xO, Preverse_xI, !(assoc_L _) in Hi.
+      + rewrite Pos.reverse_xO, Pos.reverse_xI, !(assoc_L _) in Hi.
         by apply (inj (.++ _)) in Hi.
-      + apply (Hin (i~0) x). by rewrite Preverse_xO, (assoc_L _) in Hi. }
+      + apply (Hin (i~0) x). by rewrite Pos.reverse_xO, (assoc_L _) in Hi. }
     apply IHr; auto. intros i x Hi.
-    apply (Hin (i~1) x). by rewrite Preverse_xI, (assoc_L _) in Hi.
+    apply (Hin (i~1) x). by rewrite Pos.reverse_xI, (assoc_L _) in Hi.
   - apply IHl.
     { intros i x. rewrite Pelem_of_to_list. intros [(?&Hi&?)|Hi].
-      + rewrite Preverse_xO, Preverse_xI, !(assoc_L _) in Hi.
+      + rewrite Pos.reverse_xO, Pos.reverse_xI, !(assoc_L _) in Hi.
         by apply (inj (.++ _)) in Hi.
-      + apply (Hin (i~0) x). by rewrite Preverse_xO, (assoc_L _) in Hi. }
+      + apply (Hin (i~0) x). by rewrite Pos.reverse_xO, (assoc_L _) in Hi. }
     apply IHr; auto. intros i x Hi.
-    apply (Hin (i~1) x). by rewrite Preverse_xI, (assoc_L _) in Hi.
+    apply (Hin (i~1) x). by rewrite Pos.reverse_xI, (assoc_L _) in Hi.
 Qed.
 Lemma Pomap_lookup {A B} (f : A → option B) t i :
   Pomap_raw f t !! i = t !! i ≫= f.

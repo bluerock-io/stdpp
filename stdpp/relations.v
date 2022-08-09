@@ -177,7 +177,7 @@ Section general.
   Lemma bsteps_weaken n m x y :
     n ≤ m → bsteps R n x y → bsteps R m x y.
   Proof.
-    intros. rewrite (nat_le_add_sub n m); auto using bsteps_add_r.
+    intros. rewrite (Nat.le_add_sub n m); auto using bsteps_add_r.
   Qed.
   Lemma bsteps_add_l n m x y :
     bsteps R n x y → bsteps R (m + n) x y.

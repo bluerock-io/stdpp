@@ -406,7 +406,7 @@ for example used for the countable instance of lists and in namespaces.
 Fixpoint positives_flatten_go (xs : list positive) (acc : positive) : positive :=
   match xs with
   | [] => acc
-  | x :: xs => positives_flatten_go xs (acc~1~0 ++ Preverse (Pdup x))
+  | x :: xs => positives_flatten_go xs (acc~1~0 ++ Pos.reverse (Pos.dup x))
   end.
 
 (** Flatten a list of positives into a single positive by duplicating the bits
@@ -3355,7 +3355,7 @@ Section Forall2.
     { rewrite <-(resize_resize l m n) by done. by apply Forall2_resize. }
     intros. assert (n = length k); subst.
     { by rewrite <-(Forall2_length (resize n x l) k), resize_length. }
-    rewrite (nat_le_add_sub (length k) m), !resize_add,
+    rewrite (Nat.le_add_sub (length k) m), !resize_add,
       resize_all, drop_all, resize_nil by lia.
     auto using Forall2_app, Forall2_replicate_r,
       Forall_resize, Forall_drop, resize_length.
@@ -3368,7 +3368,7 @@ Section Forall2.
     { rewrite <-(resize_resize k m n) by done. by apply Forall2_resize. }
     assert (n = length l); subst.
     { by rewrite (Forall2_length l (resize n y k)), resize_length. }
-    rewrite (nat_le_add_sub (length l) m), !resize_add,
+    rewrite (Nat.le_add_sub (length l) m), !resize_add,
       resize_all, drop_all, resize_nil by lia.
     auto using Forall2_app, Forall2_replicate_l,
       Forall_resize, Forall_drop, resize_length.
@@ -3802,7 +3802,7 @@ Section find.
           naive_solver eauto using lookup_app_l_Some with lia. }
         apply list_find_Some. split_and!; [done..|].
         intros j z ??. eapply (Hleast (length l1 + j)); [|lia].
-        by rewrite lookup_app_r, nat_sub_add by lia.
+        by rewrite lookup_app_r, Nat.sub_add' by lia.
     - intros [(?&?&Hleast)%list_find_Some|(?&Hl1&(?&?&Hleast)%list_find_Some)].
       + apply list_find_Some. split_and!; [by auto using lookup_app_l_Some..|].
         assert (i < length l1) by eauto using lookup_lt_Some.
@@ -4844,7 +4844,8 @@ Global Instance TCForall_app {A} (P : A → Prop) xs ys :
   TCForall P xs → TCForall P ys → TCForall P (xs ++ ys).
 Proof. rewrite !TCForall_Forall. apply Forall_app_2. Qed.
 
-Lemma TCForall2_Forall2 {A B} (P : A → B → Prop) xs ys : TCForall2 P xs ys ↔ Forall2 P xs ys.
+Lemma TCForall2_Forall2 {A B} (P : A → B → Prop) xs ys :
+  TCForall2 P xs ys ↔ Forall2 P xs ys.
 Proof. split; induction 1; constructor; auto. Qed.
 
 Lemma TCExists_Exists {A} (P : A → Prop) l : TCExists P l ↔ Exists P l.
@@ -4866,16 +4867,16 @@ Section positives_flatten_unflatten.
   Qed.
 
   Lemma positives_unflatten_go_app p suffix xs acc :
-    positives_unflatten_go (suffix ++ Preverse (Pdup p)) xs acc =
+    positives_unflatten_go (suffix ++ Pos.reverse (Pos.dup p)) xs acc =
     positives_unflatten_go suffix xs (acc ++ p).
   Proof.
     revert suffix acc.
     induction p as [p IH|p IH|]; intros acc suffix; simpl.
-    - rewrite 2!Preverse_xI.
+    - rewrite 2!Pos.reverse_xI.
       rewrite 2!(assoc_L (++)).
       rewrite IH.
       reflexivity.
-    - rewrite 2!Preverse_xO.
+    - rewrite 2!Pos.reverse_xO.
       rewrite 2!(assoc_L (++)).
       rewrite IH.
       reflexivity.
@@ -4927,7 +4928,8 @@ Section positives_flatten_unflatten.
   Qed.
 
   Lemma positives_flatten_cons x xs :
-    positives_flatten (x :: xs) = 1~1~0 ++ Preverse (Pdup x) ++ positives_flatten xs.
+    positives_flatten (x :: xs)
+    = 1~1~0 ++ Pos.reverse (Pos.dup x) ++ positives_flatten xs.
   Proof.
     change (x :: xs) with ([x] ++ xs)%list.
     rewrite positives_flatten_app.
@@ -4953,9 +4955,9 @@ Section positives_flatten_unflatten.
     rewrite !positives_flatten_cons, !(assoc _); intros Hl.
     assert (xs = ys) as <- by eauto; clear IH; f_equal.
     apply (inj (.++ positives_flatten xs)) in Hl.
-    rewrite 2!Preverse_Pdup in Hl.
-    apply (Pdup_suffix_eq _ _ p1 p2) in Hl.
-    by apply (inj Preverse).
+    rewrite 2!Pos.reverse_dup in Hl.
+    apply (Pos.dup_suffix_eq _ _ p1 p2) in Hl.
+    by apply (inj Pos.reverse).
   Qed.
 End positives_flatten_unflatten.
 

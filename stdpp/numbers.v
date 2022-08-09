@@ -14,7 +14,7 @@ Proof. solve_decision. Defined.
 Global Arguments Nat.sub !_ !_ / : assert.
 Global Arguments Nat.max : simpl nomatch.
 
-Typeclasses Opaque lt.
+Typeclasses Opaque Nat.lt.
 
 Reserved Notation "x ≤ y ≤ z" (at level 70, y at next level).
 Reserved Notation "x ≤ y < z" (at level 70, y at next level).
@@ -36,87 +36,92 @@ Infix "`mod`" := Nat.modulo (at level 35) : nat_scope.
 Infix "`max`" := Nat.max (at level 35) : nat_scope.
 Infix "`min`" := Nat.min (at level 35) : nat_scope.
 
-Global Instance nat_eq_dec: EqDecision nat := eq_nat_dec.
-Global Instance nat_le_dec: RelDecision le := le_dec.
-Global Instance nat_lt_dec: RelDecision lt := lt_dec.
-Global Instance nat_inhabited: Inhabited nat := populate 0%nat.
-Global Instance S_inj: Inj (=) (=) S.
-Proof. by injection 1. Qed.
-Global Instance nat_le_po: PartialOrder (≤).
-Proof. repeat split; repeat intro; auto with lia. Qed.
-Global Instance nat_le_total: Total (≤).
-Proof. repeat intro; lia. Qed.
-
-Global Instance nat_le_pi: ∀ x y : nat, ProofIrrel (x ≤ y).
-Proof.
-  assert (∀ x y (p : x ≤ y) y' (q : x ≤ y'),
-    y = y' → eq_dep nat (le x) y p y' q) as aux.
-  { fix FIX 3. intros x ? [|y p] ? [|y' q].
-    - done.
-    - clear FIX. intros; exfalso; auto with lia.
-    - clear FIX. intros; exfalso; auto with lia.
-    - injection 1. intros Hy. by case (FIX x y p y' q Hy). }
-  intros x y p q.
-  by apply (Eqdep_dec.eq_dep_eq_dec (λ x y, decide (x = y))), aux.
-Qed.
-Global Instance nat_lt_pi: ∀ x y : nat, ProofIrrel (x < y).
-Proof. unfold lt. apply _. Qed.
-
-Lemma nat_le_sum (x y : nat) : x ≤ y ↔ ∃ z, y = x + z.
-Proof. split; [exists (y - x); lia | intros [z ->]; lia]. Qed.
-
-(** [Arith.Minus.minus_plus] is deprecated starting in 8.16 *)
-Lemma nat_sub_add n m : n + m - n = m.
-Proof. lia. Qed.
-(** [Arith.Minus.le_plus_minus] is deprecated starting in 8.16 *)
-Lemma nat_le_add_sub n m : n ≤ m → m = n + (m - n).
-Proof. lia. Qed.
-
-Lemma Nat_lt_succ_succ n : n < S (S n).
-Proof. auto with arith. Qed.
-Lemma Nat_mul_split_l n x1 x2 y1 y2 :
-  x2 < n → y2 < n → x1 * n + x2 = y1 * n + y2 → x1 = y1 ∧ x2 = y2.
-Proof.
-  intros Hx2 Hy2 E. cut (x1 = y1); [intros; subst;lia |].
-  revert y1 E. induction x1; simpl; intros [|?]; simpl; auto with lia.
-Qed.
-Lemma Nat_mul_split_r n x1 x2 y1 y2 :
-  x1 < n → y1 < n → x1 + x2 * n = y1 + y2 * n → x1 = y1 ∧ x2 = y2.
-Proof. intros. destruct (Nat_mul_split_l n x2 x1 y2 y1); auto with lia. Qed.
-
 Notation lcm := Nat.lcm.
 Notation divide := Nat.divide.
 Notation "( x | y )" := (divide x y) : nat_scope.
-Global Instance Nat_divide_dec : RelDecision Nat.divide.
-Proof.
-  refine (λ x y, cast_if (decide (lcm x y = y))); by rewrite Nat.divide_lcm_iff.
-Defined.
-Global Instance: PartialOrder divide.
-Proof.
-  repeat split; try apply _. intros ??. apply Nat.divide_antisym_nonneg; lia.
-Qed.
-Global Hint Extern 0 (_ | _) => reflexivity : core.
-Lemma Nat_divide_ne_0 x y : (x | y) → y ≠ 0 → x ≠ 0.
-Proof. intros Hxy Hy ->. by apply Hy, Nat.divide_0_l. Qed.
 
-Lemma Nat_iter_S {A} n (f: A → A) x : Nat.iter (S n) f x = f (Nat.iter n f x).
-Proof. done. Qed.
-Lemma Nat_iter_S_r {A} n (f: A → A) x : Nat.iter (S n) f x = Nat.iter n f (f x).
-Proof. induction n; by f_equal/=. Qed.
-Lemma Nat_iter_add {A} n1 n2 (f : A → A) x :
-  Nat.iter (n1 + n2) f x = Nat.iter n1 f (Nat.iter n2 f x).
-Proof. induction n1; by f_equal/=. Qed.
-Lemma Nat_iter_mul {A} n1 n2 (f : A → A) x :
-  Nat.iter (n1 * n2) f x = Nat.iter n1 (Nat.iter n2 f) x.
-Proof.
-  intros. induction n1 as [|n1 IHn1]; [done|].
-  simpl. by rewrite Nat_iter_add, IHn1.
-Qed.
+Module Nat.
+  Global Instance eq_dec: EqDecision nat := eq_nat_dec.
+  Global Instance le_dec: RelDecision le := le_dec.
+  Global Instance lt_dec: RelDecision lt := lt_dec.
+  Global Instance inhabited: Inhabited nat := populate 0.
 
-Lemma Nat_iter_ind {A} (P : A → Prop) f x k :
-  P x → (∀ y, P y → P (f y)) → P (Nat.iter k f x).
-Proof. induction k; simpl; auto. Qed.
+  Global Instance succ_inj: Inj (=) (=) Nat.succ.
+  Proof. by injection 1. Qed.
 
+  Global Instance le_po: PartialOrder (≤).
+  Proof. repeat split; repeat intro; auto with lia. Qed.
+  Global Instance le_total: Total (≤).
+  Proof. repeat intro; lia. Qed.
+
+  Global Instance le_pi: ∀ x y : nat, ProofIrrel (x ≤ y).
+  Proof.
+    assert (∀ x y (p : x ≤ y) y' (q : x ≤ y'),
+      y = y' → eq_dep nat (le x) y p y' q) as aux.
+    { fix FIX 3. intros x ? [|y p] ? [|y' q].
+      - done.
+      - clear FIX. intros; exfalso; auto with lia.
+      - clear FIX. intros; exfalso; auto with lia.
+      - injection 1. intros Hy. by case (FIX x y p y' q Hy). }
+    intros x y p q.
+    by apply (Eqdep_dec.eq_dep_eq_dec (λ x y, decide (x = y))), aux.
+  Qed.
+  Global Instance lt_pi: ∀ x y : nat, ProofIrrel (x < y).
+  Proof. unfold lt. apply _. Qed.
+
+  Lemma le_sum (x y : nat) : x ≤ y ↔ ∃ z, y = x + z.
+  Proof. split; [exists (y - x); lia | intros [z ->]; lia]. Qed.
+
+  (** [Arith.Minus.minus_plus] is deprecated starting in 8.16 *)
+  Lemma sub_add' n m : n + m - n = m.
+  Proof. lia. Qed.
+  (** [Arith.Minus.le_plus_minus] is deprecated starting in 8.16 *)
+  Lemma le_add_sub n m : n ≤ m → m = n + (m - n).
+  Proof. lia. Qed.
+
+  Lemma lt_succ_succ n : n < S (S n).
+  Proof. auto with arith. Qed.
+  Lemma mul_split_l n x1 x2 y1 y2 :
+    x2 < n → y2 < n → x1 * n + x2 = y1 * n + y2 → x1 = y1 ∧ x2 = y2.
+  Proof.
+    intros Hx2 Hy2 E. cut (x1 = y1); [intros; subst;lia |].
+    revert y1 E. induction x1; simpl; intros [|?]; simpl; auto with lia.
+  Qed.
+  Lemma mul_split_r n x1 x2 y1 y2 :
+    x1 < n → y1 < n → x1 + x2 * n = y1 + y2 * n → x1 = y1 ∧ x2 = y2.
+  Proof. intros. destruct (mul_split_l n x2 x1 y2 y1); auto with lia. Qed.
+
+  Global Instance divide_dec : RelDecision Nat.divide.
+  Proof.
+    refine (λ x y, cast_if (decide (lcm x y = y))); by rewrite Nat.divide_lcm_iff.
+  Defined.
+  Global Instance divide_po : PartialOrder divide.
+  Proof.
+    repeat split; try apply _. intros ??. apply Nat.divide_antisym_nonneg; lia.
+  Qed.
+  Global Hint Extern 0 (_ | _) => reflexivity : core.
+
+  Lemma divide_ne_0 x y : (x | y) → y ≠ 0 → x ≠ 0.
+  Proof. intros Hxy Hy ->. by apply Hy, Nat.divide_0_l. Qed.
+
+  Lemma iter_succ {A} n (f: A → A) x : Nat.iter (S n) f x = f (Nat.iter n f x).
+  Proof. done. Qed.
+  Lemma iter_succ_r {A} n (f: A → A) x : Nat.iter (S n) f x = Nat.iter n f (f x).
+  Proof. induction n; by f_equal/=. Qed.
+  Lemma iter_add {A} n1 n2 (f : A → A) x :
+    Nat.iter (n1 + n2) f x = Nat.iter n1 f (Nat.iter n2 f x).
+  Proof. induction n1; by f_equal/=. Qed.
+  Lemma iter_mul {A} n1 n2 (f : A → A) x :
+    Nat.iter (n1 * n2) f x = Nat.iter n1 (Nat.iter n2 f) x.
+  Proof.
+    intros. induction n1 as [|n1 IHn1]; [done|].
+    simpl. by rewrite iter_add, IHn1.
+  Qed.
+
+  Lemma iter_ind {A} (P : A → Prop) f x k :
+    P x → (∀ y, P y → P (f y)) → P (Nat.iter k f x).
+  Proof. induction k; simpl; auto. Qed.
+End Nat.
 
 (** * Notations and properties of [positive] *)
 Local Open Scope positive_scope.
@@ -135,154 +140,160 @@ Notation "(~0)" := xO (only parsing) : positive_scope.
 Notation "(~1)" := xI (only parsing) : positive_scope.
 
 Global Arguments Pos.of_nat : simpl never.
-Global Arguments Pmult : simpl never.
+Global Arguments Pos.mul : simpl never.
 
-Global Instance positive_eq_dec: EqDecision positive := Pos.eq_dec.
-Global Instance positive_le_dec: RelDecision Pos.le.
-Proof. refine (λ x y, decide ((x ?= y) ≠ Gt)). Defined.
-Global Instance positive_lt_dec: RelDecision Pos.lt.
-Proof. refine (λ x y, decide ((x ?= y) = Lt)). Defined.
-Global Instance positive_le_total: Total Pos.le.
-Proof. repeat intro; lia. Qed.
+Module Pos.
+  Global Instance eq_dec: EqDecision positive := Pos.eq_dec.
+  Global Instance le_dec: RelDecision Pos.le.
+  Proof. refine (λ x y, decide ((x ?= y) ≠ Gt)). Defined.
+  Global Instance lt_dec: RelDecision Pos.lt.
+  Proof. refine (λ x y, decide ((x ?= y) = Lt)). Defined.
+  Global Instance le_total: Total Pos.le.
+  Proof. repeat intro; lia. Qed.
 
-Global Instance positive_inhabited: Inhabited positive := populate 1.
+  Global Instance inhabited: Inhabited positive := populate 1.
 
-Global Instance maybe_xO : Maybe xO := λ p, match p with p~0 => Some p | _ => None end.
-Global Instance maybe_xI : Maybe xI := λ p, match p with p~1 => Some p | _ => None end.
-Global Instance xO_inj : Inj (=) (=) (~0).
-Proof. by injection 1. Qed.
-Global Instance xI_inj : Inj (=) (=) (~1).
-Proof. by injection 1. Qed.
+  Global Instance maybe_xO : Maybe xO := λ p, match p with p~0 => Some p | _ => None end.
+  Global Instance maybe_xI : Maybe xI := λ p, match p with p~1 => Some p | _ => None end.
+  Global Instance xO_inj : Inj (=) (=) (~0).
+  Proof. by injection 1. Qed.
+  Global Instance xI_inj : Inj (=) (=) (~1).
+  Proof. by injection 1. Qed.
 
-(** Since [positive] represents lists of bits, we define list operations
-on it. These operations are in reverse, as positives are treated as snoc
-lists instead of cons lists. *)
-Fixpoint Papp (p1 p2 : positive) : positive :=
-  match p2 with
-  | 1 => p1
-  | p2~0 => (Papp p1 p2)~0
-  | p2~1 => (Papp p1 p2)~1
-  end.
-Infix "++" := Papp : positive_scope.
-Notation "(++)" := Papp (only parsing) : positive_scope.
-Notation "( p ++.)" := (Papp p) (only parsing) : positive_scope.
-Notation "(.++ q )" := (λ p, Papp p q) (only parsing) : positive_scope.
+  (** Since [positive] represents lists of bits, we define list operations
+  on it. These operations are in reverse, as positives are treated as snoc
+  lists instead of cons lists. *)
+  Fixpoint app (p1 p2 : positive) : positive :=
+    match p2 with
+    | 1 => p1
+    | p2~0 => (app p1 p2)~0
+    | p2~1 => (app p1 p2)~1
+    end.
 
-Fixpoint Preverse_go (p1 p2 : positive) : positive :=
-  match p2 with
-  | 1 => p1
-  | p2~0 => Preverse_go (p1~0) p2
-  | p2~1 => Preverse_go (p1~1) p2
-  end.
-Definition Preverse : positive → positive := Preverse_go 1.
+  Module Import app_notations.
+    Infix "++" := app : positive_scope.
+    Notation "(++)" := app (only parsing) : positive_scope.
+    Notation "( p ++.)" := (app p) (only parsing) : positive_scope.
+    Notation "(.++ q )" := (λ p, app p q) (only parsing) : positive_scope.
+  End app_notations.
 
-Global Instance Papp_1_l : LeftId (=) 1 (++).
-Proof. intros p. by induction p; intros; f_equal/=. Qed.
-Global Instance Papp_1_r : RightId (=) 1 (++).
-Proof. done. Qed.
-Global Instance Papp_assoc : Assoc (=) (++).
-Proof. intros ?? p. by induction p; intros; f_equal/=. Qed.
-Global Instance Papp_inj p : Inj (=) (=) (.++ p).
-Proof. intros ???. induction p; simplify_eq; auto. Qed.
+  Fixpoint reverse_go (p1 p2 : positive) : positive :=
+    match p2 with
+    | 1 => p1
+    | p2~0 => reverse_go (p1~0) p2
+    | p2~1 => reverse_go (p1~1) p2
+    end.
+  Definition reverse : positive → positive := reverse_go 1.
 
-Lemma Preverse_go_app p1 p2 p3 :
-  Preverse_go p1 (p2 ++ p3) = Preverse_go p1 p3 ++ Preverse_go 1 p2.
-Proof.
-  revert p3 p1 p2.
-  cut (∀ p1 p2 p3, Preverse_go (p2 ++ p3) p1 = p2 ++ Preverse_go p3 p1).
-  { by intros go p3; induction p3; intros p1 p2; simpl; auto; rewrite <-?go. }
-  intros p1; induction p1 as [p1 IH|p1 IH|]; intros p2 p3; simpl; auto.
-  - apply (IH _ (_~1)).
-  - apply (IH _ (_~0)).
-Qed.
-Lemma Preverse_app p1 p2 : Preverse (p1 ++ p2) = Preverse p2 ++ Preverse p1.
-Proof. unfold Preverse. by rewrite Preverse_go_app. Qed.
-Lemma Preverse_xO p : Preverse (p~0) = (1~0) ++ Preverse p.
-Proof Preverse_app p (1~0).
-Lemma Preverse_xI p : Preverse (p~1) = (1~1) ++ Preverse p.
-Proof Preverse_app p (1~1).
+  Global Instance app_1_l : LeftId (=) 1 (++).
+  Proof. intros p. by induction p; intros; f_equal/=. Qed.
+  Global Instance app_1_r : RightId (=) 1 (++).
+  Proof. done. Qed.
+  Global Instance app_assoc : Assoc (=) (++).
+  Proof. intros ?? p. by induction p; intros; f_equal/=. Qed.
+  Global Instance app_inj p : Inj (=) (=) (.++ p).
+  Proof. intros ???. induction p; simplify_eq; auto. Qed.
 
-Lemma Preverse_involutive p :
-  Preverse (Preverse p) = p.
-Proof.
-  induction p as [p IH|p IH|]; simpl.
-  - by rewrite Preverse_xI, Preverse_app, IH.
-  - by rewrite Preverse_xO, Preverse_app, IH.
-  - reflexivity.
-Qed.
+  Lemma reverse_go_app p1 p2 p3 :
+    reverse_go p1 (p2 ++ p3) = reverse_go p1 p3 ++ reverse_go 1 p2.
+  Proof.
+    revert p3 p1 p2.
+    cut (∀ p1 p2 p3, reverse_go (p2 ++ p3) p1 = p2 ++ reverse_go p3 p1).
+    { by intros go p3; induction p3; intros p1 p2; simpl; auto; rewrite <-?go. }
+    intros p1; induction p1 as [p1 IH|p1 IH|]; intros p2 p3; simpl; auto.
+    - apply (IH _ (_~1)).
+    - apply (IH _ (_~0)).
+  Qed.
+  Lemma reverse_app p1 p2 : reverse (p1 ++ p2) = reverse p2 ++ reverse p1.
+  Proof. unfold reverse. by rewrite reverse_go_app. Qed.
+  Lemma reverse_xO p : reverse (p~0) = (1~0) ++ reverse p.
+  Proof reverse_app p (1~0).
+  Lemma reverse_xI p : reverse (p~1) = (1~1) ++ reverse p.
+  Proof reverse_app p (1~1).
 
-Global Instance Preverse_inj : Inj (=) (=) Preverse.
-Proof.
-  intros p q eq.
-  rewrite <- (Preverse_involutive p).
-  rewrite <- (Preverse_involutive q).
-  by rewrite eq.
-Qed.
+  Lemma reverse_involutive p : reverse (reverse p) = p.
+  Proof.
+    induction p as [p IH|p IH|]; simpl.
+    - by rewrite reverse_xI, reverse_app, IH.
+    - by rewrite reverse_xO, reverse_app, IH.
+    - reflexivity.
+  Qed.
 
-Fixpoint Plength (p : positive) : nat :=
-  match p with 1 => 0%nat | p~0 | p~1 => S (Plength p) end.
-Lemma Papp_length p1 p2 : Plength (p1 ++ p2) = (Plength p2 + Plength p1)%nat.
-Proof. by induction p2; f_equal/=. Qed.
+  Global Instance reverse_inj : Inj (=) (=) reverse.
+  Proof.
+    intros p q eq.
+    rewrite <-(reverse_involutive p).
+    rewrite <-(reverse_involutive q).
+    by rewrite eq.
+  Qed.
 
-Lemma Plt_sum (x y : positive) : x < y ↔ ∃ z, y = x + z.
-Proof.
-  split.
-  - exists (y - x)%positive. symmetry. apply Pplus_minus. lia.
-  - intros [z ->]. lia.
-Qed.
+  Fixpoint length (p : positive) : nat :=
+    match p with 1 => 0%nat | p~0 | p~1 => S (length p) end.
+  Lemma app_length p1 p2 : length (p1 ++ p2) = (length p2 + length p1)%nat.
+  Proof. by induction p2; f_equal/=. Qed.
 
-(** Duplicate the bits of a positive, i.e. 1~0~1 -> 1~0~0~1~1 and
-    1~1~0~0 -> 1~1~1~0~0~0~0 *)
-Fixpoint Pdup (p : positive) : positive :=
-  match p with
-  | 1 => 1
-  | p'~0 => (Pdup p')~0~0
-  | p'~1 => (Pdup p')~1~1
-  end.
+  Lemma lt_sum (x y : positive) : x < y ↔ ∃ z, y = x + z.
+  Proof.
+    split.
+    - exists (y - x)%positive. symmetry. apply Pplus_minus. lia.
+    - intros [z ->]. lia.
+  Qed.
 
-Lemma Pdup_app p q :
-  Pdup (p ++ q) = Pdup p ++ Pdup q.
-Proof.
-  revert p.
-  induction q as [p IH|p IH|]; intros q; simpl.
-  - by rewrite IH.
-  - by rewrite IH.
-  - reflexivity.
-Qed.
+  (** Duplicate the bits of a positive, i.e. 1~0~1 -> 1~0~0~1~1 and
+      1~1~0~0 -> 1~1~1~0~0~0~0 *)
+  Fixpoint dup (p : positive) : positive :=
+    match p with
+    | 1 => 1
+    | p'~0 => (dup p')~0~0
+    | p'~1 => (dup p')~1~1
+    end.
 
-Lemma Pdup_suffix_eq p q s1 s2 :
-  s1~1~0 ++ Pdup p = s2~1~0 ++ Pdup q → p = q.
-Proof.
-  revert q.
-  induction p as [p IH|p IH|]; intros [q|q|] eq; simplify_eq/=.
-  - by rewrite (IH q).
-  - by rewrite (IH q).
-  - reflexivity.
-Qed.
+  Lemma dup_app p q :
+    dup (p ++ q) = dup p ++ dup q.
+  Proof.
+    revert p.
+    induction q as [p IH|p IH|]; intros q; simpl.
+    - by rewrite IH.
+    - by rewrite IH.
+    - reflexivity.
+  Qed.
 
-Global Instance Pdup_inj : Inj (=) (=) Pdup.
-Proof.
-  intros p q eq.
-  apply (Pdup_suffix_eq _ _ 1 1).
-  by rewrite eq.
-Qed.
+  Lemma dup_suffix_eq p q s1 s2 :
+    s1~1~0 ++ dup p = s2~1~0 ++ dup q → p = q.
+  Proof.
+    revert q.
+    induction p as [p IH|p IH|]; intros [q|q|] eq; simplify_eq/=.
+    - by rewrite (IH q).
+    - by rewrite (IH q).
+    - reflexivity.
+  Qed.
 
-Lemma Preverse_Pdup p :
-  Preverse (Pdup p) = Pdup (Preverse p).
-Proof.
-  induction p as [p IH|p IH|]; simpl.
-  - rewrite 3!Preverse_xI.
-    rewrite (assoc_L (++)).
-    rewrite IH.
-    rewrite Pdup_app.
-    reflexivity.
-  - rewrite 3!Preverse_xO.
-    rewrite (assoc_L (++)).
-    rewrite IH.
-    rewrite Pdup_app.
-    reflexivity.
-  - reflexivity.
-Qed.
+  Global Instance dup_inj : Inj (=) (=) dup.
+  Proof.
+    intros p q eq.
+    apply (dup_suffix_eq _ _ 1 1).
+    by rewrite eq.
+  Qed.
+
+  Lemma reverse_dup p :
+    reverse (dup p) = dup (reverse p).
+  Proof.
+    induction p as [p IH|p IH|]; simpl.
+    - rewrite 3!reverse_xI.
+      rewrite (assoc_L (++)).
+      rewrite IH.
+      rewrite dup_app.
+      reflexivity.
+    - rewrite 3!reverse_xO.
+      rewrite (assoc_L (++)).
+      rewrite IH.
+      rewrite dup_app.
+      reflexivity.
+    - reflexivity.
+  Qed.
+End Pos.
+
+Export Pos.app_notations.
 
 Local Close Scope positive_scope.
 

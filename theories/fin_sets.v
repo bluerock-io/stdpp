@@ -467,7 +467,7 @@ Section set_bind.
   Global Instance set_bind_proper : Proper (pointwise_relation _ (≡) ==> (≡) ==> (≡)) set_bind.
   Proof. unfold pointwise_relation; intros f1 f2 Hf X1 X2 HX. set_solver. Qed.
 
-  Global Instance set_bind_subset : Proper (pointwise_relation _ (⊆) ==> (⊆) ==> (⊆)) set_bind.
+  Global Instance set_bind_mono : Proper (pointwise_relation _ (⊆) ==> (⊆) ==> (⊆)) set_bind.
   Proof. unfold pointwise_relation; intros f1 f2 Hf X1 X2 HX. set_solver. Qed.
 
   Lemma set_bind_ext (f g : A → SB) (X Y : C) :

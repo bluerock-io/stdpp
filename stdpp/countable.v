@@ -298,7 +298,7 @@ Global Program Instance Qp_countable : Countable Qp :=
     (λ p : Qc, guard (0 < p)%Qc as Hp; Some (mk_Qp p Hp)) _.
 Next Obligation.
   intros [p Hp]. unfold mguard, option_guard; simpl.
-  case_match; [|done]. f_equal. by apply Qp_to_Qc_inj_iff.
+  case_match; [|done]. f_equal. by apply Qp.to_Qc_inj_iff.
 Qed.
 
 Global Program Instance fin_countable n : Countable (fin n) :=

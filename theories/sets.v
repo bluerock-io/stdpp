@@ -448,7 +448,7 @@ Section semi_set.
   Proof. set_solver. Qed.
   Lemma elem_of_equiv_empty X : X ≡ ∅ ↔ ∀ x, x ∉ X.
   Proof. set_solver. Qed.
-  Lemma elem_of_empty x : x ∈ (∅ : C) ↔ False.
+  Lemma elem_of_empty x : x ∈@{C} ∅ ↔ False.
   Proof. set_solver. Qed.
   Lemma equiv_empty X : X ⊆ ∅ → X ≡ ∅.
   Proof. set_solver. Qed.
@@ -460,19 +460,19 @@ Section semi_set.
   Proof. set_solver. Qed.
 
   (** Singleton *)
-  Lemma elem_of_singleton_1 x y : x ∈ ({[y]} : C) → x = y.
+  Lemma elem_of_singleton_1 x y : x ∈@{C} {[y]} → x = y.
   Proof. by rewrite elem_of_singleton. Qed.
-  Lemma elem_of_singleton_2 x y : x = y → x ∈ ({[y]} : C).
+  Lemma elem_of_singleton_2 x y : x = y → x ∈@{C} {[y]}.
   Proof. by rewrite elem_of_singleton. Qed.
   Lemma elem_of_subseteq_singleton x X : x ∈ X ↔ {[ x ]} ⊆ X.
   Proof. set_solver. Qed.
-  Lemma non_empty_singleton x : ({[ x ]} : C) ≢ ∅.
+  Lemma non_empty_singleton x : {[ x ]} ≢@{C} ∅.
   Proof. set_solver. Qed.
-  Lemma not_elem_of_singleton x y : x ∉ ({[ y ]} : C) ↔ x ≠ y.
+  Lemma not_elem_of_singleton x y : x ∉@{C} {[ y ]} ↔ x ≠ y.
   Proof. by rewrite elem_of_singleton. Qed.
-  Lemma not_elem_of_singleton_1 x y : x ∉ ({[ y ]} : C) → x ≠ y.
+  Lemma not_elem_of_singleton_1 x y : x ∉@{C} {[ y ]} → x ≠ y.
   Proof. apply not_elem_of_singleton. Qed.
-  Lemma not_elem_of_singleton_2 x y : x ≠ y → x ∉ ({[ y ]} : C).
+  Lemma not_elem_of_singleton_2 x y : x ≠ y → x ∉@{C} {[ y ]}.
   Proof. apply not_elem_of_singleton. Qed.
 
   Lemma singleton_subseteq_l x X : {[ x ]} ⊆ X ↔ x ∈ X.
@@ -587,7 +587,7 @@ Section semi_set.
     Proof. unfold_leibniz. apply non_empty_inhabited. Qed.
 
     (** Singleton *)
-    Lemma non_empty_singleton_L x : {[ x ]} ≠ (∅ : C).
+    Lemma non_empty_singleton_L x : {[ x ]} ≠@{C} ∅.
     Proof. unfold_leibniz. apply non_empty_singleton. Qed.
 
     (** Big unions *)
@@ -670,7 +670,7 @@ Section set.
   Global Instance intersection_empty_r: RightAbsorb (≡@{C}) ∅ (∩).
   Proof. intros X; set_solver. Qed.
 
-  Lemma intersection_singletons x : ({[x]} : C) ∩ {[x]} ≡ {[x]}.
+  Lemma intersection_singletons x : {[x]} ∩ {[x]} ≡@{C} {[x]}.
   Proof. set_solver. Qed.
 
   Lemma union_intersection_l X Y Z : X ∪ (Y ∩ Z) ≡ (X ∪ Y) ∩ (X ∪ Z).
@@ -752,7 +752,7 @@ Section set.
     Global Instance intersection_empty_r_L: RightAbsorb (=@{C}) ∅ (∩).
     Proof. intros ?. unfold_leibniz. apply (right_absorb _ _). Qed.
 
-    Lemma intersection_singletons_L x : {[x]} ∩ {[x]} = ({[x]} : C).
+    Lemma intersection_singletons_L x : {[x]} ∩ {[x]} =@{C} {[x]}.
     Proof. unfold_leibniz. apply intersection_singletons. Qed.
 
     Lemma union_intersection_l_L X Y Z : X ∪ (Y ∩ Z) = (X ∪ Y) ∩ (X ∪ Z).

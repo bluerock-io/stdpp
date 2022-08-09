@@ -53,6 +53,11 @@ Coq 8.11 is no longer supported.
   lemmas using `Qp.lem` instead of `Qp_lem`.
 - Rename `_plus`/`_minus` into `_add`/`_sub` to be consistent with Coq's current
   convention for numbers. See the sed script below for an exact list of renames.
+- Refactor the `feed` and `efeed` tactics. In particular, improve the
+  documentation of `(e)feed` tactics, rename the primitive `(e)feed`
+  tactic to `(e)feed_core`, make the syntax of `feed_core` consistent
+  with `efeed_core`, remove the `by` parameter of `efeed_core`, and add
+  `(e)feed generalize`, `efeed inversion`, and `efeed destruct`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

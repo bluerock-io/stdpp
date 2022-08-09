@@ -43,6 +43,8 @@ s/\bmap_disjoint_subset\b/kmap_subset/g
 s/\blookup_union_l\b/lookup_union_l'/g
 EOF
 ```
+- Add the bind operation `set_bind` for finite sets. (by Dan Frumin and Paolo G.
+  Giarrusso)
 
 ## std++ 1.7.0 (2022-01-22)
 

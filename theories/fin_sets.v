@@ -27,6 +27,12 @@ Definition set_map `{Elements A C, Singleton B D, Empty D, Union D}
 Typeclasses Opaque set_map.
 Global Instance: Params (@set_map) 8 := {}.
 
+Definition set_bind `{Elements A SA, Empty SB, Union SB}
+    (f : A → SB) (X : SA) : SB :=
+  ⋃ (f <$> elements X).
+Typeclasses Opaque set_bind.
+Global Instance: Params (@set_bind) 6 := {}.
+
 Global Instance set_fresh `{Elements A C, Fresh A (list A)} : Fresh A C :=
   fresh ∘ elements.
 Typeclasses Opaque set_fresh.
@@ -435,6 +441,53 @@ Section map.
     set_map (C:=C) (D:=D) f {[x]} = {[f x]}.
   Proof. unfold_leibniz. apply set_map_singleton. Qed.
 End map.
+
+(** * Bind *)
+Section set_bind.
+  Context `{FinSet B SB}.
+
+  Local Notation set_bind := (set_bind (A:=A) (SA:=C) (SB:=SB)).
+
+  Lemma elem_of_set_bind (f : A → SB) (X : C) y :
+    y ∈ set_bind f X ↔ ∃ x, x ∈ X ∧ y ∈ f x.
+  Proof.
+    unfold set_bind. rewrite !elem_of_union_list. set_solver.
+  Qed.
+
+  Global Instance set_unfold_set_bind (f : A → SB) (X : C)
+       (y : B) (P : A → B → Prop) (Q : A → Prop) :
+    (∀ x y, SetUnfoldElemOf y (f x) (P x y)) →
+    (∀ x, SetUnfoldElemOf x X (Q x)) →
+    SetUnfoldElemOf y (set_bind f X) (∃ x, Q x ∧ P x y).
+  Proof.
+    intros HSU1 HSU2. constructor.
+    rewrite elem_of_set_bind. set_solver.
+  Qed.
+
+  Global Instance set_bind_proper :
+    Proper (pointwise_relation _ (≡) ==> (≡) ==> (≡)) set_bind.
+  Proof. unfold pointwise_relation; intros f1 f2 Hf X1 X2 HX. set_solver. Qed.
+
+  Global Instance set_bind_mono :
+    Proper (pointwise_relation _ (⊆) ==> (⊆) ==> (⊆)) set_bind.
+  Proof. unfold pointwise_relation; intros f1 f2 Hf X1 X2 HX. set_solver. Qed.
+
+  Lemma set_bind_ext (f g : A → SB) (X Y : C) :
+    (∀ x, x ∈ X → x ∈ Y → f x ≡ g x) → X ≡ Y → set_bind f X ≡ set_bind g Y.
+  Proof. set_solver. Qed.
+
+  Lemma set_bind_singleton f x : set_bind f {[x]} ≡ f x.
+  Proof. set_solver. Qed.
+  Lemma set_bind_singleton_L `{!LeibnizEquiv SB} f x : set_bind f {[x]} = f x.
+  Proof. unfold_leibniz. apply set_bind_singleton. Qed.
+
+  Lemma set_bind_disj_union f (X Y : C) :
+    X ## Y → set_bind f (X ∪ Y) ≡ set_bind f X ∪ set_bind f Y.
+  Proof. set_solver. Qed.
+  Lemma set_bind_disj_union_L `{!LeibnizEquiv SB} f (X Y : C) :
+    X ## Y → set_bind f (X ∪ Y) = set_bind f X ∪ set_bind f Y.
+  Proof. unfold_leibniz. apply set_bind_disj_union. Qed.
+End set_bind.
 
 (** * Decision procedures *)
 Lemma set_Forall_elements P X : set_Forall P X ↔ Forall P (elements X).

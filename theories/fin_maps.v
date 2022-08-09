@@ -1280,6 +1280,165 @@ Proof.
     assert (m !! j = Some y) by (apply Hm; by right). naive_solver.
 Qed.
 
+(** ** Properties of the [map_Forall] predicate *)
+Section map_Forall.
+  Context {A} (P : K → A → Prop).
+  Implicit Types m : M A.
+
+  Lemma map_Forall_to_list m : map_Forall P m ↔ Forall (uncurry P) (map_to_list m).
+  Proof.
+    rewrite Forall_forall. split.
+    - intros Hforall [i x]. rewrite elem_of_map_to_list. by apply (Hforall i x).
+    - intros Hforall i x. rewrite <-elem_of_map_to_list. by apply (Hforall (i,x)).
+  Qed.
+  Lemma map_Forall_empty : map_Forall P (∅ : M A).
+  Proof. intros i x. by rewrite lookup_empty. Qed.
+  Lemma map_Forall_impl (Q : K → A → Prop) m :
+    map_Forall P m → (∀ i x, P i x → Q i x) → map_Forall Q m.
+  Proof. unfold map_Forall; naive_solver. Qed.
+  Lemma map_Forall_insert_1_1 m i x : map_Forall P (<[i:=x]>m) → P i x.
+  Proof. intros Hm. by apply Hm; rewrite lookup_insert. Qed.
+  Lemma map_Forall_insert_1_2 m i x :
+    m !! i = None → map_Forall P (<[i:=x]>m) → map_Forall P m.
+  Proof.
+    intros ? Hm j y ?; apply Hm. by rewrite lookup_insert_ne by congruence.
+  Qed.
+  Lemma map_Forall_insert_2 m i x :
+    P i x → map_Forall P m → map_Forall P (<[i:=x]>m).
+  Proof. intros ?? j y; rewrite lookup_insert_Some; naive_solver. Qed.
+  Lemma map_Forall_insert m i x :
+    m !! i = None → map_Forall P (<[i:=x]>m) ↔ P i x ∧ map_Forall P m.
+  Proof.
+    naive_solver eauto using map_Forall_insert_1_1,
+      map_Forall_insert_1_2, map_Forall_insert_2.
+  Qed.
+  Lemma map_Forall_singleton (i : K) (x : A) :
+    map_Forall P ({[i := x]} : M A) ↔ P i x.
+  Proof.
+    unfold map_Forall. setoid_rewrite lookup_singleton_Some. naive_solver.
+  Qed.
+  Lemma map_Forall_delete m i : map_Forall P m → map_Forall P (delete i m).
+  Proof. intros Hm j x; rewrite lookup_delete_Some. naive_solver. Qed.
+  Lemma map_Forall_lookup m :
+    map_Forall P m ↔ ∀ i x, m !! i = Some x → P i x.
+  Proof. done. Qed.
+  Lemma map_Forall_lookup_1 m i x :
+    map_Forall P m → m !! i = Some x → P i x.
+  Proof. intros ?. by apply map_Forall_lookup. Qed.
+  Lemma map_Forall_lookup_2 m :
+    (∀ i x, m !! i = Some x → P i x) → map_Forall P m.
+  Proof. intros ?. by apply map_Forall_lookup. Qed.
+  Lemma map_Forall_foldr_delete m is :
+    map_Forall P m → map_Forall P (foldr delete m is).
+  Proof. induction is; eauto using map_Forall_delete. Qed.
+  Lemma map_Forall_ind (Q : M A → Prop) :
+    Q ∅ →
+    (∀ m i x, m !! i = None → P i x → map_Forall P m → Q m → Q (<[i:=x]>m)) →
+    ∀ m, map_Forall P m → Q m.
+  Proof.
+    intros Hnil Hinsert m. induction m using map_ind; auto.
+    rewrite map_Forall_insert by done; intros [??]; eauto.
+  Qed.
+
+  Context `{∀ i x, Decision (P i x)}.
+  Global Instance map_Forall_dec m : Decision (map_Forall P m).
+  Proof.
+    refine (cast_if (decide (Forall (uncurry P) (map_to_list m))));
+      by rewrite map_Forall_to_list.
+  Defined.
+  Lemma map_not_Forall (m : M A) :
+    ¬map_Forall P m ↔ ∃ i x, m !! i = Some x ∧ ¬P i x.
+  Proof.
+    split; [|intros (i&x&?&?) Hm; specialize (Hm i x); tauto].
+    rewrite map_Forall_to_list. intros Hm.
+    apply (not_Forall_Exists _), Exists_exists in Hm.
+    destruct Hm as ([i x]&?&?). exists i, x. by rewrite <-elem_of_map_to_list.
+  Qed.
+End map_Forall.
+
+(** ** Properties of the [map_Exists] predicate *)
+Section map_Exists.
+  Context {A} (P : K → A → Prop).
+  Implicit Types m : M A.
+
+  Lemma map_Exists_to_list m : map_Exists P m ↔ Exists (uncurry P) (map_to_list m).
+  Proof.
+    rewrite Exists_exists. split.
+    - intros [? [? [? ?]]]. eexists (_, _). by rewrite elem_of_map_to_list.
+    - intros [[??] [??]]. eexists _, _. by rewrite <-elem_of_map_to_list.
+  Qed.
+  Lemma map_Exists_empty : ¬ map_Exists P (∅ : M A).
+  Proof. intros [?[?[Hm ?]]]. by rewrite lookup_empty in Hm. Qed.
+  Lemma map_Exists_impl (Q : K → A → Prop) m :
+    map_Exists P m → (∀ i x, P i x → Q i x) → map_Exists Q m.
+  Proof. unfold map_Exists; naive_solver. Qed.
+  Lemma map_Exists_insert_1 m i x :
+    map_Exists P (<[i:=x]>m) → P i x ∨ map_Exists P m.
+  Proof. intros [j[y[?%lookup_insert_Some ?]]]. unfold map_Exists. naive_solver. Qed.
+  Lemma map_Exists_insert_2_1 m i x : P i x → map_Exists P (<[i:=x]>m).
+  Proof. intros Hm. exists i, x. by rewrite lookup_insert. Qed.
+  Lemma map_Exists_insert_2_2 m i x :
+    m !! i = None → map_Exists P m → map_Exists P (<[i:=x]>m).
+  Proof.
+    intros Hm [j[y[??]]]. exists j, y. by rewrite lookup_insert_ne by congruence.
+  Qed.
+  Lemma map_Exists_insert m i x :
+    m !! i = None → map_Exists P (<[i:=x]>m) ↔ P i x ∨ map_Exists P m.
+  Proof.
+    naive_solver eauto using map_Exists_insert_1,
+      map_Exists_insert_2_1, map_Exists_insert_2_2.
+  Qed.
+  Lemma map_Exists_singleton (i : K) (x : A) :
+    map_Exists P ({[i := x]} : M A) ↔ P i x.
+  Proof.
+    unfold map_Exists. setoid_rewrite lookup_singleton_Some. naive_solver.
+  Qed.
+  Lemma map_Exists_delete m i : map_Exists P (delete i m) → map_Exists P m.
+  Proof.
+    intros [j [y [Hm ?]]]. rewrite lookup_delete_Some in Hm.
+    unfold map_Exists. naive_solver.
+  Qed.
+  Lemma map_Exists_lookup m :
+    map_Exists P m ↔ ∃ i x, m !! i = Some x ∧ P i x.
+  Proof. done. Qed.
+  Lemma map_Exists_lookup_1 m :
+    map_Exists P m → ∃ i x, m !! i = Some x ∧ P i x.
+  Proof. by rewrite map_Exists_lookup. Qed.
+  Lemma map_Exists_lookup_2 m i x :
+    m !! i = Some x → P i x → map_Exists P m.
+  Proof. rewrite map_Exists_lookup. by eauto. Qed.
+  Lemma map_Exists_foldr_delete m is :
+    map_Exists P (foldr delete m is) → map_Exists P m.
+  Proof. induction is; eauto using map_Exists_delete. Qed.
+
+  Lemma map_Exists_ind (Q : M A → Prop) :
+    (∀ i x, P i x → Q {[ i := x ]}) →
+    (∀ m i x, m !! i = None → map_Exists P m → Q m → Q (<[i:=x]>m)) →
+    ∀ m, map_Exists P m → Q m.
+  Proof.
+    intros Hsingleton Hinsert m Hm. induction m as [|i x m Hi IH] using map_ind.
+    { by destruct map_Exists_empty. }
+    apply map_Exists_insert in Hm as [?|?]; [|by eauto..].
+    clear IH. induction m as [|j y m Hj IH] using map_ind; [by eauto|].
+    apply lookup_insert_None in Hi as [??].
+    rewrite insert_commute by done. apply Hinsert.
+    - by apply lookup_insert_None.
+    - apply map_Exists_insert; by eauto.
+    - eauto.
+  Qed.
+
+  Lemma map_not_Exists (m : M A) :
+    ¬map_Exists P m ↔ map_Forall (λ i x, ¬ P i x) m.
+  Proof. unfold map_Exists, map_Forall; naive_solver. Qed.
+
+  Context `{∀ i x, Decision (P i x)}.
+  Global Instance map_Exists_dec m : Decision (map_Exists P m).
+  Proof.
+    refine (cast_if (decide (Exists (uncurry P) (map_to_list m))));
+      by rewrite map_Exists_to_list.
+  Defined.
+End map_Exists.
+
 (** ** The filter operation *)
 Section map_filter_lookup.
   Context {A} (P : K * A → Prop) `{!∀ x, Decision (P x)}.
@@ -1502,165 +1661,6 @@ Lemma map_filter_comm {A}
     (P Q : K * A → Prop) `{!∀ x, Decision (P x), !∀ x, Decision (Q x)} (m : M A) :
   filter P (filter Q m) = filter Q (filter P m).
 Proof. rewrite !map_filter_filter. apply map_filter_ext. naive_solver. Qed.
-
-(** ** Properties of the [map_Forall] predicate *)
-Section map_Forall.
-  Context {A} (P : K → A → Prop).
-  Implicit Types m : M A.
-
-  Lemma map_Forall_to_list m : map_Forall P m ↔ Forall (uncurry P) (map_to_list m).
-  Proof.
-    rewrite Forall_forall. split.
-    - intros Hforall [i x]. rewrite elem_of_map_to_list. by apply (Hforall i x).
-    - intros Hforall i x. rewrite <-elem_of_map_to_list. by apply (Hforall (i,x)).
-  Qed.
-  Lemma map_Forall_empty : map_Forall P (∅ : M A).
-  Proof. intros i x. by rewrite lookup_empty. Qed.
-  Lemma map_Forall_impl (Q : K → A → Prop) m :
-    map_Forall P m → (∀ i x, P i x → Q i x) → map_Forall Q m.
-  Proof. unfold map_Forall; naive_solver. Qed.
-  Lemma map_Forall_insert_1_1 m i x : map_Forall P (<[i:=x]>m) → P i x.
-  Proof. intros Hm. by apply Hm; rewrite lookup_insert. Qed.
-  Lemma map_Forall_insert_1_2 m i x :
-    m !! i = None → map_Forall P (<[i:=x]>m) → map_Forall P m.
-  Proof.
-    intros ? Hm j y ?; apply Hm. by rewrite lookup_insert_ne by congruence.
-  Qed.
-  Lemma map_Forall_insert_2 m i x :
-    P i x → map_Forall P m → map_Forall P (<[i:=x]>m).
-  Proof. intros ?? j y; rewrite lookup_insert_Some; naive_solver. Qed.
-  Lemma map_Forall_insert m i x :
-    m !! i = None → map_Forall P (<[i:=x]>m) ↔ P i x ∧ map_Forall P m.
-  Proof.
-    naive_solver eauto using map_Forall_insert_1_1,
-      map_Forall_insert_1_2, map_Forall_insert_2.
-  Qed.
-  Lemma map_Forall_singleton (i : K) (x : A) :
-    map_Forall P ({[i := x]} : M A) ↔ P i x.
-  Proof.
-    unfold map_Forall. setoid_rewrite lookup_singleton_Some. naive_solver.
-  Qed.
-  Lemma map_Forall_delete m i : map_Forall P m → map_Forall P (delete i m).
-  Proof. intros Hm j x; rewrite lookup_delete_Some. naive_solver. Qed.
-  Lemma map_Forall_lookup m :
-    map_Forall P m ↔ ∀ i x, m !! i = Some x → P i x.
-  Proof. done. Qed.
-  Lemma map_Forall_lookup_1 m i x :
-    map_Forall P m → m !! i = Some x → P i x.
-  Proof. intros ?. by apply map_Forall_lookup. Qed.
-  Lemma map_Forall_lookup_2 m :
-    (∀ i x, m !! i = Some x → P i x) → map_Forall P m.
-  Proof. intros ?. by apply map_Forall_lookup. Qed.
-  Lemma map_Forall_foldr_delete m is :
-    map_Forall P m → map_Forall P (foldr delete m is).
-  Proof. induction is; eauto using map_Forall_delete. Qed.
-  Lemma map_Forall_ind (Q : M A → Prop) :
-    Q ∅ →
-    (∀ m i x, m !! i = None → P i x → map_Forall P m → Q m → Q (<[i:=x]>m)) →
-    ∀ m, map_Forall P m → Q m.
-  Proof.
-    intros Hnil Hinsert m. induction m using map_ind; auto.
-    rewrite map_Forall_insert by done; intros [??]; eauto.
-  Qed.
-
-  Context `{∀ i x, Decision (P i x)}.
-  Global Instance map_Forall_dec m : Decision (map_Forall P m).
-  Proof.
-    refine (cast_if (decide (Forall (uncurry P) (map_to_list m))));
-      by rewrite map_Forall_to_list.
-  Defined.
-  Lemma map_not_Forall (m : M A) :
-    ¬map_Forall P m ↔ ∃ i x, m !! i = Some x ∧ ¬P i x.
-  Proof.
-    split; [|intros (i&x&?&?) Hm; specialize (Hm i x); tauto].
-    rewrite map_Forall_to_list. intros Hm.
-    apply (not_Forall_Exists _), Exists_exists in Hm.
-    destruct Hm as ([i x]&?&?). exists i, x. by rewrite <-elem_of_map_to_list.
-  Qed.
-End map_Forall.
-
-(** ** Properties of the [map_Exists] predicate *)
-Section map_Exists.
-  Context {A} (P : K → A → Prop).
-  Implicit Types m : M A.
-
-  Lemma map_Exists_to_list m : map_Exists P m ↔ Exists (uncurry P) (map_to_list m).
-  Proof.
-    rewrite Exists_exists. split.
-    - intros [? [? [? ?]]]. eexists (_, _). by rewrite elem_of_map_to_list.
-    - intros [[??] [??]]. eexists _, _. by rewrite <-elem_of_map_to_list.
-  Qed.
-  Lemma map_Exists_empty : ¬ map_Exists P (∅ : M A).
-  Proof. intros [?[?[Hm ?]]]. by rewrite lookup_empty in Hm. Qed.
-  Lemma map_Exists_impl (Q : K → A → Prop) m :
-    map_Exists P m → (∀ i x, P i x → Q i x) → map_Exists Q m.
-  Proof. unfold map_Exists; naive_solver. Qed.
-  Lemma map_Exists_insert_1 m i x :
-    map_Exists P (<[i:=x]>m) → P i x ∨ map_Exists P m.
-  Proof. intros [j[y[?%lookup_insert_Some ?]]]. unfold map_Exists. naive_solver. Qed.
-  Lemma map_Exists_insert_2_1 m i x : P i x → map_Exists P (<[i:=x]>m).
-  Proof. intros Hm. exists i, x. by rewrite lookup_insert. Qed.
-  Lemma map_Exists_insert_2_2 m i x :
-    m !! i = None → map_Exists P m → map_Exists P (<[i:=x]>m).
-  Proof.
-    intros Hm [j[y[??]]]. exists j, y. by rewrite lookup_insert_ne by congruence.
-  Qed.
-  Lemma map_Exists_insert m i x :
-    m !! i = None → map_Exists P (<[i:=x]>m) ↔ P i x ∨ map_Exists P m.
-  Proof.
-    naive_solver eauto using map_Exists_insert_1,
-      map_Exists_insert_2_1, map_Exists_insert_2_2.
-  Qed.
-  Lemma map_Exists_singleton (i : K) (x : A) :
-    map_Exists P ({[i := x]} : M A) ↔ P i x.
-  Proof.
-    unfold map_Exists. setoid_rewrite lookup_singleton_Some. naive_solver.
-  Qed.
-  Lemma map_Exists_delete m i : map_Exists P (delete i m) → map_Exists P m.
-  Proof.
-    intros [j [y [Hm ?]]]. rewrite lookup_delete_Some in Hm.
-    unfold map_Exists. naive_solver.
-  Qed.
-  Lemma map_Exists_lookup m :
-    map_Exists P m ↔ ∃ i x, m !! i = Some x ∧ P i x.
-  Proof. done. Qed.
-  Lemma map_Exists_lookup_1 m :
-    map_Exists P m → ∃ i x, m !! i = Some x ∧ P i x.
-  Proof. by rewrite map_Exists_lookup. Qed.
-  Lemma map_Exists_lookup_2 m i x :
-    m !! i = Some x → P i x → map_Exists P m.
-  Proof. rewrite map_Exists_lookup. by eauto. Qed.
-  Lemma map_Exists_foldr_delete m is :
-    map_Exists P (foldr delete m is) → map_Exists P m.
-  Proof. induction is; eauto using map_Exists_delete. Qed.
-
-  Lemma map_Exists_ind (Q : M A → Prop) :
-    (∀ i x, P i x → Q {[ i := x ]}) →
-    (∀ m i x, m !! i = None → map_Exists P m → Q m → Q (<[i:=x]>m)) →
-    ∀ m, map_Exists P m → Q m.
-  Proof.
-    intros Hsingleton Hinsert m Hm. induction m as [|i x m Hi IH] using map_ind.
-    { by destruct map_Exists_empty. }
-    apply map_Exists_insert in Hm as [?|?]; [|by eauto..].
-    clear IH. induction m as [|j y m Hj IH] using map_ind; [by eauto|].
-    apply lookup_insert_None in Hi as [??].
-    rewrite insert_commute by done. apply Hinsert.
-    - by apply lookup_insert_None.
-    - apply map_Exists_insert; by eauto.
-    - eauto.
-  Qed.
-
-  Lemma map_not_Exists (m : M A) :
-    ¬map_Exists P m ↔ map_Forall (λ i x, ¬ P i x) m.
-  Proof. unfold map_Exists, map_Forall; naive_solver. Qed.
-
-  Context `{∀ i x, Decision (P i x)}.
-  Global Instance map_Exists_dec m : Decision (map_Exists P m).
-  Proof.
-    refine (cast_if (decide (Exists (uncurry P) (map_to_list m))));
-      by rewrite map_Exists_to_list.
-  Defined.
-End map_Exists.
 
 (** ** Properties of the [merge] operation *)
 Section merge.

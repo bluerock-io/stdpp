@@ -121,7 +121,7 @@ Section seqZ.
   Proof. unfold seqZ; by rewrite fmap_length, seq_length. Qed.
   Lemma fmap_add_seqZ m m' n : Z.add m <$> seqZ m' n = seqZ (m + m') n.
   Proof.
-    revert m'. induction n as [|n ? IH|] using (Z_succ_pred_induction 0); intros m'.
+    revert m'. induction n as [|n ? IH|] using (Z.succ_pred_induction 0); intros m'.
     - by rewrite seqZ_nil.
     - rewrite (seqZ_cons m') by lia. rewrite (seqZ_cons (m + m')) by lia.
       f_equal/=. rewrite Z.pred_succ, IH; simpl. f_equal; lia.
@@ -129,7 +129,7 @@ Section seqZ.
   Qed.
   Lemma lookup_seqZ_lt m n i : Z.of_nat i < n → seqZ m n !! i = Some (m + Z.of_nat i).
   Proof.
-    revert m i. induction n as [|n ? IH|] using (Z_succ_pred_induction 0);
+    revert m i. induction n as [|n ? IH|] using (Z.succ_pred_induction 0);
       intros m i Hi; [lia| |lia].
     rewrite seqZ_cons by lia. destruct i as [|i]; simpl.
     - f_equal; lia.
@@ -140,7 +140,7 @@ Section seqZ.
   Lemma lookup_seqZ_ge m n i : n ≤ Z.of_nat i → seqZ m n !! i = None.
   Proof.
     revert m i.
-    induction n as [|n ? IH|] using (Z_succ_pred_induction 0); intros m i Hi; try lia.
+    induction n as [|n ? IH|] using (Z.succ_pred_induction 0); intros m i Hi; try lia.
     - by rewrite seqZ_nil.
     - rewrite seqZ_cons by lia.
       destruct i as [|i]; simpl; [lia|]. by rewrite Z.pred_succ, IH by lia.
@@ -315,16 +315,16 @@ Section Z_little_endian.
     intros -> ?. induction 1 as [|b bs ? ? IH]; [done|]; simpl.
     rewrite Nat2Z.inj_succ, Z_to_little_endian_succ by lia. f_equal.
     - apply Z.bits_inj_iff'. intros z' ?.
-      rewrite !Z.land_spec, Z.lor_spec, Z_ones_spec by lia.
+      rewrite !Z.land_spec, Z.lor_spec, Z.ones_spec by lia.
       case_bool_decide.
       + rewrite andb_true_r, Z.shiftl_spec_low, orb_false_r by lia. done.
       + rewrite andb_false_r.
-        symmetry. eapply (Z_bounded_iff_bits_nonneg n); lia.
+        symmetry. eapply (Z.bounded_iff_bits_nonneg n); lia.
     - rewrite <-IH at 3. f_equal.
       apply Z.bits_inj_iff'. intros z' ?.
       rewrite Z.shiftr_spec, Z.lor_spec, Z.shiftl_spec by lia.
       assert (Z.testbit b (z' + n) = false) as ->.
-      { apply (Z_bounded_iff_bits_nonneg n); lia. }
+      { apply (Z.bounded_iff_bits_nonneg n); lia. }
       rewrite orb_false_l. f_equal. lia.
   Qed.
 
@@ -334,17 +334,17 @@ Section Z_little_endian.
   Proof.
     intros ? Hm. rewrite <-Z.land_ones by lia.
     revert z.
-    induction m as [|m ? IH|] using (Z_succ_pred_induction 0); intros z; [..|lia].
+    induction m as [|m ? IH|] using (Z.succ_pred_induction 0); intros z; [..|lia].
     { Z.bitwise. by rewrite andb_false_r. }
     rewrite Z_to_little_endian_succ by lia; simpl. rewrite IH by lia.
     apply Z.bits_inj_iff'. intros z' ?.
     rewrite Z.land_spec, Z.lor_spec, Z.shiftl_spec, !Z.land_spec by lia.
-    rewrite (Z_ones_spec n z') by lia. case_bool_decide.
+    rewrite (Z.ones_spec n z') by lia. case_bool_decide.
     - rewrite andb_true_r, (Z.testbit_neg_r _ (z' - n)), orb_false_r by lia. simpl.
-      by rewrite Z_ones_spec, bool_decide_true, andb_true_r by lia.
+      by rewrite Z.ones_spec, bool_decide_true, andb_true_r by lia.
     - rewrite andb_false_r, orb_false_l.
       rewrite Z.shiftr_spec by lia. f_equal; [f_equal; lia|].
-      rewrite !Z_ones_spec by lia. apply bool_decide_ext. lia.
+      rewrite !Z.ones_spec by lia. apply bool_decide_ext. lia.
   Qed.
 
   Lemma Z_to_little_endian_length m n z :
@@ -352,7 +352,7 @@ Section Z_little_endian.
     Z.of_nat (length (Z_to_little_endian m n z)) = m.
   Proof.
     intros. revert z. induction m as [|m ? IH|]
-      using (Z_succ_pred_induction 0); intros z; [done| |lia].
+      using (Z.succ_pred_induction 0); intros z; [done| |lia].
     rewrite Z_to_little_endian_succ by lia. simpl. by rewrite Nat2Z.inj_succ, IH.
   Qed.
 
@@ -361,7 +361,7 @@ Section Z_little_endian.
     Forall (λ b, 0 ≤ b < 2 ^ n) (Z_to_little_endian m n z).
   Proof.
     intros. revert z.
-    induction m as [|m ? IH|] using (Z_succ_pred_induction 0); intros z; [..|lia].
+    induction m as [|m ? IH|] using (Z.succ_pred_induction 0); intros z; [..|lia].
     { by constructor. }
     rewrite Z_to_little_endian_succ by lia.
     constructor; [|by apply IH]. rewrite Z.land_ones by lia.
@@ -374,12 +374,12 @@ Section Z_little_endian.
     0 ≤ little_endian_to_Z n bs < 2 ^ (Z.of_nat (length bs) * n).
   Proof.
     intros ?. induction 1 as [|b bs Hb ? IH]; [done|]; simpl.
-    apply Z_bounded_iff_bits_nonneg'; [lia|..].
+    apply Z.bounded_iff_bits_nonneg'; [lia|..].
     { apply Z.lor_nonneg. split; [lia|]. apply Z.shiftl_nonneg. lia. }
     intros z' ?. rewrite Z.lor_spec.
-    rewrite Z_bounded_iff_bits_nonneg' in Hb by lia.
+    rewrite Z.bounded_iff_bits_nonneg' in Hb by lia.
     rewrite Hb, orb_false_l, Z.shiftl_spec by lia.
-    apply (Z_bounded_iff_bits_nonneg' (Z.of_nat (length bs) * n)); lia.
+    apply (Z.bounded_iff_bits_nonneg' (Z.of_nat (length bs) * n)); lia.
   Qed.
 
   Lemma Z_to_little_endian_lookup_Some m n z (i : nat) x :
@@ -387,7 +387,7 @@ Section Z_little_endian.
     Z_to_little_endian m n z !! i = Some x ↔
     Z.of_nat i < m ∧ x = Z.land (z ≫ (Z.of_nat i * n)) (Z.ones n).
   Proof.
-    revert z i. induction m as [|m ? IH|] using (Z_succ_pred_induction 0);
+    revert z i. induction m as [|m ? IH|] using (Z.succ_pred_induction 0);
       intros z i ??; [..|lia].
     { destruct i; simpl; naive_solver lia. }
     rewrite Z_to_little_endian_succ by lia. destruct i as [|i]; simpl.
@@ -415,7 +415,7 @@ Section Z_little_endian.
       rewrite Hdiv in Hlookup; simplify_eq/=.
       rewrite Z.lor_spec, Z.shiftl_spec, IH by auto with lia.
       assert (Z.testbit b' i = false) as ->.
-      { apply (Z_bounded_iff_bits_nonneg n); lia. }
+      { apply (Z.bounded_iff_bits_nonneg n); lia. }
       by rewrite <-Zminus_mod_idemp_r, Z_mod_same_full, Z.sub_0_r.
   Qed.
 End Z_little_endian.

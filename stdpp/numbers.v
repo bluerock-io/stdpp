@@ -363,43 +363,6 @@ Infix "≫" := Z.shiftr (at level 35) : Z_scope.
 Infix "`max`" := Z.max (at level 35) : Z_scope.
 Infix "`min`" := Z.min (at level 35) : Z_scope.
 
-Global Instance Zpos_inj : Inj (=) (=) Zpos.
-Proof. by injection 1. Qed.
-Global Instance Zneg_inj : Inj (=) (=) Zneg.
-Proof. by injection 1. Qed.
-
-Global Instance Z_of_nat_inj : Inj (=) (=) Z.of_nat.
-Proof. intros n1 n2. apply Nat2Z.inj. Qed.
-
-Global Instance Z_eq_dec: EqDecision Z := Z.eq_dec.
-Global Instance Z_le_dec: RelDecision Z.le := Z_le_dec.
-Global Instance Z_lt_dec: RelDecision Z.lt := Z_lt_dec.
-Global Instance Z_ge_dec: RelDecision Z.ge := Z_ge_dec.
-Global Instance Z_gt_dec: RelDecision Z.gt := Z_gt_dec.
-Global Instance Z_inhabited: Inhabited Z := populate 1.
-Global Instance Z_lt_pi x y : ProofIrrel (x < y).
-Proof. unfold Z.lt. apply _. Qed.
-
-Global Instance Z_le_po : PartialOrder (≤).
-Proof.
-  repeat split; red; [apply Z.le_refl | apply Z.le_trans | apply Z.le_antisymm].
-Qed.
-Global Instance Z_le_total: Total Z.le.
-Proof. repeat intro; lia. Qed.
-
-Lemma Z_pow_pred_r n m : 0 < m → n * n ^ (Z.pred m) = n ^ m.
-Proof.
-  intros. rewrite <-Z.pow_succ_r, Z.succ_pred; [done|]. by apply Z.lt_le_pred.
-Qed.
-Lemma Z_quot_range_nonneg k x y : 0 ≤ x < k → 0 < y → 0 ≤ x `quot` y < k.
-Proof.
-  intros [??] ?.
-  destruct (decide (y = 1)); subst; [rewrite Z.quot_1_r; auto |].
-  destruct (decide (x = 0)); subst; [rewrite Z.quot_0_l; auto with lia |].
-  split; [apply Z.quot_pos; lia|].
-  trans x; auto. apply Z.quot_lt; lia.
-Qed.
-
 Global Arguments Z.pred : simpl never.
 Global Arguments Z.succ : simpl never.
 Global Arguments Z.of_nat : simpl never.
@@ -426,140 +389,185 @@ Global Arguments Z.lnot : simpl never.
 Global Arguments Z.square : simpl never.
 Global Arguments Z.abs : simpl never.
 
-Lemma Z_to_nat_neq_0_pos x : Z.to_nat x ≠ 0%nat → 0 < x.
-Proof. by destruct x. Qed.
-Lemma Z_to_nat_neq_0_nonneg x : Z.to_nat x ≠ 0%nat → 0 ≤ x.
-Proof. by destruct x. Qed.
-Lemma Z_mod_pos x y : 0 < y → 0 ≤ x `mod` y.
-Proof. apply Z.mod_pos_bound. Qed.
+Module Z.
+  Global Instance pos_inj : Inj (=) (=) Z.pos.
+  Proof. by injection 1. Qed.
+  Global Instance neg_inj : Inj (=) (=) Z.neg.
+  Proof. by injection 1. Qed.
 
-Global Hint Resolve Z.lt_le_incl : zpos.
-Global Hint Resolve Z.add_nonneg_pos Z.add_pos_nonneg Z.add_nonneg_nonneg : zpos.
-Global Hint Resolve Z.mul_nonneg_nonneg Z.mul_pos_pos : zpos.
-Global Hint Resolve Z.pow_pos_nonneg Z.pow_nonneg: zpos.
-Global Hint Resolve Z_mod_pos Z.div_pos : zpos.
-Global Hint Extern 1000 => lia : zpos.
+  Global Instance eq_dec: EqDecision Z := Z.eq_dec.
+  Global Instance le_dec: RelDecision Z.le := Z_le_dec.
+  Global Instance lt_dec: RelDecision Z.lt := Z_lt_dec.
+  Global Instance ge_dec: RelDecision Z.ge := Z_ge_dec.
+  Global Instance gt_dec: RelDecision Z.gt := Z_gt_dec.
+  Global Instance inhabited: Inhabited Z := populate 1.
+  Global Instance lt_pi x y : ProofIrrel (x < y).
+  Proof. unfold Z.lt. apply _. Qed.
 
-Lemma Z_to_nat_nonpos x : x ≤ 0 → Z.to_nat x = 0%nat.
-Proof. destruct x; simpl; auto using Z2Nat.inj_neg. by intros []. Qed.
-Lemma Z2Nat_inj_pow (x y : nat) : Z.of_nat (x ^ y) = (Z.of_nat x) ^ (Z.of_nat y).
-Proof.
-  induction y as [|y IH]; [by rewrite Z.pow_0_r, Nat.pow_0_r|].
-  by rewrite Nat.pow_succ_r, Nat2Z.inj_succ, Z.pow_succ_r,
-    Nat2Z.inj_mul, IH by auto with zpos.
-Qed.
-Lemma Nat2Z_divide n m : (Z.of_nat n | Z.of_nat m) ↔ (n | m)%nat.
-Proof.
-  split.
-  - rewrite <-(Nat2Z.id m) at 2; intros [i ->]; exists (Z.to_nat i).
-    destruct (decide (0 ≤ i)%Z).
-    { by rewrite Z2Nat.inj_mul, Nat2Z.id by lia. }
-    by rewrite !Z_to_nat_nonpos by auto using Z.mul_nonpos_nonneg with lia.
-  - intros [i ->]. exists (Z.of_nat i). by rewrite Nat2Z.inj_mul.
-Qed.
-Lemma Z2Nat_divide n m :
-  0 ≤ n → 0 ≤ m → (Z.to_nat n | Z.to_nat m)%nat ↔ (n | m).
-Proof. intros. by rewrite <-Nat2Z_divide, !Z2Nat.id by done. Qed.
-Lemma Nat2Z_inj_div x y : Z.of_nat (x `div` y) = (Z.of_nat x) `div` (Z.of_nat y).
-Proof.
-  destruct (decide (y = 0%nat)); [by subst; destruct x |].
-  apply Z.div_unique with (Z.of_nat $ x `mod` y)%nat.
-  { left. rewrite <-(Nat2Z.inj_le 0), <-Nat2Z.inj_lt.
-    apply Nat.mod_bound_pos; lia. }
-  by rewrite <-Nat2Z.inj_mul, <-Nat2Z.inj_add, <-Nat.div_mod.
-Qed.
-Lemma Nat2Z_inj_mod x y : Z.of_nat (x `mod` y) = (Z.of_nat x) `mod` (Z.of_nat y).
-Proof.
-  destruct (decide (y = 0%nat)); [by subst; destruct x |].
-  apply Z.mod_unique with (Z.of_nat $ x `div` y)%nat.
-  { left. rewrite <-(Nat2Z.inj_le 0), <-Nat2Z.inj_lt.
-    apply Nat.mod_bound_pos; lia. }
-  by rewrite <-Nat2Z.inj_mul, <-Nat2Z.inj_add, <-Nat.div_mod.
-Qed.
-Lemma Z2Nat_inj_div x y :
-  0 ≤ x → 0 ≤ y →
-  Z.to_nat (x `div` y) = (Z.to_nat x `div` Z.to_nat y)%nat.
-Proof.
-  intros. destruct (decide (y = Z.of_nat 0%nat)); [by subst; destruct x|].
-  pose proof (Z.div_pos x y).
-  apply (inj Z.of_nat). by rewrite Nat2Z_inj_div, !Z2Nat.id by lia.
-Qed.
-Lemma Z2Nat_inj_mod x y :
-  0 ≤ x → 0 ≤ y →
-  Z.to_nat (x `mod` y) = (Z.to_nat x `mod` Z.to_nat y)%nat.
-Proof.
-  intros. destruct (decide (y = Z.of_nat 0%nat)); [by subst; destruct x|].
-  pose proof (Z_mod_pos x y).
-  apply (inj Z.of_nat). by rewrite Nat2Z_inj_mod, !Z2Nat.id by lia.
-Qed.
-Lemma Z_succ_pred_induction y (P : Z → Prop) :
-  P y →
-  (∀ x, y ≤ x → P x → P (Z.succ x)) →
-  (∀ x, x ≤ y → P x → P (Z.pred x)) →
-  (∀ x, P x).
-Proof. intros H0 HS HP. by apply (Z.order_induction' _ _ y). Qed.
-Lemma Zmod_in_range q a c :
-  q * c ≤ a < (q + 1) * c →
-  a `mod` c = a - q * c.
-Proof. intros ?. symmetry. apply Z.mod_unique_pos with q; lia. Qed.
+  Global Instance le_po : PartialOrder (≤).
+  Proof.
+    repeat split; red; [apply Z.le_refl | apply Z.le_trans | apply Z.le_antisymm].
+  Qed.
+  Global Instance le_total: Total Z.le.
+  Proof. repeat intro; lia. Qed.
 
-Lemma Z_ones_spec n m:
-  0 ≤ m → 0 ≤ n →
-  Z.testbit (Z.ones n) m = bool_decide (m < n).
-Proof.
-  intros. case_bool_decide.
-  - by rewrite Z.ones_spec_low by lia.
-  - by rewrite Z.ones_spec_high by lia.
-Qed.
+  Lemma pow_pred_r n m : 0 < m → n * n ^ (Z.pred m) = n ^ m.
+  Proof.
+    intros. rewrite <-Z.pow_succ_r, Z.succ_pred; [done|]. by apply Z.lt_le_pred.
+  Qed.
+  Lemma quot_range_nonneg k x y : 0 ≤ x < k → 0 < y → 0 ≤ x `quot` y < k.
+  Proof.
+    intros [??] ?.
+    destruct (decide (y = 1)); subst; [rewrite Z.quot_1_r; auto |].
+    destruct (decide (x = 0)); subst; [rewrite Z.quot_0_l; auto with lia |].
+    split; [apply Z.quot_pos; lia|].
+    trans x; auto. apply Z.quot_lt; lia.
+  Qed.
 
-Lemma Z_bounded_iff_bits_nonneg k n :
-  0 ≤ k → 0 ≤ n →
-  n < 2^k ↔ ∀ l, k ≤ l → Z.testbit n l = false.
-Proof.
-  intros. destruct (decide (n = 0)) as [->|].
-  { naive_solver eauto using Z.bits_0, Z.pow_pos_nonneg with lia. }
-  split.
-  { intros Hb%Z.log2_lt_pow2 l Hl; [|lia]. apply Z.bits_above_log2; lia. }
-  intros Hl. apply Z.nle_gt; intros ?.
-  assert (Z.testbit n (Z.log2 n) = false) as Hbit.
-  { apply Hl, Z.log2_le_pow2; lia. }
-  by rewrite Z.bit_log2 in Hbit by lia.
-Qed.
+  Lemma mod_pos x y : 0 < y → 0 ≤ x `mod` y.
+  Proof. apply Z.mod_pos_bound. Qed.
 
-(* Goals of the form [0 ≤ n ≤ 2^k] appear often. So we also define the
-derived version [Z_bounded_iff_bits_nonneg'] that does not require
-proving [0 ≤ n] twice in that case. *)
-Lemma Z_bounded_iff_bits_nonneg' k n :
-  0 ≤ k → 0 ≤ n →
-  0 ≤ n < 2^k ↔ ∀ l, k ≤ l → Z.testbit n l = false.
-Proof. intros ??. rewrite <-Z_bounded_iff_bits_nonneg; lia. Qed.
+  Global Hint Resolve Z.lt_le_incl : zpos.
+  Global Hint Resolve Z.add_nonneg_pos Z.add_pos_nonneg Z.add_nonneg_nonneg : zpos.
+  Global Hint Resolve Z.mul_nonneg_nonneg Z.mul_pos_pos : zpos.
+  Global Hint Resolve Z.pow_pos_nonneg Z.pow_nonneg: zpos.
+  Global Hint Resolve Z.mod_pos Z.div_pos : zpos.
+  Global Hint Extern 1000 => lia : zpos.
 
-Lemma Z_bounded_iff_bits k n :
-  0 ≤ k →
-  -2^k ≤ n < 2^k ↔ ∀ l, k ≤ l → Z.testbit n l = bool_decide (n < 0).
-Proof.
-  intros Hk.
-  case_bool_decide; [ | rewrite <-Z_bounded_iff_bits_nonneg; lia].
-  assert(n = - Z.abs n)%Z as -> by lia.
-  split.
-  { intros [? _] l Hl.
-    rewrite Z.bits_opp, negb_true_iff by lia.
-    apply Z_bounded_iff_bits_nonneg with k; lia. }
-  intros Hbit. split.
-  - rewrite <-Z.opp_le_mono, <-Z.lt_pred_le.
-    apply Z_bounded_iff_bits_nonneg; [lia..|]. intros l Hl.
-    rewrite <-negb_true_iff, <-Z.bits_opp by lia.
-    by apply Hbit.
-  - etrans; [|apply Z.pow_pos_nonneg]; lia.
-Qed.
+  Lemma succ_pred_induction y (P : Z → Prop) :
+    P y →
+    (∀ x, y ≤ x → P x → P (Z.succ x)) →
+    (∀ x, x ≤ y → P x → P (Z.pred x)) →
+    (∀ x, P x).
+  Proof. intros H0 HS HP. by apply (Z.order_induction' _ _ y). Qed.
+  Lemma mod_in_range q a c :
+    q * c ≤ a < (q + 1) * c →
+    a `mod` c = a - q * c.
+  Proof. intros ?. symmetry. apply Z.mod_unique_pos with q; lia. Qed.
 
-Lemma Z_add_nocarry_lor a b :
-  Z.land a b = 0 →
-  a + b = Z.lor a b.
-Proof. intros ?. rewrite <-Z.lxor_lor by done. by rewrite Z.add_nocarry_lxor. Qed.
+  Lemma ones_spec n m:
+    0 ≤ m → 0 ≤ n →
+    Z.testbit (Z.ones n) m = bool_decide (m < n).
+  Proof.
+    intros. case_bool_decide.
+    - by rewrite Z.ones_spec_low by lia.
+    - by rewrite Z.ones_spec_high by lia.
+  Qed.
 
-Lemma Z_opp_lnot a : -a - 1 = Z.lnot a.
-Proof. pose proof (Z.add_lnot_diag a). lia. Qed.
+  Lemma bounded_iff_bits_nonneg k n :
+    0 ≤ k → 0 ≤ n →
+    n < 2^k ↔ ∀ l, k ≤ l → Z.testbit n l = false.
+  Proof.
+    intros. destruct (decide (n = 0)) as [->|].
+    { naive_solver eauto using Z.bits_0, Z.pow_pos_nonneg with lia. }
+    split.
+    { intros Hb%Z.log2_lt_pow2 l Hl; [|lia]. apply Z.bits_above_log2; lia. }
+    intros Hl. apply Z.nle_gt; intros ?.
+    assert (Z.testbit n (Z.log2 n) = false) as Hbit.
+    { apply Hl, Z.log2_le_pow2; lia. }
+    by rewrite Z.bit_log2 in Hbit by lia.
+  Qed.
+
+  (* Goals of the form [0 ≤ n ≤ 2^k] appear often. So we also define the
+  derived version [Z_bounded_iff_bits_nonneg'] that does not require
+  proving [0 ≤ n] twice in that case. *)
+  Lemma bounded_iff_bits_nonneg' k n :
+    0 ≤ k → 0 ≤ n →
+    0 ≤ n < 2^k ↔ ∀ l, k ≤ l → Z.testbit n l = false.
+  Proof. intros ??. rewrite <-bounded_iff_bits_nonneg; lia. Qed.
+
+  Lemma bounded_iff_bits k n :
+    0 ≤ k →
+    -2^k ≤ n < 2^k ↔ ∀ l, k ≤ l → Z.testbit n l = bool_decide (n < 0).
+  Proof.
+    intros Hk.
+    case_bool_decide; [ | rewrite <-bounded_iff_bits_nonneg; lia].
+    assert(n = - Z.abs n)%Z as -> by lia.
+    split.
+    { intros [? _] l Hl.
+      rewrite Z.bits_opp, negb_true_iff by lia.
+      apply bounded_iff_bits_nonneg with k; lia. }
+    intros Hbit. split.
+    - rewrite <-Z.opp_le_mono, <-Z.lt_pred_le.
+      apply bounded_iff_bits_nonneg; [lia..|]. intros l Hl.
+      rewrite <-negb_true_iff, <-Z.bits_opp by lia.
+      by apply Hbit.
+    - etrans; [|apply Z.pow_pos_nonneg]; lia.
+  Qed.
+
+  Lemma add_nocarry_lor a b :
+    Z.land a b = 0 →
+    a + b = Z.lor a b.
+  Proof. intros ?. rewrite <-Z.lxor_lor by done. by rewrite Z.add_nocarry_lxor. Qed.
+
+  Lemma opp_lnot a : -a - 1 = Z.lnot a.
+  Proof. pose proof (Z.add_lnot_diag a). lia. Qed.
+End Z.
+
+Module Nat2Z.
+  Global Instance inj' : Inj (=) (=) Z.of_nat.
+  Proof. intros n1 n2. apply Nat2Z.inj. Qed.
+
+  Lemma divide n m : (Z.of_nat n | Z.of_nat m) ↔ (n | m)%nat.
+  Proof.
+    split.
+    - rewrite <-(Nat2Z.id m) at 2; intros [i ->]; exists (Z.to_nat i). lia.
+    - intros [i ->]. exists (Z.of_nat i). by rewrite Nat2Z.inj_mul.
+  Qed.
+  Lemma inj_div x y : Z.of_nat (x `div` y) = (Z.of_nat x) `div` (Z.of_nat y).
+  Proof.
+    destruct (decide (y = 0%nat)); [by subst; destruct x |].
+    apply Z.div_unique with (Z.of_nat $ x `mod` y)%nat.
+    { left. rewrite <-(Nat2Z.inj_le 0), <-Nat2Z.inj_lt.
+      apply Nat.mod_bound_pos; lia. }
+    by rewrite <-Nat2Z.inj_mul, <-Nat2Z.inj_add, <-Nat.div_mod.
+  Qed.
+  Lemma inj_mod x y : Z.of_nat (x `mod` y) = (Z.of_nat x) `mod` (Z.of_nat y).
+  Proof.
+    destruct (decide (y = 0%nat)); [by subst; destruct x |].
+    apply Z.mod_unique with (Z.of_nat $ x `div` y)%nat.
+    { left. rewrite <-(Nat2Z.inj_le 0), <-Nat2Z.inj_lt.
+      apply Nat.mod_bound_pos; lia. }
+    by rewrite <-Nat2Z.inj_mul, <-Nat2Z.inj_add, <-Nat.div_mod.
+  Qed.
+End Nat2Z.
+
+Module Z2Nat.
+  Lemma neq_0_pos x : Z.to_nat x ≠ 0%nat → 0 < x.
+  Proof. by destruct x. Qed.
+  Lemma neq_0_nonneg x : Z.to_nat x ≠ 0%nat → 0 ≤ x.
+  Proof. by destruct x. Qed.
+  Lemma nonpos x : x ≤ 0 → Z.to_nat x = 0%nat.
+  Proof. destruct x; simpl; auto using Z2Nat.inj_neg. by intros []. Qed.
+
+  Lemma inj_pow (x y : nat) : Z.of_nat (x ^ y) = (Z.of_nat x) ^ (Z.of_nat y).
+  Proof.
+    induction y as [|y IH]; [by rewrite Z.pow_0_r, Nat.pow_0_r|].
+    by rewrite Nat.pow_succ_r, Nat2Z.inj_succ, Z.pow_succ_r,
+      Nat2Z.inj_mul, IH by auto with zpos.
+  Qed.
+
+  Lemma divide n m :
+    0 ≤ n → 0 ≤ m → (Z.to_nat n | Z.to_nat m)%nat ↔ (n | m).
+  Proof. intros. by rewrite <-Nat2Z.divide, !Z2Nat.id by done. Qed.
+
+  Lemma inj_div x y :
+    0 ≤ x → 0 ≤ y →
+    Z.to_nat (x `div` y) = (Z.to_nat x `div` Z.to_nat y)%nat.
+  Proof.
+    intros. destruct (decide (y = Z.of_nat 0%nat)); [by subst; destruct x|].
+    pose proof (Z.div_pos x y).
+    apply (inj Z.of_nat). by rewrite Nat2Z.inj_div, !Z2Nat.id by lia.
+  Qed.
+  Lemma inj_mod x y :
+    0 ≤ x → 0 ≤ y →
+    Z.to_nat (x `mod` y) = (Z.to_nat x `mod` Z.to_nat y)%nat.
+  Proof.
+    intros. destruct (decide (y = Z.of_nat 0%nat)); [by subst; destruct x|].
+    pose proof (Z.mod_pos x y).
+    apply (inj Z.of_nat). by rewrite Nat2Z.inj_mod, !Z2Nat.id by lia.
+  Qed.
+End Z2Nat.
 
 (** ** [bool_to_Z] *)
 Definition bool_to_Z (b : bool) : Z :=
@@ -574,15 +582,30 @@ Proof. destruct b; naive_solver. Qed.
 Lemma bool_to_Z_spec b n : Z.testbit (bool_to_Z b) n = bool_decide (n = 0) && b.
 Proof. by destruct b, n. Qed.
 
-
 Local Close Scope Z_scope.
 
+
 (** * Injectivity of casts *)
-Global Instance N_of_nat_inj: Inj (=) (=) N.of_nat := Nat2N.inj.
-Global Instance nat_of_N_inj: Inj (=) (=) N.to_nat := N2Nat.inj.
-Global Instance nat_of_pos_inj: Inj (=) (=) Pos.to_nat := Pos2Nat.inj.
-Global Instance pos_of_Snat_inj: Inj (=) (=) Pos.of_succ_nat := SuccNat2Pos.inj.
-Global Instance Z_of_N_inj: Inj (=) (=) Z.of_N := N2Z.inj.
+Module Nat2N.
+  Global Instance inj' : Inj (=) (=) N.of_nat := Nat2N.inj.
+End Nat2N.
+
+Module N2Nat.
+  Global Instance inj' : Inj (=) (=) N.to_nat := N2Nat.inj.
+End N2Nat.
+
+Module Pos2Nat.
+  Global Instance inj' : Inj (=) (=) Pos.to_nat := Pos2Nat.inj.
+End Pos2Nat.
+
+Module SuccNat2Pos.
+  Global Instance inj' : Inj (=) (=) Pos.of_succ_nat := SuccNat2Pos.inj.
+End SuccNat2Pos.
+
+Module N2Z.
+  Global Instance inj' : Inj (=) (=) Z.of_N := N2Z.inj.
+End N2Z.
+
 (* Add others here. *)
 
 (** * Notations and properties of [Qc] *)
@@ -1306,7 +1329,7 @@ Definition rotate_nat_sub (base offset len : nat) : nat :=
 Lemma rotate_nat_add_add_mod base offset len:
   rotate_nat_add base offset len =
   rotate_nat_add (base `mod` len) offset len.
-Proof. unfold rotate_nat_add. by rewrite Nat2Z_inj_mod, Zplus_mod_idemp_l. Qed.
+Proof. unfold rotate_nat_add. by rewrite Nat2Z.inj_mod, Zplus_mod_idemp_l. Qed.
 
 Lemma rotate_nat_add_alt base offset len:
   base < len → offset < len →
@@ -1315,7 +1338,7 @@ Lemma rotate_nat_add_alt base offset len:
 Proof.
   unfold rotate_nat_add. intros ??. case_decide.
   - rewrite Z.mod_small by lia. by rewrite <-Nat2Z.inj_add, Nat2Z.id.
-  - rewrite (Zmod_in_range 1) by lia.
+  - rewrite (Z.mod_in_range 1) by lia.
     by rewrite Z.mul_1_l, <-Nat2Z.inj_add, <-Nat2Z.inj_sub,Nat2Z.id by lia.
 Qed.
 Lemma rotate_nat_sub_alt base offset len:
@@ -1326,7 +1349,7 @@ Proof.
   unfold rotate_nat_sub. intros ??. case_decide.
   - rewrite Z.mod_small by lia.
     by rewrite <-Nat2Z.inj_add, <-Nat2Z.inj_sub, Nat2Z.id by lia.
-  - rewrite (Zmod_in_range 1) by lia.
+  - rewrite (Z.mod_in_range 1) by lia.
     rewrite Z.mul_1_l, <-Nat2Z.inj_add, <-!Nat2Z.inj_sub,Nat2Z.id; lia.
 Qed.
 
@@ -1345,7 +1368,7 @@ Lemma rotate_nat_add_lt base offset len :
 Proof.
   unfold rotate_nat_add. intros ?.
   pose proof (Nat.mod_upper_bound (base + offset) len).
-  rewrite Z2Nat_inj_mod, Z2Nat.inj_add, !Nat2Z.id; lia.
+  rewrite Z2Nat.inj_mod, Z2Nat.inj_add, !Nat2Z.id; lia.
 Qed.
 Lemma rotate_nat_sub_lt base offset len :
   0 < len → rotate_nat_sub base offset len < len.
@@ -1360,10 +1383,10 @@ Lemma rotate_nat_add_sub base len offset:
   rotate_nat_add base (rotate_nat_sub base offset len) len = offset.
 Proof.
   intros ?. unfold rotate_nat_add, rotate_nat_sub.
-  rewrite Z2Nat.id by (apply Z_mod_pos; lia). rewrite Zplus_mod_idemp_r.
+  rewrite Z2Nat.id by (apply Z.mod_pos; lia). rewrite Zplus_mod_idemp_r.
   replace (Z.of_nat base + (Z.of_nat len + Z.of_nat offset - Z.of_nat base))%Z
     with (Z.of_nat len + Z.of_nat offset)%Z by lia.
-  rewrite (Zmod_in_range 1) by lia.
+  rewrite (Z.mod_in_range 1) by lia.
   rewrite Z.mul_1_l, <-Nat2Z.inj_add, <-!Nat2Z.inj_sub,Nat2Z.id; lia.
 Qed.
 
@@ -1372,13 +1395,13 @@ Lemma rotate_nat_sub_add base len offset:
   rotate_nat_sub base (rotate_nat_add base offset len) len = offset.
 Proof.
   intros ?. unfold rotate_nat_add, rotate_nat_sub.
-  rewrite Z2Nat.id by (apply Z_mod_pos; lia).
+  rewrite Z2Nat.id by (apply Z.mod_pos; lia).
   assert (∀ n, (Z.of_nat len + n - Z.of_nat base) = ((Z.of_nat len - Z.of_nat base) + n))%Z
     as -> by naive_solver lia.
   rewrite Zplus_mod_idemp_r.
   replace (Z.of_nat len - Z.of_nat base + (Z.of_nat base + Z.of_nat offset))%Z with
     (Z.of_nat len + Z.of_nat offset)%Z by lia.
-  rewrite (Zmod_in_range 1) by lia.
+  rewrite (Z.mod_in_range 1) by lia.
   rewrite Z.mul_1_l, <-Nat2Z.inj_add, <-!Nat2Z.inj_sub,Nat2Z.id; lia.
 Qed.
 
@@ -1388,7 +1411,7 @@ Lemma rotate_nat_add_add base offset len n:
   (rotate_nat_add base offset len + n) `mod` len.
 Proof.
   intros ?. unfold rotate_nat_add.
-  rewrite !Z2Nat_inj_mod, !Z2Nat.inj_add, !Nat2Z.id by lia.
+  rewrite !Z2Nat.inj_mod, !Z2Nat.inj_add, !Nat2Z.id by lia.
   by rewrite Nat.add_assoc, Nat.add_mod_idemp_l by lia.
 Qed.
 

@@ -31,6 +31,7 @@ Coq 8.11 is no longer supported.
   on keys contained in both maps. (by Michael Sammler)
 - Rename `lookup_union_l` → `lookup_union_l'` and add `lookup_union_l`
   as the dual to `lookup_union_r`.
+- Add `map_seqZ` as the `Z` analogue of `map_seq`. (by Michael Sammler)
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

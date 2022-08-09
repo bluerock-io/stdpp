@@ -528,6 +528,7 @@ Section semi_set.
   Qed.
   Lemma union_list_mono Xs Ys : Xs ⊆* Ys → ⋃ Xs ⊆ ⋃ Ys.
   Proof. induction 1; simpl; auto using union_mono. Qed.
+
   Lemma empty_union_list Xs : ⋃ Xs ≡ ∅ ↔ Forall (.≡ ∅) Xs.
   Proof.
     split.
@@ -597,8 +598,9 @@ Section semi_set.
     Proof. unfold_leibniz. apply union_list_app. Qed.
     Lemma union_list_reverse_L Xs : ⋃ (reverse Xs) = ⋃ Xs.
     Proof. unfold_leibniz. apply union_list_reverse. Qed.
+
     Lemma empty_union_list_L Xs : ⋃ Xs = ∅ ↔ Forall (.= ∅) Xs.
-    Proof. unfold_leibniz. by rewrite empty_union_list. Qed.
+    Proof. unfold_leibniz. apply empty_union_list. Qed.
   End leibniz.
 
   Lemma not_elem_of_iff `{!RelDecision (∈@{C})} X Y x :
@@ -607,26 +609,31 @@ Section semi_set.
 
   Section dec.
     Context `{!RelDecision (≡@{C})}.
+
     Lemma set_subseteq_inv X Y : X ⊆ Y → X ⊂ Y ∨ X ≡ Y.
     Proof. destruct (decide (X ≡ Y)); [by right|left;set_solver]. Qed.
     Lemma set_not_subset_inv X Y : X ⊄ Y → X ⊈ Y ∨ X ≡ Y.
     Proof. destruct (decide (X ≡ Y)); [by right|left;set_solver]. Qed.
 
     Lemma non_empty_union X Y : X ∪ Y ≢ ∅ ↔ X ≢ ∅ ∨ Y ≢ ∅.
-    Proof. rewrite empty_union. destruct (decide (X ≡ ∅)); intuition. Qed.
+    Proof. destruct (decide (X ≡ ∅)); set_solver. Qed.
     Lemma non_empty_union_list Xs : ⋃ Xs ≢ ∅ → Exists (.≢ ∅) Xs.
     Proof. rewrite empty_union_list. apply (not_Forall_Exists _). Qed.
+  End dec.
 
-    Context `{!LeibnizEquiv C}.
+  Section dec_leibniz.
+    Context `{!RelDecision (≡@{C}), !LeibnizEquiv C}.
+
     Lemma set_subseteq_inv_L X Y : X ⊆ Y → X ⊂ Y ∨ X = Y.
     Proof. unfold_leibniz. apply set_subseteq_inv. Qed.
     Lemma set_not_subset_inv_L X Y : X ⊄ Y → X ⊈ Y ∨ X = Y.
     Proof. unfold_leibniz. apply set_not_subset_inv. Qed.
+
     Lemma non_empty_union_L X Y : X ∪ Y ≠ ∅ ↔ X ≠ ∅ ∨ Y ≠ ∅.
     Proof. unfold_leibniz. apply non_empty_union. Qed.
     Lemma non_empty_union_list_L Xs : ⋃ Xs ≠ ∅ → Exists (.≠ ∅) Xs.
     Proof. unfold_leibniz. apply non_empty_union_list. Qed.
-  End dec.
+  End dec_leibniz.
 End semi_set.
 
 
@@ -792,6 +799,7 @@ Section set.
 
   Section dec.
     Context `{!RelDecision (∈@{C})}.
+
     Lemma not_elem_of_intersection x X Y : x ∉ X ∩ Y ↔ x ∉ X ∨ x ∉ Y.
     Proof. rewrite elem_of_intersection. destruct (decide (x ∈ X)); tauto. Qed.
     Lemma not_elem_of_difference x X Y : x ∉ X ∖ Y ↔ x ∉ X ∨ x ∈ Y.
@@ -820,8 +828,11 @@ Section set.
     Lemma singleton_union_difference X Y x :
       {[x]} ∪ (X ∖ Y) ≡ ({[x]} ∪ X) ∖ (Y ∖ {[x]}).
     Proof. intro y; destruct (decide (y ∈@{C} {[x]})); set_solver. Qed.
+  End dec.
 
-    Context `{!LeibnizEquiv C}.
+  Section dec_leibniz.
+    Context `{!RelDecision (∈@{C}), !LeibnizEquiv C}.
+
     Lemma union_difference_L X Y : X ⊆ Y → Y = X ∪ Y ∖ X.
     Proof. unfold_leibniz. apply union_difference. Qed.
     Lemma union_difference_singleton_L x Y : x ∈ Y → Y = {[x]} ∪ Y ∖ {[x]}.
@@ -837,7 +848,7 @@ Section set.
     Lemma singleton_union_difference_L X Y x :
       {[x]} ∪ (X ∖ Y) = ({[x]} ∪ X) ∖ (Y ∖ {[x]}).
     Proof. unfold_leibniz. apply singleton_union_difference. Qed.
-  End dec.
+  End dec_leibniz.
 End set.
 
 
@@ -894,11 +905,15 @@ Section option_and_list_to_set.
   Global Instance list_to_set_perm : Proper ((≡ₚ) ==> (≡)) (list_to_set (C:=C)).
   Proof. induction 1; set_solver. Qed.
 
-  Context `{!LeibnizEquiv C}.
-  Lemma list_to_set_app_L l1 l2 : list_to_set (l1 ++ l2) =@{C} list_to_set l1 ∪ list_to_set l2.
-  Proof. set_solver. Qed.
-  Global Instance list_to_set_perm_L : Proper ((≡ₚ) ==> (=)) (list_to_set (C:=C)).
-  Proof. induction 1; set_solver. Qed.
+  Section leibniz.
+    Context `{!LeibnizEquiv C}.
+
+    Lemma list_to_set_app_L l1 l2 :
+      list_to_set (l1 ++ l2) =@{C} list_to_set l1 ∪ list_to_set l2.
+    Proof. set_solver. Qed.
+    Global Instance list_to_set_perm_L : Proper ((≡ₚ) ==> (=)) (list_to_set (C:=C)).
+    Proof. induction 1; set_solver. Qed.
+  End leibniz.
 End option_and_list_to_set.
 
 (** * Finite types to sets. *)
@@ -923,6 +938,7 @@ Global Instance set_guard `{MonadSet M} : MGuard M :=
 
 Section set_monad_base.
   Context `{MonadSet M}.
+
   Lemma elem_of_guard `{Decision P} {A} (x : A) (X : M A) :
     (x ∈ guard P; X) ↔ P ∧ x ∈ X.
   Proof.

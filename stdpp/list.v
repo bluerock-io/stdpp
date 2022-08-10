@@ -2968,9 +2968,6 @@ Section Forall_Exists.
     rewrite Forall_app, Forall_singleton; intros [??]; auto.
   Qed.
 
-  Global Instance Forall_Permutation: Proper ((≡ₚ) ==> (↔)) (Forall P).
-  Proof. intros l1 l2 Hl. rewrite !Forall_forall. by setoid_rewrite Hl. Qed.
-
   Lemma Exists_exists l : Exists P l ↔ ∃ x, x ∈ l ∧ P x.
   Proof.
     split.
@@ -2989,9 +2986,6 @@ Section Forall_Exists.
   Lemma Exists_impl (Q : A → Prop) l :
     Exists P l → (∀ x, P x → Q x) → Exists Q l.
   Proof. intros H ?. induction H; auto. Defined.
-
-  Global Instance Exists_Permutation: Proper ((≡ₚ) ==> (↔)) (Exists P).
-  Proof. intros l1 l2 Hl. rewrite !Exists_exists. by setoid_rewrite Hl. Qed.
 
   Lemma Exists_not_Forall l : Exists (not ∘ P) l → ¬Forall P l.
   Proof. induction 1; inversion_clear 1; contradiction. Qed.
@@ -3032,8 +3026,20 @@ Section Forall_Exists.
     | left H => right (Forall_not_Exists _ H)
     | right H => left H
     end.
-
 End Forall_Exists.
+
+Global Instance Forall_Permutation :
+  Proper (pointwise_relation _ (↔) ==> (≡ₚ) ==> (↔)) (@Forall A).
+Proof.
+  intros P1 P2 HP l1 l2 Hl. rewrite !Forall_forall.
+  apply forall_proper; intros x. by rewrite Hl, (HP x).
+Qed.
+Global Instance Exists_Permutation :
+  Proper (pointwise_relation _ (↔) ==> (≡ₚ) ==> (↔)) (@Exists A).
+Proof.
+  intros P1 P2 HP l1 l2 Hl. rewrite !Exists_exists.
+  f_equiv; intros x. by rewrite Hl, (HP x).
+Qed.
 
 Lemma head_filter_Some P `{!∀ x : A, Decision (P x)} l x :
   head (filter P l) = Some x →
@@ -3459,9 +3465,9 @@ Section Forall2_proper.
 
   Global Instance: ∀ i, Proper (Forall2 R ==> option_Forall2 R) (lookup i).
   Proof. repeat intro. by apply Forall2_lookup. Qed.
-  Global Instance: ∀ f i,
-    Proper (R ==> R) f → Proper (Forall2 R ==> Forall2 R) (alter f i).
-  Proof. repeat intro. eauto using Forall2_alter. Qed.
+  Global Instance:
+    Proper ((R ==> R) ==> (=) ==> Forall2 R ==> Forall2 R) (alter (M:=list A)).
+  Proof. repeat intro. subst. eauto using Forall2_alter. Qed.
   Global Instance: ∀ i, Proper (R ==> Forall2 R ==> Forall2 R) (insert i).
   Proof. repeat intro. eauto using Forall2_insert. Qed.
   Global Instance: ∀ i,
@@ -3613,8 +3619,11 @@ Proof.
     [by apply list_subseteq_skip|by apply list_subseteq_cons].
 Qed.
 
-Global Instance list_subseteq_Permutation: Proper ((≡ₚ) ==> (≡ₚ) ==> (↔)) (⊆@{list A}) .
-Proof. intros l1 l2 Hl k1 k2 Hk. apply forall_proper; intros x. by rewrite Hl, Hk. Qed.
+Global Instance list_subseteq_Permutation:
+  Proper ((≡ₚ) ==> (≡ₚ) ==> (↔)) (⊆@{list A}) .
+Proof.
+  intros l1 l2 Hl k1 k2 Hk. apply forall_proper; intros x. by rewrite Hl, Hk.
+Qed.
 
 Global Program Instance list_subseteq_dec `{!EqDecision A} : RelDecision (⊆@{list A}) :=
   λ xs ys, cast_if (decide (Forall (λ x, x ∈ ys) xs)).
@@ -3664,9 +3673,11 @@ Section setoid.
     Proper (≡) inhabitant →
     Proper ((≡@{list A}) ==> (≡)) (lookup_total i).
   Proof. intros ?. induction i; destruct 1; simpl; auto. Qed.
-  Global Instance list_alter_proper f i :
-    Proper ((≡) ==> (≡)) f → Proper ((≡) ==> (≡@{list A})) (alter f i).
-  Proof. intros. induction i; destruct 1; constructor; eauto. Qed.
+  Global Instance list_alter_proper :
+    Proper (((≡) ==> (≡)) ==> (=) ==> (≡) ==> (≡@{list A})) alter.
+  Proof.
+    intros f1 f2 Hf i ? <-. induction i; destruct 1; constructor; eauto.
+  Qed.
   Global Instance list_insert_proper i :
     Proper ((≡) ==> (≡) ==> (≡@{list A})) (insert i).
   Proof. intros ???; induction i; destruct 1; constructor; eauto. Qed.
@@ -3874,6 +3885,10 @@ End find.
 Lemma list_fmap_id {A} (l : list A) : id <$> l = l.
 Proof. induction l; f_equal/=; auto. Qed.
 
+Global Instance list_fmap_proper `{!Equiv A, !Equiv B} :
+  Proper (((≡) ==> (≡)) ==> (≡@{list A}) ==> (≡@{list B})) fmap.
+Proof. induction 2; csimpl; constructor; auto. Qed.
+
 Section fmap.
   Context {A B : Type} (f : A → B).
   Implicit Types l : list A.
@@ -3886,9 +3901,6 @@ Section fmap.
   Lemma list_fmap_equiv_ext `{!Equiv B} (g : A → B) l :
     (∀ x, f x ≡ g x) → f <$> l ≡ g <$> l.
   Proof. induction l; constructor; auto. Qed.
-  Global Instance list_fmap_proper `{!Equiv A, !Equiv B} :
-    Proper ((≡) ==> (≡)) f → Proper ((≡) ==> (≡)) (fmap f).
-  Proof. induction 2; simpl; [constructor|solve_proper]. Qed.
 
   Global Instance fmap_inj: Inj (=) (=) f → Inj (=@{list A}) (=) (fmap f).
   Proof.
@@ -4085,6 +4097,13 @@ Proof.
   - apply IH. intros. eapply Hunique; rewrite ?elem_of_cons; eauto.
 Qed.
 
+Global Instance list_omap_proper `{!Equiv A, !Equiv B} :
+  Proper (((≡) ==> (≡)) ==> (≡@{list A}) ==> (≡@{list B})) omap.
+Proof.
+  intros f1 f2 Hf. induction 1 as [|x1 x2 l1 l2 Hx Hl]; csimpl; [constructor|].
+  destruct (Hf _ _ Hx); by repeat f_equiv.
+Qed.
+
 Section omap.
   Context {A B : Type} (f : A → option B).
   Implicit Types l : list A.
@@ -4101,12 +4120,6 @@ Section omap.
   Proof.
     induction 1 as [|x y l l' Hfg ? IH]; [done|].
     csimpl. rewrite Hfg. destruct (g y); [|done]. by f_equal.
-  Qed.
-  Global Instance list_omap_proper `{!Equiv A, !Equiv B} :
-    Proper ((≡) ==> (≡)) f → Proper ((≡) ==> (≡)) (omap f).
-  Proof.
-    intros Hf. induction 1 as [|x1 x2 l1 l2 Hx Hl]; csimpl; [constructor|].
-    destruct (Hf _ _ Hx); by repeat f_equiv.
   Qed.
   Lemma elem_of_list_omap l y : y ∈ omap f l ↔ ∃ x, x ∈ l ∧ f x = Some y.
   Proof.
@@ -4127,6 +4140,10 @@ Section omap.
   Proof. by destruct mx. Qed.
 End omap.
 
+Global Instance list_bind_proper `{!Equiv A, !Equiv B} :
+  Proper (((≡) ==> (≡)) ==> (≡@{list A}) ==> (≡@{list B})) mbind.
+Proof. induction 2; csimpl; constructor || f_equiv; auto. Qed.
+
 Section bind.
   Context {A B : Type} (f : A → list B).
 
@@ -4136,9 +4153,6 @@ Section bind.
   Lemma Forall_bind_ext (g : A → list B) (l : list A) :
     Forall (λ x, f x = g x) l → l ≫= f = l ≫= g.
   Proof. by induction 1; f_equal/=. Qed.
-  Global Instance list_bind_proper `{!Equiv A, !Equiv B} :
-    Proper ((≡) ==> (≡)) f → Proper ((≡) ==> (≡)) (mbind f).
-  Proof. induction 2; simpl; [constructor|solve_proper]. Qed.
   Global Instance bind_sublist: Proper (sublist ==> sublist) (mbind f).
   Proof.
     induction 1; simpl; auto;
@@ -4188,11 +4202,13 @@ Section bind.
   Proof. induction 1; csimpl; auto using Forall2_app. Qed.
 End bind.
 
+Global Instance list_join_proper `{!Equiv A} :
+  Proper ((≡) ==> (≡@{list A})) mjoin.
+Proof. induction 1; simpl; [constructor|solve_proper]. Qed.
+
 Section ret_join.
   Context {A : Type}.
 
-  Global Instance list_join_proper `{!Equiv A} : Proper ((≡) ==> (≡)) (mjoin (A:=A)).
-  Proof. induction 1; simpl; [constructor|solve_proper]. Qed.
   Lemma list_join_bind (ls : list (list A)) : mjoin ls = ls ≫= id.
   Proof. by induction ls; f_equal/=. Qed.
   Global Instance join_Permutation : Proper ((≡ₚ@{list A}) ==> (≡ₚ)) mjoin.
@@ -4219,14 +4235,17 @@ Section ret_join.
   Proof. induction 1; simpl; auto using Forall2_app. Qed.
 End ret_join.
 
+Global Instance mapM_proper `{!Equiv A, !Equiv B} :
+  Proper (((≡) ==> (≡)) ==> (≡@{list A}) ==> (≡@{option (list B)})) mapM.
+Proof.
+  induction 2; csimpl; repeat (f_equiv || constructor || intro || auto).
+Qed.
+
 Section mapM.
   Context {A B : Type} (f : A → option B).
 
   Lemma mapM_ext (g : A → option B) l : (∀ x, f x = g x) → mapM f l = mapM g l.
   Proof. intros Hfg. by induction l as [|?? IHl]; simpl; rewrite ?Hfg, ?IHl. Qed.
-  Global Instance mapM_proper `{!Equiv A, !Equiv B} :
-    Proper ((≡) ==> (≡)) f → Proper ((≡) ==> (≡)) (mbind f).
-  Proof. induction 2; simpl; [solve_proper|constructor]. Qed.
 
   Lemma Forall2_mapM_ext (g : A → option B) l k :
     Forall2 (λ x y, f x = g y) l k → mapM f l = mapM g k.
@@ -4293,18 +4312,22 @@ End mapM.
 Lemma imap_const {A B} (f : A → B) l : imap (const f) l = f <$> l.
 Proof. induction l; f_equal/=; auto. Qed.
 
+Global Instance imap_proper `{!Equiv A, !Equiv B} :
+  Proper (pointwise_relation _ ((≡) ==> (≡)) ==> (≡@{list A}) ==> (≡@{list B}))
+         imap.
+Proof.
+  intros f f' Hf l l' Hl. revert f f' Hf.
+  induction Hl as [|x1 x2 l1 l2 ?? IH]; intros f f' Hf; simpl; constructor.
+  - by apply Hf.
+  - apply IH. intros i y y' ?; simpl. by apply Hf.
+Qed.
+
 Section imap.
   Context {A B : Type} (f : nat → A → B).
 
   Lemma imap_ext g l :
     (∀ i x, l !! i = Some x → f i x = g i x) → imap f l = imap g l.
   Proof. revert f g; induction l as [|x l IH]; intros; f_equal/=; eauto. Qed.
-  Global Instance imap_proper `{!Equiv A, !Equiv B} :
-    (∀ i, Proper ((≡) ==> (≡)) (f i)) → Proper ((≡) ==> (≡)) (imap f).
-  Proof.
-    intros Hf l1 l2 Hl. revert f Hf.
-    induction Hl; intros f Hf; simpl; [constructor|repeat f_equiv; naive_solver].
-  Qed.
 
   Lemma imap_nil : imap f [] = [].
   Proof. done. Qed.
@@ -4515,6 +4538,14 @@ Lemma foldl_fmap {A B C} (f : A → B → A) x (l : list C) g :
 Proof. revert x. induction l; f_equal/=; auto. Qed.
 
 (** ** Properties of the [zip_with] and [zip] functions *)
+Global Instance zip_with_proper `{!Equiv A, !Equiv B, !Equiv C} :
+  Proper (((≡) ==> (≡) ==> (≡)) ==>
+          (≡@{list A}) ==> (≡@{list B}) ==> (≡@{list C})) zip_with.
+Proof.
+  intros f1 f2 Hf. induction 1; destruct 1; simpl; [constructor..|].
+  f_equiv; [|by auto]. by apply Hf.
+Qed.
+
 Section zip_with.
   Context {A B C : Type} (f : A → B → C).
   Implicit Types x : A.
@@ -4522,9 +4553,6 @@ Section zip_with.
   Implicit Types l : list A.
   Implicit Types k : list B.
 
-  Global Instance zip_with_proper `{!Equiv A, !Equiv B, !Equiv C} :
-    Proper ((≡) ==> (≡) ==> (≡)) f → Proper ((≡) ==> (≡) ==> (≡)) (zip_with f).
-  Proof. induction 2; destruct 1; simpl; [constructor..|repeat f_equiv; auto]. Qed.
   Lemma zip_with_nil_r l : zip_with f l [] = [].
   Proof. by destruct l. Qed.
   Lemma zip_with_app l1 l2 k1 k2 :

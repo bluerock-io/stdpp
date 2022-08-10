@@ -65,6 +65,16 @@ To obtain a development version, add the Iris opam repository:
 Run `make -jN` in this directory to build the library, where `N` is the number
 of your CPU cores.  Then run `make install` to install the library.
 
+## Unstable libraries
+
+The `stdpp_unstable` folder contains a set of libraries that are not
+deemed stable enough to be included in the main std++ library. These
+libraries are available via the `coq-stdpp-unstable` opam package. For
+each library, there is a corresponding "tracking issue" in the std++
+issue tracker (also linked from the library itself) which tracks the
+work that still needs to be done before moving the library to std++.
+No stability guarantees whatsoever are made for this package.
+
 ## Contributing to std++
 
 If you want to report a bug, please use the

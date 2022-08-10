@@ -32,6 +32,13 @@ Coq 8.11 is no longer supported.
 - Rename `lookup_union_l` → `lookup_union_l'` and add `lookup_union_l`
   as the dual to `lookup_union_r`.
 - Add `map_seqZ` as the `Z` analogue of `map_seq`. (by Michael Sammler)
+- Add the `coq-stdpp-unstable` package for libraries that are not
+  deemed stable enough to be included in the main std++ library,
+  following the `coq-iris-unstable` package. This library is contained
+  in the `stdpp_unstable` folder. The `theories` folder was renamed
+  to `stdpp`.
+- Add an unstable `bitblast` tactic for solving equalities between integers
+  involving bitwise operations. (by Michael Sammler)
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

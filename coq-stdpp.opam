@@ -36,5 +36,5 @@ depends: [
   "coq" { (>= "8.12" & < "8.16~") | (= "dev") }
 ]
 
-build: [make "-j%{jobs}%"]
-install: [make "install"]
+build: ["./make-package" "stdpp" "-j%{jobs}%"]
+install: ["./make-package" "stdpp" "install"]

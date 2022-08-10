@@ -35,7 +35,7 @@ Coq 8.11 is no longer supported.
 - Add the `coq-stdpp-unstable` package for libraries that are not
   deemed stable enough to be included in the main std++ library,
   following the `coq-iris-unstable` package. This library is contained
-  in the `stdpp_unstable` folder and the `theories` folder was renamed
+  in the `stdpp_unstable` folder. The `theories` folder was renamed
   to `stdpp`.
 - Add an unstable `bitblast` tactic for solving equalities between integers
   involving bitwise operations. (by Michael Sammler)

@@ -39,6 +39,9 @@ Global Instance: Params (@head) 1 := {}.
 Global Instance: Params (@tail) 1 := {}.
 Global Instance: Params (@take) 1 := {}.
 Global Instance: Params (@drop) 1 := {}.
+Global Instance: Params (@Forall) 1 := {}.
+Global Instance: Params (@Exists) 1 := {}.
+Global Instance: Params (@NoDup) 1 := {}.
 
 Global Arguments Permutation {_} _ _ : assert.
 Global Arguments Forall_cons {_} _ _ _ _ _ : assert.
@@ -228,9 +231,11 @@ Global Instance list_bind : MBind list := λ A B f,
 Global Instance list_join: MJoin list :=
   fix go A (ls : list (list A)) : list A :=
   match ls with [] => [] | l :: ls => l ++ @mjoin _ go _ ls end.
+
 Definition mapM `{MBind M, MRet M} {A B} (f : A → M B) : list A → M (list B) :=
   fix go l :=
   match l with [] => mret [] | x :: l => y ← f x; k ← go l; mret (y :: k) end.
+Global Instance: Params (@mapM) 5 := {}.
 
 (** We define stronger variants of the map function that allow the mapped
 function to use the index of the elements. *)
@@ -239,6 +244,7 @@ Fixpoint imap {A B} (f : nat → A → B) (l : list A) : list B :=
   | [] => []
   | x :: l => f 0 x :: imap (f ∘ S) l
   end.
+Global Instance: Params (@imap) 2 := {}.
 
 Definition zipped_map {A B} (f : list A → list A → A → B) :
     list A → list A → list B := fix go l k :=
@@ -246,12 +252,14 @@ Definition zipped_map {A B} (f : list A → list A → A → B) :
   | [] => []
   | x :: k => f l k x :: go (x :: l) k
   end.
+Global Instance: Params (@zipped_map) 2 := {}.
 
 Fixpoint imap2 {A B C} (f : nat → A → B → C) (l : list A) (k : list B) : list C :=
   match l, k with
   | [], _ | _, [] => []
   | x :: l, y :: k => f 0 x y :: imap2 (f ∘ S) l k
   end.
+Global Instance: Params (@imap2) 3 := {}.
 
 Inductive zipped_Forall {A} (P : list A → list A → A → Prop) :
     list A → list A → Prop :=

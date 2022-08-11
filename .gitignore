@@ -15,6 +15,9 @@
 .coq-native/
 Makefile.coq
 Makefile.coq.conf
+_CoqProject.*
+Makefile.package.*
+.Makefile.package.*
 *.crashcoqide
 html/
 builddep/

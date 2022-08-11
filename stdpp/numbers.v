@@ -14,7 +14,9 @@ Proof. solve_decision. Defined.
 Global Arguments Nat.sub !_ !_ / : assert.
 Global Arguments Nat.max : simpl nomatch.
 
-Typeclasses Opaque Nat.lt.
+(** We do not make [Nat.lt] since it is an alias for [lt], which contains the
+actual definition that we want to make opaque. *)
+Typeclasses Opaque lt.
 
 Reserved Notation "x ≤ y ≤ z" (at level 70, y at next level).
 Reserved Notation "x ≤ y < z" (at level 70, y at next level).
@@ -41,6 +43,8 @@ Notation divide := Nat.divide.
 Notation "( x | y )" := (divide x y) : nat_scope.
 
 Module Nat.
+  Export PeanoNat.Nat.
+
   Global Instance eq_dec: EqDecision nat := eq_nat_dec.
   Global Instance le_dec: RelDecision le := le_dec.
   Global Instance lt_dec: RelDecision lt := lt_dec.
@@ -67,7 +71,7 @@ Module Nat.
     by apply (Eqdep_dec.eq_dep_eq_dec (λ x y, decide (x = y))), aux.
   Qed.
   Global Instance lt_pi: ∀ x y : nat, ProofIrrel (x < y).
-  Proof. unfold lt. apply _. Qed.
+  Proof. unfold Peano.lt. apply _. Qed.
 
   Lemma le_sum (x y : nat) : x ≤ y ↔ ∃ z, y = x + z.
   Proof. split; [exists (y - x); lia | intros [z ->]; lia]. Qed.
@@ -143,6 +147,8 @@ Global Arguments Pos.of_nat : simpl never.
 Global Arguments Pos.mul : simpl never.
 
 Module Pos.
+  Export BinPos.Pos.
+
   Global Instance eq_dec: EqDecision positive := Pos.eq_dec.
   Global Instance le_dec: RelDecision Pos.le.
   Proof. refine (λ x y, decide ((x ?= y) ≠ Gt)). Defined.
@@ -390,6 +396,8 @@ Global Arguments Z.square : simpl never.
 Global Arguments Z.abs : simpl never.
 
 Module Z.
+  Export BinInt.Z.
+
   Global Instance pos_inj : Inj (=) (=) Z.pos.
   Proof. by injection 1. Qed.
   Global Instance neg_inj : Inj (=) (=) Z.neg.
@@ -505,6 +513,8 @@ Module Z.
 End Z.
 
 Module Nat2Z.
+  Export Znat.Nat2Z.
+
   Global Instance inj' : Inj (=) (=) Z.of_nat.
   Proof. intros n1 n2. apply Nat2Z.inj. Qed.
 
@@ -533,6 +543,8 @@ Module Nat2Z.
 End Nat2Z.
 
 Module Z2Nat.
+  Export Znat.Z2Nat.
+
   Lemma neq_0_pos x : Z.to_nat x ≠ 0%nat → 0 < x.
   Proof. by destruct x. Qed.
   Lemma neq_0_nonneg x : Z.to_nat x ≠ 0%nat → 0 ≤ x.
@@ -557,7 +569,7 @@ Module Z2Nat.
   Proof.
     intros. destruct (decide (y = Z.of_nat 0%nat)); [by subst; destruct x|].
     pose proof (Z.div_pos x y).
-    apply (inj Z.of_nat). by rewrite Nat2Z.inj_div, !Z2Nat.id by lia.
+    apply (base.inj Z.of_nat). by rewrite Nat2Z.inj_div, !Z2Nat.id by lia.
   Qed.
   Lemma inj_mod x y :
     0 ≤ x → 0 ≤ y →
@@ -565,7 +577,7 @@ Module Z2Nat.
   Proof.
     intros. destruct (decide (y = Z.of_nat 0%nat)); [by subst; destruct x|].
     pose proof (Z.mod_pos x y).
-    apply (inj Z.of_nat). by rewrite Nat2Z.inj_mod, !Z2Nat.id by lia.
+    apply (base.inj Z.of_nat). by rewrite Nat2Z.inj_mod, !Z2Nat.id by lia.
   Qed.
 End Z2Nat.
 
@@ -587,22 +599,27 @@ Local Close Scope Z_scope.
 
 (** * Injectivity of casts *)
 Module Nat2N.
+  Export Nnat.Nat2N.
   Global Instance inj' : Inj (=) (=) N.of_nat := Nat2N.inj.
 End Nat2N.
 
 Module N2Nat.
+  Export Nnat.N2Nat.
   Global Instance inj' : Inj (=) (=) N.to_nat := N2Nat.inj.
 End N2Nat.
 
 Module Pos2Nat.
+  Export Pnat.Pos2Nat.
   Global Instance inj' : Inj (=) (=) Pos.to_nat := Pos2Nat.inj.
 End Pos2Nat.
 
 Module SuccNat2Pos.
+  Export Pnat.SuccNat2Pos.
   Global Instance inj' : Inj (=) (=) Pos.of_succ_nat := SuccNat2Pos.inj.
 End SuccNat2Pos.
 
 Module N2Z.
+  Export Znat.N2Z.
   Global Instance inj' : Inj (=) (=) Z.of_N := N2Z.inj.
 End N2Z.
 

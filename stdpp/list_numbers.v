@@ -164,7 +164,7 @@ Section seqZ.
   Proof.
     intros. unfold seqZ. rewrite Z2Nat.inj_add, seq_app, fmap_app by done.
     f_equal. rewrite Nat.add_comm, <-!fmap_add_seq, <-list_fmap_compose.
-    apply list_fmap_ext; [|done]; intros j; simpl.
+    apply list_fmap_ext; intros j n; simpl.
     rewrite Nat2Z.inj_add, Z2Nat.id by done. lia.
   Qed.
 

@@ -39,6 +39,8 @@ Coq 8.11 is no longer supported.
   to `stdpp`.
 - Add an unstable `bitblast` tactic for solving equalities between integers
   involving bitwise operations. (by Michael Sammler)
+- Add the bind operation `set_bind` for finite sets. (by Dan Frumin and Paolo G.
+  Giarrusso)
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).
@@ -50,8 +52,6 @@ s/\bmap_disjoint_subset\b/kmap_subset/g
 s/\blookup_union_l\b/lookup_union_l'/g
 EOF
 ```
-- Add the bind operation `set_bind` for finite sets. (by Dan Frumin and Paolo G.
-  Giarrusso)
 
 ## std++ 1.7.0 (2022-01-22)
 

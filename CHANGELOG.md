@@ -44,6 +44,15 @@ Coq 8.11 is no longer supported.
 - Change `list_fmap_ext` and `list_fmap_equiv_ext` to require equality on the
   elements of the list, not on all elements of the carrier type. This change
   makes these lemmas consistent with those for maps.
+- Use the modules `Nat`, `Pos`, `N`, `Z`, `Nat2Z`, `Z2Nat`, `Nat2N`, `Pos2Nat`,
+  `SuccNat2Pos`, and `N2Z` for our extended results on number types. Before,
+  we prefixed our the std++ lemmas with `Nat_` or `nat_`, but now you refer
+  to them with `Nat.`, similar to the way you refer to number lemmas from Coq's
+  standard library.
+- Use a module `Qp` for our positive rationals library. You now refer to `Qp`
+  lemmas using `Qp.lem` instead of `Qp_lem`.
+- Rename `_plus`/`_minus` into `_add`/`_sub` to be consistent with Coq's current
+  convention for numbers. See the sed script below for an exact list of renames.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).
@@ -53,6 +62,47 @@ sed -i -E -f- $(find theories -name "*.v") <<EOF
 s/\bmap_disjoint_subseteq\b/kmap_subseteq/g
 s/\bmap_disjoint_subset\b/kmap_subset/g
 s/\blookup_union_l\b/lookup_union_l'/g
+# number modules --- note that this might rename your own lemmas
+# start with Nat_/N_/Z_/Qp_/P(app|reverse|length|dup)_ too eagerly.
+s/\bNat_/Nat\./g
+s/\bNat.iter_S(|_r)\b/Nat.iter_succ\1/g
+s/\bP(app|reverse|length|dup)/Pos\.\1/g
+s/\bPlt_sum\b/Pos\.lt_sum/g
+s/\bPos\.reverse_Pdup\b/Pos\.reverse_Pdup/g
+s/\bnat_le_sum\b/Nat\.le_sum/g
+s/\bN_/N\./g
+s/\bZ_/Z\./g
+s/\bZ\.scope\b/Z_scope/g
+s/\bN\.scope\b/N_scope/g
+s/\Z\.of_nat_complete\b/Z_of_nat_complete/g
+s/\bZ\.of_nat_inj\b/Nat2Z.inj/g
+s/\bZ2Nat_/Z2Nat\./g
+s/\bNat2Z_/Nat2Z\./g
+s/\bQp_/Qp\./g
+s/\bQp\.1_1/Qp\.add_1_1/g
+# plus → add
+s/\bfin_plus_inv\b/fin_add_inv/g
+s/\bfin_plus_inv_L\b/fin_add_inv_l/g
+s/\bfin_plus_inv_R\b/fin_add_inv_r/g
+s/\bset_seq_plus\b/set_seq_add/g
+s/\bset_seq_plus_L\b/set_seq_add_L/g
+s/\bset_seq_plus_disjoint\b/set_seq_add_disjoint/g
+s/\bnsteps_plus_inv\b/nsteps_add_inv/g
+s/\bbsteps_plus_r\b/bsteps_add_r/g
+s/\bbsteps_plus_l\b/bsteps_add_l/g
+s/\btake_plus_app\b/take_add_app/g
+s/\breplicate_plus\b/replicate_add/g
+s/\btake_replicate_plus\b/take_replicate_add/g
+s/\bdrop_replicate_plus\b/drop_replicate_add/g
+s/\bresize_plus\b/resize_add/g
+s/\bresize_plus_eq\b/resize_add_eq/g
+s/\btake_resize_plus\b/take_resize_add/g
+s/\bdrop_resize_plus\b/drop_resize_add/g
+s/\bdrop_plus_app\b/drop_add_app/g
+s/\bMakeNatPlus\b/MakeNatAdd/g
+s/\bmake_nat_plus\b/make_nat_add/g
+s/\bnat_minus_plus\b/Nat\.sub_add/g
+s/\bnat_le_plus_minus\b/Nat\.le_add_sub/g
 EOF
 ```
 

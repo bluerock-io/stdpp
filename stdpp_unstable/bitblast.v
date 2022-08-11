@@ -9,7 +9,7 @@ From stdpp Require Import options.
 (** * [bitblast] tactic: Solve integer goals by bitwise reasoning *)
 (** This file provides the [bitblast] tactic for bitwise reasoning
 about [Z] via [Z.testbit]. Concretely, [bitblast] first turns an
-equality [a = b] into [∀ n, Z.testbit a n = Z.testbit a b], then
+equality [a = b] into [∀ n, Z.testbit a n = Z.testbit b n], then
 simplifies the [Z.testbit] expressions using lemmas like
 [Z.testbit (Z.land a b) n = Z.testbit a n && Z.testbit b n], or
 [Z.testbit (Z.ones z) n = bool_decide (0 ≤ n < z) || bool_decide (z < 0 ∧ 0 ≤ n)]

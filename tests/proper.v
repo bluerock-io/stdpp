@@ -85,6 +85,10 @@ Section map_tests.
   that also allow the function to differ. We test that we can derive simpler
   [Proper]s for a fixed function using both type class inference ([apply _])
   and std++'s [solve_proper] tactic. *)
+  Global Instance map_alter_proper_test (f : A → A) i :
+    Proper ((≡) ==> (≡)) f →
+    Proper ((≡) ==> (≡)) (alter (M:=M A) f i).
+  Proof. apply _. Restart. solve_proper. Abort.
   Global Instance map_zip_proper_test `{Equiv B} :
     Proper ((≡@{M A}) ==> (≡@{M B}) ==> (≡@{M (A * B)})) map_zip.
   Proof. apply _. Restart. solve_proper. Abort.
@@ -103,6 +107,10 @@ Section map_tests.
 End map_tests.
 
 (** And similarly for lists *)
+Global Instance list_alter_proper_test `{!Equiv A} (f : A → A) i :
+  Proper ((≡) ==> (≡)) f →
+  Proper ((≡) ==> (≡)) (alter (M:=list A) f i).
+Proof. apply _. Restart. solve_proper. Abort.
 Global Instance list_fmap_proper_test `{!Equiv A, !Equiv B} (f : A → B) :
   Proper ((≡) ==> (≡)) f → Proper ((≡) ==> (≡)) (fmap f).
 Proof. apply _. Restart. solve_proper. Abort.

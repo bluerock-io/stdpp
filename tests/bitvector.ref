@@ -1,0 +1,19 @@
+"notation_test"
+     : string
+BV 10 3 = BV 10 5
+     : Prop
+The command has indeed failed with message:
+The term "BV 10 5" has type "bv 10" while it is expected to have type "bv 2".
+BV 2 3 = BV 10 5
+     : Prop
+The command has indeed failed with message:
+Unable to satisfy the following constraints:
+
+?bv_is_wf : "BvWf 2 4"
+
+"bvn_to_bv_test"
+     : string
+1 goal
+  
+  ============================
+  Some (BV 2 3) = Some (BV 2 3)

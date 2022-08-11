@@ -59,3 +59,5 @@ stdpp/telescopes.v
 stdpp/binders.v
 
 stdpp_unstable/bitblast.v
+stdpp_unstable/bitvector.v
+stdpp_unstable/bitvector_tactics.v

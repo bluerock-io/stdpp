@@ -1292,7 +1292,7 @@ Global Arguments delete _ _ _ !_ !_ / : simpl nomatch, assert.
 function [f], which is called with the original value. *)
 Class Alter (K A M : Type) := alter: (A → A) → K → M → M.
 Global Hint Mode Alter - - ! : typeclass_instances.
-Global Instance: Params (@alter) 5 := {}.
+Global Instance: Params (@alter) 4 := {}.
 Global Arguments alter {_ _ _ _} _ !_ !_ / : simpl nomatch, assert.
 
 (** The function [partial_alter f k m] should update the value at key [k] using the

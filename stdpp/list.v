@@ -3895,12 +3895,6 @@ Section fmap.
 
   Lemma list_fmap_compose {C} (g : B → C) l : g ∘ f <$> l = g <$> (f <$> l).
   Proof. induction l; f_equal/=; auto. Qed.
-  Lemma list_fmap_ext (g : A → B) (l1 l2 : list A) :
-    (∀ x, f x = g x) → l1 = l2 → fmap f l1 = fmap g l2.
-  Proof. intros ? <-. induction l1; f_equal/=; auto. Qed.
-  Lemma list_fmap_equiv_ext `{!Equiv B} (g : A → B) l :
-    (∀ x, f x ≡ g x) → f <$> l ≡ g <$> l.
-  Proof. induction l; constructor; auto. Qed.
 
   Global Instance fmap_inj: Inj (=) (=) f → Inj (=@{list A}) (=) (fmap f).
   Proof.
@@ -4083,6 +4077,24 @@ Section fmap.
   Lemma list_fmap_bind {C} (g : B → list C) l : (f <$> l) ≫= g = l ≫= g ∘ f.
   Proof. by induction l; f_equal/=. Qed.
 End fmap.
+
+Section ext.
+  Context {A B : Type}.
+  Implicit Types l : list A.
+
+  Lemma list_fmap_ext (f g : A → B) l :
+    (∀ i x, l !! i = Some x → f x = g x) → f <$> l = g <$> l.
+  Proof.
+    intros Hfg. apply list_eq; intros i. rewrite !list_lookup_fmap.
+    destruct (l !! i) eqn:?; f_equal/=; eauto.
+  Qed.
+  Lemma list_fmap_equiv_ext `{!Equiv B} (f g : A → B) l :
+    (∀ i x, l !! i = Some x → f x ≡ g x) → f <$> l ≡ g <$> l.
+  Proof.
+    intros Hl. apply list_equiv_lookup; intros i. rewrite !list_lookup_fmap.
+    destruct (l !! i) eqn:?; simpl; constructor; eauto.
+  Qed.
+End ext.
 
 Lemma list_alter_fmap_mono {A} (f : A → A) (g : A → A) l i :
   Forall (λ x, f (g x) = g (f x)) l → f <$> alter g i l = alter g i (f <$> l).

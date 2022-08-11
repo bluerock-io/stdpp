@@ -41,6 +41,9 @@ Coq 8.11 is no longer supported.
   involving bitwise operations. (by Michael Sammler)
 - Add the bind operation `set_bind` for finite sets. (by Dan Frumin and Paolo G.
   Giarrusso)
+- Change `list_fmap_ext` and `list_fmap_equiv_ext` to require equality on the
+  elements of the list, not on all elements of the carrier type. This change
+  makes these lemmas consistent with those for maps.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

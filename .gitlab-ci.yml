@@ -44,7 +44,6 @@ variables:
 
 build-coq.8.16.dev:
   <<: *template
-  <<: *branches_and_mr
   variables:
     OPAM_PINS: "coq version 8.16+rc1"
 

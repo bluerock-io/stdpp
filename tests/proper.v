@@ -1,6 +1,36 @@
 From stdpp Require Import prelude fin_maps propset.
 
-(** Some tests for solve_proper. *)
+(** Some tests for f_equiv. *)
+Section f_equiv.
+  Context `{!Equiv A, !Equiv B, !SubsetEq A}.
+
+  Lemma f_equiv1 (fn : A → B) (x1 x2 : A) :
+    Proper ((≡) ==> (≡)) fn →
+    x1 ≡ x2 →
+    fn x1 ≡ fn x2.
+  Proof. intros. f_equiv. assumption. Qed.
+
+  Lemma f_equiv2 (fn : A → B) (x1 x2 : A) :
+    Proper ((⊆) ==> (≡)) fn →
+    x1 ⊆ x2 →
+    fn x1 ≡ fn x2.
+  Proof. intros. f_equiv. assumption. Qed.
+
+  (* Ensure that we prefer the ≡. *)
+  Lemma f_equiv3 (fn : A → B) (x1 x2 : A) :
+    Proper ((≡) ==> (≡)) fn →
+    Proper ((⊆) ==> (≡)) fn →
+    x1 ≡ x2 →
+    fn x1 ≡ fn x2.
+  Proof.
+    (* The Coq tactic prefers the ⊆. *)
+    intros. Morphisms.f_equiv. Fail assumption.
+  Restart.
+    intros. f_equiv. assumption.
+  Qed.
+End f_equiv.
+
+(** Some tests for solve_proper (also testing f_equiv indirectly). *)
 Section tests.
   Context {A B : Type} `{!Equiv A, !Equiv B}.
   Context (foo : A → A) (bar : A → B) (baz : B → A → A).

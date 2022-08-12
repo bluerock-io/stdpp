@@ -32,7 +32,7 @@ Goal ∀ z, 0 ≤ z < 2 ^ 64 →
 Proof.
   intros z ?. split.
   - intros Hx. split.
-    + apply Z_bounded_iff_bits_nonneg; [lia..|]. intros n ?. bitblast.
+    + apply Z.bounded_iff_bits_nonneg; [lia..|]. intros n ?. bitblast.
       by bitblast Hx with n.
     + bitblast as n. by bitblast Hx with n.
   - intros [H1 H2]. bitblast as n. by bitblast H2 with n.

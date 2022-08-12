@@ -1265,17 +1265,17 @@ Section set_seq.
     - rewrite set_seq_subseteq; lia.
   Qed.
 
-  Lemma set_seq_plus_disjoint start len1 len2 :
+  Lemma set_seq_add_disjoint start len1 len2 :
     set_seq (C:=C) start len1 ## set_seq (start + len1) len2.
   Proof. set_solver by lia. Qed.
-  Lemma set_seq_plus start len1 len2 :
+  Lemma set_seq_add start len1 len2 :
     set_seq (C:=C) start (len1 + len2)
     ≡ set_seq start len1 ∪ set_seq (start + len1) len2.
   Proof. set_solver by lia. Qed.
-  Lemma set_seq_plus_L `{!LeibnizEquiv C} start len1 len2 :
+  Lemma set_seq_add_L `{!LeibnizEquiv C} start len1 len2 :
     set_seq (C:=C) start (len1 + len2)
     = set_seq start len1 ∪ set_seq (start + len1) len2.
-  Proof. unfold_leibniz. apply set_seq_plus. Qed.
+  Proof. unfold_leibniz. apply set_seq_add. Qed.
 
   Lemma set_seq_S_start_disjoint start len :
     {[ start ]} ## set_seq (C:=C) (S start) len.

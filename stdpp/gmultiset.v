@@ -438,7 +438,7 @@ Section more_lemmas.
         by (by rewrite ?lookup_union_with, ?lookup_delete, ?HX).
       rewrite (assoc_L _), <-(comm (++) (f (_,n'))), <-!(assoc_L _), <-IH.
       rewrite (assoc_L _). f_equiv.
-      rewrite (comm _); simpl. by rewrite replicate_plus, Permutation_middle.
+      rewrite (comm _); simpl. by rewrite replicate_add, Permutation_middle.
     - rewrite <-insert_union_with_l, !map_to_list_insert, !bind_cons
         by (by rewrite ?lookup_union_with, ?HX, ?HY).
       by rewrite <-(assoc_L (++)), <-IH.

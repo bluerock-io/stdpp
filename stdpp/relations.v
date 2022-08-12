@@ -150,7 +150,7 @@ Section general.
   Lemma nsteps_r n x y z : nsteps R n x y → R y z → nsteps R (S n) x z.
   Proof. induction 1; eauto. Qed.
 
-  Lemma nsteps_plus_inv n m x z :
+  Lemma nsteps_add_inv n m x z :
     nsteps R (n + m) x z → ∃ y, nsteps R n x y ∧ nsteps R m y z.
   Proof.
     revert x.
@@ -161,7 +161,7 @@ Section general.
   Lemma nsteps_inv_r n x z : nsteps R (S n) x z → ∃ y, nsteps R n x y ∧ R y z.
   Proof.
     rewrite <- PeanoNat.Nat.add_1_r.
-    intros (?&?&?%nsteps_once_inv)%nsteps_plus_inv; eauto.
+    intros (?&?&?%nsteps_once_inv)%nsteps_add_inv; eauto.
   Qed.
 
   Lemma nsteps_congruence {B} (f : A → B) (R' : relation B) n x y :
@@ -171,22 +171,22 @@ Section general.
   (** ** Results about [bsteps] *)
   Lemma bsteps_once n x y : R x y → bsteps R (S n) x y.
   Proof. eauto. Qed.
-  Lemma bsteps_plus_r n m x y :
+  Lemma bsteps_add_r n m x y :
     bsteps R n x y → bsteps R (n + m) x y.
   Proof. induction 1; simpl; eauto. Qed.
   Lemma bsteps_weaken n m x y :
     n ≤ m → bsteps R n x y → bsteps R m x y.
   Proof.
-    intros. rewrite (nat_le_plus_minus n m); auto using bsteps_plus_r.
+    intros. rewrite (Nat.le_add_sub n m); auto using bsteps_add_r.
   Qed.
-  Lemma bsteps_plus_l n m x y :
+  Lemma bsteps_add_l n m x y :
     bsteps R n x y → bsteps R (m + n) x y.
   Proof. apply bsteps_weaken. auto with arith. Qed.
   Lemma bsteps_S n x y :  bsteps R n x y → bsteps R (S n) x y.
   Proof. apply bsteps_weaken. lia. Qed.
   Lemma bsteps_trans n m x y z :
     bsteps R n x y → bsteps R m y z → bsteps R (n + m) x z.
-  Proof. induction 1; simpl; eauto using bsteps_plus_l. Qed.
+  Proof. induction 1; simpl; eauto using bsteps_add_l. Qed.
   Lemma bsteps_r n x y z : bsteps R n x y → R y z → bsteps R (S n) x z.
   Proof. induction 1; eauto. Qed.
   Lemma bsteps_ind_r (P : nat → A → Prop) (x : A)

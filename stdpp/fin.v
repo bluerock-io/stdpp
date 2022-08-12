@@ -87,26 +87,26 @@ Qed.
 Lemma nat_to_fin_to_nat {n} (i : fin n) H : @nat_to_fin (fin_to_nat i) n H = i.
 Proof. apply (inj fin_to_nat), fin_to_nat_to_fin. Qed.
 
-Fixpoint fin_plus_inv {n1 n2} : ∀ (P : fin (n1 + n2) → Type)
+Fixpoint fin_add_inv {n1 n2} : ∀ (P : fin (n1 + n2) → Type)
     (H1 : ∀ i1 : fin n1, P (Fin.L n2 i1))
     (H2 : ∀ i2, P (Fin.R n1 i2)) (i : fin (n1 + n2)), P i :=
   match n1 with
   | 0 => λ P H1 H2 i, H2 i
-  | S n => λ P H1 H2, fin_S_inv P (H1 0%fin) (fin_plus_inv _ (λ i, H1 (FS i)) H2)
+  | S n => λ P H1 H2, fin_S_inv P (H1 0%fin) (fin_add_inv _ (λ i, H1 (FS i)) H2)
   end.
 
-Lemma fin_plus_inv_L {n1 n2} (P : fin (n1 + n2) → Type)
+Lemma fin_add_inv_l {n1 n2} (P : fin (n1 + n2) → Type)
     (H1: ∀ i1 : fin n1, P (Fin.L _ i1)) (H2: ∀ i2, P (Fin.R _ i2)) (i: fin n1) :
-  fin_plus_inv P H1 H2 (Fin.L n2 i) = H1 i.
+  fin_add_inv P H1 H2 (Fin.L n2 i) = H1 i.
 Proof.
   revert P H1 H2 i.
   induction n1 as [|n1 IH]; intros P H1 H2 i; inv_fin i; simpl; auto.
   intros i. apply (IH (λ i, P (FS i))).
 Qed.
 
-Lemma fin_plus_inv_R {n1 n2} (P : fin (n1 + n2) → Type)
+Lemma fin_add_inv_r {n1 n2} (P : fin (n1 + n2) → Type)
     (H1: ∀ i1 : fin n1, P (Fin.L _ i1)) (H2: ∀ i2, P (Fin.R _ i2)) (i: fin n2) :
-  fin_plus_inv P H1 H2 (Fin.R n1 i) = H2 i.
+  fin_add_inv P H1 H2 (Fin.R n1 i) = H2 i.
 Proof.
   revert P H1 H2 i; induction n1 as [|n1 IH]; intros P H1 H2 i; simpl; auto.
   apply (IH (λ i, P (FS i))).

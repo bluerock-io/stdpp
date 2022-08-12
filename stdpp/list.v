@@ -406,7 +406,7 @@ for example used for the countable instance of lists and in namespaces.
 Fixpoint positives_flatten_go (xs : list positive) (acc : positive) : positive :=
   match xs with
   | [] => acc
-  | x :: xs => positives_flatten_go xs (acc~1~0 ++ Preverse (Pdup x))
+  | x :: xs => positives_flatten_go xs (acc~1~0 ++ Pos.reverse (Pos.dup x))
   end.
 
 (** Flatten a list of positives into a single positive by duplicating the bits
@@ -1244,7 +1244,7 @@ Lemma take_app3_alt l1 l2 l3 n : n = length l1 → take n ((l1 ++ l2) ++ l3) = l
 Proof. intros ->. by rewrite <-(assoc_L (++)), take_app. Qed.
 Lemma take_app_le l k n : n ≤ length l → take n (l ++ k) = take n l.
 Proof. revert n. induction l; intros [|?] ?; f_equal/=; auto with lia. Qed.
-Lemma take_plus_app l k n m :
+Lemma take_add_app l k n m :
   length l = n → take (n + m) (l ++ k) = l ++ take m k.
 Proof. intros <-. induction l; f_equal/=; auto. Qed.
 Lemma take_app_ge l k n :
@@ -1339,7 +1339,7 @@ Proof.
   intros. rewrite <-(Nat.sub_add (length l) n) at 1 by done.
   by rewrite Nat.add_comm, <-drop_drop, drop_app.
 Qed.
-Lemma drop_plus_app l k n m :
+Lemma drop_add_app l k n m :
   length l = n → drop (n + m) (l ++ k) = drop m k.
 Proof. intros <-. by rewrite <-drop_drop, drop_app. Qed.
 Lemma lookup_drop l n i : drop n l !! i = l !! (n + i).
@@ -1438,7 +1438,7 @@ Lemma replicate_S n x : replicate (S n) x = x :: replicate  n x.
 Proof. done. Qed.
 Lemma replicate_S_end n x : replicate (S n) x = replicate n x ++ [x].
 Proof. induction n; f_equal/=; auto. Qed.
-Lemma replicate_plus n m x :
+Lemma replicate_add n m x :
   replicate (n + m) x = replicate n x ++ replicate m x.
 Proof. induction n; f_equal/=; auto. Qed.
 Lemma replicate_cons_app n x :
@@ -1446,11 +1446,11 @@ Lemma replicate_cons_app n x :
 Proof. induction n; f_equal/=; eauto.  Qed.
 Lemma take_replicate n m x : take n (replicate m x) = replicate (min n m) x.
 Proof. revert m. by induction n; intros [|?]; f_equal/=. Qed.
-Lemma take_replicate_plus n m x : take n (replicate (n + m) x) = replicate n x.
+Lemma take_replicate_add n m x : take n (replicate (n + m) x) = replicate n x.
 Proof. by rewrite take_replicate, min_l by lia. Qed.
 Lemma drop_replicate n m x : drop n (replicate m x) = replicate (m - n) x.
 Proof. revert m. by induction n; intros [|?]; f_equal/=. Qed.
-Lemma drop_replicate_plus n m x : drop n (replicate (n + m) x) = replicate m x.
+Lemma drop_replicate_add n m x : drop n (replicate (n + m) x) = replicate m x.
 Proof. rewrite drop_replicate. f_equal. lia. Qed.
 Lemma replicate_as_elem_of x n l :
   replicate n x = l ↔ length l = n ∧ ∀ y, y ∈ l → y = x.
@@ -1490,16 +1490,16 @@ Lemma resize_all l x : resize (length l) x l = l.
 Proof. intros. by rewrite resize_le, take_ge. Qed.
 Lemma resize_all_alt l n x : n = length l → resize n x l = l.
 Proof. intros ->. by rewrite resize_all. Qed.
-Lemma resize_plus l n m x :
+Lemma resize_add l n m x :
   resize (n + m) x l = resize n x l ++ resize m x (drop n l).
 Proof.
   revert n m. induction l; intros [|?] [|?]; f_equal/=; auto.
   - by rewrite Nat.add_0_r, (right_id_L [] (++)).
-  - by rewrite replicate_plus.
+  - by rewrite replicate_add.
 Qed.
-Lemma resize_plus_eq l n m x :
+Lemma resize_add_eq l n m x :
   length l = n → resize (n + m) x l = l ++ replicate m x.
-Proof. intros <-. by rewrite resize_plus, resize_all, drop_all, resize_nil. Qed.
+Proof. intros <-. by rewrite resize_add, resize_all, drop_all, resize_nil. Qed.
 Lemma resize_app_le l1 l2 n x :
   n ≤ length l1 → resize n x (l1 ++ l2) = resize n x l1.
 Proof.
@@ -1537,7 +1537,7 @@ Lemma take_resize_le l n m x : n ≤ m → take n (resize m x l) = resize n x l.
 Proof. intros. by rewrite take_resize, Nat.min_l. Qed.
 Lemma take_resize_eq l n x : take n (resize n x l) = resize n x l.
 Proof. intros. by rewrite take_resize, Nat.min_l. Qed.
-Lemma take_resize_plus l n m x : take n (resize (n + m) x l) = resize n x l.
+Lemma take_resize_add l n m x : take n (resize (n + m) x l) = resize n x l.
 Proof. by rewrite take_resize, min_l by lia. Qed.
 Lemma drop_resize_le l n m x :
   n ≤ m → drop n (resize m x l) = resize (m - n) x (drop n l).
@@ -1546,7 +1546,7 @@ Proof.
   - intros. by rewrite drop_nil, !resize_nil, drop_replicate.
   - intros [|?] [|?] ?; simpl; try case_match; auto with lia.
 Qed.
-Lemma drop_resize_plus l n m x :
+Lemma drop_resize_add l n m x :
   drop n (resize (n + m) x l) = resize m x (drop n l).
 Proof. rewrite drop_resize_le by lia. f_equal. lia. Qed.
 Lemma lookup_resize l n x i : i < n → i < length l → resize n x l !! i = l !! i.
@@ -1578,7 +1578,7 @@ Proof. intros. by rewrite !list_lookup_total_alt, lookup_resize_old. Qed.
 Lemma rotate_replicate n1 n2 x:
   rotate n1 (replicate n2 x) = replicate n2 x.
 Proof.
-  unfold rotate. rewrite drop_replicate, take_replicate, <-replicate_plus.
+  unfold rotate. rewrite drop_replicate, take_replicate, <-replicate_add.
   f_equal. lia.
 Qed.
 
@@ -3355,7 +3355,7 @@ Section Forall2.
     { rewrite <-(resize_resize l m n) by done. by apply Forall2_resize. }
     intros. assert (n = length k); subst.
     { by rewrite <-(Forall2_length (resize n x l) k), resize_length. }
-    rewrite (nat_le_plus_minus (length k) m), !resize_plus,
+    rewrite (Nat.le_add_sub (length k) m), !resize_add,
       resize_all, drop_all, resize_nil by lia.
     auto using Forall2_app, Forall2_replicate_r,
       Forall_resize, Forall_drop, resize_length.
@@ -3368,7 +3368,7 @@ Section Forall2.
     { rewrite <-(resize_resize k m n) by done. by apply Forall2_resize. }
     assert (n = length l); subst.
     { by rewrite (Forall2_length l (resize n y k)), resize_length. }
-    rewrite (nat_le_plus_minus (length l) m), !resize_plus,
+    rewrite (Nat.le_add_sub (length l) m), !resize_add,
       resize_all, drop_all, resize_nil by lia.
     auto using Forall2_app, Forall2_replicate_l,
       Forall_resize, Forall_drop, resize_length.
@@ -3802,7 +3802,7 @@ Section find.
           naive_solver eauto using lookup_app_l_Some with lia. }
         apply list_find_Some. split_and!; [done..|].
         intros j z ??. eapply (Hleast (length l1 + j)); [|lia].
-        by rewrite lookup_app_r, nat_minus_plus by lia.
+        by rewrite lookup_app_r, Nat.sub_add' by lia.
     - intros [(?&?&Hleast)%list_find_Some|(?&Hl1&(?&?&Hleast)%list_find_Some)].
       + apply list_find_Some. split_and!; [by auto using lookup_app_l_Some..|].
         assert (i < length l1) by eauto using lookup_lt_Some.
@@ -4844,7 +4844,8 @@ Global Instance TCForall_app {A} (P : A → Prop) xs ys :
   TCForall P xs → TCForall P ys → TCForall P (xs ++ ys).
 Proof. rewrite !TCForall_Forall. apply Forall_app_2. Qed.
 
-Lemma TCForall2_Forall2 {A B} (P : A → B → Prop) xs ys : TCForall2 P xs ys ↔ Forall2 P xs ys.
+Lemma TCForall2_Forall2 {A B} (P : A → B → Prop) xs ys :
+  TCForall2 P xs ys ↔ Forall2 P xs ys.
 Proof. split; induction 1; constructor; auto. Qed.
 
 Lemma TCExists_Exists {A} (P : A → Prop) l : TCExists P l ↔ Exists P l.
@@ -4866,16 +4867,16 @@ Section positives_flatten_unflatten.
   Qed.
 
   Lemma positives_unflatten_go_app p suffix xs acc :
-    positives_unflatten_go (suffix ++ Preverse (Pdup p)) xs acc =
+    positives_unflatten_go (suffix ++ Pos.reverse (Pos.dup p)) xs acc =
     positives_unflatten_go suffix xs (acc ++ p).
   Proof.
     revert suffix acc.
     induction p as [p IH|p IH|]; intros acc suffix; simpl.
-    - rewrite 2!Preverse_xI.
+    - rewrite 2!Pos.reverse_xI.
       rewrite 2!(assoc_L (++)).
       rewrite IH.
       reflexivity.
-    - rewrite 2!Preverse_xO.
+    - rewrite 2!Pos.reverse_xO.
       rewrite 2!(assoc_L (++)).
       rewrite IH.
       reflexivity.
@@ -4927,7 +4928,8 @@ Section positives_flatten_unflatten.
   Qed.
 
   Lemma positives_flatten_cons x xs :
-    positives_flatten (x :: xs) = 1~1~0 ++ Preverse (Pdup x) ++ positives_flatten xs.
+    positives_flatten (x :: xs)
+    = 1~1~0 ++ Pos.reverse (Pos.dup x) ++ positives_flatten xs.
   Proof.
     change (x :: xs) with ([x] ++ xs)%list.
     rewrite positives_flatten_app.
@@ -4953,9 +4955,9 @@ Section positives_flatten_unflatten.
     rewrite !positives_flatten_cons, !(assoc _); intros Hl.
     assert (xs = ys) as <- by eauto; clear IH; f_equal.
     apply (inj (.++ positives_flatten xs)) in Hl.
-    rewrite 2!Preverse_Pdup in Hl.
-    apply (Pdup_suffix_eq _ _ p1 p2) in Hl.
-    by apply (inj Preverse).
+    rewrite 2!Pos.reverse_dup in Hl.
+    apply (Pos.dup_suffix_eq _ _ p1 p2) in Hl.
+    by apply (inj Pos.reverse).
   Qed.
 End positives_flatten_unflatten.
 

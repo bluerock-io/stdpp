@@ -5,7 +5,7 @@
   bv_wrap 64 (a + 1) = bv_wrap 64 (Z.succ a)
 1 goal
   
-  sp, l, r, xs : bv 64
+  l, r, xs : bv 64
   data : list (bv 64)
   H : bv_unsigned l < bv_unsigned r
   H0 : bv_unsigned r ≤ Z.of_nat (length data)

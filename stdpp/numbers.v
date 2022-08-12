@@ -1,6 +1,26 @@
-(** This file collects some trivial facts on the Coq types [nat] and [N] for
-natural numbers, and the type [Z] for integers. It also declares some useful
-notations. *)
+(** This file provides various tweaks and extensions to Coq's theory of numbers
+(natural numbers [nat] and [N], positive numbers [positive], integers [Z], and
+rationals [Qc]). In addition, this file defines a new type of positive rational
+numbers [Qp], which is used extensively in Iris to represent fractional
+permissions.
+
+The organization of this file follows mostly Coq's standard library.
+
+- We put all results in modules. For example, the module [Nat] collects the
+  results for type [nat]. Since the Coq stdlib already defines a module [Nat],
+  our module [Nat] exports Coq's module so that our module [Nat] contains the
+  union of the results from the Coq stdlib and std++.
+- We follow the naming convention of Coq's "numbers" library to prefer
+  [succ]/[add]/[sub]/[mul] over [S]/[plus]/[minus]/[mult].
+- One typically does not [Import] modules such as [Nat], and refers to the
+  results using [Nat.lem]. As a consequence, all [Hint]s [Instance]s in the modules in
+  this file are [Global] and not [Export]. Other things like [Arguments] are outside
+  the modules, since for them [Global] works like [Export].
+
+The results for [Qc] are not yet in a module. This is in part because they
+still follow the old/non-module style in Coq's standard library. See also
+https://gitlab.mpi-sws.org/iris/stdpp/-/issues/147. *)
+
 From Coq Require Export EqdepFacts PArith NArith ZArith NPeano.
 From Coq Require Import QArith Qcanon.
 From stdpp Require Export base decidable option.
@@ -38,6 +58,8 @@ Infix "`mod`" := Nat.modulo (at level 35) : nat_scope.
 Infix "`max`" := Nat.max (at level 35) : nat_scope.
 Infix "`min`" := Nat.min (at level 35) : nat_scope.
 
+(** TODO: Consider removing these notations to avoid populting the global
+scope? *)
 Notation lcm := Nat.lcm.
 Notation divide := Nat.divide.
 Notation "( x | y )" := (divide x y) : nat_scope.

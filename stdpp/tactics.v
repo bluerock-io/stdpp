@@ -496,10 +496,16 @@ Tactic Notation "iter" tactic(tac) tactic(l) :=
   let rec go l :=
   match l with ?x :: ?l => tac x || go l end in go l.
 
-(** Given [H : A_1 → ... → A_n → B] (where each [A_i] is non-dependent), the
-tactic [feed tac H tac_by] creates a subgoal for each [A_i] and calls [tac p]
-with the generated proof [p] of [B]. *)
-Tactic Notation "feed" tactic(tac) constr(H) :=
+(** Given [H : A_1 → ... → A_n → B] (where each [A_i] is non-dependent
+and [B] is not convertible to an arrow), the tactic [feed_core H using
+tac] creates a subgoal for each [A_i]  (in front of the original goal)
+and calls [tac p] with the generated proof [p] of [B].
+
+For example, given [H : P → Q → R], [feed_core H using (fun p
+=> pose proof p)] creates the subgoals [P] and [Q] in front of the
+original goal, and then in the original goal executes
+[pose proof Hfeed] where [Hfeed : R], which adds [R] to the context. *)
+Tactic Notation "feed_core" constr(H) "using" tactic3(tac) :=
   let rec go H :=
   let T := type of H in
   lazymatch eval hnf in T with
@@ -514,49 +520,97 @@ Tactic Notation "feed" tactic(tac) constr(H) :=
   | ?T1 => tac H
   end in go H.
 
-(** The tactic [efeed tac H] is similar to [feed], but it also instantiates
-dependent premises of [H] with evars. *)
-Tactic Notation "efeed" constr(H) "using" tactic3(tac) "by" tactic3 (bytac) :=
+(** The tactic [efeed_core H using tac] is similar to [feed_core], but
+it also instantiates dependent premises of [H] with evars.
+
+For example, given [H : ∀ x y, P x → Q y → R x y] (where [R x y] is
+not convertible to an arrow/forall), [efeed_core H using (fun p
+=> pose proof p)] creates evars [?x] and [?y] for [x] and [y] and
+subgoals [P ?x] and [Q ?y] in front of the original goal, and then
+in the original goal executes [pose proof Hfeed] where
+[Hfeed : R ?x ?y], which adds [R ?x ?y] to the context. *)
+Tactic Notation "efeed_core" constr(H) "using" tactic3(tac) :=
   let rec go H :=
   let T := type of H in
   lazymatch eval hnf in T with
   | ?T1 → ?T2 =>
     let HT1 := fresh "feed" in assert T1 as HT1;
-      [bytac | go (H HT1); clear HT1 ]
+      [| go (H HT1); clear HT1 ]
   | ?T1 → _ =>
     let e := mk_evar T1 in
     go (H e)
   | ?T1 => tac H
   end in go H.
-Tactic Notation "efeed" constr(H) "using" tactic3(tac) :=
-  efeed H using tac by idtac.
 
 (** The following variants of [pose proof], [specialize], [inversion], and
-[destruct], use the [feed] tactic before invoking the actual tactic. *)
+[destruct], use the [(e)feed_core] tactic before invoking the actual tactic. *)
+(** [feed pose proof H as H'] on [H : P → Q → R] creates two new
+subgoals [P] and [Q] in front of the original goal and adds [H' : R] to
+the context of the original goal. *)
 Tactic Notation "feed" "pose" "proof" constr(H) "as" ident(H') :=
-  feed (fun p => pose proof p as H') H.
+  feed_core H using (fun p => pose proof p as H').
 Tactic Notation "feed" "pose" "proof" constr(H) :=
-  feed (fun p => pose proof p) H.
+  feed_core H using (fun p => pose proof p).
 
 Tactic Notation "efeed" "pose" "proof" constr(H) "as" ident(H') :=
-  efeed H using (fun p => pose proof p as H').
+  efeed_core H using (fun p => pose proof p as H').
 Tactic Notation "efeed" "pose" "proof" constr(H) :=
-  efeed H using (fun p => pose proof p).
+  efeed_core H using (fun p => pose proof p).
 
+(** [feed specialize H] on hypothesis [H : P → Q → R] creates two new
+subgoals [P] and [Q] in front of the original goal and changes [H] to have
+type [R] in the original goal.
+
+Note that [(e)feed specialize] only works on hypotheses. For arbitrary
+proof terms, use [(e)feed pose proof]. *)
 Tactic Notation "feed" "specialize" hyp(H) :=
-  feed (fun p => specialize p) H.
+  feed_core H using (fun p => specialize p).
 Tactic Notation "efeed" "specialize" hyp(H) :=
-  efeed H using (fun p => specialize p).
+  efeed_core H using (fun p => specialize p).
 
+(** [feed generalize H] on [H : P → Q → R] creates two new
+subgoals [P] and [Q] in front of the original goal and adds [R] to
+the original goal (i.e. [Goal] becomes [R → Goal]).
+
+[efeed generalize] is also sometimes called [exploit] (e.g. in
+CompCert). *)
+Tactic Notation "feed" "generalize" constr(H) :=
+  feed_core H using (fun p => let H':=fresh in pose proof p as H'; revert H').
+Tactic Notation "efeed" "generalize" constr(H) :=
+  efeed_core H using (fun p => let H':=fresh in pose proof p as H'; revert H').
+
+(** [feed inversion H] on [H : P → Q → R] creates two new subgoals [P]
+and [Q] in front of the original goal and performs [inversion] on [R]
+in the original goal.
+
+Note that [(e)feed inversion] allows passing terms, not just
+identifiers (unlike standard [inversion]). *)
 Tactic Notation "feed" "inversion" constr(H) :=
-  feed (fun p => let H':=fresh in pose proof p as H'; inversion H') H.
-Tactic Notation "feed" "inversion" constr(H) "as" simple_intropattern(IP) :=
-  feed (fun p => let H':=fresh in pose proof p as H'; inversion H' as IP) H.
+  feed_core H using (fun p => let H':=fresh in pose proof p as H'; inversion H').
+Tactic Notation "efeed" "inversion" constr(H) :=
+  efeed_core H using (fun p => let H':=fresh in pose proof p as H'; inversion H').
 
+Tactic Notation "feed" "inversion" constr(H) "as" simple_intropattern(IP) :=
+  feed_core H using (fun p => let H':=fresh in pose proof p as H'; inversion H' as IP).
+Tactic Notation "efeed" "inversion" constr(H) "as" simple_intropattern(IP) :=
+  efeed_core H using (fun p => let H':=fresh in pose proof p as H'; inversion H' as IP).
+
+(** [feed destruct H] on [H : P → Q → R] creates two new subgoals [P]
+and [Q] in front of the original goal and performs [destruct] on [R]
+in the original goal.
+
+[destruct] and [edestruct] already provide the functionality of
+[feed destruct] and [efeed destruct], but we provide [feed destruct]
+and [efeed destruct] for consistency. *)
 Tactic Notation "feed" "destruct" constr(H) :=
-  feed (fun p => let H':=fresh in pose proof p as H'; destruct H') H.
+  feed_core H using (fun p => let H':=fresh in pose proof p as H'; destruct H').
+Tactic Notation "efeed" "destruct" constr(H) :=
+  efeed_core H using (fun p => let H':=fresh in pose proof p as H'; destruct H').
+
 Tactic Notation "feed" "destruct" constr(H) "as" simple_intropattern(IP) :=
-  feed (fun p => let H':=fresh in pose proof p as H'; destruct H' as IP) H.
+  feed_core H using (fun p => let H':=fresh in pose proof p as H'; destruct H' as IP).
+Tactic Notation "efeed" "destruct" constr(H) "as" simple_intropattern(IP) :=
+  efeed_core H using (fun p => let H':=fresh in pose proof p as H'; destruct H' as IP).
 
 (** The block definitions are taken from [Coq.Program.Equality] and can be used
 by tactics to separate their goal from hypotheses they generalize over. *)

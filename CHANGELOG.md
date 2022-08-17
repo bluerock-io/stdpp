@@ -69,12 +69,13 @@ s/\bmap_disjoint_subset\b/kmap_subset/g
 s/\blookup_union_l\b/lookup_union_l'/g
 # number modules --- note that this might rename your own lemmas
 # start with Nat_/N_/Z_/Qp_/P(app|reverse|length|dup)_ too eagerly.
+# Also the list of names starting with nat_ is not complete.
 s/\bNat_/Nat\./g
 s/\bNat.iter_S(|_r)\b/Nat.iter_succ\1/g
 s/\bP(app|reverse|length|dup)/Pos\.\1/g
 s/\bPlt_sum\b/Pos\.lt_sum/g
 s/\bPos\.reverse_Pdup\b/Pos\.reverse_Pdup/g
-s/\bnat_le_sum\b/Nat\.le_sum/g
+s/\bnat_(le_sum|eq_dec|lt_pi)\b/Nat\.\1/g
 s/\bN_/N\./g
 s/\bZ_/Z\./g
 s/\bZ\.scope\b/Z_scope/g

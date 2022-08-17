@@ -1,9 +1,15 @@
 This file lists "large-ish" changes to the std++ Coq library, but not every
 API-breaking change is listed.
 
-## std++ master
+## std++ 1.8.0 (2022-08-??)
 
-Coq 8.11 is no longer supported.
+Coq 8.16 is newly supported by this release, and Coq 8.12 to 8.15 remain
+supported. Coq 8.11 is no longer supported.
+
+This release of std++ was managed by Ralf Jung, Robbert Krebbers, and Lennard
+Gäher, with contributions from Andrej Dudenhefner, Dan Frumin, Gregory Malecha,
+Jan-Oliver Kaiser, Lennard Gäher, Léo Stefanesco, Michael Sammler, Paolo G. Giarrusso,
+Ralf Jung, Robbert Krebbers, and Vincent Siles. Thanks a lot to everyone involved!
 
 - Make sure that `gset` and `mapset` do not bump the universe.
 - Rewrite `tele_arg` to make it not bump universes. (by Gregory Malecha, BedRock

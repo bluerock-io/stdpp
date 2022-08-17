@@ -1,7 +1,7 @@
 This file lists "large-ish" changes to the std++ Coq library, but not every
 API-breaking change is listed.
 
-## std++ 1.8.0 (2022-08-??)
+## std++ 1.8.0 (2022-08-18)
 
 Coq 8.16 is newly supported by this release, and Coq 8.12 to 8.15 remain
 supported. Coq 8.11 is no longer supported.

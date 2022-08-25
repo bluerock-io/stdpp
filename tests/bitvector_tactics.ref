@@ -64,3 +64,25 @@ goal 2 is:
        (bv_wrap (16 * 2) (bv_unsigned v ≫ Z.of_N (16 * 2)) ≪ Z.of_N (16 * 2))
        (Z.lor (bv_unsigned b ≪ Z.of_N (16 * 1))
           (bv_wrap (16 * 1) (bv_unsigned v))))
+1 goal
+  
+  b : bv 16
+  ============================
+  bv_wrap 16 (bv_unsigned b) = bv_wrap 16 (bv_unsigned b)
+1 goal
+  
+  b : bv 16
+  ============================
+  bv_wrap 16 (bv_unsigned b) ≠ bv_wrap 16 (bv_unsigned b + 1)
+1 goal
+  
+  b : bv 16
+  H : bv_unsigned b = bv_unsigned b
+  ============================
+  True
+1 goal
+  
+  b : bv 16
+  H : bv_unsigned b ≠ bv_wrap 16 (bv_unsigned b + 1)
+  ============================
+  True

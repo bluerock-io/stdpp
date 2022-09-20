@@ -1015,6 +1015,9 @@ Proof.
     by rewrite <-?map_to_list_empty_iff.
 Defined.
 
+Lemma map_choose_or_empty {A} (m : M A) : (∃ i x, m !! i = Some x) ∨ m = ∅.
+Proof. destruct (decide (m = ∅)); [right|left]; auto using map_choose. Qed.
+
 (** Properties of the imap function *)
 Lemma map_lookup_imap {A B} (f : K → A → option B) (m : M A) i :
   map_imap f m !! i = m !! i ≫= f i.

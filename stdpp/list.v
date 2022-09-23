@@ -2033,6 +2033,13 @@ Section filter.
     rewrite reverse_cons, filter_app, IHl, !filter_cons.
     case_decide; [by rewrite reverse_cons|by rewrite filter_nil, app_nil_r].
   Qed.
+
+  Lemma filter_app_complement l : filter P l ++ filter (λ x, ¬P x) l ≡ₚ l.
+  Proof.
+    induction l as [|x l IH]; simpl; [done|]. case_decide.
+    - rewrite decide_False by naive_solver. simpl. by rewrite IH.
+    - rewrite decide_True by done. by rewrite <-Permutation_middle, IH.
+  Qed.
 End filter.
 
 Lemma list_filter_iff (P1 P2 : A → Prop)

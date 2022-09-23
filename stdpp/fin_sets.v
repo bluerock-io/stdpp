@@ -298,6 +298,93 @@ Proof. by unfold set_fold; simpl; rewrite elements_empty. Qed.
 Lemma set_fold_singleton {B} (f : A → B → B) (b : B) (a : A) :
   set_fold f b ({[a]} : C) = f a b.
 Proof. by unfold set_fold; simpl; rewrite elements_singleton. Qed.
+
+(** Generalization of [set_fold_union] (below) with a.) a relation [R]
+instead of equality b.) a function [f : A → B → B] instead of [f : A → A → A],
+and c.) premises that ensure the elements are in [X ∪ Y]. *)
+Lemma set_fold_union_strong {B} (R : relation B) `{!PreOrder R}
+    (f : A → B → B) (b : B) X Y :
+  (∀ x, Proper (R ==> R) (f x)) →
+  (∀ x b',
+    (** This is morally idempotence for elements of [X ∩ Y] *)
+    x ∈ X ∩ Y →
+    (** We cannot write this in the usual direction of idempotence properties
+    (i.e., [R (f x (f x b'))) (f x b')]) because [R] is not symmetric. *)
+    R (f x b') (f x (f x b'))) →
+  (∀ x1 x2 b',
+    (** This is morally commutativity + associativity for elements of [X ∪ Y] *)
+    x1 ∈ X ∪ Y → x2 ∈ X ∪ Y → x1 ≠ x2 →
+    R (f x1 (f x2 b')) (f x2 (f x1 b'))) →
+  R (set_fold f b (X ∪ Y)) (set_fold f (set_fold f b X) Y).
+Proof.
+  (** This lengthy proof involves various steps by transitivity of [R].
+  Roughly, we show that the LHS is related to folding over:
+
+    elements (Y ∖ X) ++ elements (X ∩ Y) ++ elements (X ∖ Y)
+
+  and the RHS is related to folding over:
+
+    elements (Y ∖ X) ++ elements (X ∩ Y) ++ elements (X ∩ Y) ++ elements (Y ∖ X)
+
+  These steps are justified by lemma [foldr_permutation]. In the middle we
+  remove the repeated folding over [elements (X ∩ Y)] using [foldr_idemp_strong].
+  Most of the proof work concerns the side conditions of [foldr_permutation]
+  and [foldr_idemp_strong], which require relating results about lists and
+  sets. *)
+  intros ?.
+  assert (∀ b1 b2 l, R b1 b2 → R (foldr f b1 l) (foldr f b2 l)) as Hff.
+  { intros b1 b2 l Hb. induction l as [|x l]; simpl; [done|]. by f_equiv. }
+  intros Hfidemp Hfcomm. unfold set_fold; simpl.
+  trans (foldr f b (elements (Y ∖ X) ++ elements (X ∩ Y) ++ elements (X ∖ Y))).
+  { apply (foldr_permutation R f b).
+    - intros j1 x1 j2 x2 b' Hj Hj1 Hj2. apply Hfcomm.
+      + apply elem_of_list_lookup_2 in Hj1. set_solver.
+      + apply elem_of_list_lookup_2 in Hj2. set_solver.
+      + intros ->. pose proof (NoDup_elements (X ∪ Y)).
+        by eapply Hj, NoDup_lookup.
+    - rewrite <-!elements_disj_union by set_solver. f_equiv; intros x.
+      destruct (decide (x ∈ X)), (decide (x ∈ Y)); set_solver. }
+  trans (foldr f (foldr f b (elements (X ∩ Y) ++ elements (X ∖ Y)))
+    (elements (Y ∖ X) ++ elements (X ∩ Y))).
+  { rewrite !foldr_app. apply Hff. apply (foldr_idemp_strong (flip R)).
+    - solve_proper.
+    - intros j a b' ?%elem_of_list_lookup_2. apply Hfidemp. set_solver.
+    - intros j1 x1 j2 x2 b' Hj Hj1 Hj2. apply Hfcomm.
+      + apply elem_of_list_lookup_2 in Hj2. set_solver.
+      + apply elem_of_list_lookup_2 in Hj1. set_solver.
+      + intros ->. pose proof (NoDup_elements (X ∩ Y)).
+        by eapply Hj, NoDup_lookup. }
+  trans (foldr f (foldr f b (elements (X ∩ Y) ++ elements (X ∖ Y))) (elements Y)).
+  { apply (foldr_permutation R f _).
+    - intros j1 x1 j2 x2 b' Hj Hj1 Hj2. apply Hfcomm.
+      + apply elem_of_list_lookup_2 in Hj1. set_solver.
+      + apply elem_of_list_lookup_2 in Hj2. set_solver.
+      + intros ->. assert (NoDup (elements (Y ∖ X) ++ elements (X ∩ Y))).
+        { rewrite <-elements_disj_union by set_solver. apply NoDup_elements. }
+        by eapply Hj, NoDup_lookup.
+    - rewrite <-!elements_disj_union by set_solver. f_equiv; intros x.
+      destruct (decide (x ∈ X)); set_solver. }
+  apply Hff. apply (foldr_permutation R f _).
+  - intros j1 x1 j2 x2 b' Hj Hj1 Hj2. apply Hfcomm.
+    + apply elem_of_list_lookup_2 in Hj1. set_solver.
+    + apply elem_of_list_lookup_2 in Hj2. set_solver.
+    + intros ->. assert (NoDup (elements (X ∩ Y) ++ elements (X ∖ Y))).
+      { rewrite <-elements_disj_union by set_solver. apply NoDup_elements. }
+      by eapply Hj, NoDup_lookup.
+  - rewrite <-!elements_disj_union by set_solver. f_equiv; intros x.
+    destruct (decide (x ∈ Y)); set_solver.
+Qed.
+Lemma set_fold_union (f : A → A → A) (b : A) X Y :
+  IdemP (=) f →
+  Comm (=) f →
+  Assoc (=) f →
+  set_fold f b (X ∪ Y) = set_fold f (set_fold f b X) Y.
+Proof.
+  intros. apply (set_fold_union_strong _ _ _ _ _ _).
+  - intros x b' _. by rewrite (assoc_L f), (idemp f).
+  - intros x1 x2 b' _ _ _. by rewrite !(assoc_L f), (comm_L f x1).
+Qed.
+
 (** Generalization of [set_fold_disj_union] (below) with a.) a relation [R]
 instead of equality b.) a function [f : A → B → B] instead of [f : A → A → A],
 and c.) premises that ensure the elements are in [X ∪ Y]. *)
@@ -310,16 +397,7 @@ Lemma set_fold_disj_union_strong {B} (R : relation B) `{!PreOrder R}
     R (f x1 (f x2 b')) (f x2 (f x1 b'))) →
   X ## Y →
   R (set_fold f b (X ∪ Y)) (set_fold f (set_fold f b X) Y).
-Proof.
-  intros ? Hf Hdisj. unfold set_fold; simpl.
-  rewrite <-foldr_app. apply (foldr_permutation R f b).
-  - intros j1 x1 j2 x2 b' Hj Hj1 Hj2. apply Hf.
-    + apply elem_of_list_lookup_2 in Hj1. set_solver.
-    + apply elem_of_list_lookup_2 in Hj2. set_solver.
-    + intros ->. pose proof (NoDup_elements (X ∪ Y)).
-      by eapply Hj, NoDup_lookup.
-  - by rewrite elements_disj_union, (comm (++)).
-Qed.
+Proof. intros. apply set_fold_union_strong; set_solver. Qed.
 Lemma set_fold_disj_union (f : A → A → A) (b : A) X Y :
   Comm (=) f →
   Assoc (=) f →

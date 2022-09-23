@@ -4487,15 +4487,21 @@ End permutations.
 (** Note that [foldr] has much better support, so when in doubt, it should be
 preferred over [foldl]. *)
 Definition foldr_app := @fold_right_app.
+
+Lemma foldr_cons {A B} (f : B → A → A) (a : A) l x :
+  foldr f a (x :: l) = f x (foldr f a l).
+Proof. done. Qed.
 Lemma foldr_snoc {A B} (f : B → A → A) (a : A) l x :
   foldr f a (l ++ [x]) = foldr f (f x a) l.
 Proof. rewrite foldr_app. done. Qed.
+
 Lemma foldr_fmap {A B C} (f : B → A → A) x (l : list C) g :
   foldr f x (g <$> l) = foldr (λ b a, f (g b) a) x l.
 Proof. induction l; f_equal/=; auto. Qed.
 Lemma foldr_ext {A B} (f1 f2 : B → A → A) x1 x2 l1 l2 :
   (∀ b a, f1 b a = f2 b a) → l1 = l2 → x1 = x2 → foldr f1 x1 l1 = foldr f2 x2 l2.
 Proof. intros Hf -> ->. induction l2 as [|x l2 IH]; f_equal/=; by rewrite Hf, IH. Qed.
+
 Lemma foldr_permutation {A B} (R : relation B) `{!PreOrder R}
     (f : A → B → B) (b : B) `{Hf : !∀ x, Proper (R ==> R) (f x)} (l1 l2 : list A) :
   (∀ j1 a1 j2 a2 b,

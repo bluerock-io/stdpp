@@ -632,6 +632,14 @@ Lemma list_lookup_singleton_Some x i y :
   [x] !! i = Some y ↔ i = 0 ∧ x = y.
 Proof. rewrite lookup_cons_Some. naive_solver. Qed.
 
+Lemma lookup_snoc_Some x l i y :
+  (l ++ [x]) !! i = Some y ↔
+    (i < length l ∧ l !! i = Some y) ∨ (i = length l ∧ x = y).
+Proof.
+  rewrite lookup_app_Some, list_lookup_singleton_Some.
+  naive_solver auto using lookup_lt_is_Some_1 with lia.
+Qed.
+
 Lemma list_lookup_middle l1 l2 x n :
   n = length l1 → (l1 ++ x :: l2) !! n = Some x.
 Proof. intros ->. by induction l1. Qed.

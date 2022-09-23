@@ -4528,14 +4528,16 @@ Proof.
   by rewrite (assoc f), (comm f _ b), (assoc f), (comm f b), (comm f _ a2).
 Qed.
 Lemma foldr_cons_permute {A} (R : relation A) `{!PreOrder R}
-    (f : A → A → A) (a : A) `{!∀ a, Proper (R ==> R) (f a), !Assoc R f, !Comm R f} x l :
+    (f : A → A → A) (a : A)
+`{!∀ a, Proper (R ==> R) (f a), !Assoc R f, !Comm R f} x l :
   R (foldr f a (x :: l)) (foldr f (f x a) l).
 Proof.
   rewrite <-foldr_snoc.
   eapply foldr_permutation_proper'; [done..|].
   rewrite Permutation_app_comm. done.
 Qed.
-Lemma foldr_cons_permute_eq {A} (f : A → A → A) (a : A) `{!Assoc (=) f, !Comm (=) f} x l :
+Lemma foldr_cons_permute_eq {A} (f : A → A → A) (a : A)
+    `{!Assoc (=) f, !Comm (=) f} x l :
   foldr f a (x :: l) = foldr f (f x a) l.
 Proof. eapply (foldr_cons_permute eq); apply _. Qed.
 

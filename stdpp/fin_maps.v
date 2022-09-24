@@ -1262,7 +1262,7 @@ Lemma map_fold_delete {A B} (R : relation B) `{!PreOrder R}
     (f : K → A → B → B) (b : B) (i : K) (x : A) (m : M A) :
   (∀ j z, Proper (R ==> R) (f j z)) →
   (∀ j1 j2 z1 z2 y,
-    j1 ≠ j2 → <[i:=x]> m !! j1 = Some z1 → <[i:=x]> m !! j2 = Some z2 →
+    j1 ≠ j2 → m !! j1 = Some z1 → m !! j2 = Some z2 →
     R (f j1 z1 (f j2 z2 y)) (f j2 z2 (f j1 z1 y))) →
   m !! i = Some x →
   R (map_fold f b m) (f i x (map_fold f b (delete i m))).
@@ -1270,13 +1270,13 @@ Proof.
   intros Hf_proper Hf Hi.
   rewrite <-map_fold_insert; [|done|done| |].
   - rewrite insert_delete; done.
-  - intros j1 j2 ????. rewrite insert_delete_insert. auto.
-  - rewrite lookup_delete. done.
+  - intros j1 j2 z1 z2 y. rewrite insert_delete_insert, insert_id by done. auto.
+  - rewrite lookup_delete; done.
 Qed.
 
 Lemma map_fold_delete_L {A B} (f : K → A → B → B) (b : B) (i : K) (x : A) (m : M A) :
   (∀ j1 j2 z1 z2 y,
-    j1 ≠ j2 → <[i:=x]> m !! j1 = Some z1 → <[i:=x]> m !! j2 = Some z2 →
+    j1 ≠ j2 → m !! j1 = Some z1 → m !! j2 = Some z2 →
     f j1 z1 (f j2 z2 y) = f j2 z2 (f j1 z1 y)) →
   m !! i = Some x →
   map_fold f b m = f i x (map_fold f b (delete i m)).

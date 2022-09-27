@@ -708,7 +708,7 @@ Section set.
   Proof. set_solver. Qed.
   Lemma subset_difference_elem_of x X : x ∈ X → X ∖ {[ x ]} ⊂ X.
   Proof. set_solver. Qed.
-  Lemma difference_difference X Y Z : (X ∖ Y) ∖ Z ≡ X ∖ (Y ∪ Z).
+  Lemma difference_difference_l X Y Z : (X ∖ Y) ∖ Z ≡ X ∖ (Y ∪ Z).
   Proof. set_solver. Qed.
 
   Lemma difference_mono X1 X2 Y1 Y2 :
@@ -789,8 +789,8 @@ Section set.
     Proof. unfold_leibniz. apply difference_intersection_distr_l. Qed.
     Lemma difference_disjoint_L X Y : X ## Y → X ∖ Y = X.
     Proof. unfold_leibniz. apply difference_disjoint. Qed.
-    Lemma difference_difference_L X Y Z : (X ∖ Y) ∖ Z = X ∖ (Y ∪ Z).
-    Proof. unfold_leibniz. apply difference_difference. Qed.
+    Lemma difference_difference_l_L X Y Z : (X ∖ Y) ∖ Z = X ∖ (Y ∪ Z).
+    Proof. unfold_leibniz. apply difference_difference_l. Qed.
 
     (** Disjointness *)
     Lemma disjoint_intersection_L X Y : X ## Y ↔ X ∩ Y = ∅.
@@ -816,6 +816,9 @@ Section set.
       intros x. rewrite !elem_of_union; rewrite elem_of_difference.
       split; [ | destruct (decide (x ∈ Y)) ]; intuition.
     Qed.
+    Lemma difference_difference_r X Y Z : X ∖ (Y ∖ Z) ≡ (X ∖ Y) ∪ (X ∩ Z).
+    Proof. intros x. destruct (decide (x ∈ Z)); set_solver. Qed.
+
     Lemma subseteq_disjoint_union X Y : X ⊆ Y ↔ ∃ Z, Y ≡ X ∪ Z ∧ X ## Z.
     Proof.
       split; [|set_solver].
@@ -848,6 +851,9 @@ Section set.
     Lemma singleton_union_difference_L X Y x :
       {[x]} ∪ (X ∖ Y) = ({[x]} ∪ X) ∖ (Y ∖ {[x]}).
     Proof. unfold_leibniz. apply singleton_union_difference. Qed.
+    Lemma difference_difference_r_L X Y Z : X ∖ (Y ∖ Z) = (X ∖ Y) ∪ (X ∩ Z).
+    Proof. unfold_leibniz. apply difference_difference_r. Qed.
+
   End dec_leibniz.
 End set.
 

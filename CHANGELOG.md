@@ -64,6 +64,8 @@ Ralf Jung, Robbert Krebbers, and Vincent Siles. Thanks a lot to everyone involve
   tactic to `(e)feed_core`, make the syntax of `feed_core` consistent
   with `efeed_core`, remove the `by` parameter of `efeed_core`, and add
   `(e)feed generalize`, `efeed inversion`, and `efeed destruct`.
+- Renamed `difference_difference` -> `difference_difference_l`, and added
+  `difference_difference_r` lemma.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).
@@ -115,6 +117,8 @@ s/\bMakeNatPlus\b/MakeNatAdd/g
 s/\bmake_nat_plus\b/make_nat_add/g
 s/\bnat_minus_plus\b/Nat\.sub_add/g
 s/\bnat_le_plus_minus\b/Nat\.le_add_sub/g
+# difference lemma
+s/\bdifference_difference\b/difference_difference_l/g
 EOF
 ```
 

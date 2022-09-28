@@ -64,7 +64,7 @@ Ralf Jung, Robbert Krebbers, and Vincent Siles. Thanks a lot to everyone involve
   tactic to `(e)feed_core`, make the syntax of `feed_core` consistent
   with `efeed_core`, remove the `by` parameter of `efeed_core`, and add
   `(e)feed generalize`, `efeed inversion`, and `efeed destruct`.
-- Renamed `difference_difference` -> `difference_difference_l`, and added
+- Rename `difference_difference` -> `difference_difference_l`, and add
   `difference_difference_r` lemma.
 
 The following `sed` script should perform most of the renaming

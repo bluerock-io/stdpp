@@ -1,6 +1,21 @@
 This file lists "large-ish" changes to the std++ Coq library, but not every
 API-breaking change is listed.
 
+## std++ master
+
+- Rename `difference_difference` -> `difference_difference_l`, and add
+  `difference_difference_r` lemma.
+
+The following `sed` script should perform most of the renaming
+(on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).
+Note that the script is not idempotent, do not run it twice.
+```
+sed -i -E -f- $(find theories -name "*.v") <<EOF
+# difference lemma
+s/\bdifference_difference\b/difference_difference_l/g
+EOF
+```
+
 ## std++ 1.8.0 (2022-08-18)
 
 Coq 8.16 is newly supported by this release, and Coq 8.12 to 8.15 remain
@@ -64,8 +79,6 @@ Ralf Jung, Robbert Krebbers, and Vincent Siles. Thanks a lot to everyone involve
   tactic to `(e)feed_core`, make the syntax of `feed_core` consistent
   with `efeed_core`, remove the `by` parameter of `efeed_core`, and add
   `(e)feed generalize`, `efeed inversion`, and `efeed destruct`.
-- Rename `difference_difference` -> `difference_difference_l`, and add
-  `difference_difference_r` lemma.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).
@@ -117,8 +130,6 @@ s/\bMakeNatPlus\b/MakeNatAdd/g
 s/\bmake_nat_plus\b/make_nat_add/g
 s/\bnat_minus_plus\b/Nat\.sub_add/g
 s/\bnat_le_plus_minus\b/Nat\.le_add_sub/g
-# difference lemma
-s/\bdifference_difference\b/difference_difference_l/g
 EOF
 ```
 

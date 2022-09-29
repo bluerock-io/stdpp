@@ -12,7 +12,7 @@ Note that the script is not idempotent, do not run it twice.
 ```
 sed -i -E -f- $(find theories -name "*.v") <<EOF
 # difference lemma
-s/\bdifference_difference\b/difference_difference_l/g
+s/\bdifference_difference(|_L)\b/difference_difference_l\1/g
 EOF
 ```
 

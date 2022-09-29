@@ -3,8 +3,9 @@ API-breaking change is listed.
 
 ## std++ master
 
-- Rename `difference_difference` -> `difference_difference_l`, and add
-  `difference_difference_r` lemma.
+- Rename `difference_difference` -> `difference_difference_l` and
+  `difference_difference_L` -> `difference_difference_l_L`, add
+  `difference_difference_r` and `difference_difference_r_L`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

@@ -142,7 +142,7 @@ Global Instance list_alter_proper_test `{!Equiv A} (f : A → A) i :
   Proper ((≡) ==> (≡)) (alter (M:=list A) f i).
 Proof. apply _. Restart. solve_proper. Abort.
 Global Instance list_fmap_proper_test `{!Equiv A, !Equiv B} (f : A → B) :
-  Proper ((≡) ==> (≡)) f → Proper ((≡) ==> (≡)) (fmap f).
+  Proper ((≡) ==> (≡)) f → Proper ((≡@{list A}) ==> (≡)) (fmap f).
 Proof. apply _. Restart. solve_proper. Abort.
 Global Instance list_bind_proper_test `{!Equiv A, !Equiv B} (f : A → list B) :
   Proper ((≡) ==> (≡)) f → Proper ((≡) ==> (≡)) (mbind f).

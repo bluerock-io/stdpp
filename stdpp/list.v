@@ -3685,7 +3685,7 @@ Section setoid.
   Global Instance list_lookup_proper i : Proper ((≡@{list A}) ==> (≡)) (lookup i).
   Proof. induction i; destruct 1; simpl; try constructor; auto. Qed.
   Global Instance list_lookup_total_proper `{!Inhabited A} i :
-    Proper (≡) inhabitant →
+    Proper (≡@{A}) inhabitant →
     Proper ((≡@{list A}) ==> (≡)) (lookup_total i).
   Proof. intros ?. induction i; destruct 1; simpl; auto. Qed.
   Global Instance list_alter_proper :
@@ -3728,7 +3728,7 @@ Section setoid.
     induction n; destruct 2; simpl; repeat (constructor || f_equiv); auto.
   Qed.
 
-  Lemma nil_equiv_eq mx : mx ≡ [] ↔ mx = [].
+  Lemma nil_equiv_eq l : l ≡ [] ↔ l = [].
   Proof. split; [by inversion_clear 1|intros ->; constructor]. Qed.
   Lemma cons_equiv_eq l x k : l ≡ x :: k ↔ ∃ x' k', l = x' :: k' ∧ x' ≡ x ∧ k' ≡ k.
   Proof. split; [inversion 1; naive_solver|naive_solver (by constructor)]. Qed.

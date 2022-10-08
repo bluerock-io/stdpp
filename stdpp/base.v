@@ -283,7 +283,8 @@ Notation "X ≢@{ A } Y":= (¬X ≡@{ A } Y)
 with Leibniz equality. We provide the tactic [fold_leibniz] to transform such
 setoid equalities into Leibniz equalities, and [unfold_leibniz] for the
 reverse. *)
-Class LeibnizEquiv A `{Equiv A} := leibniz_equiv x y : x ≡ y → x = y.
+Class LeibnizEquiv A `{Equiv A} :=
+  leibniz_equiv (x y : A) : x ≡ y → x = y.
 Global Hint Mode LeibnizEquiv ! - : typeclass_instances.
 
 Lemma leibniz_equiv_iff `{LeibnizEquiv A, !Reflexive (≡@{A})} (x y : A) :
@@ -315,7 +316,8 @@ Global Instance: Params (@equiv) 2 := {}.
 (** The following instance forces [setoid_replace] to use setoid equality
 (for types that have an [Equiv] instance) rather than the standard Leibniz
 equality. *)
-Global Instance equiv_default_relation `{Equiv A} : DefaultRelation (≡) | 3 := {}.
+Global Instance equiv_default_relation `{Equiv A} :
+  DefaultRelation (≡@{A}) | 3 := {}.
 Global Hint Extern 0 (_ ≡ _) => reflexivity : core.
 Global Hint Extern 0 (_ ≡ _) => symmetry; assumption : core.
 

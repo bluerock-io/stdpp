@@ -3287,7 +3287,7 @@ Section map_seq.
   Implicit Types xs : list A.
 
   Global Instance map_seq_proper `{Equiv A} start :
-    Proper ((≡) ==> (≡)) (map_seq (M:=M A) start).
+    Proper ((≡@{list A}) ==> (≡@{M A})) (map_seq start).
   Proof.
     intros l1 l2 Hl. revert start.
     induction Hl as [|x1 x2 l1 l2 ?? IH]; intros start; simpl.
@@ -3408,7 +3408,7 @@ Section map_seqZ.
   Local Open Scope Z_scope.
 
   Global Instance map_seqZ_proper `{Equiv A} start :
-    Proper ((≡) ==> (≡)) (map_seqZ (M:=M A) start).
+    Proper ((≡@{list A}) ==> (≡@{M A})) (map_seqZ start).
   Proof.
     intros l1 l2 Hl. revert start.
     induction Hl as [|x1 x2 l1 l2 ?? IH]; intros start; simpl.

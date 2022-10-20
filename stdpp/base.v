@@ -804,7 +804,7 @@ Section prod_relation.
     Proper ((prod_relation (prod_relation (prod_relation RA RB) RC) RD ==> RE) ==>
             RA ==> RB ==> RC ==> RD ==> RE) curry4.
   Proof. firstorder eauto. Qed.
-  Global Instance uncurry5_proper' `{RC : relation C, RD : relation D, RE : relation E} :
+  Global Instance uncurry4_proper' `{RC : relation C, RD : relation D, RE : relation E} :
     Proper ((RA ==> RB ==> RC ==> RD ==> RE) ==>
             prod_relation (prod_relation (prod_relation RA RB) RC) RD ==> RE) uncurry4.
   Proof.

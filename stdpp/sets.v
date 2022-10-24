@@ -347,7 +347,7 @@ Tactic Notation "set_solver" "-" hyp_list(Hs) "by" tactic3(tac) :=
   clear Hs; set_solver by tac.
 Tactic Notation "set_solver" "+" hyp_list(Hs) "by" tactic3(tac) :=
   clear -Hs; set_solver by tac.
-Tactic Notation "set_solver" := set_solver by idtac.
+Tactic Notation "set_solver" := set_solver by eauto.
 Tactic Notation "set_solver" "-" hyp_list(Hs) := clear Hs; set_solver.
 Tactic Notation "set_solver" "+" hyp_list(Hs) := clear -Hs; set_solver.
 

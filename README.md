@@ -75,6 +75,9 @@ issue tracker (also linked from the library itself) which tracks the
 work that still needs to be done before moving the library to std++.
 No stability guarantees whatsoever are made for this package.
 
+Note that the unstable package is not released, so it only exists in the
+development version of std++.
+
 ## Contributing to std++
 
 If you want to report a bug, please use the

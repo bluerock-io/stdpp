@@ -356,7 +356,7 @@ Section gset.
   Qed.
 
   Lemma gset_to_gmap_to_list {A} (X : gset K) (x : A) :
-    map_to_list (gset_to_gmap x X) ≡ₚ (., x) <$> (elements X).
+    map_to_list (gset_to_gmap x X) ≡ₚ (., x) <$> elements X.
   Proof.
     induction X as [| y X not_in IH] using set_ind_L.
     - rewrite gset_to_gmap_empty, elements_empty, map_to_list_empty. done.

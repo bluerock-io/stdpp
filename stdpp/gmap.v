@@ -355,7 +355,7 @@ Section gset.
     rewrite lookup_gset_to_gmap_Some, lookup_set_to_map; naive_solver.
   Qed.
 
-  Lemma gset_to_gmap_to_list {A} (X : gset K) (x : A) :
+  Lemma map_to_list_gset_to_gmap {A} (X : gset K) (x : A) :
     map_to_list (gset_to_gmap x X) ≡ₚ (., x) <$> elements X.
   Proof.
     induction X as [| y X not_in IH] using set_ind_L.

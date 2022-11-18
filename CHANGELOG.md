@@ -6,6 +6,7 @@ API-breaking change is listed.
 - Rename `difference_difference` -> `difference_difference_l` and
   `difference_difference_L` -> `difference_difference_l_L`, add
   `difference_difference_r` and `difference_difference_r_L`.
+- Let `set_solver` use `eauto` (instead of `idtac`) as its default solver.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

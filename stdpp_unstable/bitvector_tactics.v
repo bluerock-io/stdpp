@@ -482,14 +482,22 @@ Tactic Notation "bv_simplify" :=
   with length of lists of bytes. *)
   reduce_closed_N;
   autorewrite with bv_simplify;
-  first [apply bv_eq_wrap | apply bv_neq_wrap | idtac];
+  lazymatch goal with
+  | |- _ =@{bv _} _ => apply bv_eq_wrap
+  | |- not (_ =@{bv _} _) => apply bv_neq_wrap
+  | _ => idtac
+  end;
   bv_unfold;
   autorewrite with bv_unfolded_simplify.
 
 Tactic Notation "bv_simplify" ident(H) :=
   unfold_lets_in_context;
   autorewrite with bv_simplify in H;
-  first [ apply bv_eq in H | apply bv_neq in H | idtac ];
+  lazymatch (type of H) with
+  | _ =@{bv _} _ => apply bv_eq in H
+  | not (_ =@{bv _} _) => apply bv_neq in H
+  | _ => idtac
+  end;
   tactic bv_unfold in H;
   autorewrite with bv_unfolded_simplify in H.
 Tactic Notation "bv_simplify" "select" open_constr(pat) :=

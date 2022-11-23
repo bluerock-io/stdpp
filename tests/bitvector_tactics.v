@@ -73,3 +73,13 @@ Goal ∀ b : bv 16, ∀ v : bv 64,
 Proof.
   intros. bv_simplify. Show. bitblast.
 Qed.
+
+(** Regression test for https://gitlab.mpi-sws.org/iris/stdpp/-/merge_requests/411 *)
+Goal ∀ b : bv 16, bv_wrap 16 (bv_unsigned b) = bv_wrap 16 (bv_unsigned b).
+Proof. intros. bv_simplify. Show. Restart. intros. bv_solve. Qed.
+Goal ∀ b : bv 16, bv_wrap 16 (bv_unsigned b) ≠ bv_wrap 16 (bv_unsigned (b + BV 16 1)).
+Proof. intros. bv_simplify. Show. Restart. intros. bv_solve. Qed.
+Goal ∀ b : bv 16, bv_unsigned b = bv_unsigned b → True.
+Proof. intros ? H. bv_simplify H. Show. Abort.
+Goal ∀ b : bv 16, bv_unsigned b ≠ bv_unsigned (b + BV 16 1) → True.
+Proof. intros ? H. bv_simplify H. Show. Abort.

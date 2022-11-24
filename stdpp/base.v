@@ -59,6 +59,23 @@ End seal.
 Global Arguments unseal {_ _} _ : assert.
 Global Arguments seal_eq {_ _} _ : assert.
 
+(** * Solving type class instances *)
+(** The tactic [tc_solve] is used to solve type class goals by invoking type
+class search. It is similar to [apply _], but it is more robust since it does
+not affect unrelated goals/evars due to https://github.com/coq/coq/issues/6583.
+
+The tactic [tc_solve] is particularly useful when building custom tactics that
+need tight control over when type class search is invoked. In Iris, many of the
+proof mode tactics make use of [notypeclasses refine] and use [tc_solve] to
+manually invoke type class search.
+
+Note that [typeclasses eauto] is multi-success. That means, whenever subsequent
+tactics fail, it will backtrack to [typeclasses eauto] to try the next type
+class instance. This is almost always undesired and can lead to poor performance
+and horrible error messages. Hence, we wrap it in a [once]. *)
+Ltac tc_solve :=
+  solve [once (typeclasses eauto)].
+
 (** * Non-backtracking type classes *)
 (** The type class [TCNoBackTrack P] can be used to establish [P] without ever
 backtracking on the instance of [P] that has been found. Backtracking may

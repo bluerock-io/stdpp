@@ -253,7 +253,7 @@ Lemma lookup_empty_is_Some {A} i : ¬is_Some ((∅ : M A) !! i).
 Proof. rewrite lookup_empty. by inversion 1. Qed.
 Lemma lookup_empty_Some {A} i (x : A) : ¬(∅ : M A) !! i = Some x.
 Proof. by rewrite lookup_empty. Qed.
-Lemma loopup_total_empty `{!Inhabited A} i : (∅ : M A) !!! i = inhabitant.
+Lemma lookup_total_empty `{!Inhabited A} i : (∅ : M A) !!! i = inhabitant.
 Proof. by rewrite lookup_total_alt, lookup_empty. Qed.
 Lemma map_subset_empty {A} (m : M A) : m ⊄ ∅.
 Proof.

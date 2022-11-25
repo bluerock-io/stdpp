@@ -56,3 +56,8 @@ Lemma test12 N :
   ↑N.@"other" ##@{coPset} ↑N.@"this" ∪ ↑N.@"that" ∧
   ↑N.@"other" ∪ ↑N.@"this" ##@{coPset} ↑N.@"that".
 Proof. split; solve_ndisj. Qed.
+
+Lemma test13 E N :
+  ↑N ⊆ E →
+  ⊤ ∖ E ⊆ ⊤ ∖ (E ∖ ↑N) ∖ ↑N.
+Proof. solve_ndisj. Qed.

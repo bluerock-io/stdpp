@@ -47,3 +47,17 @@ Proof. solve_ndisj. Qed.
 Lemma test10 N1 N2 E :
   ↑N1 ∪ E ## ⊤ ∖ ↑N1 ∖ ↑N2 ∖ E.
 Proof. solve_ndisj. Qed.
+
+Lemma test11 N :
+  ↑N.@"other" ⊆@{coPset} ⊤ ∖ (↑N.@"this" ∪ ↑N.@"that").
+Proof. solve_ndisj. Qed.
+
+Lemma test12 N :
+  ↑N.@"other" ##@{coPset} ↑N.@"this" ∪ ↑N.@"that" ∧
+  ↑N.@"other" ∪ ↑N.@"this" ##@{coPset} ↑N.@"that".
+Proof. split; solve_ndisj. Qed.
+
+Lemma test13 E N :
+  ↑N ⊆ E →
+  ⊤ ∖ E ⊆ ⊤ ∖ (E ∖ ↑N) ∖ ↑N.
+Proof. solve_ndisj. Qed.

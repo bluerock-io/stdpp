@@ -102,6 +102,13 @@ Local Definition coPset_disjoint_empty_l := disjoint_empty_l (C:=coPset).
 Global Hint Resolve coPset_disjoint_empty_l : ndisj.
 Local Definition coPset_disjoint_empty_r := disjoint_empty_r (C:=coPset).
 Global Hint Resolve coPset_disjoint_empty_r : ndisj.
+(** If-and-only-if rules for ∪ on the left/right. *)
+Local Definition coPset_disjoint_union_l X1 X2 Y :=
+  proj2 (disjoint_union_l (C:=coPset) X1 X2 Y).
+Global Hint Resolve coPset_disjoint_union_l : ndisj.
+Local Definition coPset_disjoint_union_r X Y1 Y2 :=
+  proj2 (disjoint_union_r (C:=coPset) X Y1 Y2).
+Global Hint Resolve coPset_disjoint_union_r : ndisj.
 (** We prefer ∖ on the left of ## (for the [disjoint_difference] lemmas to
 apply), so try moving it there. *)
 Global Hint Extern 10 (_ ## (_ ∖ _)) =>

@@ -1,6 +1,18 @@
 From stdpp Require Import prelude fin_maps propset.
 
 (** Some tests for f_equiv. *)
+(* Similar to [f_equal], it should solve goals by [reflexivity]. *)
+Lemma test_f_equiv_refl {A} (R : relation A) `{!Equivalence R} x :
+  R x x.
+Proof. f_equiv. Qed.
+
+(* And immediately solve sub-goals by reflexivity *)
+Lemma test_f_equiv_refl_nested {A} (R : relation A) `{!Equivalence R} g x y z :
+  Proper (R ==> R ==> R) g →
+  R y z →
+  R (g x y) (g x z).
+Proof. intros ? Hyz. f_equiv. apply Hyz. Qed.
+
 Section f_equiv.
   Context `{!Equiv A, !Equiv B, !SubsetEq A}.
 
@@ -31,6 +43,12 @@ Section f_equiv.
 End f_equiv.
 
 (** Some tests for solve_proper (also testing f_equiv indirectly). *)
+
+(** Test case for #161 *)
+Lemma test_solve_proper_const {A} (R : relation A) `{!Equivalence R} x :
+  Proper (R ==> R) (λ _, x).
+Proof. solve_proper. Qed.
+
 Section tests.
   Context {A B : Type} `{!Equiv A, !Equiv B}.
   Context (foo : A → A) (bar : A → B) (baz : B → A → A).

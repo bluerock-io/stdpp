@@ -364,7 +364,7 @@ Ltac setoid_subst :=
 be used to avoid expensive failing unification. *)
 Ltac fast_reflexivity :=
   match goal with
-  | |- _ ?x ?x => simple apply reflexivity
+  | |- _ ?x ?x => solve [simple apply reflexivity]
   end.
 
 (** f_equiv works on goals of the form [f _ = f _], for any relation and any

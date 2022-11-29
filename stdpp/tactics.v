@@ -360,6 +360,13 @@ Ltac setoid_subst :=
   | H : @equiv ?A ?e _ ?x |- _ => symmetry in H; setoid_subst_aux (@equiv A e) x
   end.
 
+(* The [fast_reflexivity] tactic only works on syntactically equal terms. It can
+be used to avoid expensive failing unification. *)
+Ltac fast_reflexivity :=
+  match goal with
+  | |- _ ?x ?x => simple apply reflexivity
+  end.
+
 (** f_equiv works on goals of the form [f _ = f _], for any relation and any
 number of arguments. It looks for an appropriate [Proper] instance, and applies
 it. The tactic is somewhat limited, since it cannot be used to backtrack on
@@ -427,10 +434,12 @@ Ltac f_equiv :=
   | |- ?R (?f _ _ _) _ => simple apply (_ : Proper (_ ==> _ ==> _ ==> R) f)
   | |- ?R (?f _ _ _ _) _ => simple apply (_ : Proper (_ ==> _ ==> _ ==> _ ==> R) f)
   | |- ?R (?f _ _ _ _ _) _ => simple apply (_ : Proper (_ ==> _ ==> _ ==> _ ==> _ ==> R) f)
+
+  (* Similar to [f_equal] also handle the reflexivity case. *)
+  | |- _ ?x ?x => fast_reflexivity
   end;
-  (* Only try reflexivity if the terms are syntactically equal. This avoids
-     very expensive failing unification. *)
-  try match goal with  |- _ ?x ?x => simple apply reflexivity end.
+  (* Similar to [f_equal] immediately solve trivial solve goals *)
+  try fast_reflexivity.
 Tactic Notation "f_equiv" "/=" := csimpl in *; f_equiv.
 
 (** The tactic [solve_proper_unfold] unfolds the first head symbol, so that

@@ -438,7 +438,7 @@ Ltac f_equiv :=
   (* Similar to [f_equal] also handle the reflexivity case. *)
   | |- _ ?x ?x => fast_reflexivity
   end;
-  (* Similar to [f_equal] immediately solve trivial solve goals *)
+  (* Similar to [f_equal] immediately solve trivial goals *)
   try fast_reflexivity.
 Tactic Notation "f_equiv" "/=" := csimpl in *; f_equiv.
 

@@ -89,8 +89,9 @@ issue #6714.
 
 See https://gitlab.mpi-sws.org/FP/iris-coq/merge_requests/112 for a rationale
 of this type class. *)
-Class TCNoBackTrack (P : Prop) := { tc_no_backtrack : P }.
-Global Hint Extern 0 (TCNoBackTrack _) => constructor; apply _ : typeclass_instances.
+Class TCNoBackTrack (P : Prop) := TCNoBackTrack_intro { tc_no_backtrack : P }.
+Global Hint Extern 0 (TCNoBackTrack _) =>
+  notypeclasses refine (TCNoBackTrack_intro _ _); tc_solve : typeclass_instances.
 
 (* A conditional at the type class level. Note that [TCIf P Q R] is not the same
 as [TCOr (TCAnd P Q) R]: the latter will backtrack to [R] if it fails to
@@ -103,8 +104,8 @@ Inductive TCIf (P Q R : Prop) : Prop :=
 Existing Class TCIf.
 
 Global Hint Extern 0 (TCIf _ _ _) =>
-  first [apply TCIf_true; [apply _|]
-        |apply TCIf_false] : typeclass_instances.
+  first [notypeclasses refine (TCIf_true _ _ _ _ _); [tc_solve|]
+        |notypeclasses refine (TCIf_false _ _ _ _)] : typeclass_instances.
 
 (** * Typeclass opaque definitions *)
 (** The constant [tc_opaque] is used to make definitions opaque for just type

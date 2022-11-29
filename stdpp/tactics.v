@@ -31,6 +31,13 @@ is rather inefficient when having big hint databases, or expensive [Hint Extern]
 declarations as the ones above. *)
 Tactic Notation "intuition" := intuition auto.
 
+(** The [fast_reflexivity] tactic only works on syntactically equal terms. It
+can be used to avoid expensive failing unification. *)
+Ltac fast_reflexivity :=
+  match goal with
+  | |- _ ?x ?x => solve [simple apply reflexivity]
+  end.
+
 (** [done] can get slow as it calls "trivial". [fast_done] can solve way less
 goals, but it will also always finish quickly.  We do 'reflexivity' last because
 for goals of the form ?x = y, if we have x = y in the context, we will typically
@@ -358,13 +365,6 @@ Ltac setoid_subst :=
   | _ => progress simplify_eq/=
   | H : @equiv ?A ?e ?x _ |- _ => setoid_subst_aux (@equiv A e) x
   | H : @equiv ?A ?e _ ?x |- _ => symmetry in H; setoid_subst_aux (@equiv A e) x
-  end.
-
-(* The [fast_reflexivity] tactic only works on syntactically equal terms. It can
-be used to avoid expensive failing unification. *)
-Ltac fast_reflexivity :=
-  match goal with
-  | |- _ ?x ?x => solve [simple apply reflexivity]
   end.
 
 (** f_equiv works on goals of the form [f _ = f _], for any relation and any

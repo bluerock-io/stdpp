@@ -31,6 +31,13 @@ is rather inefficient when having big hint databases, or expensive [Hint Extern]
 declarations as the ones above. *)
 Tactic Notation "intuition" := intuition auto.
 
+(** The [fast_reflexivity] tactic only works on syntactically equal terms. It
+can be used to avoid expensive failing unification. *)
+Ltac fast_reflexivity :=
+  match goal with
+  | |- _ ?x ?x => solve [simple apply reflexivity]
+  end.
+
 (** [done] can get slow as it calls "trivial". [fast_done] can solve way less
 goals, but it will also always finish quickly.  We do 'reflexivity' last because
 for goals of the form ?x = y, if we have x = y in the context, we will typically
@@ -427,10 +434,12 @@ Ltac f_equiv :=
   | |- ?R (?f _ _ _) _ => simple apply (_ : Proper (_ ==> _ ==> _ ==> R) f)
   | |- ?R (?f _ _ _ _) _ => simple apply (_ : Proper (_ ==> _ ==> _ ==> _ ==> R) f)
   | |- ?R (?f _ _ _ _ _) _ => simple apply (_ : Proper (_ ==> _ ==> _ ==> _ ==> _ ==> R) f)
+
+  (* Similar to [f_equal] also handle the reflexivity case. *)
+  | |- _ ?x ?x => fast_reflexivity
   end;
-  (* Only try reflexivity if the terms are syntactically equal. This avoids
-     very expensive failing unification. *)
-  try match goal with  |- _ ?x ?x => simple apply reflexivity end.
+  (* Similar to [f_equal] immediately solve trivial goals *)
+  try fast_reflexivity.
 Tactic Notation "f_equiv" "/=" := csimpl in *; f_equiv.
 
 (** The tactic [solve_proper_unfold] unfolds the first head symbol, so that

@@ -1858,6 +1858,19 @@ Proof. rewrite map_lookup_zip_with_Some. destruct p. naive_solver. Qed.
 Lemma map_zip_with_empty {A B C} (f : A → B → C) :
   map_zip_with f ∅ ∅ =@{M C} ∅.
 Proof. unfold map_zip_with. by rewrite merge_empty by done. Qed.
+Lemma map_zip_with_empty_l {A B C} (f : A → B → C) m2 :
+  map_zip_with f ∅ m2 =@{M C} ∅.
+Proof.
+  unfold map_zip_with. apply map_eq; intros i.
+  rewrite lookup_merge, !lookup_empty. destruct (m2 !! i); done.
+Qed.
+Lemma map_zip_with_empty_r {A B C} (f : A → B → C) m1 :
+  map_zip_with f m1 ∅ =@{M C} ∅.
+Proof.
+  unfold map_zip_with. apply map_eq; intros i.
+  rewrite lookup_merge, !lookup_empty. destruct (m1 !! i); done.
+Qed.
+
 Lemma map_insert_zip_with {A B C} (f : A → B → C) (m1 : M A) (m2 : M B) i y z :
   <[i:=f y z]>(map_zip_with f m1 m2) = map_zip_with f (<[i:=y]>m1) (<[i:=z]>m2).
 Proof. unfold map_zip_with. by erewrite insert_merge by done. Qed.

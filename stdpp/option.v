@@ -362,6 +362,12 @@ Proof. intros. by case_option_guard. Qed.
 Lemma option_guard_iff {A} P Q `{Decision P, Decision Q} (mx : option A) :
   (P ↔ Q) → (guard P; mx) = guard Q; mx.
 Proof. intros [??]. repeat case_option_guard; intuition. Qed.
+Lemma option_guard_decide {A} P `{Decision P} (mx : option A) :
+  (guard P; mx) = if decide P then mx else None.
+Proof. done. Qed.
+Lemma option_guard_bool_decide {A} P `{Decision P} (mx : option A) :
+  (guard P; mx) = if bool_decide P then mx else None.
+Proof. by rewrite option_guard_decide, decide_bool_decide. Qed.
 
 Tactic Notation "simpl_option" "by" tactic3(tac) :=
   let assert_Some_None A mx H := first

@@ -1141,6 +1141,15 @@ Proof. intros Hi. by rewrite map_size_delete, Hi. Qed.
 Lemma map_size_fmap {A B} (f : A -> B) (m : M A) : size (f <$> m) = size m.
 Proof. intros. unfold size, map_size. by rewrite map_to_list_fmap, fmap_length. Qed.
 
+Lemma map_size_list_to_map {A} (l : list (K * A)) :
+  NoDup l.*1 →
+  size (list_to_map l : M A) = length l.
+Proof.
+  induction l; csimpl; inversion 1; simplify_eq/=; [by rewrite map_size_empty|].
+  rewrite map_size_insert_None by eauto using not_elem_of_list_to_map_1.
+  eauto with f_equal.
+Qed.
+
 (** ** Properties of conversion from sets *)
 Section set_to_map.
   Context {A : Type} `{FinSet B C}.

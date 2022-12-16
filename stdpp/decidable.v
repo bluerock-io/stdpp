@@ -87,8 +87,13 @@ Notation cast_if_not S := (if S then right _ else left _).
 
 (** * Instances of [Decision] *)
 (** Instances of [Decision] for operators of propositional logic. *)
-Global Instance True_dec: Decision True := left I.
-Global Instance False_dec: Decision False := right (False_rect False).
+(** The instances for [True] and [False] have a very high cost. If they are
+applied too eagerly, HO-unification could wrongfully instantiate TC instances
+with [λ .., True] or [λ .., False].
+See https://gitlab.mpi-sws.org/iris/stdpp/-/issues/165 *)
+Global Instance True_dec: Decision True | 1000 := left I.
+Global Instance False_dec: Decision False | 1000 := right (False_rect False).
+
 Global Instance Is_true_dec b : Decision (Is_true b).
 Proof. destruct b; simpl; apply _. Defined.
 

@@ -26,10 +26,10 @@ Importing std++ has some side effects as the library sets some global options.
 Notably:
 
 * `Generalizable All Variables`: This option enables implicit generalization in
-  arguments of the form `` `{...}`` (i.e., anonymous arguments).  Unfortunately, it
-  also enables implicit generalization in `Instance`.  We think that the fact
-  that both behaviors are coupled together is a
-  [bug in Coq](https://github.com/coq/coq/issues/6030).
+  arguments of the form `` `{...}`` (i.e., anonymous arguments) and in terms of
+  shape `` `{}``/`` `[]``/`` `()``. See [Coq's
+  manual](https://coq.inria.fr/distrib/current/refman/language/extensions/implicit-arguments.html#implicit-generalization)
+  for further details.
 * The behavior of `Program` is tweaked: `Unset Transparent Obligations`,
   `Obligation Tactic := idtac`, `Add Search Blacklist "_obligation_"`.  See
   [`base.v`](theories/base.v) for further details.

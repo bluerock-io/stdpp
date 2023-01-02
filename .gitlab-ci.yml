@@ -44,6 +44,11 @@ variables:
 
 ## Build jobs
 
+build-coq.8.17.dev:
+  <<: *template
+  variables:
+    OPAM_PINS: "coq version 8.17.dev"
+
 build-coq.8.16.1:
   <<: *template
   variables:

@@ -3,7 +3,7 @@ API-breaking change is listed.
 
 ## std++ master
 
-Coq 8.12 is no longer supported by this release.
+Coq 8.12 and 8.13 are no longer supported by this release.
 
 - Rename `difference_difference` -> `difference_difference_l` and
   `difference_difference_L` -> `difference_difference_l_L`, add

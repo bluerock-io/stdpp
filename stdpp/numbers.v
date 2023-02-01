@@ -235,9 +235,9 @@ Module Pos.
   Lemma reverse_app p1 p2 : reverse (p1 ++ p2) = reverse p2 ++ reverse p1.
   Proof. unfold reverse. by rewrite reverse_go_app. Qed.
   Lemma reverse_xO p : reverse (p~0) = (1~0) ++ reverse p.
-  Proof reverse_app p (1~0).
+  Proof. apply (reverse_app p (1~0)). Qed.
   Lemma reverse_xI p : reverse (p~1) = (1~1) ++ reverse p.
-  Proof reverse_app p (1~1).
+  Proof. apply (reverse_app p (1~1)). Qed.
 
   Lemma reverse_involutive p : reverse (reverse p) = p.
   Proof.

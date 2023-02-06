@@ -13,6 +13,7 @@ Coq 8.12 and 8.13 are no longer supported by this release.
 - Change `f_equiv` to use `reflexivity` in a way similar to `f_equal`. That is,
   let `f_equiv` solve goals and subgoals of the form `R x x`. However, we use
   a restricted `fast_reflexivity` as full `reflexivity` can be quite expensive.
+- Rename `loopup_total_empty` -> `lookup_total_empty`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).
@@ -21,6 +22,7 @@ Note that the script is not idempotent, do not run it twice.
 sed -i -E -f- $(find theories -name "*.v") <<EOF
 # difference lemma
 s/\bdifference_difference(|_L)\b/difference_difference_l\1/g
+s/\bloopup_total_empty\b/lookup_total_empty\1/g
 EOF
 ```
 

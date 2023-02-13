@@ -713,12 +713,7 @@ Global Instance: Params (@pair) 2 := {}.
 Global Instance: Params (@fst) 2 := {}.
 Global Instance: Params (@snd) 2 := {}.
 
-(** The Coq standard library swapped the names of curry/uncurry, see
-https://github.com/coq/coq/pull/12716/
-FIXME: Remove this workaround once the lowest Coq version we support is 8.13. *)
-Notation curry := prod_uncurry.
 Global Instance: Params (@curry) 3 := {}.
-Notation uncurry := prod_curry.
 Global Instance: Params (@uncurry) 3 := {}.
 
 Definition uncurry3 {A B C D} (f : A → B → C → D) (p : A * B * C) : D :=

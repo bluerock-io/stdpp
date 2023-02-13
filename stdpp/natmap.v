@@ -56,7 +56,7 @@ Proof. induction i; simpl; auto. Qed.
 Lemma natmap_lookup_singleton_raw_ne {A} (i j : nat) (x : A) :
   i ≠ j → mjoin (natmap_singleton_raw i x !! j) = None.
 Proof. revert j; induction i; intros [|?]; simpl; auto with congruence. Qed.
-Hint Rewrite @natmap_lookup_singleton_raw : natmap.
+Local Hint Rewrite @natmap_lookup_singleton_raw : natmap.
 
 Definition natmap_cons_canon {A} (o : option A) (l : natmap_raw A) :=
   match o, l with None, [] => [] | _, _ => o :: l end.
@@ -69,7 +69,7 @@ Proof. by destruct o, l. Qed.
 Lemma natmap_cons_canon_S {A} (o : option A) (l : natmap_raw A) i :
   natmap_cons_canon o l !! S i = l !! i.
 Proof. by destruct o, l. Qed.
-Hint Rewrite @natmap_cons_canon_O @natmap_cons_canon_S : natmap.
+Local Hint Rewrite @natmap_cons_canon_O @natmap_cons_canon_S : natmap.
 
 Definition natmap_alter_raw {A} (f : option A → option A) :
     nat → natmap_raw A → natmap_raw A :=
@@ -118,7 +118,7 @@ Lemma natmap_lookup_omap_raw {A B} (f : A → option B) l i :
 Proof.
   revert i. induction l; intros [|?]; simpl; autorewrite with natmap; auto.
 Qed.
-Hint Rewrite @natmap_lookup_omap_raw : natmap.
+Local Hint Rewrite @natmap_lookup_omap_raw : natmap.
 Global Instance natmap_omap: OMap natmap := λ A B f m,
   let (l,Hl) := m in NatMap _ (natmap_omap_raw_wf f _ Hl).
 

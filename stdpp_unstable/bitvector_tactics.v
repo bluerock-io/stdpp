@@ -110,11 +110,12 @@ Qed.
 (** The [bv_simplify] database collects rewrite rules that rewrite
 bitvectors into other bitvectors. *)
 Create HintDb bv_simplify discriminated. (* Technically not necessary for rewrite db. *)
-Hint Rewrite @bv_concat_0 using done : bv_simplify.
-Hint Rewrite @bv_extract_concat_later @bv_extract_concat_here using lia : bv_simplify.
-Hint Rewrite @bv_extract_bool_to_bv using lia : bv_simplify.
-Hint Rewrite @bv_not_bool_to_bv : bv_simplify.
-Hint Rewrite bool_decide_bool_to_bv_0 bool_decide_bool_to_bv_1 : bv_simplify.
+Global Hint Rewrite @bv_concat_0 using done : bv_simplify.
+Global Hint Rewrite @bv_extract_concat_later
+  @bv_extract_concat_here using lia : bv_simplify.
+Global Hint Rewrite @bv_extract_bool_to_bv using lia : bv_simplify.
+Global Hint Rewrite @bv_not_bool_to_bv : bv_simplify.
+Global Hint Rewrite bool_decide_bool_to_bv_0 bool_decide_bool_to_bv_1 : bv_simplify.
 
 (** * [bv_unfold] *)
 Create HintDb bv_unfold_db discriminated.
@@ -437,17 +438,18 @@ Ltac bv_unfold :=
 (** The [bv_unfolded_simplify] database collects rewrite rules that
 should be used to simplify the goal after Z is bv_unfolded. *)
 Create HintDb bv_unfolded_simplify discriminated. (* Technically not necessary for rewrite db. *)
-Hint Rewrite Z.shiftr_0_r Z.lor_0_r Z.lor_0_l : bv_unfolded_simplify.
-Hint Rewrite Z.land_ones using lia : bv_unfolded_simplify.
-Hint Rewrite bv_wrap_bv_wrap using lia : bv_unfolded_simplify.
-Hint Rewrite Z_to_bv_small using unfold bv_modulus; lia : bv_unfolded_simplify.
+Global Hint Rewrite Z.shiftr_0_r Z.lor_0_r Z.lor_0_l : bv_unfolded_simplify.
+Global Hint Rewrite Z.land_ones using lia : bv_unfolded_simplify.
+Global Hint Rewrite bv_wrap_bv_wrap using lia : bv_unfolded_simplify.
+Global Hint Rewrite
+  Z_to_bv_small using unfold bv_modulus; lia : bv_unfolded_simplify.
 
 (** * [bv_unfolded_to_arith] rewrite database *)
 (** The [bv_unfolded_to_arith] database collects rewrite rules that
 convert bitwise operations to arithmetic operations in preparation for lia. *)
 Create HintDb bv_unfolded_to_arith discriminated. (* Technically not necessary for rewrite db. *)
-Hint Rewrite <-Z.opp_lnot : bv_unfolded_to_arith.
-Hint Rewrite Z.shiftl_mul_pow2 Z.shiftr_div_pow2 using lia : bv_unfolded_to_arith.
+Global Hint Rewrite <-Z.opp_lnot : bv_unfolded_to_arith.
+Global Hint Rewrite Z.shiftl_mul_pow2 Z.shiftr_div_pow2 using lia : bv_unfolded_to_arith.
 
 (** * Reduction of closed terms *)
 Ltac reduce_closed_N_tac := idtac.

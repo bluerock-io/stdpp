@@ -180,7 +180,7 @@ Ltac simpl_bool :=
 (** * [simplify_bitblast_index] *)
 Create HintDb simplify_bitblast_index_db discriminated.
 
-Hint Rewrite
+Global Hint Rewrite
   Z.sub_add
   Z.add_simpl_r
   : simplify_bitblast_index_db.

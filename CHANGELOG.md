@@ -29,6 +29,7 @@ Coq 8.12 and 8.13 are no longer supported by this release.
   `submseteq_Permutation_length_eq`; use `submseteq_length_Permutation` instead.
 - Remove `map_to_list_length` (which seemed to be an unneeded auxiliary lemma);
   use `map_subset_size` instead.
+- Rename `option_union_Some` → `union_Some`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).
@@ -41,6 +42,8 @@ s/\bloopup_total_empty\b/lookup_total_empty/g
 s/\bmap_preimage/map_preimg/g
 s/\blookup_preimage/lookup_preimg/g
 s/\blookup_total_preimg/lookup_total_preimg/g
+# union_Some
+s/\boption_union_Some\b/union_Some/g
 EOF
 ```
 

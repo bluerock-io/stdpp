@@ -5,15 +5,15 @@ API-breaking change is listed.
 
 Coq 8.12 and 8.13 are no longer supported by this release.
 
-- Rename `difference_difference` -> `difference_difference_l` and
-  `difference_difference_L` -> `difference_difference_l_L`, add
+- Rename `difference_difference` → `difference_difference_l` and
+  `difference_difference_L` → `difference_difference_l_L`, add
   `difference_difference_r` and `difference_difference_r_L`.
 - Let `set_solver` use `eauto` (instead of `idtac`) as its default solver.
 - Add tactic `tc_solve` (this was `iSolveTC` in Iris).
 - Change `f_equiv` to use `reflexivity` in a way similar to `f_equal`. That is,
   let `f_equiv` solve goals and subgoals of the form `R x x`. However, we use
   a restricted `fast_reflexivity` as full `reflexivity` can be quite expensive.
-- Rename `loopup_total_empty` -> `lookup_total_empty`.
+- Rename `loopup_total_empty` → `lookup_total_empty`.
 - Let `naive_solver tac` fail if `tac` creates new evars. Before it would
   succeed with a proof that contains unresolved evars/shelved goals.
 

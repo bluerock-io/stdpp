@@ -722,10 +722,9 @@ Lemma forall_and_distr (A : Type) (P Q : A → Prop) :
 Proof. firstorder. Qed.
 
 (** The tactic [no_new_unsolved_evars tac] executes [tac] and fails if it
-creates any new evars. This trick is by Jonathan Leivent, see:
-https://coq.inria.fr/bugs/show_bug.cgi?id=3872 *)
+creates any new evars. *)
 
-Ltac no_new_unsolved_evars tac := exact ltac:(tac).
+Ltac no_new_unsolved_evars tac := solve [unshelve tac].
 
 Tactic Notation "naive_solver" tactic(tac) :=
   unfold iff, not in *;

@@ -762,7 +762,7 @@ Tactic Notation "naive_solver" tactic(tac) :=
   | H : Is_true (_ || _) |- _ =>
      apply orb_True in H; let H1 := fresh in destruct H as [H1|H1]; try clear H
   (**i solve the goal using the user supplied tactic *)
-  | |- _ => solve [tac]
+  | |- _ => no_new_unsolved_evars (tac)
   end;
   (**i use recursion to enable backtracking on the following clauses. *)
   match goal with

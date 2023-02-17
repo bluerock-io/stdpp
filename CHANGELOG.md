@@ -22,9 +22,8 @@ The following `sed` script should perform most of the renaming
 Note that the script is not idempotent, do not run it twice.
 ```
 sed -i -E -f- $(find theories -name "*.v") <<EOF
-# difference lemma
 s/\bdifference_difference(|_L)\b/difference_difference_l\1/g
-s/\bloopup_total_empty\b/lookup_total_empty\1/g
+s/\bloopup_total_empty\b/lookup_total_empty/g
 EOF
 ```
 

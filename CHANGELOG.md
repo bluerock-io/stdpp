@@ -14,6 +14,8 @@ Coq 8.12 and 8.13 are no longer supported by this release.
   let `f_equiv` solve goals and subgoals of the form `R x x`. However, we use
   a restricted `fast_reflexivity` as full `reflexivity` can be quite expensive.
 - Rename `loopup_total_empty` -> `lookup_total_empty`.
+- Let `naive_solver tac` fail if `tac` creates new evars. Before it would
+  succeed with a proof that contains unresolved evars/shelved goals.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

@@ -105,6 +105,15 @@ Module Nat.
   Lemma le_add_sub n m : n ≤ m → m = n + (m - n).
   Proof. lia. Qed.
 
+  (** Cancellation for multiplication. Coq's stdlib has these lemmas for [Z],
+  but those for [nat] are missing. We use the naming scheme of Coq's stdlib. *)
+  Lemma mul_reg_l n m p : p ≠ 0 → p * n = p * m → n = m.
+  Proof.
+    pose proof (Z.mul_reg_l (Z.of_nat n) (Z.of_nat m) (Z.of_nat p)). lia.
+  Qed.
+  Lemma mul_reg_r n m p : p ≠ 0 → n * p = m * p → n = m.
+  Proof. rewrite <-!(Nat.mul_comm p). apply mul_reg_l. Qed.
+
   Lemma lt_succ_succ n : n < S (S n).
   Proof. auto with arith. Qed.
   Lemma mul_split_l n x1 x2 y1 y2 :

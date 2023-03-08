@@ -1,4 +1,4 @@
-From stdpp Require Import gmultiset.
+From stdpp Require Import gmultiset sets.
 
 Section test.
   Context `{Countable A}.
@@ -10,6 +10,12 @@ Section test.
   Lemma test_eq_2 x y z X Y :
     {[+ z +]} ⊎ X = {[+ y +]} ⊎ Y →
     {[+ x; z +]} ⊎ X = {[+ y; x +]} ⊎ Y.
+  Proof. multiset_solver. Qed.
+  Lemma test_eq_3 x :
+    {[+ x; x +]} =@{gmultiset _} 2 *: {[+ x +]}.
+  Proof. multiset_solver. Qed.
+  Lemma test_eq_4 x y :
+    {[+ x; y; x +]} =@{gmultiset _} 2 *: {[+ x +]} ⊎ {[+ y +]}.
   Proof. multiset_solver. Qed.
 
   Lemma test_neq_1 x y X : {[+ x; y +]} ⊎ X ≠ ∅.
@@ -31,6 +37,12 @@ Section test.
   Proof. multiset_solver. Qed.
   Lemma test_multiplicity_3 x X :
     multiplicity x X < 3 → {[+ x; x; x +]} ⊈ X.
+  Proof. multiset_solver. Qed.
+  Lemma test_multiplicity_4 x X :
+    2 < multiplicity x X → 3 *: {[+ x +]} ⊆ X.
+  Proof. multiset_solver. Qed.
+  Lemma test_multiplicity_5 x X :
+    multiplicity x X < 3 → 3 *: {[+ x +]} ⊈ X.
   Proof. multiset_solver. Qed.
 
   Lemma test_elem_of_1 x X : x ∈ X ↔ {[+ x +]} ⊎ ∅ ⊆ X.
@@ -62,6 +74,11 @@ Section test.
     {[+ x1; x2; x3; x4; x4 +]} ⊎ {[+ x5; x6; x7; x8; x8; x9 +]}
     ⊆@{gmultiset A}
       {[+ x1; x1; x2; x3; x4; x4 +]} ⊎ {[+ x5; x5; x6; x7; x9; x8; x8 +]}.
+  Proof. multiset_solver. Qed.
+  Lemma test_big_5 x1 x2 x3 x4 x5 x6 x7 x8 x9 :
+    2 *: {[+ x1; x2; x4 +]} ⊎ 2 *: {[+ x5; x6; x7; x8; x8; x9 +]}
+    ⊆@{gmultiset A}
+      {[+ x1; x1; x2; x3; x4; x4; x2 +]} ⊎ 3 *: {[+ x5; x5; x6; x7; x9; x8; x8 +]}.
   Proof. multiset_solver. Qed.
 
   Lemma test_firstorder_1 (P : A → Prop) x X :

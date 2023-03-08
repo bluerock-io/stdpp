@@ -4285,7 +4285,7 @@ Section bind.
   Proof.
     intros inj Hf Hl; induction l; cbn; [constructor|inversion_clear Hl].
     apply NoDup_app; repeat split; auto; intros b H1 H2.
-    apply elem_of_list_bind in H2 as (a' & H3 & H4).
+    apply elem_of_list_bind in H2 as (a'&?&?).
     apply (inj a a') in H1; subst; done.
   Qed.
 End bind.

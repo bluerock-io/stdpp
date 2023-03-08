@@ -173,7 +173,10 @@ simplifies occurences of [multiplicity x {[ y ]}] as follows:
   occur elsewhere in the hypotheses or goal.
 - Finally, we make a case distinction between [x = y] or [x ≠ y]. This step is
   done last so as to avoid needless exponential blow-ups.
-*)
+
+The tests [test_big_X] in [tests/multiset_solver.v] show the second step reduces
+the running time significantly (from >10 seconds to <1 second). *)
+
 Class MultisetUnfold `{Countable A} (x : A) (X : gmultiset A) (n : nat) :=
   { multiset_unfold : multiplicity x X = n }.
 Global Arguments multiset_unfold {_ _ _} _ _ _ {_} : assert.
@@ -282,6 +285,9 @@ Ltac multiset_instantiate :=
   end.
 
 (** Step 4: simplify singletons *)
+(** This lemma results in information loss if there are other occurences of
+[y] in the goal. In the tactic [multiset_simplify_singletons] we use [clear y]
+to ensure we do not use the lemma if it leads to information loss. *)
 Local Lemma multiplicity_singleton_forget `{Countable A} x y :
   ∃ n, multiplicity (A:=A) x {[+ y +]} = n ∧ n ≤ 1.
 Proof. rewrite multiplicity_singleton'. case_decide; eauto with lia. Qed.

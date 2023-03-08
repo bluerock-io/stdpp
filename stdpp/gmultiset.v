@@ -192,7 +192,7 @@ Section multiset_unfold.
   Proof. done. Qed.
   Global Instance multiset_unfold_empty x : MultisetUnfold x ∅ 0.
   Proof. constructor. by rewrite multiplicity_empty. Qed.
-  Global Instance multiset_unfold_singleton x y :
+  Global Instance multiset_unfold_singleton x :
     MultisetUnfold x {[+ x +]} 1.
   Proof. constructor. by rewrite multiplicity_singleton. Qed.
   Global Instance multiset_unfold_union x X Y n m :

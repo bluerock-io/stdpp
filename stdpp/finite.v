@@ -326,6 +326,26 @@ Proof.
   rewrite app_length, fmap_length. auto.
 Qed.
 
+Fixpoint vec_enum {A} l n : list (vec A n) :=
+  match n with
+  | 0 => [[#]]
+  | S m => a ← l; vcons a <$> vec_enum l m
+  end.
+
+Global Program Instance vec_finite `{Finite A} n : Finite (vec A n) :=
+  {| enum := vec_enum (enum A) n |}.
+Next Obligation.
+  induction n; cbn; intros; [apply NoDup_singleton|apply NoDup_bind].
+  - intros ???; rewrite ?elem_of_list_fmap; intros (?&?&_) (?&?&_); congruence.
+  - intros; apply NoDup_fmap; auto; repeat intro; eapply vcons_inj_2; done.
+  - apply NoDup_enum.
+Qed.
+Next Obligation.
+  induction x; cbn; [apply elem_of_list_here|].
+  apply elem_of_list_bind; eexists; split; [|apply elem_of_enum].
+  apply elem_of_list_fmap_1; done.
+Qed.
+
 Definition list_enum {A} (l : list A) : ∀ n, list { l : list A | length l = n } :=
   fix go n :=
   match n with

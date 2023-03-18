@@ -4280,13 +4280,15 @@ Section bind.
     Forall2 P (l1 ≫= f) (l2 ≫= g).
   Proof. induction 1; csimpl; auto using Forall2_app. Qed.
   Lemma NoDup_bind l :
-    (∀ a a' b, b ∈ f a → b ∈ f a' → a = a') →
-    (∀ a, NoDup (f a)) → NoDup l → NoDup (l ≫= f).
+    (∀ x1 x2 y, x1 ∈ l → x2 ∈ l → y ∈ f x1 → y ∈ f x2 → x1 = x2) →
+    (∀ x, x ∈ l → NoDup (f x)) → NoDup l → NoDup (l ≫= f).
   Proof.
-    intros inj Hf Hl; induction l; cbn; [constructor|inversion_clear Hl].
-    apply NoDup_app; repeat split; auto; intros b H1 H2.
-    apply elem_of_list_bind in H2 as (a'&?&?).
-    apply (inj a a') in H1; subst; done.
+    intros Hinj Hf. induction 1 as [|x l ?? IH]; csimpl; [constructor|].
+    apply NoDup_app. split_and!.
+    - eauto 10 using elem_of_list_here.
+    - intros y ? (x'&?&?)%elem_of_list_bind.
+      destruct (Hinj x x' y); auto using elem_of_list_here, elem_of_list_further.
+    - eauto 10 using elem_of_list_further.
   Qed.
 End bind.
 

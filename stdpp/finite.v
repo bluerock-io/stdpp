@@ -346,6 +346,13 @@ Next Obligation.
   intros A ?? n v. induction v as [|x n v IH]; csimpl; [apply elem_of_list_here|].
   apply elem_of_list_bind. eauto using elem_of_enum, elem_of_list_fmap_1.
 Qed.
+Lemma vec_card `{Finite A} n : card (vec A n) = card A ^ n.
+Proof.
+  unfold card; simpl. induction n as [|n IH]; simpl; [done|].
+  rewrite <-IH. clear IH. generalize (vec_enum (enum A) n).
+  induction (enum A) as [|x xs IH]; intros l; csimpl; auto.
+  by rewrite app_length, fmap_length, IH.
+Qed.
 
 Definition list_enum {A} (l : list A) : ∀ n, list { l : list A | length l = n } :=
   fix go n :=

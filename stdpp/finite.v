@@ -300,25 +300,17 @@ Lemma sum_card `{Finite A, Finite B} : card (A + B) = card A + card B.
 Proof. unfold card. simpl. by rewrite app_length, !fmap_length. Qed.
 
 Global Program Instance prod_finite `{Finite A, Finite B} : Finite (A * B)%type :=
-  {| enum := foldr (λ x, (pair x <$> enum B ++.)) [] (enum A) |}.
+  {| enum := a ← enum A; (a,.) <$> enum B |}.
 Next Obligation.
-  intros A ?????. induction (NoDup_enum A) as [|x xs Hx Hxs IH]; simpl.
-  { constructor. }
-  apply NoDup_app; split_and?.
-  - by apply (NoDup_fmap_2 _), NoDup_enum.
-  - intros [? y]. rewrite elem_of_list_fmap. intros (?&?&?); simplify_eq.
-    clear IH. induction Hxs as [|x' xs ?? IH]; simpl.
-    { rewrite elem_of_nil. tauto. }
-    rewrite elem_of_app, elem_of_list_fmap.
-    intros [(?&?&?)|?]; simplify_eq.
-    + destruct Hx. by left.
-    + destruct IH; [ | by auto ]. by intro; destruct Hx; right.
-  - done.
+  intros A ?????. apply NoDup_bind.
+  - intros a1 a2 [a b] ?? (?&?&_)%elem_of_list_fmap (?&?&_)%elem_of_list_fmap.
+    naive_solver.
+  - intros a ?. rewrite (NoDup_fmap _). apply NoDup_enum.
+  - apply NoDup_enum.
 Qed.
 Next Obligation.
-  intros ?????? [x y]. induction (elem_of_enum x); simpl.
-  - rewrite elem_of_app, !elem_of_list_fmap. eauto using elem_of_enum.
-  - rewrite elem_of_app; eauto.
+  intros ?????? [a b]. apply elem_of_list_bind.
+  exists a. eauto using elem_of_enum, elem_of_list_fmap_1.
 Qed.
 Lemma prod_card `{Finite A} `{Finite B} : card (A * B) = card A * card B.
 Proof.

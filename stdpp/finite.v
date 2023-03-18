@@ -346,46 +346,15 @@ Proof.
   by rewrite app_length, fmap_length, IH.
 Qed.
 
-Definition list_enum {A} (l : list A) : ∀ n, list { l : list A | length l = n } :=
-  fix go n :=
-  match n with
-  | 0 => [[]↾eq_refl]
-  | S n => foldr (λ x, (sig_map (x ::.) (λ _ H, f_equal S H) <$> (go n) ++.)) [] l
-  end.
-
-Global Program Instance list_finite `{Finite A} n : Finite { l : list A | length l = n } :=
-  {| enum := list_enum (enum A) n |}.
-Next Obligation.
-  intros A ?? n. induction n as [|n IH]; simpl; [apply NoDup_singleton |].
-  revert IH. generalize (list_enum (enum A) n). intros l Hl.
-  induction (NoDup_enum A) as [|x xs Hx Hxs IH]; simpl; auto; [constructor |].
-  apply NoDup_app; split_and?.
-  - by apply (NoDup_fmap_2 _).
-  - intros [k1 Hk1]. clear Hxs IH. rewrite elem_of_list_fmap.
-    intros ([k2 Hk2]&?&?) Hxk2; simplify_eq/=. destruct Hx. revert Hxk2.
-    induction xs as [|x' xs IH]; simpl in *; [by rewrite elem_of_nil |].
-    rewrite elem_of_app, elem_of_list_fmap, elem_of_cons.
-    intros [([??]&?&?)|?]; simplify_eq/=; auto.
-  - apply IH.
-Qed.
-Next Obligation.
-  intros A ?? n [l Hl]. revert l Hl.
-  induction n as [|n IH]; intros [|x l] Hl; simpl; simplify_eq.
-  { apply elem_of_list_singleton. by apply (sig_eq_pi _). }
-  revert IH. generalize (list_enum (enum A) n). intros k Hk.
-  induction (elem_of_enum x) as [x xs|x xs]; simpl in *.
-  - rewrite elem_of_app, elem_of_list_fmap. left. injection Hl. intros Hl'.
-    eexists (l↾Hl'). split; [|done]. by apply (sig_eq_pi _).
-  - rewrite elem_of_app. eauto.
-Qed.
-
-Lemma list_card `{Finite A} n : card { l : list A | length l = n } = card A ^ n.
+Global Instance list_finite `{Finite A} n : Finite { l : list A | length l = n }.
 Proof.
-  unfold card; simpl. induction n as [|n IH]; simpl; auto.
-  rewrite <-IH. clear IH. generalize (list_enum (enum A) n).
-  induction (enum A) as [|x xs IH]; intros l; simpl; auto.
-  by rewrite app_length, fmap_length, IH.
-Qed.
+  refine (bijective_finite (λ v : vec A n, vec_to_list v ↾ vec_to_list_length _)).
+  - abstract (by intros v1 v2 [= ?%vec_to_list_inj2]).
+  - abstract (intros [l <-]; exists (list_to_vec l);
+      apply (sig_eq_pi _), vec_to_list_to_vec).
+Defined.
+Lemma list_card `{Finite A} n : card { l : list A | length l = n } = card A ^ n.
+Proof. unfold card; simpl. rewrite fmap_length. apply vec_card. Qed.
 
 Fixpoint fin_enum (n : nat) : list (fin n) :=
   match n with 0 => [] | S n => 0%fin :: (FS <$> fin_enum n) end.

@@ -233,12 +233,16 @@ Section surjective_finite.
 End surjective_finite.
 
 Section bijective_finite.
-  Context `{Finite A, EqDecision B} (f : A → B) (g : B → A).
-  Context `{!Inj (=) (=) f, !Cancel (=) f g}.
+  Context `{Finite A, EqDecision B} (f : A → B).
+  Context `{!Inj (=) (=) f, !Surj (=) f}.
 
-  Definition bijective_finite : Finite B :=
-    let _ := cancel_surj (f:=f) (g:=g) in
-    surjective_finite f.
+  Program Definition bijective_finite : Finite B :=
+    {| enum := f <$> enum A |}.
+  Next Obligation. apply (NoDup_fmap f), NoDup_enum. Qed.
+  Next Obligation.
+    intros b. rewrite elem_of_list_fmap. destruct (surj f b).
+    eauto using elem_of_enum.
+  Qed.
 End bijective_finite.
 
 Global Program Instance option_finite `{Finite A} : Finite (option A) :=

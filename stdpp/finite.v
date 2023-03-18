@@ -219,6 +219,11 @@ Section enc_finite.
   Proof. unfold card. simpl. by rewrite fmap_length, seq_length. Qed.
 End enc_finite.
 
+(** If we have a surjection [f : A → B] and [A] is finite, then [B] is finite
+too. The surjection [f] could map multiple [x : A] on the same [B], so we
+need to remove duplicates in [enum]. If [f] is injective, we do not to do that,
+leading to a potentially faster implementation of [enum], see [bijective_finite]
+below. *)
 Section surjective_finite.
   Context `{Finite A, EqDecision B} (f : A → B).
   Context `{!Surj (=) f}.

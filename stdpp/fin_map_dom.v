@@ -187,6 +187,40 @@ Proof.
   unfold size, map_size. rewrite fmap_length. done.
 Qed.
 
+Lemma dom_subseteq_size {A} (m1 m2 : M A) : dom m2 ⊆ dom m1 → size m2 ≤ size m1.
+Proof.
+  revert m1. induction m2 as [|i x m2 ? IH] using map_ind; intros m1 Hdom.
+  { rewrite map_size_empty. lia. }
+  rewrite dom_insert in Hdom.
+  assert (i ∉ dom m2) by (by apply not_elem_of_dom).
+  assert (i ∈ dom m1) as [x' Hx']%elem_of_dom by set_solver.
+  rewrite <-(insert_delete m1 i x') by done.
+  rewrite !map_size_insert_None, <-Nat.succ_le_mono by (by rewrite ?lookup_delete).
+  apply IH. rewrite dom_delete. set_solver.
+Qed.
+Lemma dom_subset_size {A} (m1 m2 : M A) : dom m2 ⊂ dom m1 → size m2 < size m1.
+Proof.
+  revert m1. induction m2 as [|i x m2 ? IH] using map_ind; intros m1 Hdom.
+  { destruct m1 as [|i x m1 ? _] using map_ind.
+    - rewrite !dom_empty in Hdom. set_solver.
+    - rewrite map_size_empty, map_size_insert_None by done. lia. }
+  rewrite dom_insert in Hdom.
+  assert (i ∉ dom m2) by (by apply not_elem_of_dom).
+  assert (i ∈ dom m1) as [x' Hx']%elem_of_dom by set_solver.
+  rewrite <-(insert_delete m1 i x') by done.
+  rewrite !map_size_insert_None, <-Nat.succ_lt_mono by (by rewrite ?lookup_delete).
+  apply IH. rewrite dom_delete. split; [set_solver|].
+  intros ?. destruct Hdom as [? []].
+  intros j. destruct (decide (i = j)); set_solver.
+Qed.
+
+Lemma map_eq_subseteq_dom {A} (m1 m2 : M A) :
+  m1 = m2 ↔ m1 ⊆ m2 ∧ dom m2 ⊆@{D} dom m1.
+Proof.
+  split; [by intros ->|]. intros [??].
+  apply map_eq_subseteq_size. auto using dom_subseteq_size.
+Qed.
+
 Lemma dom_singleton_inv {A} (m : M A) i :
   dom m ≡@{D} {[i]} → ∃ x, m = {[i := x]}.
 Proof.

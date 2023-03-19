@@ -27,7 +27,7 @@ Note that the script is not idempotent, do not run it twice.
 sed -i -E -f- $(find theories -name "*.v") <<EOF
 s/\bdifference_difference(|_L)\b/difference_difference_l\1/g
 s/\bloopup_total_empty\b/lookup_total_empty/g
-# map img
+# map_preimg
 s/\bmap_preimage/map_preimg/g
 s/\blookup_preimage/lookup_preimg/g
 s/\blookup_total_preimg/lookup_total_preimg/g

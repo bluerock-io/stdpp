@@ -4,7 +4,10 @@ From stdpp Require Import options.
 
 (** Multisets [gmultiset A] are represented as maps from [A] to natural numbers,
 which represent the multiplicity. To ensure we have canonical representations,
-the multiplicity is "minus 1". *)
+the multiplicity is "minus 1". Therefore, [gmultiset_car !! x = None] means [x]
+has multiplicity [0] and [gmultiset_car !! x = Some 0] means [x] has
+multiplicity 1. *)
+
 Record gmultiset A `{Countable A} := GMultiSet { gmultiset_car : gmap A nat }.
 Global Arguments GMultiSet {_ _ _} _ : assert.
 Global Arguments gmultiset_car {_ _ _} _ : assert.
@@ -53,6 +56,10 @@ Section definitions.
       let z := x - y in guard (0 < z); Some (pred z)) X Y.
   Global Instance gmultiset_scalar_mul : ScalarMul nat (gmultiset A) := λ n X,
     let (X) := X in GMultiSet $
+      (* Since multiplicities are stored "minus 1", the arithmetic here is a
+      bit subtle: the new mutliplicity is [(S m) * (S n')], which is equal to
+      [S m + (S m) * n'], and then we have to subtract 1 again so the first
+      [S m] becomes [m]. *)
       match n with 0 => ∅ | S n' => fmap (λ m, m + n' * S m) X end.
 
   Global Instance gmultiset_dom : Dom (gmultiset A) (gset A) := λ X,

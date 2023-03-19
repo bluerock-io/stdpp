@@ -213,6 +213,16 @@ Proof.
   apply set_size_proper. set_solver.
 Qed.
 
+Lemma set_equiv_subseteq_size X1 X2 : X1 ≡ X2 ↔ X1 ⊆ X2 ∧ size X2 ≤ size X1.
+Proof.
+  split; [by intros ->|]. intros [??]. apply (anti_symm _); [done|].
+  apply empty_difference_subseteq, size_empty_iff.
+  rewrite size_difference by done. lia.
+Qed.
+Lemma set_eq_subseteq_size `{!LeibnizEquiv C} X1 X2 :
+  X1 = X2 ↔ X1 ⊆ X2 ∧ size X2 ≤ size X1.
+Proof. unfold_leibniz. apply set_equiv_subseteq_size. Qed.
+
 Lemma subseteq_size X Y : X ⊆ Y → size X ≤ size Y.
 Proof. intros. rewrite (union_difference X Y), size_union_alt by done. lia. Qed.
 Lemma subset_size X Y : X ⊂ Y → size X < size Y.

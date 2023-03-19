@@ -1079,6 +1079,18 @@ Fixpoint list_to_set `{Singleton A C, Empty C, Union C} (l : list A) : C :=
 Fixpoint list_to_set_disj `{SingletonMS A C, Empty C, DisjUnion C} (l : list A) : C :=
   match l with [] => ∅ | x :: l => {[+ x +]} ⊎ list_to_set_disj l end.
 
+Class ScalarMul N A := scalar_mul : N → A → A.
+Global Hint Mode ScalarMul - ! : typeclass_instances.
+(** The [N] arguments is typically [nat] or [Z], so we do not want to rewrite
+in that. Hence, the value of [Params] is 3. *)
+Global Instance: Params (@scalar_mul) 3 := {}.
+(** The notation [*:] and level is taken from ssreflect, see
+https://github.com/math-comp/math-comp/blob/master/mathcomp/ssreflect/ssrnotations.v *)
+Infix "*:" := scalar_mul (at level 40, left associativity) : stdpp_scope.
+Notation "(*:)" :=  scalar_mul (only parsing) : stdpp_scope.
+Notation "( x *:.)" := (scalar_mul x) (only parsing) : stdpp_scope.
+Notation "(.*: x )" := (λ y, scalar_mul y x) (only parsing) : stdpp_scope.
+
 (** The class [Lexico A] is used for the lexicographic order on [A]. This order
 is used to create finite maps, finite sets, etc, and is typically different from
 the order [(⊆)]. *)

@@ -2,6 +2,12 @@ From stdpp Require Export countable.
 From stdpp Require Import gmap.
 From stdpp Require Import options.
 
+(** Multisets [gmultiset A] are represented as maps from [A] to natural numbers,
+which represent the multiplicity. To ensure we have canonical representations,
+the multiplicity is "minus 1". Therefore, [gmultiset_car !! x = None] means [x]
+has multiplicity [0] and [gmultiset_car !! x = Some 0] means [x] has
+multiplicity 1. *)
+
 Record gmultiset A `{Countable A} := GMultiSet { gmultiset_car : gmap A nat }.
 Global Arguments GMultiSet {_ _ _} _ : assert.
 Global Arguments gmultiset_car {_ _ _} _ : assert.
@@ -48,6 +54,13 @@ Section definitions.
     let (X) := X in let (Y) := Y in
     GMultiSet $ difference_with (λ x y,
       let z := x - y in guard (0 < z); Some (pred z)) X Y.
+  Global Instance gmultiset_scalar_mul : ScalarMul nat (gmultiset A) := λ n X,
+    let (X) := X in GMultiSet $
+      (* Since multiplicities are stored "minus 1", the arithmetic here is a
+      bit subtle: the new mutliplicity is [(S m) * (S n')], which is equal to
+      [S m + (S m) * n'], and then we have to subtract 1 again so the first
+      [S m] becomes [m]. *)
+      match n with 0 => ∅ | S n' => fmap (λ m, m + n' * S m) X end.
 
   Global Instance gmultiset_dom : Dom (gmultiset A) (gset A) := λ X,
     let (X) := X in dom X.
@@ -56,7 +69,7 @@ End definitions.
 Typeclasses Opaque gmultiset_elem_of gmultiset_subseteq.
 Typeclasses Opaque gmultiset_elements gmultiset_size gmultiset_empty.
 Typeclasses Opaque gmultiset_singleton gmultiset_union gmultiset_difference.
-Typeclasses Opaque gmultiset_dom.
+Typeclasses Opaque gmultiset_scalar_mul gmultiset_dom.
 
 Section basic_lemmas.
   Context `{Countable A}.
@@ -114,6 +127,12 @@ Section basic_lemmas.
     rewrite lookup_difference_with.
     destruct (X !! _), (Y !! _); simplify_option_eq; lia.
   Qed.
+  Lemma multiplicity_scalar_mul n X x :
+    multiplicity x (n *: X) = n * multiplicity x X.
+  Proof.
+    destruct X as [X]; unfold multiplicity; simpl. destruct n as [|n]; [done|].
+    rewrite lookup_fmap. destruct (X !! _); simpl; lia.
+  Qed.
 
   (* Set *)
   Lemma elem_of_multiplicity x X : x ∈ X ↔ 0 < multiplicity x X.
@@ -131,6 +150,8 @@ Section basic_lemmas.
   Proof. rewrite !elem_of_multiplicity, multiplicity_disj_union. lia. Qed.
   Lemma gmultiset_elem_of_intersection X Y x : x ∈ X ∩ Y ↔ x ∈ X ∧ x ∈ Y.
   Proof. rewrite !elem_of_multiplicity, multiplicity_intersection. lia. Qed.
+  Lemma gmultiset_elem_of_scalar_mul n X x : x ∈ n *: X ↔ n ≠ 0 ∧ x ∈ X.
+  Proof. rewrite !elem_of_multiplicity, multiplicity_scalar_mul. lia. Qed.
 
   Global Instance gmultiset_elem_of_dec : RelDecision (∈@{gmultiset A}).
   Proof. refine (λ x X, cast_if (decide (0 < multiplicity x X))); done. Defined.
@@ -211,6 +232,10 @@ Section multiset_unfold.
     MultisetUnfold x X n → MultisetUnfold x Y m →
     MultisetUnfold x (X ∖ Y) (n - m).
   Proof. intros [HX] [HY]; constructor. by rewrite multiplicity_difference, HX, HY. Qed.
+  Global Instance multiset_unfold_scalar_mul x m X n :
+    MultisetUnfold x X n →
+    MultisetUnfold x (m *: X) (m * n).
+  Proof. intros [HX]; constructor. by rewrite multiplicity_scalar_mul, HX. Qed.
 
   Global Instance set_unfold_multiset_equiv X Y f g :
     (∀ x, MultisetUnfold x X (f x)) → (∀ x, MultisetUnfold x Y (g x)) →
@@ -394,6 +419,40 @@ Section more_lemmas.
   Lemma gmultiset_non_empty_singleton x : {[+ x +]} ≠@{gmultiset A} ∅.
   Proof. multiset_solver. Qed.
 
+  (** Scalar *)
+  Lemma gmultiset_scalar_mul_0 X : 0 *: X = ∅.
+  Proof. multiset_solver. Qed.
+  Lemma gmultiset_scalar_mul_S_l n X : S n *: X = X ⊎ (n *: X).
+  Proof. multiset_solver. Qed.
+  Lemma gmultiset_scalar_mul_S_r n X : S n *: X = (n *: X) ⊎ X.
+  Proof. multiset_solver. Qed.
+  Lemma gmultiset_scalar_mul_1 X : 1 *: X = X.
+  Proof. multiset_solver. Qed.
+  Lemma gmultiset_scalar_mul_2 X : 2 *: X = X ⊎ X.
+  Proof. multiset_solver. Qed.
+  Lemma gmultiset_scalar_mul_empty n : n *: ∅ =@{gmultiset A} ∅.
+  Proof. multiset_solver. Qed.
+  Lemma gmultiset_scalar_mul_disj_union n X Y :
+    n *: (X ⊎ Y) =@{gmultiset A} (n *: X) ⊎ (n *: Y).
+  Proof. multiset_solver. Qed.
+  Lemma gmultiset_scalar_mul_union n X Y :
+    n *: (X ∪ Y) =@{gmultiset A} (n *: X) ∪ (n *: Y).
+  Proof. set_unfold. intros x; by rewrite Nat.mul_max_distr_l. Qed.
+  Lemma gmultiset_scalar_mul_intersection n X Y :
+    n *: (X ∩ Y) =@{gmultiset A} (n *: X) ∩ (n *: Y).
+  Proof. set_unfold. intros x; by rewrite Nat.mul_min_distr_l. Qed.
+  Lemma gmultiset_scalar_mul_difference n X Y :
+    n *: (X ∖ Y) =@{gmultiset A} (n *: X) ∖ (n *: Y).
+  Proof. set_unfold. intros x; by rewrite Nat.mul_sub_distr_l. Qed.
+
+  Lemma gmultiset_scalar_mul_inj_ne_0 n X1 X2 :
+    n ≠ 0 → n *: X1 = n *: X2 → X1 = X2.
+  Proof. set_unfold. intros ? HX x. apply (Nat.mul_reg_l _ _ n); auto. Qed.
+  (** Specialized to [S n] so that type class search can find it. *)
+  Global Instance gmultiset_scalar_mul_inj_S n :
+    Inj (=) (=@{gmultiset A}) (S n *:.).
+  Proof. intros x1 x2. apply gmultiset_scalar_mul_inj_ne_0. lia. Qed.
+
   (** Conversion from lists *)
   Lemma list_to_set_disj_nil : list_to_set_disj [] =@{gmultiset A} ∅.
   Proof. done. Qed.
@@ -449,6 +508,13 @@ Section more_lemmas.
         by (by rewrite ?lookup_union_with, ?HX, ?HY).
       by rewrite <-(assoc_L (++)), <-IH.
   Qed.
+  Lemma gmultiset_elements_scalar_mul n X :
+    elements (n *: X) ≡ₚ mjoin (replicate n (elements X)).
+  Proof.
+    induction n as [|n IH]; simpl.
+    - by rewrite gmultiset_scalar_mul_0, gmultiset_elements_empty.
+    - by rewrite gmultiset_scalar_mul_S_l, gmultiset_elements_disj_union, IH.
+  Qed.
   Lemma gmultiset_elem_of_elements x X : x ∈ elements X ↔ x ∈ X.
   Proof.
     destruct X as [X]. unfold elements, gmultiset_elements.
@@ -481,6 +547,16 @@ Section more_lemmas.
   Proof.
     intros Hcomm Hassoc. unfold set_fold; simpl.
     by rewrite gmultiset_elements_disj_union, <- foldr_app, (comm (++)).
+  Qed.
+  Lemma gmultiset_set_fold_scalar_mul (f : A → A → A) (b : A) n X :
+    Comm (=) f →
+    Assoc (=) f →
+    set_fold f b (n *: X) = Nat.iter n (flip (set_fold f) X) b.
+  Proof.
+    intros Hcomm Hassoc. induction n as [|n IH]; simpl.
+    - by rewrite gmultiset_scalar_mul_0, gmultiset_set_fold_empty.
+    - rewrite gmultiset_scalar_mul_S_r.
+      by rewrite (gmultiset_set_fold_disj_union _ _ _ _ _ _), IH.
   Qed.
 
   (** Properties of the size operation *)
@@ -518,6 +594,12 @@ Section more_lemmas.
   Proof.
     unfold size, gmultiset_size; simpl.
     by rewrite gmultiset_elements_disj_union, app_length.
+  Qed.
+  Lemma gmultiset_size_scalar_mul n X : size (n *: X) = n * size X.
+  Proof.
+    induction n as [|n IH].
+    - by rewrite gmultiset_scalar_mul_0, gmultiset_size_empty.
+    - rewrite gmultiset_scalar_mul_S_l, gmultiset_size_disj_union, IH. lia.
   Qed.
 
   (** Order stuff *)

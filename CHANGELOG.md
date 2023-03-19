@@ -21,6 +21,7 @@ Coq 8.12 and 8.13 are no longer supported by this release.
 - Rename `map_preimage` into `map_preimg` to be consistent with `dom`.
 - Improve `bijective_finite`: do not require an inverse, do not unnecessarily
   remove duplicates.
+- Add operation `*:` for "scalar" multiplication of multisets.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

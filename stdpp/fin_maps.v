@@ -1177,6 +1177,19 @@ Proof.
     apply reflexive_eq, symmetry, map_eq_subseteq_size. auto with lia.
 Qed.
 
+(** ** Induction principles *)
+Lemma map_wf {A} : wf (⊂@{M A}).
+Proof. apply (wf_projected (<) size); auto using map_subset_size, lt_wf. Qed.
+
+Lemma map_ind {A} (P : M A → Prop) :
+  P ∅ → (∀ i x m, m !! i = None → P m → P (<[i:=x]>m)) → ∀ m, P m.
+Proof.
+  intros ? Hins m. induction (map_wf m) as [m _ IH].
+  destruct (map_choose_or_empty m) as [(i&x&?)| ->]; [|done].
+  rewrite <-(insert_delete m i x) by done.
+  apply Hins; [by rewrite lookup_delete|]. by apply IH, delete_subset.
+Qed.
+
 (** ** Properties of conversion from sets *)
 Section set_to_map.
   Context {A : Type} `{FinSet B C}.
@@ -1232,39 +1245,6 @@ End map_to_set.
 Lemma elem_of_map_to_set_pair `{Set_ (K * A) C} (m : M A) i x :
   (i,x) ∈@{C} map_to_set pair m ↔ m !! i = Some x.
 Proof. rewrite elem_of_map_to_set. naive_solver. Qed.
-
-(** ** Induction principles *)
-Lemma map_ind {A} (P : M A → Prop) :
-  P ∅ → (∀ i x m, m !! i = None → P m → P (<[i:=x]>m)) → ∀ m, P m.
-Proof.
-  intros ? Hins. cut (∀ l, NoDup (l.*1) → ∀ m, map_to_list m ≡ₚ l → P m).
-  { intros help m.
-    apply (help (map_to_list m)); auto using NoDup_fst_map_to_list. }
-  intros l. induction l as [|[i x] l IH]; intros Hnodup m Hml.
-  { rewrite Permutation_nil_r, map_to_list_empty_iff in Hml. by rewrite Hml. }
-  inversion_clear Hnodup.
-  apply map_to_list_insert_inv in Hml; subst m. apply Hins.
-  - by apply not_elem_of_list_to_map_1.
-  - apply IH; auto using map_to_list_to_map.
-Qed.
-Lemma map_to_list_length {A} (m1 m2 : M A) :
-  m1 ⊂ m2 → length (map_to_list m1) < length (map_to_list m2).
-Proof.
-  revert m2. induction m1 as [|i x m ? IH] using map_ind.
-  { intros m2 Hm2. rewrite map_to_list_empty. simpl.
-    apply Nat.neq_0_lt_0, Nat.neq_sym. intros Hlen. symmetry in Hlen.
-    apply nil_length_inv, map_to_list_empty_iff in Hlen.
-    rewrite Hlen in Hm2. destruct (irreflexivity (⊂) ∅ Hm2). }
-  intros m2 Hm2.
-  destruct (insert_subset_inv m m2 i x) as (m2'&?&?&?); auto; subst.
-  rewrite !map_to_list_insert; simpl; auto with arith.
-Qed.
-Lemma map_wf {A} : wf (⊂@{M A}).
-Proof.
-  apply (wf_projected (<) (length ∘ map_to_list)).
-  - by apply map_to_list_length.
-  - by apply lt_wf.
-Qed.
 
 (** ** The fold operation *)
 Lemma map_fold_empty {A B} (f : K → A → B → B) (b : B) :

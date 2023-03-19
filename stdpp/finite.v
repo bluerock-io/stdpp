@@ -118,9 +118,9 @@ Qed.
 Lemma finite_inj_Permutation `{Finite A} `{Finite B} (f : A → B)
   `{!Inj (=) (=) f} : card A = card B → f <$> enum A ≡ₚ enum B.
 Proof.
-  intros. apply submseteq_Permutation_length_eq.
-  - by rewrite fmap_length.
+  intros. apply Permutation_submseteq_length. split.
   - by apply finite_inj_submseteq.
+  - rewrite fmap_length. by apply Nat.eq_le_incl.
 Qed.
 Lemma finite_inj_surj `{Finite A} `{Finite B} (f : A → B)
   `{!Inj (=) (=) f} : card A = card B → Surj (=) f.

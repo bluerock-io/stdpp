@@ -2588,16 +2588,7 @@ Proof.
   - exists (x :: k). by rewrite Hk, Permutation_middle.
   - exists (k ++ k'). by rewrite Hk', Hk, (assoc_L (++)).
 Qed.
-Lemma submseteq_Permutation_length_le l1 l2 :
-  length l2 ≤ length l1 → l1 ⊆+ l2 → l1 ≡ₚ l2.
-Proof.
-  intros Hl21 Hl12. destruct (submseteq_Permutation l1 l2) as [[|??] Hk]; auto.
-  - by rewrite Hk, (right_id_L [] (++)).
-  - rewrite Hk, app_length in Hl21; simpl in Hl21; lia.
-Qed.
-Lemma submseteq_Permutation_length_eq l1 l2 :
-  length l2 = length l1 → l1 ⊆+ l2 → l1 ≡ₚ l2.
-Proof. intro. apply submseteq_Permutation_length_le. lia. Qed.
+
 Global Instance: Proper ((≡ₚ) ==> (≡ₚ) ==> iff) (@submseteq A).
 Proof.
   intros l1 l2 ? k1 k2 ?. split; intros.
@@ -2606,8 +2597,21 @@ Proof.
   - trans l2; [by apply Permutation_submseteq|].
     trans k2; [done|]. by apply Permutation_submseteq.
 Qed.
+
+Lemma Permutation_submseteq_length l1 l2 :
+  l1 ≡ₚ l2 ↔ l1 ⊆+ l2 ∧ length l2 ≤ length l1.
+Proof.
+  split; [by intros ->|].
+  intros [Hsub Hlen]. destruct (submseteq_Permutation l1 l2) as [[|??] Hk]; auto.
+  - by rewrite Hk, (right_id_L [] (++)).
+  - rewrite Hk, app_length in Hlen. simpl in *; lia.
+Qed.
+
 Global Instance: AntiSymm (≡ₚ) (@submseteq A).
-Proof. red. auto using submseteq_Permutation_length_le, submseteq_length. Qed.
+Proof.
+  intros l1 l2 ??. apply Permutation_submseteq_length.
+  auto using submseteq_length.
+Qed.
 
 Lemma elem_of_submseteq l k x : x ∈ l → l ⊆+ k → x ∈ k.
 Proof. intros ? [l' ->]%submseteq_Permutation. apply elem_of_app; auto. Qed.
@@ -2723,13 +2727,6 @@ Qed.
 Lemma submseteq_middle l k1 k2 : l ⊆+ k1 ++ l ++ k2.
 Proof. by apply submseteq_inserts_l, submseteq_inserts_r. Qed.
 
-Lemma Permutation_alt l1 l2 : l1 ≡ₚ l2 ↔ length l1 = length l2 ∧ l1 ⊆+ l2.
-Proof.
-  split.
-  - by intros Hl; rewrite Hl.
-  - intros [??]; auto using submseteq_Permutation_length_eq.
-Qed.
-
 Lemma NoDup_submseteq l k : NoDup l → (∀ x, x ∈ l → x ∈ k) → l ⊆+ k.
 Proof.
   intros Hl. revert k. induction Hl as [|x l Hx ? IH].
@@ -2826,9 +2823,9 @@ Section submseteq_dec.
   Defined.
   Global Instance Permutation_dec : RelDecision (≡ₚ@{A}).
   Proof using Type*.
-   refine (λ l1 l2, cast_if_and
-    (decide (length l1 = length l2)) (decide (l1 ⊆+ l2)));
-    abstract (rewrite Permutation_alt; tauto).
+    refine (λ l1 l2, cast_if_and
+      (decide (l1 ⊆+ l2)) (decide (length l2 ≤ length l1)));
+      abstract (rewrite Permutation_submseteq_length; tauto).
   Defined.
 End submseteq_dec.
 

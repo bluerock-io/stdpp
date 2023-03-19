@@ -2,6 +2,9 @@ From stdpp Require Export countable.
 From stdpp Require Import gmap.
 From stdpp Require Import options.
 
+(** Multisets [gmultiset A] are represented as maps from [A] to natural numbers,
+which represent the multiplicity. To ensure we have canonical representations,
+the multiplicity is "minus 1". *)
 Record gmultiset A `{Countable A} := GMultiSet { gmultiset_car : gmap A nat }.
 Global Arguments GMultiSet {_ _ _} _ : assert.
 Global Arguments gmultiset_car {_ _ _} _ : assert.

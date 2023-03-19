@@ -180,15 +180,15 @@ Global Instance map_lookup_total `{!Lookup K A (M A), !Inhabited A} :
 Typeclasses Opaque map_lookup_total.
 
 (** Given a finite map [m] with keys [K] and values [A], the preimage
-[map_preimage m] gives a finite map with keys [A] and values being sets of [K].
-The type of [map_preimage] is very generic to support different map and set
+[map_preimg m] gives a finite map with keys [A] and values being sets of [K].
+The type of [map_preimg] is very generic to support different map and set
 implementations. A possible instance is [MKA:=gmap K A], [MASK:=gmap A (gset K)],
 and [SK:=gset K]. *)
-Definition map_preimage `{FinMapToList K A MKA, Empty MASK,
+Definition map_preimg `{FinMapToList K A MKA, Empty MASK,
     PartialAlter A SK MASK, Empty SK, Singleton K SK, Union SK}
     (m : MKA) : MASK :=
   map_fold (λ i, partial_alter (λ mX, Some $ {[ i ]} ∪ default ∅ mX)) ∅ m.
-Typeclasses Opaque map_preimage.
+Typeclasses Opaque map_preimg.
 
 (** * Theorems *)
 Section theorems.
@@ -3711,22 +3711,22 @@ Section kmap.
   Proof. unfold strict. by rewrite !kmap_subseteq. Qed.
 End kmap.
 
-Section preimage.
+Section preimg.
   (** We restrict the theory to finite sets with Leibniz equality, which is
   sufficient for [gset], but not for [boolset] or [propset]. The result of the
   pre-image is a map of sets. To support general sets, we would need setoid
   equality on sets, and thus setoid equality on maps. *)
   Context `{FinMap K MK, FinMap A MA, FinSet K SK, !LeibnizEquiv SK}.
-  Local Notation map_preimage :=
-    (map_preimage (K:=K) (A:=A) (MKA:=MK A) (MASK:=MA SK) (SK:=SK)).
+  Local Notation map_preimg :=
+    (map_preimg (K:=K) (A:=A) (MKA:=MK A) (MASK:=MA SK) (SK:=SK)).
   Implicit Types m : MK A.
 
-  Lemma map_preimage_empty : map_preimage ∅ = ∅.
+  Lemma map_preimg_empty : map_preimg ∅ = ∅.
   Proof. apply map_fold_empty. Qed.
-  Lemma map_preimage_insert m i x :
+  Lemma map_preimg_insert m i x :
     m !! i = None →
-    map_preimage (<[i:=x]> m) =
-      partial_alter (λ mX, Some ({[ i ]} ∪ default ∅ mX)) x (map_preimage m).
+    map_preimg (<[i:=x]> m) =
+      partial_alter (λ mX, Some ({[ i ]} ∪ default ∅ mX)) x (map_preimg m).
   Proof.
     intros Hi. refine (map_fold_insert_L _ _ i x m _ Hi).
     intros j1 j2 x1 x2 m' ? _ _. destruct (decide (x1 = x2)) as [->|?].
@@ -3735,73 +3735,73 @@ Section preimage.
     - by apply partial_alter_commute.
   Qed.
 
-  (** The [preimage] function never returns an empty set (we represent that case
-  via [None]). *)
-  Lemma lookup_preimage_Some_non_empty m x :
-    map_preimage m !! x ≠ Some ∅.
+  (** The [map_preimg] function never returns an empty set (we represent that
+  case via [None]). *)
+  Lemma lookup_preimg_Some_non_empty m x :
+    map_preimg m !! x ≠ Some ∅.
   Proof.
     induction m as [|i x' m ? IH] using map_ind.
-    { by rewrite map_preimage_empty, lookup_empty. }
-    rewrite map_preimage_insert by done. destruct (decide (x = x')) as [->|].
+    { by rewrite map_preimg_empty, lookup_empty. }
+    rewrite map_preimg_insert by done. destruct (decide (x = x')) as [->|].
     - rewrite lookup_partial_alter. intros [=]. set_solver.
     - rewrite lookup_partial_alter_ne by done. set_solver.
   Qed.
 
-  Lemma lookup_preimage_None_1 m x i :
-    map_preimage m !! x = None → m !! i ≠ Some x.
+  Lemma lookup_preimg_None_1 m x i :
+    map_preimg m !! x = None → m !! i ≠ Some x.
   Proof.
     induction m as [|i' x' m ? IH] using map_ind; [by rewrite lookup_empty|].
-    rewrite map_preimage_insert by done. destruct (decide (x = x')) as [->|].
+    rewrite map_preimg_insert by done. destruct (decide (x = x')) as [->|].
     - by rewrite lookup_partial_alter.
     - rewrite lookup_partial_alter_ne, lookup_insert_Some by done. naive_solver.
   Qed.
 
-  Lemma lookup_preimage_Some_1 m X x i :
-    map_preimage m !! x = Some X →
+  Lemma lookup_preimg_Some_1 m X x i :
+    map_preimg m !! x = Some X →
     i ∈ X ↔ m !! i = Some x.
   Proof.
     revert X. induction m as [|i' x' m ? IH] using map_ind; intros X.
-    { by rewrite map_preimage_empty, lookup_empty. }
-    rewrite map_preimage_insert by done. destruct (decide (x = x')) as [->|].
+    { by rewrite map_preimg_empty, lookup_empty. }
+    rewrite map_preimg_insert by done. destruct (decide (x = x')) as [->|].
     - rewrite lookup_partial_alter. intros [= <-].
       rewrite elem_of_union, elem_of_singleton, lookup_insert_Some.
-      destruct (map_preimage m !! x') as [X'|] eqn:Hx'; simpl.
+      destruct (map_preimg m !! x') as [X'|] eqn:Hx'; simpl.
       + rewrite IH by done. naive_solver.
-      + apply (lookup_preimage_None_1 _ _ i) in Hx'. set_solver.
+      + apply (lookup_preimg_None_1 _ _ i) in Hx'. set_solver.
     - rewrite lookup_partial_alter_ne, lookup_insert_Some by done. naive_solver.
   Qed.
 
-  Lemma lookup_preimage_None m x :
-    map_preimage m !! x = None ↔ ∀ i, m !! i ≠ Some x.
+  Lemma lookup_preimg_None m x :
+    map_preimg m !! x = None ↔ ∀ i, m !! i ≠ Some x.
   Proof.
-    split; [by eauto using lookup_preimage_None_1|].
+    split; [by eauto using lookup_preimg_None_1|].
     intros Hm. apply eq_None_not_Some; intros [X ?].
     destruct (set_choose_L X) as [i ?].
-    { intros ->. by eapply lookup_preimage_Some_non_empty. }
-    by eapply (Hm i), lookup_preimage_Some_1.
+    { intros ->. by eapply lookup_preimg_Some_non_empty. }
+    by eapply (Hm i), lookup_preimg_Some_1.
   Qed.
 
-  Lemma lookup_preimage_Some m x X :
-    map_preimage m !! x = Some X ↔ X ≠ ∅ ∧ ∀ i, i ∈ X ↔ m !! i = Some x.
+  Lemma lookup_preimg_Some m x X :
+    map_preimg m !! x = Some X ↔ X ≠ ∅ ∧ ∀ i, i ∈ X ↔ m !! i = Some x.
   Proof.
     split.
-    - intros HxX. split; [intros ->; by eapply lookup_preimage_Some_non_empty|].
-      intros j. by apply lookup_preimage_Some_1.
-    - intros [HXne HX]. destruct (map_preimage m !! x) as [X'|] eqn:HX'.
+    - intros HxX. split; [intros ->; by eapply lookup_preimg_Some_non_empty|].
+      intros j. by apply lookup_preimg_Some_1.
+    - intros [HXne HX]. destruct (map_preimg m !! x) as [X'|] eqn:HX'.
       + f_equal; apply set_eq; intros i. rewrite HX.
-        by apply lookup_preimage_Some_1.
+        by apply lookup_preimg_Some_1.
       + apply set_choose_L in HXne as [j ?].
-        apply (lookup_preimage_None_1 _ _ j) in HX'. naive_solver.
+        apply (lookup_preimg_None_1 _ _ j) in HX'. naive_solver.
   Qed.
 
-  Lemma lookup_total_preimage m x i :
-    i ∈ map_preimage m !!! x ↔ m !! i = Some x.
+  Lemma lookup_total_preimg m x i :
+    i ∈ map_preimg m !!! x ↔ m !! i = Some x.
   Proof.
-    rewrite lookup_total_alt. destruct (map_preimage m !! x) as [X|] eqn:HX.
-    - by apply lookup_preimage_Some.
-    - rewrite lookup_preimage_None in HX. set_solver.
+    rewrite lookup_total_alt. destruct (map_preimg m !! x) as [X|] eqn:HX.
+    - by apply lookup_preimg_Some.
+    - rewrite lookup_preimg_None in HX. set_solver.
   Qed.
-End preimage.
+End preimg.
 
 (** * Tactics *)
 (** The tactic [decompose_map_disjoint] simplifies occurrences of [disjoint]

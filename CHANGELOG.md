@@ -18,6 +18,7 @@ Coq 8.12 and 8.13 are no longer supported by this release.
   succeed with a proof that contains unresolved evars/shelved goals.
 - Add lemmas `Nat.mul_reg_{l,r}` for cancellation of multiplication on `nat`.
   (Names are analogous to the `Z.` lemmas for Coq's standard library.)
+- Rename `map_preimage` into `map_preimg` to be consistent with `dom`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).
@@ -26,6 +27,10 @@ Note that the script is not idempotent, do not run it twice.
 sed -i -E -f- $(find theories -name "*.v") <<EOF
 s/\bdifference_difference(|_L)\b/difference_difference_l\1/g
 s/\bloopup_total_empty\b/lookup_total_empty/g
+# map_preimg
+s/\bmap_preimage/map_preimg/g
+s/\blookup_preimage/lookup_preimg/g
+s/\blookup_total_preimg/lookup_total_preimg/g
 EOF
 ```
 

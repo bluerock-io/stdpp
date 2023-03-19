@@ -46,6 +46,8 @@ Section setoids_simple.
   Proof.
     intros X1 X2 HX Y1 Y2 HY. apply forall_proper; intros x. by rewrite HX, HY.
   Qed.
+  Global Instance subset_proper : Proper ((≡@{C}) ==> (≡@{C}) ==> iff) (⊂).
+  Proof. solve_proper. Qed.
 End setoids_simple.
 
 Section setoids.

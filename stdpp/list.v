@@ -2177,6 +2177,17 @@ Proof.
   apply not_elem_of_app_cons_inv_l in Hle; [|done..]. unfold prefix. naive_solver.
 Qed.
 
+Lemma list_eq_prefix_eq l1 l2 :
+  l1 = l2 ↔ l1 `prefix_of` l2 ∧ length l2 ≤ length l1.
+Proof.
+  split; [by intros ->|]. intros [Hprefix Hlen].
+  assert (length l1 = length l2).
+  { apply prefix_length in Hprefix. lia. }
+  eapply list_eq_same_length with (length l1); [done..|].
+  intros i x y _ ??. assert (l2 !! i = Some x) by eauto using prefix_lookup.
+  congruence.
+Qed.
+
 Section prefix_ops.
   Context `{!EqDecision A}.
   Lemma max_prefix_fst l1 l2 :
@@ -2318,6 +2329,13 @@ Lemma suffix_not_elem_of_app_cons_inv x y l1 l2 k1 k2 :
 Proof.
   intros Hin1 Hin2 [k Hle]. rewrite (assoc_L (++)) in Hle.
   apply not_elem_of_app_cons_inv_r in Hle; [|done..]. unfold suffix. naive_solver.
+Qed.
+
+Lemma list_eq_suffix_eq l1 l2 :
+  l1 = l2 ↔ l1 `suffix_of` l2 ∧ length l2 ≤ length l1.
+Proof.
+  rewrite <-(inj_iff reverse), list_eq_prefix_eq.
+  by rewrite !reverse_length, <-suffix_prefix_reverse.
 Qed.
 
 Section max_suffix.

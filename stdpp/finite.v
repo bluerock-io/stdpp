@@ -219,6 +219,11 @@ Section enc_finite.
   Proof. unfold card. simpl. by rewrite fmap_length, seq_length. Qed.
 End enc_finite.
 
+(** If we have a surjection [f : A → B] and [A] is finite, then [B] is finite
+too. The surjection [f] could map multiple [x : A] on the same [B], so we
+need to remove duplicates in [enum]. If [f] is injective, we do not need to do that,
+leading to a potentially faster implementation of [enum], see [bijective_finite]
+below. *)
 Section surjective_finite.
   Context `{Finite A, EqDecision B} (f : A → B).
   Context `{!Surj (=) f}.
@@ -233,12 +238,16 @@ Section surjective_finite.
 End surjective_finite.
 
 Section bijective_finite.
-  Context `{Finite A, EqDecision B} (f : A → B) (g : B → A).
-  Context `{!Inj (=) (=) f, !Cancel (=) f g}.
+  Context `{Finite A, EqDecision B} (f : A → B).
+  Context `{!Inj (=) (=) f, !Surj (=) f}.
 
-  Definition bijective_finite : Finite B :=
-    let _ := cancel_surj (f:=f) (g:=g) in
-    surjective_finite f.
+  Program Definition bijective_finite : Finite B :=
+    {| enum := f <$> enum A |}.
+  Next Obligation. apply (NoDup_fmap f), NoDup_enum. Qed.
+  Next Obligation.
+    intros b. rewrite elem_of_list_fmap. destruct (surj f b).
+    eauto using elem_of_enum.
+  Qed.
 End bijective_finite.
 
 Global Program Instance option_finite `{Finite A} : Finite (option A) :=

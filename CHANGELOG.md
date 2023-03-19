@@ -19,6 +19,8 @@ Coq 8.12 and 8.13 are no longer supported by this release.
 - Add lemmas `Nat.mul_reg_{l,r}` for cancellation of multiplication on `nat`.
   (Names are analogous to the `Z.` lemmas for Coq's standard library.)
 - Rename `map_preimage` into `map_preimg` to be consistent with `dom`.
+- Improve `bijective_finite`: do not require an inverse, do not unnecessarily
+  remove duplicates.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

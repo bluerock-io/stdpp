@@ -3882,7 +3882,8 @@ Section image.
   Lemma elem_of_img_insert k v m : v ∈ img (<[k:=v]> m).
   Proof. apply elem_of_img. exists k. apply lookup_insert. Qed.
   Lemma elem_of_img_insert_ne k v w m : v ≠ w → w ∈ img(<[k:=v]> m) → w ∈ img m.
-  Proof. rewrite !elem_of_img. intros Hv [k' Hk].
+  Proof.
+    rewrite !elem_of_img. intros Hv [k' Hk].
     destruct (decide (k=k')) as [Heq|Heq].
     - rewrite Heq, lookup_insert in Hk.
       apply Some_inj in Hk. contradiction (Hv Hk).

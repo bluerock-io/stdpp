@@ -283,7 +283,6 @@ Section gset.
     intros A m. specialize (Hdom A m). by destruct m.
   Qed.
 
-
   (** If you are looking for a lemma showing that [gset] is extensional, see
   [sets.set_eq]. *)
 

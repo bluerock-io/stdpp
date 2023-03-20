@@ -332,8 +332,16 @@ Ltac multiset_simplify_singletons :=
   end.
 
 (** Putting it all together *)
-Ltac multiset_solver :=
-  set_solver by (multiset_instantiate; multiset_simplify_singletons; lia).
+(** Similar to [set_solver] and [naive_solver], [multiset_solver] has a [by]
+parameter whose default is [eauto]. *)
+Tactic Notation "multiset_solver" "by" tactic3(tac) :=
+  set_solver by (multiset_instantiate;
+                 multiset_simplify_singletons;
+                 (* [fast_done] to solve trivial equalities or contradictions,
+                 [lia] for the common case that involves arithmetic,
+                 [tac] if all else fails *)
+                 first [fast_done|lia|tac]).
+Tactic Notation "multiset_solver" := multiset_solver by eauto.
 
 Section more_lemmas.
   Context `{Countable A}.

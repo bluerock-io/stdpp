@@ -10,6 +10,7 @@ stdpp/base.v
 stdpp/tactics.v
 stdpp/option.v
 stdpp/fin_map_dom.v
+stdpp/fin_map_img.v
 stdpp/boolset.v
 stdpp/fin_maps.v
 stdpp/fin.v

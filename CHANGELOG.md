@@ -22,6 +22,7 @@ Coq 8.12 and 8.13 are no longer supported by this release.
 - Improve `bijective_finite`: do not require an inverse, do not unnecessarily
   remove duplicates.
 - Add operation `*:` for "scalar" multiplication of multisets.
+- Add `by` parameter to `multiset_solver`, which defaults to `eauto`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

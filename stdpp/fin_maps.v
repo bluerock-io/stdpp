@@ -3917,13 +3917,38 @@ Section image.
     destruct (Hspec Hv12) as [Hm | [_ Hm]];
     [ left | right ]; rewrite elem_of_img; exists k; exact Hm.
   Qed.
+  Lemma elem_of_img_union_l m1 m2 v :
+    v ∈ img m1 → v ∈ img (m1 ∪ m2).
+  Proof.
+    intros Hv. rewrite elem_of_img. apply elem_of_img in Hv as [k Hv].
+    exists k. by apply lookup_union_Some_l.
+  Qed.
+  Lemma elem_of_img_union_r m1 m2 v :
+    m1 ##ₘ m2 → v ∈ img m2 → v ∈ img (m1 ∪ m2).
+  Proof.
+    intros Hdisj Hv. rewrite elem_of_img. apply elem_of_img in Hv as [k Hv].
+    exists k. by apply lookup_union_Some_r.
+  Qed.
+  Lemma elem_of_img_union_disjoint m1 m2 v :
+    m1 ##ₘ m2 → v ∈ img (m1 ∪ m2) ↔ v ∈ img m1 \/ v ∈ img m2.
+  Proof.
+    intros Hdisj. split.
+    - apply elem_of_img_union.
+    - intros [Hv | Hv].
+      + by apply elem_of_img_union_l.
+      + by apply elem_of_img_union_r.
+  Qed.
+
   Lemma img_union_subseteq m1 m2 : img (m1 ∪ m2) ⊆ img m1 ∪ img m2.
   Proof. intros v Hv. apply elem_of_union, elem_of_img_union. exact Hv. Qed.
   Lemma img_union_subseteq_l m1 m2 : img m1 ⊆ img (m1 ∪ m2).
+  Proof. intros v Hv. by apply elem_of_img_union_l. Qed.
+  Lemma img_union_subseteq_r m1 m2 : m1 ##ₘ m2 → img m2 ⊆ img (m1 ∪ m2).
+  Proof. intros Hdisj v Hv. by apply elem_of_img_union_r. Qed.
+  Lemma img_union_disjoint m1 m2 : m1 ##ₘ m2 → img (m1 ∪ m2) ≡ img m1 ∪ img m2.
   Proof.
-    intros v Hv. apply elem_of_img in Hv as [k Hv].
-    rewrite elem_of_img.
-    exists k. apply lookup_union_Some_l. apply Hv.
+    intros Hdisj. apply set_equiv. intros v.
+    rewrite elem_of_union. by apply elem_of_img_union_disjoint.
   Qed.
 
   Lemma img_finite m : set_finite (img m).
@@ -4015,6 +4040,9 @@ Section image.
 
     Lemma img_insert_notin_L k v m : m!!k=None → img (<[k:=v]> m) = {[ v ]} ∪ img m.
     Proof. unfold_leibniz. apply img_insert_notin. Qed.
+
+    Lemma img_union_disjoint_L m1 m2 : m1 ##ₘ m2 → img (m1 ∪ m2) = img m1 ∪ img m2.
+    Proof. unfold_leibniz. apply img_union_disjoint. Qed.
 
     Lemma img_list_to_map_L l :
       (∀ k v v', (k,v) ∈ l → (k,v') ∈ l → v = v') →

@@ -532,7 +532,7 @@ Section set_omap.
 
   Lemma elem_of_set_omap_1 f X y : y ∈ set_omap f X → ∃ x, Some y = f x ∧ x ∈ X.
   Proof. set_solver. Qed.
-  Lemma elem_of_set_omap_2 f X x y : x ∈ X → f x = Some y -> y ∈ set_omap f X.
+  Lemma elem_of_set_omap_2 f X x y : x ∈ X → f x = Some y → y ∈ set_omap f X.
   Proof. set_solver. Qed.
 
   Lemma set_omap_empty f : set_omap f ∅ = ∅.
@@ -540,8 +540,7 @@ Section set_omap.
   Lemma set_omap_empty_iff f X : set_omap f X ≡ ∅ ↔ set_Forall (λ x, f x = None) X.
   Proof.
     split; set_unfold; unfold set_Forall.
-    - intros Hi x Hx. destruct (f x) as [y|] eqn:Hy; [|done].
-      exfalso. apply (Hi y). by exists x.
+    - intros Hi x Hx. destruct (f x) as [y|] eqn:Hy; naive_solver.
     - intros Hi y (x & Hf & Hx). specialize (Hi x Hx). by rewrite Hi in Hf.
   Qed.
 
@@ -549,10 +548,7 @@ Section set_omap.
   Proof. set_solver. Qed.
 
   Lemma set_omap_singleton f x :
-    set_omap f {[ x ]} ≡ match f x with
-      | Some y => {[ y ]}
-      | None => ∅
-      end.
+    set_omap f {[ x ]} ≡ match f x with Some y => {[ y ]} | None => ∅ end.
   Proof. set_solver. Qed.
   Lemma set_omap_singleton_Some f x y : f x = Some y → set_omap f {[ x ]} ≡ {[ y ]}.
   Proof. intros Hx. by rewrite set_omap_singleton, Hx. Qed.
@@ -561,17 +557,15 @@ Section set_omap.
 
   Section leibniz.
     Context `{!LeibnizEquiv D}.
+
     Lemma set_omap_union_L f X Y : set_omap f (X ∪ Y) = set_omap f X ∪ set_omap f Y.
     Proof. unfold_leibniz. apply set_omap_union. Qed.
     Lemma set_omap_singleton_L f x :
-      set_omap f {[ x ]} ≡ match f x with
-        | Some y => {[ y ]}
-        | None => ∅
-        end.
+      set_omap f {[ x ]} = match f x with Some y => {[ y ]} | None => ∅ end.
     Proof. unfold_leibniz. apply set_omap_singleton. Qed.
     Lemma set_omap_singleton_Some_L f x y : f x = Some y → set_omap f {[ x ]} = {[ y ]}.
     Proof. unfold_leibniz. apply set_omap_singleton_Some. Qed.
-    Lemma set_omap_singleton_None_L f x : f x = None → set_omap f {[ x ]} ≡ ∅.
+    Lemma set_omap_singleton_None_L f x : f x = None → set_omap f {[ x ]} = ∅.
     Proof. unfold_leibniz. apply set_omap_singleton_None. Qed.
   End leibniz.
 End set_omap.

@@ -282,8 +282,6 @@ Section gset.
     pose proof (mapset_dom_spec (M:=gmap K)) as [?? Hdom]; split; auto.
     intros A m. specialize (Hdom A m). by destruct m.
   Qed.
-  Global Instance gmap_img `{Countable A} : Img (gmap A K) (gset K) :=
-    fin_map_img A K (gmap A K) (gset K).
 
 
   (** If you are looking for a lemma showing that [gset] is extensional, see

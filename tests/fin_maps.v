@@ -22,3 +22,11 @@ Section map_dom.
   Lemma set_solver_dom_disjoint {A} (X : D) : dom (∅ : M A) ## X.
   Proof. set_solver. Qed.
 End map_dom.
+
+Section map_img.
+  Context `{FinMap K M, Set_ A SA}.
+
+  Lemma set_solver_map_img i x :
+    map_img (∅ : M A) ⊆@{SA} map_img ({[ i := x ]} : M A).
+  Proof. set_unfold. set_solver. Qed.
+End map_img.

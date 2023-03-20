@@ -340,7 +340,7 @@ Tactic Notation "multiset_solver" "by" tactic3(tac) :=
                  (* [fast_done] to solve trivial equalities or contradictions,
                  [lia] for the common case that involves arithmetic,
                  [tac] if all else fails *)
-                 first [fast_done|lia|tac]).
+                 solve [fast_done|lia|tac]).
 Tactic Notation "multiset_solver" := multiset_solver by eauto.
 
 Section more_lemmas.

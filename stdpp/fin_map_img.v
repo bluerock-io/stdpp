@@ -154,7 +154,7 @@ Section fin_map_img.
   Proof.
     induction m using map_ind.
     - rewrite img_empty. apply empty_finite.
-    - apply (set_finite_subseteq _ _ (img_insert i x m)).
+    - apply (set_finite_subseteq _ _ (img_insert _ _ m)).
       apply union_finite; [ apply singleton_finite | apply IHm ].
   Qed.
 

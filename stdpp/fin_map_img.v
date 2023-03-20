@@ -152,9 +152,9 @@ Section fin_map_img.
 
   Lemma img_finite m: set_finite (img m).
   Proof.
-    induction m using map_ind.
+    induction m as [|x i m Hm IHm] using map_ind .
     - rewrite img_empty. apply empty_finite.
-    - apply (set_finite_subseteq _ _ (img_insert _ _ m)).
+    - apply (set_finite_subseteq _ _ (img_insert x i m)).
       apply union_finite; [ apply singleton_finite | apply IHm ].
   Qed.
 
@@ -162,7 +162,7 @@ Section fin_map_img.
     (∀ k v v', (k,v) ∈ l -> (k,v') ∈ l -> v = v') ->
     img (list_to_map l : M A) ≡ list_to_set l.*2.
   Proof.
-    induction l as [|?? IH].
+    induction l as [|a l IH].
     - by rewrite img_empty.
     - intros Hl. destruct a as [k v]. simpl.
       assert (IH': img (list_to_map l: M A) ≡ list_to_set l.*2).

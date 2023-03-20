@@ -4014,6 +4014,9 @@ Section img.
   Global Instance set_unfold_map_img_empty x :
     SetUnfoldElemOf x (map_img (∅:M A)) False.
   Proof. constructor. by rewrite map_img_empty, elem_of_empty. Qed.
+  Global Instance set_unfold_map_img_singleton x i y :
+    SetUnfoldElemOf x (map_img ({[i:=y]}:M A)) (x = y).
+  Proof. constructor. by rewrite map_img_singleton, elem_of_singleton. Qed.
 End img.
 
 Lemma map_img_fmap `{FinMap K M, FinSet A D, FinSet B D2} (f : A → B) (m : M A) :

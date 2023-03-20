@@ -85,10 +85,6 @@ Definition set_to_map `{Elements B C, Insert K A M, Empty M}
     (f : B → K * A) (X : C) : M :=
   list_to_map (f <$> elements X).
 
-Global Instance fin_map_img `{FinMapToList K A M,
-  Singleton A D, Empty D, Union D} : Img M D := map_to_set (λ _ x, x).
-Typeclasses Opaque fin_map_img.
-
 Global Instance map_union_with `{Merge M} {A} : UnionWith A (M A) :=
   λ f, merge (union_with f).
 Global Instance map_intersection_with `{Merge M} {A} : IntersectionWith A (M A) :=
@@ -182,6 +178,10 @@ Fixpoint map_seqZ `{Insert Z A M, Empty M} (start : Z) (xs : list A) : M :=
 Global Instance map_lookup_total `{!Lookup K A (M A), !Inhabited A} :
   LookupTotal K A (M A) | 20 := λ i m, default inhabitant (m !! i).
 Typeclasses Opaque map_lookup_total.
+
+Definition map_img `{FinMapToList K A M,
+  Singleton A D, Empty D, Union D} : M → D := map_to_set (λ _ x, x).
+Typeclasses Opaque map_img.
 
 (** Given a finite map [m] with keys [K] and values [A], the preimage
 [map_preimg m] gives a finite map with keys [A] and values being sets of [K].
@@ -3808,147 +3808,157 @@ Section preimg.
 End preimg.
 
 
-(** ** The [img] (image/codomain) operation *)
-Section image.
+(** ** The [map_img] (image/codomain) operation *)
+Section img.
   Context `{FinMap K M, FinSet A D}.
-  Implicit Types (m : M A) (i j : K) (x y : A) (X : D).
+  Implicit Types m : M A.
+  Implicit Types x y : A.
+  Implicit Types X : D.
 
   (* avoid writing ≡@{D} everywhere... *)
-  Notation img := (@img (M A) D _).
+  Notation map_img := (map_img (M:=M A) (D:=D)).
 
-  Lemma elem_of_img m x : x ∈ img m ↔ ∃ i, m !! i = Some x.
-  Proof. unfold img, fin_map_img. rewrite elem_of_map_to_set. naive_solver. Qed.
-  Lemma elem_of_img_1 m x : x ∈ img m → ∃ i, m !! i = Some x.
-  Proof. apply elem_of_img. Qed.
-  Lemma elem_of_img_2 m i x : m !! i = Some x → x ∈ img m.
-  Proof. rewrite elem_of_img. eauto. Qed.
+  Lemma elem_of_map_img m x : x ∈ map_img m ↔ ∃ i, m !! i = Some x.
+  Proof. unfold map_img. rewrite elem_of_map_to_set. naive_solver. Qed.
+  Lemma elem_of_map_img_1 m x : x ∈ map_img m → ∃ i, m !! i = Some x.
+  Proof. apply elem_of_map_img. Qed.
+  Lemma elem_of_map_img_2 m i x : m !! i = Some x → x ∈ map_img m.
+  Proof. rewrite elem_of_map_img. eauto. Qed.
 
-  Lemma not_elem_of_img m x : x ∉ img m ↔ ∀ i, m !! i ≠ Some x.
-  Proof. rewrite elem_of_img. naive_solver. Qed.
-  Lemma not_elem_of_img_1 m i x : x ∉ img m → m !! i ≠ Some x.
-  Proof. rewrite not_elem_of_img. eauto. Qed.
-  Lemma not_elem_of_img_2 m x : (∀ i, m !! i ≠ Some x) → x ∉ img m.
-  Proof. apply not_elem_of_img. Qed.
+  Lemma not_elem_of_map_img m x : x ∉ map_img m ↔ ∀ i, m !! i ≠ Some x.
+  Proof. rewrite elem_of_map_img. naive_solver. Qed.
+  Lemma not_elem_of_map_img_1 m i x : x ∉ map_img m → m !! i ≠ Some x.
+  Proof. rewrite not_elem_of_map_img. eauto. Qed.
+  Lemma not_elem_of_map_img_2 m x : (∀ i, m !! i ≠ Some x) → x ∉ map_img m.
+  Proof. apply not_elem_of_map_img. Qed.
 
-  Lemma subseteq_img m1 m2 : m1 ⊆ m2 → img m1 ⊆ img m2.
+  Lemma map_subseteq_img m1 m2 : m1 ⊆ m2 → map_img m1 ⊆ map_img m2.
   Proof.
-    rewrite map_subseteq_spec. intros ? x. rewrite !elem_of_img. naive_solver.
+    rewrite map_subseteq_spec. intros ? x.
+    rewrite !elem_of_map_img. naive_solver.
   Qed.
 
-  Lemma img_filter (P : K * A → Prop) `{!∀ ix, Decision (P ix)} m X :
+  Lemma map_img_filter (P : K * A → Prop) `{!∀ ix, Decision (P ix)} m X :
     (∀ x, x ∈ X ↔ ∃ i, m !! i = Some x ∧ P (i, x)) →
-    img (filter P m) ≡ X.
+    map_img (filter P m) ≡ X.
   Proof.
-    intros HX x. rewrite elem_of_img, HX.
+    intros HX x. rewrite elem_of_map_img, HX.
     unfold is_Some. by setoid_rewrite map_filter_lookup_Some.
   Qed.
-  Lemma img_filter_subseteq (P : K * A → Prop) `{!∀ ix, Decision (P ix)} m :
-    img (filter P m) ⊆ img m.
-  Proof. apply subseteq_img, map_filter_subseteq. Qed.
+  Lemma map_img_filter_subseteq (P : K * A → Prop) `{!∀ ix, Decision (P ix)} m :
+    map_img (filter P m) ⊆ map_img m.
+  Proof. apply map_subseteq_img, map_filter_subseteq. Qed.
 
-  Lemma img_empty : img ∅ ≡ ∅.
+  Lemma map_img_empty : map_img ∅ ≡ ∅.
   Proof.
-    rewrite set_equiv. intros x. rewrite elem_of_img, elem_of_empty.
+    rewrite set_equiv. intros x. rewrite elem_of_map_img, elem_of_empty.
     setoid_rewrite lookup_empty. naive_solver.
   Qed.
-  Lemma img_empty_iff m : img m ≡ ∅ ↔ m = ∅.
+  Lemma map_img_empty_iff m : map_img m ≡ ∅ ↔ m = ∅.
   Proof.
-    split; [|intros ->; by rewrite img_empty].
+    split; [|intros ->; by rewrite map_img_empty].
     intros Hm. apply map_empty; intros i.
-    apply eq_None_ne_Some; intros x ?%elem_of_img_2. set_solver.
+    apply eq_None_ne_Some; intros x ?%elem_of_map_img_2. set_solver.
   Qed.
-  Lemma img_empty_inv m : img m ≡ ∅ → m = ∅.
-  Proof. apply img_empty_iff. Qed.
+  Lemma map_img_empty_inv m : map_img m ≡ ∅ → m = ∅.
+  Proof. apply map_img_empty_iff. Qed.
 
-  Lemma img_delete_subseteq i m : img (delete i m) ⊆ img m.
-  Proof. apply subseteq_img, delete_subseteq. Qed.
+  Lemma map_img_delete_subseteq i m : map_img (delete i m) ⊆ map_img m.
+  Proof. apply map_subseteq_img, delete_subseteq. Qed.
 
-  Lemma img_insert m i x :
-    img (<[i:=x]> m) ≡ {[ x ]} ∪ img (delete i m).
+  Lemma map_img_insert m i x :
+    map_img (<[i:=x]> m) ≡ {[ x ]} ∪ map_img (delete i m).
   Proof.
-    intros y. rewrite elem_of_union, !elem_of_img, elem_of_singleton.
+    intros y. rewrite elem_of_union, !elem_of_map_img, elem_of_singleton.
     setoid_rewrite lookup_delete_Some. setoid_rewrite lookup_insert_Some.
     naive_solver.
   Qed.
-  Lemma img_insert_notin m i x :
-    m !! i = None → img (<[i:=x]> m) ≡ {[ x ]} ∪ img m.
-  Proof. intros. by rewrite img_insert, delete_notin. Qed.
+  Lemma map_img_insert_notin m i x :
+    m !! i = None → map_img (<[i:=x]> m) ≡ {[ x ]} ∪ map_img m.
+  Proof. intros. by rewrite map_img_insert, delete_notin. Qed.
 
-  Lemma img_insert_subseteq m i x : img (<[i:=x]> m) ⊆ {[ x ]} ∪ img m.
-  Proof. rewrite img_insert. apply union_mono_l, img_delete_subseteq. Qed.
-  Lemma elem_of_img_insert m i x : x ∈ img (<[i:=x]> m).
-  Proof. apply elem_of_img. exists i. apply lookup_insert. Qed.
-  Lemma elem_of_img_insert_ne m i x y : x ≠ y → x ∈ img(<[i:=y]> m) → x ∈ img m.
-  Proof. intros ? ?%img_insert_subseteq. set_solver. Qed.
+  Lemma map_img_insert_subseteq m i x :
+    map_img (<[i:=x]> m) ⊆ {[ x ]} ∪ map_img m.
+  Proof.
+    rewrite map_img_insert. apply union_mono_l, map_img_delete_subseteq.
+  Qed.
+  Lemma elem_of_map_img_insert m i x : x ∈ map_img (<[i:=x]> m).
+  Proof. apply elem_of_map_img. exists i. apply lookup_insert. Qed.
+  Lemma elem_of_map_img_insert_ne m i x y :
+    x ≠ y → x ∈ map_img (<[i:=y]> m) → x ∈ map_img m.
+  Proof. intros ? ?%map_img_insert_subseteq. set_solver. Qed.
 
-  Lemma img_singleton i x : img {[ i := x ]} ≡ {[ x ]}.
+  Lemma map_img_singleton i x : map_img {[ i := x ]} ≡ {[ x ]}.
   Proof.
     apply set_equiv. intros y.
-    rewrite elem_of_img. setoid_rewrite lookup_singleton_Some. set_solver.
+    rewrite elem_of_map_img. setoid_rewrite lookup_singleton_Some. set_solver.
   Qed.
 
-  Lemma elem_of_img_union m1 m2 x :
-    x ∈ img (m1 ∪ m2) →
-    x ∈ img m1 ∨ x ∈ img m2.
+  Lemma elem_of_map_img_union m1 m2 x :
+    x ∈ map_img (m1 ∪ m2) →
+    x ∈ map_img m1 ∨ x ∈ map_img m2.
   Proof.
-    rewrite !elem_of_img. setoid_rewrite lookup_union_Some_raw. naive_solver.
+    rewrite !elem_of_map_img. setoid_rewrite lookup_union_Some_raw. naive_solver.
   Qed.
-  Lemma elem_of_img_union_l m1 m2 x :
-    x ∈ img m1 → x ∈ img (m1 ∪ m2).
+  Lemma elem_of_map_img_union_l m1 m2 x :
+    x ∈ map_img m1 → x ∈ map_img (m1 ∪ m2).
   Proof.
-    rewrite !elem_of_img. setoid_rewrite lookup_union_Some_raw. naive_solver.
+    rewrite !elem_of_map_img. setoid_rewrite lookup_union_Some_raw. naive_solver.
   Qed.
-  Lemma elem_of_img_union_r m1 m2 x :
-    m1 ##ₘ m2 → x ∈ img m2 → x ∈ img (m1 ∪ m2).
+  Lemma elem_of_map_img_union_r m1 m2 x :
+    m1 ##ₘ m2 → x ∈ map_img m2 → x ∈ map_img (m1 ∪ m2).
   Proof.
-    intros. rewrite map_union_comm by done. by apply elem_of_img_union_l.
+    intros. rewrite map_union_comm by done. by apply elem_of_map_img_union_l.
   Qed.
-  Lemma elem_of_img_union_disjoint m1 m2 x :
-    m1 ##ₘ m2 → x ∈ img (m1 ∪ m2) ↔ x ∈ img m1 ∨ x ∈ img m2.
+  Lemma elem_of_map_img_union_disjoint m1 m2 x :
+    m1 ##ₘ m2 → x ∈ map_img (m1 ∪ m2) ↔ x ∈ map_img m1 ∨ x ∈ map_img m2.
   Proof.
-    naive_solver eauto using elem_of_img_union,
-      elem_of_img_union_l, elem_of_img_union_r.
+    naive_solver eauto using elem_of_map_img_union,
+      elem_of_map_img_union_l, elem_of_map_img_union_r.
   Qed.
 
-  Lemma img_union_subseteq m1 m2 : img (m1 ∪ m2) ⊆ img m1 ∪ img m2.
-  Proof. intros v Hv. apply elem_of_union, elem_of_img_union. exact Hv. Qed.
-  Lemma img_union_subseteq_l m1 m2 : img m1 ⊆ img (m1 ∪ m2).
-  Proof. intros v Hv. by apply elem_of_img_union_l. Qed.
-  Lemma img_union_subseteq_r m1 m2 : m1 ##ₘ m2 → img m2 ⊆ img (m1 ∪ m2).
-  Proof. intros Hdisj v Hv. by apply elem_of_img_union_r. Qed.
-  Lemma img_union_disjoint m1 m2 : m1 ##ₘ m2 → img (m1 ∪ m2) ≡ img m1 ∪ img m2.
+  Lemma map_img_union_subseteq m1 m2 :
+    map_img (m1 ∪ m2) ⊆ map_img m1 ∪ map_img m2.
+  Proof. intros v Hv. apply elem_of_union, elem_of_map_img_union. exact Hv. Qed.
+  Lemma map_img_union_subseteq_l m1 m2 : map_img m1 ⊆ map_img (m1 ∪ m2).
+  Proof. intros v Hv. by apply elem_of_map_img_union_l. Qed.
+  Lemma map_img_union_subseteq_r m1 m2 :
+    m1 ##ₘ m2 → map_img m2 ⊆ map_img (m1 ∪ m2).
+  Proof. intros Hdisj v Hv. by apply elem_of_map_img_union_r. Qed.
+  Lemma map_img_union_disjoint m1 m2 :
+    m1 ##ₘ m2 → map_img (m1 ∪ m2) ≡ map_img m1 ∪ map_img m2.
   Proof.
     intros Hdisj. apply set_equiv. intros x.
-    rewrite elem_of_union. by apply elem_of_img_union_disjoint.
+    rewrite elem_of_union. by apply elem_of_map_img_union_disjoint.
   Qed.
 
-  Lemma img_finite m : set_finite (img m).
+  Lemma map_img_finite m : set_finite (map_img m).
   Proof.
     induction m as [|i x m ? IH] using map_ind.
-    - rewrite img_empty. apply empty_finite.
-    - eapply set_finite_subseteq; [by apply img_insert_subseteq|].
+    - rewrite map_img_empty. apply empty_finite.
+    - eapply set_finite_subseteq; [by apply map_img_insert_subseteq|].
       apply union_finite; [apply singleton_finite | apply IH].
   Qed.
 
   (** Alternative definition of [img] in terms of [map_to_list]. *)
-  Lemma img_alt m : img m ≡ list_to_set (map_to_list m).*2.
+  Lemma map_img_alt m : map_img m ≡ list_to_set (map_to_list m).*2.
   Proof.
     induction m as [|i x m ? IH] using map_ind.
-    { by rewrite img_empty, map_to_list_empty. }
-    by rewrite img_insert_notin, map_to_list_insert by done.
+    { by rewrite map_img_empty, map_to_list_empty. }
+    by rewrite map_img_insert_notin, map_to_list_insert by done.
   Qed.
 
-  Lemma img_singleton_inv m i x :
-    img m ≡ {[ x ]} → m !! i = None ∨ m !! i = Some x.
+  Lemma map_img_singleton_inv m i x :
+    map_img m ≡ {[ x ]} → m !! i = None ∨ m !! i = Some x.
   Proof.
     intros Hm. destruct (m !! i) eqn:Hmk; [|by auto].
-    apply elem_of_img_2 in Hmk. set_solver.
+    apply elem_of_map_img_2 in Hmk. set_solver.
   Qed.
 
-  Lemma img_union_inv `{!RelDecision (∈@{D})} X Y m :
+  Lemma map_img_union_inv `{!RelDecision (∈@{D})} X Y m :
     X ## Y →
-    img m ≡ X ∪ Y →
-    ∃ m1 m2, m = m1 ∪ m2 ∧ m1 ##ₘ m2 ∧ img m1 ≡ X ∧ img m2 ≡ Y.
+    map_img m ≡ X ∪ Y →
+    ∃ m1 m2, m = m1 ∪ m2 ∧ m1 ##ₘ m2 ∧ map_img m1 ≡ X ∧ map_img m2 ≡ Y.
   Proof.
     intros Hsep Himg.
     exists (filter (λ '(_,x), x ∈ X) m), (filter (λ '(_,x), x ∉ X) m).
@@ -3957,77 +3967,78 @@ Section image.
     split_and!.
     - symmetry. apply map_filter_union_complement.
     - done.
-    - apply img_filter; intros x. split; [|naive_solver].
-      intros. destruct (elem_of_img_1 m x); set_solver.
-    - apply img_filter; intros x; split.
-      + intros. destruct (elem_of_img_1 m x); set_solver.
-      + intros (i & ?%elem_of_img_2 & ?). set_solver.
+    - apply map_img_filter; intros x. split; [|naive_solver].
+      intros. destruct (elem_of_map_img_1 m x); set_solver.
+    - apply map_img_filter; intros x; split.
+      + intros. destruct (elem_of_map_img_1 m x); set_solver.
+      + intros (i & ?%elem_of_map_img_2 & ?). set_solver.
   Qed.
 
   Section leibniz.
     Context `{!LeibnizEquiv D}.
 
-    Lemma img_empty_L : img ∅ = ∅.
-    Proof. unfold_leibniz. exact img_empty. Qed.
+    Lemma map_img_empty_L : map_img ∅ = ∅.
+    Proof. unfold_leibniz. exact map_img_empty. Qed.
 
-    Lemma img_empty_iff_L m : img m = ∅ ↔ m = ∅.
-    Proof. unfold_leibniz. apply img_empty_iff. Qed.
-    Lemma img_empty_inv_L m : img m = ∅ → m = ∅.
-    Proof. apply img_empty_iff_L. Qed.
+    Lemma map_img_empty_iff_L m : map_img m = ∅ ↔ m = ∅.
+    Proof. unfold_leibniz. apply map_img_empty_iff. Qed.
+    Lemma map_img_empty_inv_L m : map_img m = ∅ → m = ∅.
+    Proof. apply map_img_empty_iff_L. Qed.
 
-    Lemma img_singleton_L i x : img {[ i := x ]} = {[ x ]}.
-    Proof. unfold_leibniz. apply img_singleton. Qed.
+    Lemma map_img_singleton_L i x : map_img {[ i := x ]} = {[ x ]}.
+    Proof. unfold_leibniz. apply map_img_singleton. Qed.
 
-    Lemma img_insert_notin_L m i x :
-      m !! i = None → img (<[i:=x]> m) = {[ x ]} ∪ img m.
-    Proof. unfold_leibniz. apply img_insert_notin. Qed.
+    Lemma map_img_insert_notin_L m i x :
+      m !! i = None → map_img (<[i:=x]> m) = {[ x ]} ∪ map_img m.
+    Proof. unfold_leibniz. apply map_img_insert_notin. Qed.
 
-    Lemma img_union_disjoint_L m1 m2 :
-      m1 ##ₘ m2 → img (m1 ∪ m2) = img m1 ∪ img m2.
-    Proof. unfold_leibniz. apply img_union_disjoint. Qed.
+    Lemma map_img_union_disjoint_L m1 m2 :
+      m1 ##ₘ m2 → map_img (m1 ∪ m2) = map_img m1 ∪ map_img m2.
+    Proof. unfold_leibniz. apply map_img_union_disjoint. Qed.
 
-    Lemma img_alt_L m : img m = list_to_set (map_to_list m).*2.
-    Proof. unfold_leibniz. apply img_alt. Qed.
+    Lemma map_img_alt_L m : map_img m = list_to_set (map_to_list m).*2.
+    Proof. unfold_leibniz. apply map_img_alt. Qed.
 
-    Lemma img_singleton_inv_L m i x :
-      img m = {[ x ]} → m !! i = None ∨ m !! i = Some x.
-    Proof. unfold_leibniz. apply img_singleton_inv. Qed.
+    Lemma map_img_singleton_inv_L m i x :
+      map_img m = {[ x ]} → m !! i = None ∨ m !! i = Some x.
+    Proof. unfold_leibniz. apply map_img_singleton_inv. Qed.
 
-    Lemma img_union_inv_L `{!RelDecision (∈@{D})} X Y m :
+    Lemma map_img_union_inv_L `{!RelDecision (∈@{D})} X Y m :
       X ## Y →
-      img m = X ∪ Y →
-      ∃ m1 m2, m = m1 ∪ m2 ∧ m1 ##ₘ m2 ∧ img m1 = X ∧ img m2 = Y.
-    Proof. unfold_leibniz. apply img_union_inv. Qed.
+      map_img m = X ∪ Y →
+      ∃ m1 m2, m = m1 ∪ m2 ∧ m1 ##ₘ m2 ∧ map_img m1 = X ∧ map_img m2 = Y.
+    Proof. unfold_leibniz. apply map_img_union_inv. Qed.
   End leibniz.
 
   (** * Set solver instances *)
-  Global Instance set_unfold_img_empty x : SetUnfoldElemOf x (img (∅:M A)) False.
-  Proof. constructor. by rewrite img_empty, elem_of_empty. Qed.
-End image.
+  Global Instance set_unfold_map_img_empty x :
+    SetUnfoldElemOf x (map_img (∅:M A)) False.
+  Proof. constructor. by rewrite map_img_empty, elem_of_empty. Qed.
+End img.
 
-Lemma img_fmap `{FinMap K M, FinSet A D, FinSet B D2} (f : A → B) (m : M A) :
-  img (f <$> m) ≡@{D2} set_map (C:=D) f (img m).
+Lemma map_img_fmap `{FinMap K M, FinSet A D, FinSet B D2} (f : A → B) (m : M A) :
+  map_img (f <$> m) ≡@{D2} set_map (C:=D) f (map_img m).
 Proof.
-  apply set_equiv. intros y. rewrite elem_of_img, elem_of_map.
-  setoid_rewrite lookup_fmap. setoid_rewrite fmap_Some. setoid_rewrite elem_of_img.
-  naive_solver.
+  apply set_equiv. intros y. rewrite elem_of_map_img, elem_of_map.
+  setoid_rewrite lookup_fmap. setoid_rewrite fmap_Some.
+  setoid_rewrite elem_of_map_img. naive_solver.
 Qed.
-Lemma img_fmap_L `{FinMap K M, FinSet A D, FinSet B D2, !LeibnizEquiv D2}
+Lemma map_img_fmap_L `{FinMap K M, FinSet A D, FinSet B D2, !LeibnizEquiv D2}
     (f : A → B) (m : M A) :
-  img (f <$> m) = set_map (C:=D) (D:=D2) f (img m).
-Proof. unfold_leibniz. apply img_fmap. Qed.
+  map_img (f <$> m) = set_map (C:=D) (D:=D2) f (map_img m).
+Proof. unfold_leibniz. apply map_img_fmap. Qed.
 
-Lemma img_kmap `{FinMap K M, FinMap K2 M2, FinSet A D}
+Lemma map_img_kmap `{FinMap K M, FinMap K2 M2, FinSet A D}
     (f : K → K2) `{!Inj (=) (=) f} m :
-  img (kmap (M2:=M2) f m) ≡@{D} img m.
+  map_img (kmap (M2:=M2) f m) ≡@{D} map_img m.
 Proof.
-  apply set_equiv. intros x. rewrite !elem_of_img.
+  apply set_equiv. intros x. rewrite !elem_of_map_img.
   setoid_rewrite (lookup_kmap_Some f). naive_solver.
 Qed.
-Lemma img_kmap_L `{FinMap K M, FinMap K2 M2, FinSet A D, !LeibnizEquiv D}
+Lemma map_img_kmap_L `{FinMap K M, FinMap K2 M2, FinSet A D, !LeibnizEquiv D}
     (f : K → K2) `{!Inj (=) (=) f} m :
-  img (kmap (M2:=M2) f m) = (img m : D).
-Proof. unfold_leibniz. by apply img_kmap. Qed.
+  map_img (kmap (M2:=M2) f m) = (map_img m : D).
+Proof. unfold_leibniz. by apply map_img_kmap. Qed.
 
 
 (** * Tactics *)

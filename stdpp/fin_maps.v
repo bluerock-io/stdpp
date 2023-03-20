@@ -3811,7 +3811,7 @@ End preimg.
 (** ** The [img] (image/codomain) operation *)
 Section image.
   Context `{FinMap K M, FinSet A D}.
-  Implicit Types (m : M A) (k : K) (v : A).
+  Implicit Types (m : M A) (k : K) (v : A) (X : D).
 
   (* avoid writing ≡@{D} everywhere... *)
   Notation img := (@img (M A) D _).
@@ -3822,7 +3822,8 @@ Section image.
     - intros (k & v' & mk_v' & v'_v). exists k. rewrite v'_v in mk_v'. exact mk_v'.
     - intros [k mk_v]. exists k. exists v. split; [exact mk_v|reflexivity].
   Qed.
-
+  Lemma elem_of_img_1 m v : v ∈ img m → ∃ k, m !! k = Some v.
+  Proof. intros Hmkv. by rewrite <- elem_of_img. Qed.
   Lemma elem_of_img_2 m k v : m !! k = Some v → v ∈ img m.
   Proof. intros Hmkv. rewrite elem_of_img. exists k. exact Hmkv. Qed.
 
@@ -3834,6 +3835,8 @@ Section image.
   Qed.
   Lemma not_elem_of_img_1 m v k : v ∉ img m → m !! k ≠ Some v.
   Proof. intros Hm. apply not_elem_of_img. exact Hm. Qed.
+  Lemma not_elem_of_img_2 m v : (∀ k, m !! k ≠ Some v) → v ∉ img m.
+  Proof. by rewrite <- not_elem_of_img. Qed.
 
   Lemma subseteq_img m1 m2 : m1 ⊆ m2 → img m1 ⊆ img m2.
   Proof.

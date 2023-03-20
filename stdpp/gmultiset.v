@@ -667,13 +667,7 @@ Section more_lemmas.
   Proof. multiset_solver. Qed.
   Lemma gmultiset_singleton_subseteq x y :
     {[+ x +]} ⊆@{gmultiset A} {[+ y +]} ↔ x = y.
-  Proof.
-    split; [|multiset_solver].
-    (* FIXME: [multiset_solver] should solve this *)
-    intros Hxy. specialize (Hxy x).
-    rewrite multiplicity_singleton, multiplicity_singleton' in Hxy.
-    case_decide; [done|lia].
-  Qed.
+  Proof. multiset_solver. Qed.
 
   Lemma gmultiset_elem_of_subseteq X1 X2 x : x ∈ X1 → X1 ⊆ X2 → x ∈ X2.
   Proof. multiset_solver. Qed.

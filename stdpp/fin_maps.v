@@ -179,8 +179,12 @@ Global Instance map_lookup_total `{!Lookup K A (M A), !Inhabited A} :
   LookupTotal K A (M A) | 20 := λ i m, default inhabitant (m !! i).
 Typeclasses Opaque map_lookup_total.
 
+(** Given a finite map [m] with keys [K] and values [A], the image [map_img m]
+gives a finite set containing with the values [A] of [m]. The type of [map_img]
+is generic to support different map and set implementations. A possible instance
+is [SA:=gset A]. *)
 Definition map_img `{FinMapToList K A M,
-  Singleton A D, Empty D, Union D} : M → D := map_to_set (λ _ x, x).
+  Singleton A SA, Empty SA, Union SA} : M → SA := map_to_set (λ _ x, x).
 Typeclasses Opaque map_img.
 
 (** Given a finite map [m] with keys [K] and values [A], the preimage
@@ -3810,13 +3814,13 @@ End preimg.
 
 (** ** The [map_img] (image/codomain) operation *)
 Section img.
-  Context `{FinMap K M, FinSet A D}.
+  Context `{FinMap K M, FinSet A SA}.
   Implicit Types m : M A.
   Implicit Types x y : A.
-  Implicit Types X : D.
+  Implicit Types X : SA.
 
   (* avoid writing ≡@{D} everywhere... *)
-  Notation map_img := (map_img (M:=M A) (D:=D)).
+  Notation map_img := (map_img (M:=M A) (SA:=SA)).
 
   Lemma elem_of_map_img m x : x ∈ map_img m ↔ ∃ i, m !! i = Some x.
   Proof. unfold map_img. rewrite elem_of_map_to_set. naive_solver. Qed.
@@ -3955,7 +3959,7 @@ Section img.
     apply elem_of_map_img_2 in Hmk. set_solver.
   Qed.
 
-  Lemma map_img_union_inv `{!RelDecision (∈@{D})} X Y m :
+  Lemma map_img_union_inv `{!RelDecision (∈@{SA})} X Y m :
     X ## Y →
     map_img m ≡ X ∪ Y →
     ∃ m1 m2, m = m1 ∪ m2 ∧ m1 ##ₘ m2 ∧ map_img m1 ≡ X ∧ map_img m2 ≡ Y.
@@ -3975,7 +3979,7 @@ Section img.
   Qed.
 
   Section leibniz.
-    Context `{!LeibnizEquiv D}.
+    Context `{!LeibnizEquiv SA}.
 
     Lemma map_img_empty_L : map_img ∅ = ∅.
     Proof. unfold_leibniz. exact map_img_empty. Qed.
@@ -4003,7 +4007,7 @@ Section img.
       map_img m = {[ x ]} → m !! i = None ∨ m !! i = Some x.
     Proof. unfold_leibniz. apply map_img_singleton_inv. Qed.
 
-    Lemma map_img_union_inv_L `{!RelDecision (∈@{D})} X Y m :
+    Lemma map_img_union_inv_L `{!RelDecision (∈@{SA})} X Y m :
       X ## Y →
       map_img m = X ∪ Y →
       ∃ m1 m2, m = m1 ∪ m2 ∧ m1 ##ₘ m2 ∧ map_img m1 = X ∧ map_img m2 = Y.
@@ -4019,28 +4023,28 @@ Section img.
   Proof. constructor. by rewrite map_img_singleton, elem_of_singleton. Qed.
 End img.
 
-Lemma map_img_fmap `{FinMap K M, FinSet A D, FinSet B D2} (f : A → B) (m : M A) :
-  map_img (f <$> m) ≡@{D2} set_map (C:=D) f (map_img m).
+Lemma map_img_fmap `{FinMap K M, FinSet A SA, FinSet B SB} (f : A → B) (m : M A) :
+  map_img (f <$> m) ≡@{SB} set_map (C:=SA) f (map_img m).
 Proof.
   apply set_equiv. intros y. rewrite elem_of_map_img, elem_of_map.
   setoid_rewrite lookup_fmap. setoid_rewrite fmap_Some.
   setoid_rewrite elem_of_map_img. naive_solver.
 Qed.
-Lemma map_img_fmap_L `{FinMap K M, FinSet A D, FinSet B D2, !LeibnizEquiv D2}
+Lemma map_img_fmap_L `{FinMap K M, FinSet A SA, FinSet B SB, !LeibnizEquiv SB}
     (f : A → B) (m : M A) :
-  map_img (f <$> m) = set_map (C:=D) (D:=D2) f (map_img m).
+  map_img (f <$> m) =@{SB} set_map (C:=SA) f (map_img m).
 Proof. unfold_leibniz. apply map_img_fmap. Qed.
 
-Lemma map_img_kmap `{FinMap K M, FinMap K2 M2, FinSet A D}
+Lemma map_img_kmap `{FinMap K M, FinMap K2 M2, FinSet A SA}
     (f : K → K2) `{!Inj (=) (=) f} m :
-  map_img (kmap (M2:=M2) f m) ≡@{D} map_img m.
+  map_img (kmap (M2:=M2) f m) ≡@{SA} map_img m.
 Proof.
   apply set_equiv. intros x. rewrite !elem_of_map_img.
   setoid_rewrite (lookup_kmap_Some f). naive_solver.
 Qed.
-Lemma map_img_kmap_L `{FinMap K M, FinMap K2 M2, FinSet A D, !LeibnizEquiv D}
+Lemma map_img_kmap_L `{FinMap K M, FinMap K2 M2, FinSet A SA, !LeibnizEquiv SA}
     (f : K → K2) `{!Inj (=) (=) f} m :
-  map_img (kmap (M2:=M2) f m) = (map_img m : D).
+  map_img (kmap (M2:=M2) f m) =@{SA} map_img m.
 Proof. unfold_leibniz. by apply map_img_kmap. Qed.
 
 

@@ -3816,7 +3816,7 @@ Section image.
   (* avoid writing ≡@{D} everywhere... *)
   Notation img := (@img (M A) D _).
 
-  Lemma elem_of_img m v : v ∈ img m ↔ ∃ (k : K), m !! k = Some v.
+  Lemma elem_of_img m v : v ∈ img m ↔ ∃ k, m !! k = Some v.
   Proof.
     unfold img, fin_map_img. rewrite elem_of_map_to_set. split.
     - intros (k & v' & mk_v' & v'_v). exists k. rewrite v'_v in mk_v'. exact mk_v'.
@@ -3846,7 +3846,7 @@ Section image.
     apply (Hm k v Hv).
   Qed.
 
-  Lemma img_filter (P : K * A → Prop) `{!∀ x, Decision (P x)} m (X : D) :
+  Lemma img_filter (P : K * A → Prop) `{!∀ x, Decision (P x)} m X :
     (∀ v, v ∈ X ↔ ∃ k, m !! k = Some v ∧ P (k, v)) →
     img (filter P m) ≡ X.
   Proof.
@@ -3892,7 +3892,7 @@ Section image.
       apply Some_inj in Hk. contradiction (Hv Hk).
     - rewrite (lookup_insert_ne _ _ _ _ Heq) in Hk. exists k'. exact Hk.
   Qed.
-  Lemma img_insert_notin k v m : m!!k = None → img (<[k:=v]> m) ≡ {[ v ]} ∪ img m.
+  Lemma img_insert_notin k v m : m !! k = None → img (<[k:=v]> m) ≡ {[ v ]} ∪ img m.
   Proof.
     intros Hm w. rewrite elem_of_union, !elem_of_img, elem_of_singleton.
     setoid_rewrite lookup_insert_Some.
@@ -3934,7 +3934,7 @@ Section image.
     exists k. by apply lookup_union_Some_r.
   Qed.
   Lemma elem_of_img_union_disjoint m1 m2 v :
-    m1 ##ₘ m2 → v ∈ img (m1 ∪ m2) ↔ v ∈ img m1 \/ v ∈ img m2.
+    m1 ##ₘ m2 → v ∈ img (m1 ∪ m2) ↔ v ∈ img m1 ∨ v ∈ img m2.
   Proof.
     intros Hdisj. split.
     - apply elem_of_img_union.
@@ -4089,7 +4089,7 @@ Lemma img_fmap_L `{FinMap K M, FinSet A D, FinSet B D2, !LeibnizEquiv D2} (f : A
 Proof. unfold_leibniz. apply img_fmap. Qed.
 
 Lemma img_kmap `{FinMap K M, FinMap K2 M2, FinSet A D}
-      (f : K → K2) `{!Inj (=) (=) f} m :
+    (f : K → K2) `{!Inj (=) (=) f} m :
   img (kmap (M2:=M2) f m) ≡@{D} img m.
 Proof.
   apply set_equiv. intros v.
@@ -4098,7 +4098,7 @@ Proof.
   - exists (f k). rewrite lookup_kmap; done.
 Qed.
 Lemma img_kmap_L `{FinMap K M, FinMap K2 M2, FinSet A D, !LeibnizEquiv D}
-  (f : K → K2) `{!Inj (=) (=) f} m :
+    (f : K → K2) `{!Inj (=) (=) f} m :
   img (kmap (M2:=M2) f m) = (img m : D).
 Proof. unfold_leibniz. apply img_kmap. done. Qed.
 

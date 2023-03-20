@@ -460,7 +460,7 @@ End map.
 
 (** * Bind *)
 Section set_bind.
-  Context `{FinSet B SB}.
+  Context `{Set_ B SB}.
 
   Local Notation set_bind := (set_bind (A:=A) (SA:=C) (SB:=SB)).
 

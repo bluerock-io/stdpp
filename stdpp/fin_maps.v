@@ -179,7 +179,7 @@ Global Instance map_lookup_total `{!Lookup K A (M A), !Inhabited A} :
   LookupTotal K A (M A) | 20 := λ i m, default inhabitant (m !! i).
 Typeclasses Opaque map_lookup_total.
 
-(** Given a finite map [m] with keys [K] and values [A], the image [map_img m]
+(** Given a finite map [m : M] with keys [K] and values [A], the image [map_img m]
 gives a finite set containing with the values [A] of [m]. The type of [map_img]
 is generic to support different map and set implementations. A possible instance
 is [SA:=gset A]. *)

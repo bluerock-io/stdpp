@@ -558,8 +558,7 @@ Section set_omap.
   Lemma set_omap_set_bind `{Elements B D, EqDecision B, !FinSet B D} f X :
     set_omap f X ≡ set_bind (λ x, match f x with Some y => {[ y ]} | None => ∅ end) X.
   Proof. set_unfold. naive_solver. Qed.
-  Lemma set_map_set_omap (f : A → B) X :
-    set_map f X ≡ set_omap (Some ∘ f) X.
+  Lemma set_map_set_omap (f : A → B) X : set_map f X ≡ set_omap (Some ∘ f) X.
   Proof. set_unfold. naive_solver. Qed.
   Lemma set_omap_filter P `{∀ x, Decision (P x)} f X :
     (∀ x, x ∈ X → is_Some (f x) → P x) →
@@ -571,6 +570,7 @@ Section set_omap.
 
     Lemma set_omap_union_L f X Y : set_omap f (X ∪ Y) = set_omap f X ∪ set_omap f Y.
     Proof. unfold_leibniz. apply set_omap_union. Qed.
+
     Lemma set_omap_singleton_L f x :
       set_omap f {[ x ]} = match f x with Some y => {[ y ]} | None => ∅ end.
     Proof. unfold_leibniz. apply set_omap_singleton. Qed.
@@ -578,11 +578,11 @@ Section set_omap.
     Proof. unfold_leibniz. apply set_omap_singleton_Some. Qed.
     Lemma set_omap_singleton_None_L f x : f x = None → set_omap f {[ x ]} = ∅.
     Proof. unfold_leibniz. apply set_omap_singleton_None. Qed.
+
     Lemma set_omap_set_bind_L `{Elements B D, EqDecision B, !FinSet B D} f X :
       set_omap f X = set_bind (λ x, match f x with Some y => {[ y ]} | None => ∅ end) X.
     Proof. unfold_leibniz. apply set_omap_set_bind. Qed.
-    Lemma set_map_set_omap_L (f : A → B) X :
-      set_map f X = set_omap (Some ∘ f) X.
+    Lemma set_map_set_omap_L (f : A → B) X : set_map f X = set_omap (Some ∘ f) X.
     Proof. unfold_leibniz. apply set_map_set_omap. Qed.
     Lemma set_omap_filter_L P `{∀ x, Decision (P x)} f X :
       (∀ x, x ∈ X → is_Some (f x) → P x) →

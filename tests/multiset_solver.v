@@ -58,6 +58,19 @@ Section test.
   Lemma test_elem_of_6 x y X : {[+ x; y +]} ⊆ X → x ∈ X ∧ y ∈ X.
   Proof. multiset_solver. Qed.
 
+  (** Tests where the goals do not involve the multiset connectives *)
+  Lemma test_goal_1 x y X : {[+ x +]} ∪ X ⊆ {[+ y +]} → x = y.
+  Proof. multiset_solver. Qed.
+  Lemma test_goal_2 x y X : {[+ x +]} ∪ X ⊆ {[+ y +]} → [x] = [y].
+  Proof. multiset_solver. Qed.
+  Lemma test_goal_3 x y X l :
+    {[+ x +]} ∪ X ⊆ {[+ y +]} → [x] `suffix_of` l ++ [y].
+  Proof.
+    (* [multiset_solver] will first substitute [x]/[y], and then [eauto] is used
+    on the leaf. *)
+    multiset_solver by eauto using suffix_app_r.
+  Qed.
+
   Lemma test_big_1 x1 x2 x3 x4 :
     {[+ x1; x2; x3; x4; x4 +]} ⊆@{gmultiset A} {[+ x1; x1; x2; x3; x4; x4 +]}.
   Proof. multiset_solver. Qed.

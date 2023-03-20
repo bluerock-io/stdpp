@@ -23,8 +23,8 @@ Coq 8.12 and 8.13 are no longer supported by this release.
   remove duplicates.
 - Add operation `*:` for "scalar" multiplication of multisets.
 - Add `by` parameter to `multiset_solver`, which defaults to `eauto`.
-
-- Add `img` operator for map image/codomain and some results to manipulate it.
+- Add `map_img` operator for map image/codomain and some lemmas about it. (by
+  Dorian Lesbre)
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

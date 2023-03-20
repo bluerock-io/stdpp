@@ -273,3 +273,16 @@ Section fin_map_img.
   Global Instance set_unfold_img_empty i : SetUnfoldElemOf i (img (∅:M A)) False.
   Proof. constructor. by rewrite img_empty, elem_of_empty. Qed.
 End fin_map_img.
+
+Global Instance fin_map_img K A M D
+  `{FinMapToList K A M, Singleton A D, Empty D, Union D}
+: Img M D := map_to_set (fun _ a => a).
+
+Global Instance fin_map_img_spec K A M D
+  `{HFinMap:FinMap K M} `{HFinSet:FinSet A D} : FinMapImg K A M D.
+Proof.
+  split; [exact HFinMap | apply fin_set_set |].
+  unfold img, fin_map_img. intros m v. rewrite elem_of_map_to_set. split.
+  - intros [k [v' [mk_v' v'_v]]]. exists k. rewrite v'_v in mk_v'. exact mk_v'.
+  - intros [k mk_v]. exists k. exists v. split; [exact mk_v|reflexivity].
+Qed.

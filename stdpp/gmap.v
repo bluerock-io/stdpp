@@ -9,7 +9,7 @@ To compute concrete results, you need to both:
   [gmap]/[gset], does not contain proofs, say via [map_to_list] or [!!]; and
 - use [vm_compute] to run the computation, because it ignores opacity.
 *)
-From stdpp Require Export countable infinite fin_maps fin_map_dom.
+From stdpp Require Export countable infinite fin_maps fin_map_dom fin_map_img.
 From stdpp Require Import pmap mapset propset.
 From stdpp Require Import options.
 
@@ -282,6 +282,11 @@ Section gset.
     pose proof (mapset_dom_spec (M:=gmap K)) as [?? Hdom]; split; auto.
     intros A m. specialize (Hdom A m). by destruct m.
   Qed.
+  Global Instance gmap_img `{Countable A} : Img (gmap A K) (gset K) :=
+    fin_map_img A K (gmap A K) (gset K).
+  Global Instance gset_img_spec `{Countable A} : FinMapImg A K (gmap A) (gset K) :=
+    fin_map_img_spec A K (gmap A) (gset K).
+
 
   (** If you are looking for a lemma showing that [gset] is extensional, see
   [sets.set_eq]. *)

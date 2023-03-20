@@ -2177,11 +2177,10 @@ Proof.
   apply not_elem_of_app_cons_inv_l in Hle; [|done..]. unfold prefix. naive_solver.
 Qed.
 
-Lemma list_eq_prefix_eq l1 l2 :
-  l1 = l2 ↔ l1 `prefix_of` l2 ∧ length l2 ≤ length l1.
+Lemma prefix_length_eq l1 l2 :
+  l1 `prefix_of` l2 → length l2 ≤ length l1 → l1 = l2.
 Proof.
-  split; [by intros ->|]. intros [Hprefix Hlen].
-  assert (length l1 = length l2).
+  intros Hprefix Hlen. assert (length l1 = length l2).
   { apply prefix_length in Hprefix. lia. }
   eapply list_eq_same_length with (length l1); [done..|].
   intros i x y _ ??. assert (l2 !! i = Some x) by eauto using prefix_lookup.
@@ -2331,11 +2330,12 @@ Proof.
   apply not_elem_of_app_cons_inv_r in Hle; [|done..]. unfold suffix. naive_solver.
 Qed.
 
-Lemma list_eq_suffix_eq l1 l2 :
-  l1 = l2 ↔ l1 `suffix_of` l2 ∧ length l2 ≤ length l1.
+Lemma suffix_length_eq l1 l2 :
+  l1 `suffix_of` l2 → length l2 ≤ length l1 → l1 = l2.
 Proof.
-  rewrite <-(inj_iff reverse), list_eq_prefix_eq.
-  by rewrite !reverse_length, <-suffix_prefix_reverse.
+  intros. apply (inj reverse), prefix_length_eq.
+  - by apply suffix_prefix_reverse.
+  - by rewrite !reverse_length.
 Qed.
 
 Section max_suffix.
@@ -2598,19 +2598,18 @@ Proof.
     trans k2; [done|]. by apply Permutation_submseteq.
 Qed.
 
-Lemma Permutation_submseteq_length l1 l2 :
-  l1 ≡ₚ l2 ↔ l1 ⊆+ l2 ∧ length l2 ≤ length l1.
+Lemma submseteq_length_Permutation l1 l2 :
+  l1 ⊆+ l2 → length l2 ≤ length l1 → l1 ≡ₚ l2.
 Proof.
-  split; [by intros ->|].
-  intros [Hsub Hlen]. destruct (submseteq_Permutation l1 l2) as [[|??] Hk]; auto.
+  intros Hsub Hlen. destruct (submseteq_Permutation l1 l2) as [[|??] Hk]; auto.
   - by rewrite Hk, (right_id_L [] (++)).
   - rewrite Hk, app_length in Hlen. simpl in *; lia.
 Qed.
 
 Global Instance: AntiSymm (≡ₚ) (@submseteq A).
 Proof.
-  intros l1 l2 ??. apply Permutation_submseteq_length.
-  auto using submseteq_length.
+  intros l1 l2 ??.
+  apply submseteq_length_Permutation; auto using submseteq_length.
 Qed.
 
 Lemma elem_of_submseteq l k x : x ∈ l → l ⊆+ k → x ∈ k.
@@ -2825,7 +2824,8 @@ Section submseteq_dec.
   Proof using Type*.
     refine (λ l1 l2, cast_if_and
       (decide (l1 ⊆+ l2)) (decide (length l2 ≤ length l1)));
-      abstract (rewrite Permutation_submseteq_length; tauto).
+      [by apply submseteq_length_Permutation
+      |abstract (intros He; by rewrite He in *)..].
   Defined.
 End submseteq_dec.
 

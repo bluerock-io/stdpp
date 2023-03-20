@@ -214,12 +214,9 @@ Proof.
   intros j. destruct (decide (i = j)); set_solver.
 Qed.
 
-Lemma map_eq_subseteq_dom {A} (m1 m2 : M A) :
-  m1 = m2 ↔ m1 ⊆ m2 ∧ dom m2 ⊆@{D} dom m1.
-Proof.
-  split; [by intros ->|]. intros [??].
-  apply map_eq_subseteq_size. auto using dom_subseteq_size.
-Qed.
+Lemma subseteq_dom_eq {A} (m1 m2 : M A) :
+  m1 ⊆ m2 → dom m2 ⊆@{D} dom m1 → m1 = m2.
+Proof. intros. apply map_subseteq_size_eq; auto using dom_subseteq_size. Qed.
 
 Lemma dom_singleton_inv {A} (m : M A) i :
   dom m ≡@{D} {[i]} → ∃ x, m = {[i := x]}.

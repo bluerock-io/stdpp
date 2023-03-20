@@ -1158,12 +1158,11 @@ Proof.
   eauto with f_equal.
 Qed.
 
-Lemma map_eq_subseteq_size {A} (m1 m2 : M A) :
-  m1 = m2 ↔ m1 ⊆ m2 ∧ size m2 ≤ size m1.
+Lemma map_subseteq_size_eq {A} (m1 m2 : M A) :
+  m1 ⊆ m2 → size m2 ≤ size m1 → m1 = m2.
 Proof.
-  split; [by intros ->|].
-  intros [??]. apply map_to_list_inj, Permutation_submseteq_length.
-  split; [|done]. by apply map_to_list_submseteq.
+  intros. apply map_to_list_inj, submseteq_length_Permutation; [|done].
+  by apply map_to_list_submseteq.
 Qed.
 
 Lemma map_subseteq_size {A} (m1 m2 : M A) : m1 ⊆ m2 → size m1 ≤ size m2.
@@ -1174,7 +1173,7 @@ Proof.
   intros [Hm12 Hm21]. apply Nat.le_neq. split.
   - by apply map_subseteq_size.
   - intros Hsize. destruct Hm21.
-    apply reflexive_eq, symmetry, map_eq_subseteq_size. auto with lia.
+    apply reflexive_eq, symmetry, map_subseteq_size_eq; auto with lia.
 Qed.
 
 (** ** Induction principles *)

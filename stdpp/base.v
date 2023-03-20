@@ -1342,6 +1342,16 @@ Global Instance: Params (@dom) 3 := {}.
 Global Arguments dom : clear implicits.
 Global Arguments dom {_ _ _} !_ / : simpl nomatch, assert.
 
+(** The function [img m] should yield the image/codomain of [m]. That is a finite
+set of type [D] that contains the values that appear in [m].
+[D] is an output of the typeclass, i.e., there can be only one instance per map
+type [M]. *)
+Class Img (M D : Type) := img: M → D.
+Global Hint Mode Img ! - : typeclass_instances.
+Global Instance: Params (@img) 3 := {}.
+Global Arguments img : clear implicits.
+Global Arguments img {_ _ _} !_ / : simpl nomatch, assert.
+
 (** The function [merge f m1 m2] should merge the maps [m1] and [m2] by
 constructing a new map whose value at key [k] is [f (m1 !! k) (m2 !! k)].*)
 Class Merge (M : Type → Type) :=

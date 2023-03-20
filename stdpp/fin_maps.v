@@ -85,6 +85,10 @@ Definition set_to_map `{Elements B C, Insert K A M, Empty M}
     (f : B → K * A) (X : C) : M :=
   list_to_map (f <$> elements X).
 
+Global Instance fin_map_img K A M D
+  `{FinMapToList K A M, Singleton A D, Empty D, Union D}
+  : Img M D := map_to_set (λ _ a, a).
+
 Global Instance map_union_with `{Merge M} {A} : UnionWith A (M A) :=
   λ f, merge (union_with f).
 Global Instance map_intersection_with `{Merge M} {A} : IntersectionWith A (M A) :=
@@ -3805,22 +3809,17 @@ End preimg.
 
 
 (** ** The [img] (image/codomain) operation *)
-Global Instance fin_map_img K A M D
-    `{FinMapToList K A M, Singleton A D, Empty D, Union D}
-    : Img M D := map_to_set (λ _ a, a).
-
 Section image.
   Context `{FinMap K M, FinSet A D}.
   Implicit Types (m : M A) (k : K) (v : A).
 
   (* avoid writing ≡@{D} everywhere... *)
-  Infix "≡" := (@equiv D _) (at level 70).
-  Notation img := (@img _ D (fin_map_img _ _ _ _)).
+  Notation img := (@img (M A) D _).
 
   Lemma elem_of_img m v : v ∈ img m ↔ ∃ (k : K), m !! k = Some v.
   Proof.
     unfold img, fin_map_img. rewrite elem_of_map_to_set. split.
-    - intros [k [v' [mk_v' v'_v]]]. exists k. rewrite v'_v in mk_v'. exact mk_v'.
+    - intros (k & v' & mk_v' & v'_v). exists k. rewrite v'_v in mk_v'. exact mk_v'.
     - intros [k mk_v]. exists k. exists v. split; [exact mk_v|reflexivity].
   Qed.
 
@@ -3828,14 +3827,15 @@ Section image.
   Proof. intros Hmkv. rewrite elem_of_img. exists k. exact Hmkv. Qed.
 
   Lemma not_elem_of_img m v : v ∉ img m ↔ ∀ k, m !! k ≠ Some v.
-  Proof. rewrite elem_of_img. split.
-  - intros Hm k Hk. contradiction (Hm (ex_intro _ k Hk)).
-  - intros Hm [k Hk]. contradiction (Hm k Hk).
+  Proof.
+    rewrite elem_of_img. split.
+    - intros Hm k Hk. contradiction (Hm (ex_intro _ k Hk)).
+    - intros Hm [k Hk]. contradiction (Hm k Hk).
   Qed.
   Lemma not_elem_of_img_1 m v k : v ∉ img m → m !! k ≠ Some v.
   Proof. intros Hm. apply not_elem_of_img. exact Hm. Qed.
 
-  Lemma subseteq_img (m1 m2 : M A) : m1 ⊆ m2 → img m1 ⊆ img m2.
+  Lemma subseteq_img m1 m2 : m1 ⊆ m2 → img m1 ⊆ img m2.
   Proof.
     intros Hm v Hv. rewrite elem_of_img.
     apply elem_of_img in Hv as [k Hv]. exists k.
@@ -3854,7 +3854,7 @@ Section image.
     img (filter P m) ⊆ img m.
   Proof. apply subseteq_img, map_filter_subseteq. Qed.
 
-  Lemma img_empty : img (∅ : M A) ≡ ∅.
+  Lemma img_empty : img ∅ ≡ ∅.
   Proof.
     rewrite set_equiv. intros x. split; intros Hempty.
     - apply elem_of_img in Hempty. destruct Hempty as [k Hk].
@@ -3898,7 +3898,7 @@ Section image.
       destruct (decide (k=k')) as [Hk|Hk]; [ simplify_eq | done ].
   Qed.
 
-  Lemma img_singleton k v : img ({[ k := v ]} : M A) ≡ {[ v ]}.
+  Lemma img_singleton k v : img {[ k := v ]} ≡ {[ v ]}.
   Proof.
     rewrite set_equiv. intros x.
     rewrite elem_of_img. rewrite elem_of_singleton.
@@ -3961,12 +3961,12 @@ Section image.
 
   Lemma img_list_to_map l :
     (∀ k v v', (k,v) ∈ l → (k,v') ∈ l → v = v') →
-    img (list_to_map l : M A) ≡ list_to_set l.*2.
+    img (list_to_map l) ≡ list_to_set l.*2.
   Proof.
     induction l as [|a l IH].
     - by rewrite img_empty.
     - intros Hl. destruct a as [k v]. simpl.
-      assert (IH' : img (list_to_map l : M A) ≡ list_to_set l.*2).
+      assert (IH' : img (list_to_map l) ≡ list_to_set l.*2).
       { apply IH. intros k' v' v'' Hv' Hv''. apply (Hl k' v' v''); apply elem_of_list_further; assumption. }
       rewrite <- IH'.
       destruct ((list_to_map l : M A)!!k) as [w|] eqn:Hw.
@@ -4027,7 +4027,7 @@ Section image.
   Section Leibniz.
     Context `{!LeibnizEquiv D}.
 
-    Lemma img_empty_L : img (@empty (M A) _) = ∅.
+    Lemma img_empty_L : img ∅ = ∅.
     Proof. unfold_leibniz. exact img_empty. Qed.
 
     Lemma img_empty_iff_L m : img m = ∅ ↔ m = ∅.
@@ -4035,7 +4035,7 @@ Section image.
     Lemma img_empty_inv_L m : img m = ∅ → m = ∅.
     Proof. apply img_empty_iff_L. Qed.
 
-    Lemma img_singleton_L k v : img ({[ k := v ]} : M A) = {[ v ]}.
+    Lemma img_singleton_L k v : img {[ k := v ]} = {[ v ]}.
     Proof. unfold_leibniz. apply img_singleton. Qed.
 
     Lemma img_insert_notin_L k v m : m!!k=None → img (<[k:=v]> m) = {[ v ]} ∪ img m.
@@ -4046,7 +4046,7 @@ Section image.
 
     Lemma img_list_to_map_L l :
       (∀ k v v', (k,v) ∈ l → (k,v') ∈ l → v = v') →
-      img (list_to_map l : M A) = list_to_set l.*2.
+      img (list_to_map l) = list_to_set l.*2.
     Proof. unfold_leibniz. apply img_list_to_map. Qed.
 
     Lemma img_alt_L m : img m = list_to_set (map_to_list m).*2.

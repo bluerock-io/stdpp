@@ -561,6 +561,10 @@ Section set_omap.
   Lemma set_map_set_omap (f : A → B) X :
     set_map f X ≡ set_omap (Some ∘ f) X.
   Proof. set_unfold. naive_solver. Qed.
+  Lemma set_omap_filter P `{∀ x, Decision (P x)} f X :
+    (∀ x, x ∈ X → is_Some (f x) → P x) →
+    set_omap f (filter P X) ≡ set_omap f X.
+  Proof. set_unfold. naive_solver. Qed.
 
   Section leibniz.
     Context `{!LeibnizEquiv D}.
@@ -580,6 +584,10 @@ Section set_omap.
     Lemma set_map_set_omap_L (f : A → B) X :
       set_map f X = set_omap (Some ∘ f) X.
     Proof. unfold_leibniz. apply set_map_set_omap. Qed.
+    Lemma set_omap_filter_L P `{∀ x, Decision (P x)} f X :
+      (∀ x, x ∈ X → is_Some (f x) → P x) →
+      set_omap f (filter P X) = set_omap f X.
+    Proof. unfold_leibniz. apply set_omap_filter. Qed.
   End leibniz.
 End set_omap.
 

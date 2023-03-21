@@ -296,7 +296,7 @@ Global Instance option_difference_with {A} : DifferenceWith A (option A) := λ f
   end.
 Global Instance option_union {A} : Union (option A) := union_with (λ x _, Some x).
 
-Lemma option_union_Some {A} (mx my : option A) z :
+Lemma union_Some {A} (mx my : option A) z :
   mx ∪ my = Some z → mx = Some z ∨ my = Some z.
 Proof. destruct mx, my; naive_solver. Qed.
 
@@ -421,7 +421,7 @@ Tactic Notation "simplify_option_eq" "by" tactic3(tac) :=
   | _ : maybe2 _ ?x = Some _ |- _ => is_var x; destruct x
   | _ : maybe3 _ ?x = Some _ |- _ => is_var x; destruct x
   | _ : maybe4 _ ?x = Some _ |- _ => is_var x; destruct x
-  | H : _ ∪ _ = Some _ |- _ => apply option_union_Some in H; destruct H
+  | H : _ ∪ _ = Some _ |- _ => apply union_Some in H; destruct H
   | H : mbind (M:=option) ?f ?mx = ?my |- _ =>
     match mx with Some _ => fail 1 | None => fail 1 | _ => idtac end;
     match my with Some _ => idtac | None => idtac | _ => fail 1 end;

@@ -2177,6 +2177,16 @@ Proof.
   apply not_elem_of_app_cons_inv_l in Hle; [|done..]. unfold prefix. naive_solver.
 Qed.
 
+Lemma prefix_length_eq l1 l2 :
+  l1 `prefix_of` l2 → length l2 ≤ length l1 → l1 = l2.
+Proof.
+  intros Hprefix Hlen. assert (length l1 = length l2).
+  { apply prefix_length in Hprefix. lia. }
+  eapply list_eq_same_length with (length l1); [done..|].
+  intros i x y _ ??. assert (l2 !! i = Some x) by eauto using prefix_lookup.
+  congruence.
+Qed.
+
 Section prefix_ops.
   Context `{!EqDecision A}.
   Lemma max_prefix_fst l1 l2 :
@@ -2318,6 +2328,14 @@ Lemma suffix_not_elem_of_app_cons_inv x y l1 l2 k1 k2 :
 Proof.
   intros Hin1 Hin2 [k Hle]. rewrite (assoc_L (++)) in Hle.
   apply not_elem_of_app_cons_inv_r in Hle; [|done..]. unfold suffix. naive_solver.
+Qed.
+
+Lemma suffix_length_eq l1 l2 :
+  l1 `suffix_of` l2 → length l2 ≤ length l1 → l1 = l2.
+Proof.
+  intros. apply (inj reverse), prefix_length_eq.
+  - by apply suffix_prefix_reverse.
+  - by rewrite !reverse_length.
 Qed.
 
 Section max_suffix.
@@ -2570,16 +2588,7 @@ Proof.
   - exists (x :: k). by rewrite Hk, Permutation_middle.
   - exists (k ++ k'). by rewrite Hk', Hk, (assoc_L (++)).
 Qed.
-Lemma submseteq_Permutation_length_le l1 l2 :
-  length l2 ≤ length l1 → l1 ⊆+ l2 → l1 ≡ₚ l2.
-Proof.
-  intros Hl21 Hl12. destruct (submseteq_Permutation l1 l2) as [[|??] Hk]; auto.
-  - by rewrite Hk, (right_id_L [] (++)).
-  - rewrite Hk, app_length in Hl21; simpl in Hl21; lia.
-Qed.
-Lemma submseteq_Permutation_length_eq l1 l2 :
-  length l2 = length l1 → l1 ⊆+ l2 → l1 ≡ₚ l2.
-Proof. intro. apply submseteq_Permutation_length_le. lia. Qed.
+
 Global Instance: Proper ((≡ₚ) ==> (≡ₚ) ==> iff) (@submseteq A).
 Proof.
   intros l1 l2 ? k1 k2 ?. split; intros.
@@ -2588,8 +2597,20 @@ Proof.
   - trans l2; [by apply Permutation_submseteq|].
     trans k2; [done|]. by apply Permutation_submseteq.
 Qed.
+
+Lemma submseteq_length_Permutation l1 l2 :
+  l1 ⊆+ l2 → length l2 ≤ length l1 → l1 ≡ₚ l2.
+Proof.
+  intros Hsub Hlen. destruct (submseteq_Permutation l1 l2) as [[|??] Hk]; auto.
+  - by rewrite Hk, (right_id_L [] (++)).
+  - rewrite Hk, app_length in Hlen. simpl in *; lia.
+Qed.
+
 Global Instance: AntiSymm (≡ₚ) (@submseteq A).
-Proof. red. auto using submseteq_Permutation_length_le, submseteq_length. Qed.
+Proof.
+  intros l1 l2 ??.
+  apply submseteq_length_Permutation; auto using submseteq_length.
+Qed.
 
 Lemma elem_of_submseteq l k x : x ∈ l → l ⊆+ k → x ∈ k.
 Proof. intros ? [l' ->]%submseteq_Permutation. apply elem_of_app; auto. Qed.
@@ -2705,13 +2726,6 @@ Qed.
 Lemma submseteq_middle l k1 k2 : l ⊆+ k1 ++ l ++ k2.
 Proof. by apply submseteq_inserts_l, submseteq_inserts_r. Qed.
 
-Lemma Permutation_alt l1 l2 : l1 ≡ₚ l2 ↔ length l1 = length l2 ∧ l1 ⊆+ l2.
-Proof.
-  split.
-  - by intros Hl; rewrite Hl.
-  - intros [??]; auto using submseteq_Permutation_length_eq.
-Qed.
-
 Lemma NoDup_submseteq l k : NoDup l → (∀ x, x ∈ l → x ∈ k) → l ⊆+ k.
 Proof.
   intros Hl. revert k. induction Hl as [|x l Hx ? IH].
@@ -2808,9 +2822,10 @@ Section submseteq_dec.
   Defined.
   Global Instance Permutation_dec : RelDecision (≡ₚ@{A}).
   Proof using Type*.
-   refine (λ l1 l2, cast_if_and
-    (decide (length l1 = length l2)) (decide (l1 ⊆+ l2)));
-    abstract (rewrite Permutation_alt; tauto).
+    refine (λ l1 l2, cast_if_and
+      (decide (l1 ⊆+ l2)) (decide (length l2 ≤ length l1)));
+      [by apply submseteq_length_Permutation
+      |abstract (intros He; by rewrite He in *)..].
   Defined.
 End submseteq_dec.
 

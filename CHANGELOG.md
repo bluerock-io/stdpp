@@ -25,6 +25,10 @@ Coq 8.12 and 8.13 are no longer supported by this release.
 - Add `by` parameter to `multiset_solver`, which defaults to `eauto`.
 - Add `map_img` operator for map image/codomain and some lemmas about it. (by
   Dorian Lesbre)
+- Remove `Permutation_alt`, `submseteq_Permutation_length_le`, and
+  `submseteq_Permutation_length_eq`; use `submseteq_length_Permutation` instead.
+- Remove `map_to_list_length` (which seemed to be an unneeded auxiliary lemma);
+  use `map_subset_size` instead.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

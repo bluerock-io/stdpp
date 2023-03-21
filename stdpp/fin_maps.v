@@ -2320,7 +2320,7 @@ Qed.
 Global Instance map_union_idemp {A} : IdemP (=@{M A}) (∪).
 Proof. intros ?. by apply union_with_idemp. Qed.
 Lemma lookup_union {A} (m1 m2 : M A) i :
-  (m1 ∪ m2) !! i = union_with (λ x _, Some x) (m1 !! i) (m2 !! i).
+  (m1 ∪ m2) !! i = (m1 !! i) ∪ (m2 !! i).
 Proof. apply lookup_union_with. Qed.
 Lemma lookup_union_r {A} (m1 m2 : M A) i :
   m1 !! i = None → (m1 ∪ m2) !! i = m2 !! i.

@@ -299,6 +299,17 @@ Global Instance option_union {A} : Union (option A) := union_with (λ x _, Some 
 Lemma union_Some {A} (mx my : option A) z :
   mx ∪ my = Some z → mx = Some z ∨ my = Some z.
 Proof. destruct mx, my; naive_solver. Qed.
+Lemma union_Some_l {A} x (my : option A) :
+  Some x ∪ my = Some x.
+Proof. destruct my; done. Qed.
+Lemma union_Some_r {A} (mx : option A) y :
+  mx ∪ Some y = Some (default y mx).
+Proof. destruct mx; done. Qed.
+
+Global Instance option_union_left_id {A} : LeftId (=@{option A}) None union.
+Proof. by intros [?|]. Qed.
+Global Instance option_union_right_id {A} : RightId (=@{option A}) None union.
+Proof. by intros [?|]. Qed.
 
 Section union_intersection_difference.
   Context {A} (f : A → A → option A).
@@ -310,10 +321,18 @@ Section union_intersection_difference.
   Global Instance union_with_comm :
     Comm (=) f → Comm (=@{option A}) (union_with f).
   Proof. by intros ? [?|] [?|]; compute; rewrite 1?(comm f). Qed.
+  (** These are duplicates of the above [LeftId]/[RightId] instances, but easier to
+  find with [SearchAbout]. *)
+  Lemma union_with_None_l my : union_with f None my = my.
+  Proof. destruct my; done. Qed.
+  Lemma union_with_None_r mx : union_with f mx None = mx.
+  Proof. destruct mx; done. Qed.
+
   Global Instance intersection_with_left_ab : LeftAbsorb (=) None (intersection_with f).
   Proof. by intros [?|]. Qed.
   Global Instance intersection_with_right_ab : RightAbsorb (=) None (intersection_with f).
   Proof. by intros [?|]. Qed.
+
   Global Instance difference_with_comm :
     Comm (=) f → Comm (=@{option A}) (intersection_with f).
   Proof. by intros ? [?|] [?|]; compute; rewrite 1?(comm f). Qed.

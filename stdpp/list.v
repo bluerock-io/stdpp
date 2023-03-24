@@ -1442,7 +1442,7 @@ Proof.
 Qed.
 Lemma elem_of_replicate_inv x n y : x ∈ replicate n y → x = y.
 Proof. induction n; simpl; rewrite ?elem_of_nil, ?elem_of_cons; intuition. Qed.
-Lemma replicate_S n x : replicate (S n) x = x :: replicate  n x.
+Lemma replicate_S n x : replicate (S n) x = x :: replicate n x.
 Proof. done. Qed.
 Lemma replicate_S_end n x : replicate (S n) x = replicate n x ++ [x].
 Proof. induction n; f_equal/=; auto. Qed.
@@ -1478,6 +1478,8 @@ Lemma replicate_false βs n : length βs = n → replicate n false =.>* βs.
 Proof. intros <-. by induction βs; simpl; constructor. Qed.
 Lemma tail_replicate x n : tail (replicate n x) = replicate (pred n) x.
 Proof. by destruct n. Qed.
+Lemma head_replicate_Some x n : head (replicate n x) = Some x ↔ 0 < n.
+Proof. destruct n; naive_solver lia. Qed.
 
 (** ** Properties of the [resize] function *)
 Lemma resize_spec l n x : resize n x l = take n l ++ replicate (n - length l) x.
@@ -2128,7 +2130,12 @@ Lemma prefix_app_l l1 l2 l3 : l1 ++ l3 `prefix_of` l2 → l1 `prefix_of` l2.
 Proof. intros [k ->]. exists (l3 ++ k). by rewrite (assoc_L (++)). Qed.
 Lemma prefix_app_r l1 l2 l3 : l1 `prefix_of` l2 → l1 `prefix_of` l2 ++ l3.
 Proof. intros [k ->]. exists (k ++ l3). by rewrite (assoc_L (++)). Qed.
-Lemma prefix_lookup l1 l2 i x :
+Lemma prefix_take l n : take n l `prefix_of` l.
+Proof. rewrite <-(take_drop n l) at 2. apply prefix_app_r. done. Qed.
+Lemma prefix_lookup_lt l1 l2 i :
+  i < length l1 → l1 `prefix_of` l2 → l1 !! i = l2 !! i.
+Proof. intros ? [? ->]. by rewrite lookup_app_l. Qed.
+Lemma prefix_lookup_Some l1 l2 i x :
   l1 !! i = Some x → l1 `prefix_of` l2 → l2 !! i = Some x.
 Proof. intros ? [k ->]. rewrite lookup_app_l; eauto using lookup_lt_Some. Qed.
 Lemma prefix_length l1 l2 : l1 `prefix_of` l2 → length l1 ≤ length l2.
@@ -2183,7 +2190,7 @@ Proof.
   intros Hprefix Hlen. assert (length l1 = length l2).
   { apply prefix_length in Hprefix. lia. }
   eapply list_eq_same_length with (length l1); [done..|].
-  intros i x y _ ??. assert (l2 !! i = Some x) by eauto using prefix_lookup.
+  intros i x y _ ??. assert (l2 !! i = Some x) by eauto using prefix_lookup_Some.
   congruence.
 Qed.
 
@@ -2296,11 +2303,25 @@ Lemma suffix_cons_r l1 l2 x : l1 `suffix_of` l2 → l1 `suffix_of` x :: l2.
 Proof. intros [k ->]. by exists (x :: k). Qed.
 Lemma suffix_app_r l1 l2 l3 : l1 `suffix_of` l2 → l1 `suffix_of` l3 ++ l2.
 Proof. intros [k ->]. exists (l3 ++ k). by rewrite (assoc_L (++)). Qed.
+Lemma suffix_drop l n : drop n l `suffix_of` l.
+Proof. rewrite <-(take_drop n l) at 2. apply suffix_app_r. done. Qed.
 Lemma suffix_cons_inv l1 l2 x y :
   x :: l1 `suffix_of` y :: l2 → x :: l1 = y :: l2 ∨ x :: l1 `suffix_of` l2.
 Proof.
   intros [[|? k] E]; [by left|]. right. simplify_eq/=. by apply suffix_app_r.
 Qed.
+Lemma suffix_lookup_lt l1 l2 i :
+  i < length l1 →
+  l1 `suffix_of` l2 →
+  l1 !! i = l2 !! (i + (length l2 - length l1)).
+Proof.
+  intros Hi [k ->]. rewrite app_length, lookup_app_r by lia. f_equal; lia.
+Qed.
+Lemma suffix_lookup_Some l1 l2 i x :
+  l1 !! i = Some x →
+  l1 `suffix_of` l2 →
+  l2 !! (i + (length l2 - length l1)) = Some x.
+Proof. intros. by rewrite <-suffix_lookup_lt by eauto using lookup_lt_Some. Qed.
 Lemma suffix_length l1 l2 : l1 `suffix_of` l2 → length l1 ≤ length l2.
 Proof. intros [? ->]. rewrite app_length. lia. Qed.
 Lemma suffix_cons_not x l : ¬x :: l `suffix_of` l.
@@ -3128,13 +3149,6 @@ Lemma Forall_swap {A B} (Q : A → B → Prop) l1 l2 :
   Forall (λ y, Forall (Q y) l1) l2 ↔ Forall (λ x, Forall (flip Q x) l2) l1.
 Proof. repeat setoid_rewrite Forall_forall. simpl. split; eauto. Qed.
 
-Lemma Forall2_same_length {A B} (l : list A) (k : list B) :
-  Forall2 (λ _ _, True) l k ↔ length l = length k.
-Proof.
-  split; [by induction 1; f_equal/=|].
-  revert k. induction l; intros [|??] ?; simplify_eq/=; auto.
-Qed.
-
 (** ** Properties of the [Forall2] predicate *)
 Lemma Forall_Forall2_diag {A} (Q : A → A → Prop) l :
   Forall (λ x, Q x x) l → Forall2 Q l l.
@@ -3147,6 +3161,13 @@ Proof.
   intros Hlk. induction (Hlk inhabitant) as [|x y l k _ _ IH]; constructor.
   - intros z. by feed inversion (Hlk z).
   - apply IH. intros z. by feed inversion (Hlk z).
+Qed.
+
+Lemma Forall2_same_length {A B} (l : list A) (k : list B) :
+  Forall2 (λ _ _, True) l k ↔ length l = length k.
+Proof.
+  split; [by induction 1; f_equal/=|].
+  revert k. induction l; intros [|??] ?; simplify_eq/=; auto.
 Qed.
 
 Lemma Forall2_Forall {A} P (l1 l2 : list A) :
@@ -3635,6 +3656,18 @@ Proof.
 Qed.
 Lemma list_subseteq_cons x l1 l2 : l1 ⊆ l2 → l1 ⊆ x :: l2.
 Proof. intros Hin y Hy. right. by apply Hin. Qed.
+Lemma list_subseteq_app_l l1 l2 l : l1 ⊆ l2 → l1 ⊆ l2 ++ l.
+Proof. unfold subseteq, list_subseteq. setoid_rewrite elem_of_app. naive_solver. Qed.
+Lemma list_subseteq_app_r l1 l2 l : l1 ⊆ l2 → l1 ⊆ l ++ l2.
+Proof. unfold subseteq, list_subseteq. setoid_rewrite elem_of_app. naive_solver. Qed.
+
+Lemma list_subseteq_app_iff_l l1 l2 l :
+  l1 ++ l2 ⊆ l ↔ l1 ⊆ l ∧ l2 ⊆ l.
+Proof. unfold subseteq, list_subseteq. setoid_rewrite elem_of_app. naive_solver. Qed.
+Lemma list_subseteq_cons_iff x l1 l2 :
+  x :: l1 ⊆ l2 ↔ x ∈ l2 ∧ l1 ⊆ l2.
+Proof. unfold subseteq, list_subseteq. setoid_rewrite elem_of_cons. naive_solver. Qed.
+
 Lemma list_delete_subseteq i l : delete i l ⊆ l.
 Proof.
   revert i. induction l as [|x l IHl]; intros i; [done|].
@@ -3648,6 +3681,10 @@ Proof.
   destruct (decide (P x));
     [by apply list_subseteq_skip|by apply list_subseteq_cons].
 Qed.
+Lemma subseteq_drop n l : drop n l ⊆ l.
+Proof. rewrite <-(take_drop n l) at 2. apply list_subseteq_app_r. done. Qed.
+Lemma subseteq_take n l : take n l ⊆ l.
+Proof. rewrite <-(take_drop n l) at 2. apply list_subseteq_app_l. done. Qed.
 
 Global Instance list_subseteq_Permutation:
   Proper ((≡ₚ) ==> (≡ₚ) ==> (↔)) (⊆@{list A}) .
@@ -4724,7 +4761,7 @@ Section zip_with.
   Proof. revert n. induction l; intros [|?] ?; f_equal/=; auto with lia. Qed.
   Lemma zip_with_replicate_r_eq n y l :
     length l = n → zip_with f l (replicate n y) = flip f y <$> l.
-  Proof. intros; apply  zip_with_replicate_r; lia. Qed.
+  Proof. intros; apply zip_with_replicate_r; lia. Qed.
   Lemma zip_with_take n l k :
     take n (zip_with f l k) = zip_with f (take n l) (take n k).
   Proof. revert n k. by induction l; intros [|?] [|??]; f_equal/=. Qed.
@@ -4814,6 +4851,7 @@ Section zip.
   Context {A B : Type}.
   Implicit Types l : list A.
   Implicit Types k : list B.
+
   Lemma fst_zip l k : length l ≤ length k → (zip l k).*1 = l.
   Proof. by apply fmap_zip_with_l. Qed.
   Lemma snd_zip l k : length k ≤ length l → (zip l k).*2 = k.
@@ -4999,7 +5037,7 @@ Section positives_flatten_unflatten.
   Qed.
 End positives_flatten_unflatten.
 
-(** * Relection over lists *)
+(** * Reflection over lists *)
 (** We define a simple data structure [rlist] to capture a syntactic
 representation of lists consisting of constants, applications and the nil list.
 Note that we represent [(x ::.)] as [rapp (rnode [x])]. For now, we abstract

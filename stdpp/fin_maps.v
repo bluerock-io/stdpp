@@ -1010,6 +1010,10 @@ Proof.
     auto using not_elem_of_list_to_map_1.
 Qed.
 
+Lemma map_to_list_length {A} (m : M A) :
+  length (map_to_list m) = size m.
+Proof. reflexivity. Qed.
+
 Lemma map_choose {A} (m : M A) : m ≠ ∅ → ∃ i x, m !! i = Some x.
 Proof.
   rewrite <-map_to_list_empty_iff.
@@ -1115,6 +1119,20 @@ Proof. by rewrite map_size_empty_iff. Qed.
 
 Lemma map_size_singleton {A} i (x : A) : size ({[ i := x ]} : M A) = 1.
 Proof. unfold size, map_size. by rewrite map_to_list_singleton. Qed.
+
+Lemma map_size_ne_0_lookup {A} (m : M A) :
+  size m ≠ 0 ↔ ∃ i, is_Some (m !! i).
+Proof.
+  rewrite map_size_non_empty_iff. split.
+  - intros Hsz. apply map_choose. intros Hemp. done.
+  - intros [i [k Hi]] ->. rewrite lookup_empty in Hi. done.
+Qed.
+Lemma map_size_ne_0_lookup_1 {A} (m : M A) :
+  size m ≠ 0 → ∃ i, is_Some (m !! i).
+Proof. intros. by eapply map_size_ne_0_lookup. Qed.
+Lemma map_size_ne_0_lookup_2 {A} (m : M A) i :
+  is_Some (m !! i) → size m ≠ 0.
+Proof. intros. eapply map_size_ne_0_lookup. eauto. Qed.
 
 Lemma map_size_insert {A} i x (m : M A) :
   size (<[i:=x]> m) = (match m !! i with Some _ => id | None => S end) (size m).
@@ -1701,6 +1719,11 @@ Section map_filter.
     rewrite map_subseteq_spec. intros Hm1m2.
     apply map_filter_strong_subseteq_ext. naive_solver.
   Qed.
+
+  Lemma map_size_filter m :
+    size (filter P m) ≤ size m.
+  Proof. apply map_subseteq_size. apply map_filter_subseteq. Qed.
+
 End map_filter.
 
 Lemma map_filter_comm {A}

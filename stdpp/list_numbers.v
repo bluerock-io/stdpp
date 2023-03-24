@@ -87,12 +87,6 @@ Section seq.
   Qed.
   Lemma NoDup_seq j n : NoDup (seq j n).
   Proof. apply NoDup_ListNoDup, seq_NoDup. Qed.
-  (* FIXME: This lemma is in the stdlib since Coq 8.12 *)
-  Lemma seq_S n j : seq j (S n) = seq j n ++ [j + n].
-  Proof.
-    revert j. induction n as [|n IH]; intros j; f_equal/=; [done |].
-    by rewrite IH, Nat.add_succ_r.
-  Qed.
 
   Lemma elem_of_seq j n k :
     k ∈ seq j n ↔ j ≤ k < j + n.
@@ -101,6 +95,23 @@ Section seq.
   Lemma Forall_seq (P : nat → Prop) i n :
     Forall P (seq i n) ↔ ∀ j, i ≤ j < i + n → P j.
   Proof. rewrite Forall_forall. setoid_rewrite elem_of_seq. auto with lia. Qed.
+
+  Lemma drop_seq j n m :
+    drop m (seq j n) = seq (j + m) (n - m).
+  Proof.
+    revert j m. induction n as [|n IH]; simpl; intros j m.
+    - rewrite drop_nil. done.
+    - destruct m; simpl.
+      + rewrite Nat.add_0_r. done.
+      + rewrite IH. f_equal; lia.
+  Qed.
+  Lemma take_seq j n m :
+    take m (seq j n) = seq j (m `min` n).
+  Proof.
+    revert j m. induction n as [|n IH]; simpl; intros j m.
+    - rewrite take_nil. replace (m `min` 0) with 0 by lia. done.
+    - destruct m; simpl; auto with f_equal.
+  Qed.
 End seq.
 
 (** ** Properties of the [seqZ] function *)

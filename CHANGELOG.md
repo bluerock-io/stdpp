@@ -30,6 +30,7 @@ Coq 8.12 and 8.13 are no longer supported by this release.
 - Remove `map_to_list_length` (which seemed to be an unneeded auxiliary lemma);
   use `map_subset_size` instead.
 - Rename `option_union_Some` → `union_Some`.
+- Rename `prefix_lookup` → `prefix_lookup_Some`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).
@@ -44,6 +45,8 @@ s/\blookup_preimage/lookup_preimg/g
 s/\blookup_total_preimg/lookup_total_preimg/g
 # union_Some
 s/\boption_union_Some\b/union_Some/g
+# prefix_lookup
+s/\bprefix_lookup\b/prefix_lookup_Some/g
 EOF
 ```
 

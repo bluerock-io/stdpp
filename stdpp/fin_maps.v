@@ -4195,7 +4195,7 @@ Section img.
     Proof. unfold_leibniz. apply map_img_union_inv. Qed.
   End leibniz.
 
-  (** * Set solver instances *)
+  (** Set solver instances *)
   Global Instance set_unfold_map_img_empty x :
     SetUnfoldElemOf x (map_img (∅:M A)) False.
   Proof. constructor. by rewrite map_img_empty, elem_of_empty. Qed.

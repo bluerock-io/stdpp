@@ -103,6 +103,8 @@ longer supported by this release.
 - Rename `map_filter_lookup` → `map_lookup_filter` and
   `map_filter_lookup_Some` → `map_lookup_filter_Some` and
   `map_filter_lookup_None` → `map_lookup_filter_None`.
+- Add `map_compose` operation, notation `m ∘ₘ n`, and associated lemmas.
+  (by Dorian Lesbre)
 
 **Changes in `stdpp_unstable`:**
 

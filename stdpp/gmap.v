@@ -52,6 +52,7 @@ And marking [gmap] consumers as [simpl never] does not work either, see:
 https://gitlab.mpi-sws.org/iris/stdpp/-/merge_requests/171#note_53216
 *)
 Global Opaque gmap_empty.
+
 Lemma gmap_partial_alter_wf `{Countable K} {A} (f : option A → option A) m i :
   gmap_wf K m → gmap_wf K (partial_alter f (encode (A:=K) i) m).
 Proof.
@@ -60,7 +61,6 @@ Proof.
   - rewrite decode_encode; eauto.
   - rewrite lookup_partial_alter_ne by done. by apply Hm.
 Qed.
-
 Global Instance gmap_partial_alter `{Countable K} {A} :
     PartialAlter K A (gmap K A) := λ f i '(GMap m Hm),
   GMap (partial_alter f (encode i) m) (gmap_partial_alter_wf f m i Hm).
@@ -73,6 +73,7 @@ Proof.
 Qed.
 Global Instance gmap_fmap `{Countable K} : FMap (gmap K) := λ A B f '(GMap m Hm),
   GMap (f <$> m) (gmap_fmap_wf f m Hm).
+
 Lemma gmap_omap_wf `{Countable K} {A B} (f : A → option B) m :
   gmap_wf K m → gmap_wf K (omap f m).
 Proof.
@@ -81,6 +82,7 @@ Proof.
 Qed.
 Global Instance gmap_omap `{Countable K} : OMap (gmap K) := λ A B f '(GMap m Hm),
   GMap (omap f m) (gmap_omap_wf f m Hm).
+
 Lemma gmap_merge_wf `{Countable K} {A B C}
     (f : option A → option B → option C) m1 m2 :
   gmap_wf K m1 → gmap_wf K m2 → gmap_wf K (merge f m1 m2).
@@ -92,9 +94,10 @@ Qed.
 Global Instance gmap_merge `{Countable K} : Merge (gmap K) :=
   λ A B C f '(GMap m1 Hm1) '(GMap m2 Hm2),
     GMap (merge f m1 m2) (gmap_merge_wf f m1 m2 Hm1 Hm2).
-Global Instance gmap_to_list `{Countable K} {A} : FinMapToList K A (gmap K A) :=
-  λ '(GMap m _),
-    omap (λ '(i, x), (., x) <$> decode i) (map_to_list m).
+
+Global Instance gmap_fold `{Countable K} {A} : MapFold K A (gmap K A) :=
+  λ B f d '(GMap m _),
+    map_fold (λ i x, match decode i with Some k => f k x | None => id end) d m.
 
 (** * Instantiation of the finite map interface *)
 Global Instance gmap_finmap `{Countable K} : FinMap K (gmap K).
@@ -113,24 +116,24 @@ Proof.
   - intros A f [m Hm] i j Hs; apply (lookup_partial_alter_ne f m).
     by contradict Hs; apply (inj encode).
   - intros A B f [m Hm] i; apply (lookup_fmap f m).
-  - intros A [m Hm]; unfold map_to_list; simpl.
-    apply bool_decide_unpack, map_Forall_to_list in Hm; revert Hm.
-    induction (NoDup_map_to_list m) as [|[p x] l Hpx];
-      inversion 1 as [|??? Hm']; simplify_eq/=; [by constructor|].
-    destruct (decode p) as [i|] eqn:?; simplify_eq/=; constructor; eauto.
-    rewrite elem_of_list_omap; intros ([p' x']&?&?); simplify_eq/=.
-    feed pose proof (proj1 (Forall_forall _ _) Hm' (p',x')); simpl in *; auto.
-    by destruct (decode p') as [i'|]; simplify_eq/=.
-  - intros A [m Hm] i x; unfold map_to_list, lookup; simpl.
-    apply bool_decide_unpack in Hm; rewrite elem_of_list_omap; split.
-    + intros ([p' x']&Hp'&?); apply elem_of_map_to_list in Hp'.
-      feed pose proof (Hm p' x'); simpl in *; auto.
-      by destruct (decode p') as [i'|] eqn:?; simplify_eq/=.
-    + intros; exists (encode i,x); simpl.
-      by rewrite elem_of_map_to_list, decode_encode.
   - intros A B f [m Hm] i; apply (lookup_omap f m).
   - intros A B C f [m1 Hm1] [m2 Hm2] i; unfold merge, lookup; simpl.
     by rewrite lookup_merge by done; destruct (m1 !! _), (m2 !! _).
+  - intros A B P f b Hemp Hinsert [m Hm]. unfold map_fold; simpl. revert Hm.
+    apply (map_fold_ind (λ r m, ∀ Hm : gmap_wf K m, P r (GMap m Hm))); clear m.
+    { intros Hm.
+      by replace (GMap ∅ Hm) with (∅ : gmap K A) by (by apply gmap_eq). }
+    intros i x m r ? IH Hm'.
+    assert (gmap_wf K m) as Hm.
+    { apply bool_decide_pack; intros j y ?. apply bool_decide_unpack in Hm'.
+      apply (Hm' j y). rewrite lookup_insert_ne; naive_solver. }
+    assert (∃ k : K, i = encode k) as [k ->].
+    { apply bool_decide_unpack in Hm'.
+      specialize (Hm' i x (lookup_insert _ _ _)). apply fmap_Some in Hm'.
+      naive_solver. }
+    replace (GMap (<[encode k:=x]> m) Hm')
+      with (<[k:=x]> (GMap m Hm) : gmap K A) by (by apply gmap_eq).
+    rewrite decode_encode. by apply Hinsert, IH.
 Qed.
 
 Global Program Instance gmap_countable

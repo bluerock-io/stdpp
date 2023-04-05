@@ -18,63 +18,50 @@ Proof.
   | NMap x t1, NMap y t2 => cast_if_and (decide (x = y)) (decide (t1 = t2))
   end); abstract congruence.
 Defined.
-Global Instance Nempty {A} : Empty (Nmap A) := NMap None ∅.
-Global Opaque Nempty.
-Global Instance Nlookup {A} : Lookup N A (Nmap A) := λ i t,
+Global Instance Nmap_empty {A} : Empty (Nmap A) := NMap None ∅.
+Global Opaque Nmap_empty.
+Global Instance Nmap_lookup {A} : Lookup N A (Nmap A) := λ i t,
   match i with
-  | N0 => Nmap_0 t
-  | Npos p => Nmap_pos t !! p
+  | 0 => Nmap_0 t
+  | N.pos p => Nmap_pos t !! p
   end.
-Global Instance Npartial_alter {A} : PartialAlter N A (Nmap A) := λ f i t,
+Global Instance Nmap_partial_alter {A} : PartialAlter N A (Nmap A) := λ f i t,
   match i, t with
-  | N0, NMap o t => NMap (f o) t
-  | Npos p, NMap o t => NMap o (partial_alter f p t)
+  | 0, NMap o t => NMap (f o) t
+  | N.pos p, NMap o t => NMap o (partial_alter f p t)
   end.
-Global Instance Nto_list {A} : FinMapToList N A (Nmap A) := λ t,
-  match t with
-  | NMap o t =>
-     from_option (λ x, [(0,x)]) [] o ++ (prod_map Npos id <$> map_to_list t)
-  end.
-Global Instance Nomap: OMap Nmap := λ A B f t,
+Global Instance Nmap_fmap: FMap Nmap := λ A B f t,
+  match t with NMap o t => NMap (f <$> o) (f <$> t) end.
+Global Instance Nmap_omap: OMap Nmap := λ A B f t,
   match t with NMap o t => NMap (o ≫= f) (omap f t) end.
-Global Instance Nmerge: Merge Nmap := λ A B C f t1 t2,
+Global Instance Nmap_merge: Merge Nmap := λ A B C f t1 t2,
   match t1, t2 with
   | NMap o1 t1, NMap o2 t2 => NMap (diag_None f o1 o2) (merge f t1 t2)
   end.
-Global Instance Nfmap: FMap Nmap := λ A B f t,
-  match t with NMap o t => NMap (f <$> o) (f <$> t) end.
+Global Instance Nmap_fold {A} : MapFold N A (Nmap A) := λ B f d t,
+  match t with
+  | NMap mx t =>
+     map_fold (f ∘ N.pos) match mx with Some x => f 0 x d | None => d end t
+  end.
 
-Global Instance: FinMap N Nmap.
+Global Instance Nmap_map: FinMap N Nmap.
 Proof.
   split.
   - intros ? [??] [??] H. f_equal; [apply (H 0)|].
-    apply map_eq. intros i. apply (H (Npos i)).
+    apply map_eq. intros i. apply (H (N.pos i)).
   - by intros ? [|?].
   - intros ? f [? t] [|i]; simpl; [done |]. apply lookup_partial_alter.
   - intros ? f [? t] [|i] [|j]; simpl; try intuition congruence.
     intros. apply lookup_partial_alter_ne. congruence.
   - intros ??? [??] []; simpl; [done|]. apply lookup_fmap.
-  - intros ? [[x|] t]; unfold map_to_list; simpl.
-    + constructor.
-      * rewrite elem_of_list_fmap. by intros [[??] [??]].
-      * by apply (NoDup_fmap _), NoDup_map_to_list.
-    + apply (NoDup_fmap _), NoDup_map_to_list.
-  - intros ? t i x. unfold map_to_list. split.
-    + destruct t as [[y|] t]; simpl.
-      * rewrite elem_of_cons, elem_of_list_fmap.
-        intros [? | [[??] [??]]]; simplify_eq/=; [done |].
-        by apply elem_of_map_to_list.
-      * rewrite elem_of_list_fmap; intros [[??] [??]]; simplify_eq/=.
-        by apply elem_of_map_to_list.
-    + destruct t as [[y|] t]; simpl.
-      * rewrite elem_of_cons, elem_of_list_fmap.
-        destruct i as [|i]; simpl; [intuition congruence |].
-        intros. right. exists (i, x). by rewrite elem_of_map_to_list.
-      * rewrite elem_of_list_fmap.
-        destruct i as [|i]; simpl; [done |].
-        intros. exists (i, x). by rewrite elem_of_map_to_list.
   - intros ?? f [??] [|?]; simpl; [done|]; apply (lookup_omap f).
   - intros ??? f [??] [??] [|?]; simpl; [done|]; apply (lookup_merge f).
+  - intros A B P f b Hemp Hinsert [mx t]. unfold map_fold; simpl.
+    apply (map_fold_ind (λ r t, P r (NMap mx t))); clear t.
+    { destruct mx as [x|]; [|done].
+      replace (NMap (Some x) ∅) with (<[0:=x]> ∅ : Nmap _) by done.
+      by apply Hinsert. }
+    intros i x t r ??. by apply (Hinsert (N.pos i) x (NMap mx t)).
 Qed.
 
 (** * Finite sets *)

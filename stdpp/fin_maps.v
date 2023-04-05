@@ -11,27 +11,29 @@ locally (or things moved out of sections) as no default works well enough. *)
 Unset Default Proof Using.
 
 (** * Axiomatization of finite maps *)
-(** We require Leibniz equality to be extensional on finite maps. This of
-course limits the space of finite map implementations, but since we are mainly
-interested in finite maps with numbers as indexes, we do not consider this to
-be a serious limitation. The main application of finite maps is to implement
-the memory, where extensionality of Leibniz equality is very important for a
-convenient use in the assertions of our axiomatic semantics. *)
+(** We require Leibniz equality of maps to extensional, i.e.,
+[(∀ i, m1 !! i = m2 !! i) → m1 = m2]. This is a very useful property as it
+avoids the need for setoid rewriting in proof. However, it comes at the cost of
+restricting what map implementations we support. Since Coq does not have
+quotient types, it rules out balanced search trees (AVL, red-black, etc.). We
+do provide a reasonable efficient implementation of binary tries (see [gmap]
+and [Pmap]). *)
 
-(** Finiteness is axiomatized by requiring that each map can be translated
-to an association list. The translation to association lists is used to
-prove well founded recursion on finite maps. *)
+(** Finiteness is axiomatized through a fold operation [map_fold f b m], which
+folds a function [f] over each element of the map [m]. The order in which the
+function is called is unspecified. *)
+
+Class MapFold K A M := map_fold B : (K → A → B → B) → B → M → B.
+Global Arguments map_fold {_ _ _ _ _} _ _ _.
+Global Hint Mode MapFold - - ! : typeclass_instances.
+Global Hint Mode MapFold ! - - : typeclass_instances.
 
 (** Finite map implementations are required to implement the [merge] function
 which enables us to give a generic implementation of [union_with],
-[intersection_with], and [difference_with]. *)
+[intersection_with], and [difference_with].
 
-Class FinMapToList K A M := map_to_list: M → list (K * A).
-Global Hint Mode FinMapToList ! - - : typeclass_instances.
-Global Hint Mode FinMapToList - - ! : typeclass_instances.
-
-(** The function [diag_None f] is used in the specification and lemmas of
-[merge f]. It lifts a function [f : option A → option B → option C] by returning
+The function [diag_None f] is used in the specification and lemmas of [merge f].
+It lifts a function [f : option A → option B → option C] by returning
 [None] if both arguments are [None], to make sure that in [merge f m1 m2], the
 function [f] can only operate on elements that are in the domain of either [m1]
 or [m2]. *)
@@ -39,8 +41,11 @@ Definition diag_None {A B C} (f : option A → option B → option C)
     (mx : option A) (my : option B) : option C :=
   match mx, my with None, None => None | _, _ => f mx my end.
 
+Global Instance map_insert `{PartialAlter K A M} : Insert K A M :=
+  λ i x, partial_alter (λ _, Some x) i.
+
 Class FinMap K M `{FMap M, ∀ A, Lookup K A (M A), ∀ A, Empty (M A), ∀ A,
-    PartialAlter K A (M A), OMap M, Merge M, ∀ A, FinMapToList K A (M A),
+    PartialAlter K A (M A), OMap M, Merge M, ∀ A, MapFold K A (M A),
     EqDecision K} := {
   map_eq {A} (m1 m2 : M A) : (∀ i, m1 !! i = m2 !! i) → m1 = m2;
   lookup_empty {A} i : (∅ : M A) !! i = None;
@@ -49,13 +54,14 @@ Class FinMap K M `{FMap M, ∀ A, Lookup K A (M A), ∀ A, Empty (M A), ∀ A,
   lookup_partial_alter_ne {A} f (m : M A) i j :
     i ≠ j → partial_alter f i m !! j = m !! j;
   lookup_fmap {A B} (f : A → B) (m : M A) i : (f <$> m) !! i = f <$> m !! i;
-  NoDup_map_to_list {A} (m : M A) : NoDup (map_to_list m);
-  elem_of_map_to_list {A} (m : M A) i x :
-    (i,x) ∈ map_to_list m ↔ m !! i = Some x;
   lookup_omap {A B} (f : A → option B) (m : M A) i :
     omap f m !! i = m !! i ≫= f;
   lookup_merge {A B C} (f : option A → option B → option C) (m1 : M A) (m2 : M B) i :
-    merge f m1 m2 !! i = diag_None f (m1 !! i) (m2 !! i)
+    merge f m1 m2 !! i = diag_None f (m1 !! i) (m2 !! i);
+  map_fold_ind {A B} (P : B → M A → Prop) (f : K → A → B → B) (b : B) :
+    P b ∅ →
+    (∀ i x m r, m !! i = None → P r m → P (f i x r) (<[i:=x]> m)) →
+    ∀ m, P (map_fold f b m) m
 }.
 
 (** * Derived operations *)
@@ -63,8 +69,6 @@ Class FinMap K M `{FMap M, ∀ A, Lookup K A (M A), ∀ A, Empty (M A), ∀ A,
 finite map implementations. These generic implementations do not cause a
 significant performance loss, which justifies including them in the finite map
 interface as primitive operations. *)
-Global Instance map_insert `{PartialAlter K A M} : Insert K A M :=
-  λ i x, partial_alter (λ _, Some x) i.
 Global Instance map_alter `{PartialAlter K A M} : Alter K A M :=
   λ f, partial_alter (fmap f).
 Global Instance map_delete `{PartialAlter K A M} : Delete K M :=
@@ -75,10 +79,12 @@ Global Instance map_singleton `{PartialAlter K A M, Empty M} :
 Definition list_to_map `{Insert K A M, Empty M} : list (K * A) → M :=
   fold_right (λ p, <[p.1:=p.2]>) ∅.
 
-Global Instance map_size `{FinMapToList K A M} : Size M := λ m,
-  length (map_to_list m).
+Global Instance map_size `{MapFold K A M} : Size M :=
+  map_fold (λ _ _, S) 0.
+Definition map_to_list `{MapFold K A M} : M → list (K * A) :=
+  map_fold (λ i x, ((i,x) ::.)) [].
 
-Definition map_to_set `{FinMapToList K A M,
+Definition map_to_set `{MapFold K A M,
     Singleton B C, Empty C, Union C} (f : K → A → B) (m : M) : C :=
   list_to_set (uncurry f <$> map_to_list m).
 Definition set_to_map `{Elements B C, Insert K A M, Empty M}
@@ -135,7 +141,7 @@ Global Instance map_difference `{Merge M} {A} : Difference (M A) :=
 (** A stronger variant of map that allows the mapped function to use the index
 of the elements. Implemented by conversion to lists, so not very efficient. *)
 Definition map_imap `{∀ A, Insert K A (M A), ∀ A, Empty (M A),
-    ∀ A, FinMapToList K A (M A)} {A B} (f : K → A → option B) (m : M A) : M B :=
+    ∀ A, MapFold K A (M A)} {A B} (f : K → A → option B) (m : M A) : M B :=
   list_to_map (omap (λ ix, (fst ix ,.) <$> uncurry f ix) (map_to_list m)).
 
 (** Given a function [f : K1 → K2], the function [kmap f] turns a maps with
@@ -144,7 +150,7 @@ is only well-behaved if [f] is injective, as otherwise it could map multiple
 entries into the same entry. All lemmas about [kmap f] thus have the premise
 [Inj (=) (=) f]. *)
 Definition kmap `{∀ A, Insert K2 A (M2 A), ∀ A, Empty (M2 A),
-    ∀ A, FinMapToList K1 A (M1 A)} {A} (f : K1 → K2) (m : M1 A) : M2 A :=
+    ∀ A, MapFold K1 A (M1 A)} {A} (f : K1 → K2) (m : M1 A) : M2 A :=
   list_to_map (fmap (prod_map f id) (map_to_list m)).
 
 (* The zip operation on maps combines two maps key-wise. The keys of resulting
@@ -154,13 +160,8 @@ Definition map_zip_with `{Merge M} {A B C} (f : A → B → C) : M A → M B →
     match mx, my with Some x, Some y => Some (f x y) | _, _ => None end).
 Notation map_zip := (map_zip_with pair).
 
-(* Folds a function [f] over a map. The order in which the function is called
-is unspecified. *)
-Definition map_fold `{FinMapToList K A M} {B}
-  (f : K → A → B → B) (b : B) : M → B := foldr (uncurry f) b ∘ map_to_list.
-
 Global Instance map_filter
-    `{FinMapToList K A M, Insert K A M, Empty M} : Filter (K * A) M :=
+    `{MapFold K A M, Insert K A M, Empty M} : Filter (K * A) M :=
   λ P _, map_fold (λ k v m, if decide (P (k,v)) then <[k := v]>m else m) ∅.
 
 Fixpoint map_seq `{Insert nat A M, Empty M} (start : nat) (xs : list A) : M :=
@@ -183,7 +184,7 @@ Global Typeclasses Opaque map_lookup_total.
 gives a finite set containing with the values [A] of [m]. The type of [map_img]
 is generic to support different map and set implementations. A possible instance
 is [SA:=gset A]. *)
-Definition map_img `{FinMapToList K A M,
+Definition map_img `{MapFold K A M,
   Singleton A SA, Empty SA, Union SA} : M → SA := map_to_set (λ _ x, x).
 Global Typeclasses Opaque map_img.
 
@@ -192,7 +193,7 @@ Global Typeclasses Opaque map_img.
 The type of [map_preimg] is very generic to support different map and set
 implementations. A possible instance is [MKA:=gmap K A], [MASK:=gmap A (gset K)],
 and [SK:=gset K]. *)
-Definition map_preimg `{FinMapToList K A MKA, Empty MASK,
+Definition map_preimg `{MapFold K A MKA, Empty MASK,
     PartialAlter A SK MASK, Empty SK, Singleton K SK, Union SK}
     (m : MKA) : MASK :=
   map_fold (λ i, partial_alter (λ mX, Some $ {[ i ]} ∪ default ∅ mX)) ∅ m.
@@ -269,6 +270,26 @@ Proof.
 Qed.
 Lemma map_empty_subseteq {A} (m : M A) : ∅ ⊆ m.
 Proof. apply map_subseteq_spec. intros k v []%lookup_empty_Some. Qed.
+
+(** [NoDup_map_to_list] and [NoDup_map_to_list] need to be proved mutually,
+hence a [Local] helper lemma. *)
+Local Lemma map_to_list_spec {A} (m : M A) :
+  NoDup (map_to_list m) ∧ (∀ i x, (i,x) ∈ map_to_list m ↔ m !! i = Some x).
+Proof.
+  apply (map_fold_ind (λ l m,
+    NoDup l ∧ ∀ i x, (i,x) ∈ l ↔ m !! i = Some x)); clear m.
+  { split; [constructor|]. intros i x. by rewrite elem_of_nil, lookup_empty. }
+  intros i x m l ? [IH1 IH2]. split; [constructor; naive_solver|].
+  intros j y. rewrite elem_of_cons, IH2.
+  unfold insert, map_insert. destruct (decide (i = j)) as [->|].
+  - rewrite lookup_partial_alter. naive_solver.
+  - rewrite lookup_partial_alter_ne by done. naive_solver.
+Qed.
+Lemma NoDup_map_to_list {A} (m : M A) : NoDup (map_to_list m).
+Proof. apply map_to_list_spec. Qed.
+Lemma elem_of_map_to_list {A} (m : M A) i x :
+  (i,x) ∈ map_to_list m ↔ m !! i = Some x.
+Proof. apply map_to_list_spec. Qed.
 
 Lemma map_subset_alt {A} (m1 m2 : M A) :
   m1 ⊂ m2 ↔ m1 ⊆ m2 ∧ ∃ i, m1 !! i = None ∧ is_Some (m2 !! i).
@@ -1012,7 +1033,11 @@ Qed.
 
 Lemma map_to_list_length {A} (m : M A) :
   length (map_to_list m) = size m.
-Proof. reflexivity. Qed.
+Proof.
+  apply (map_fold_ind (λ n m, length (map_to_list m) = n)); clear m.
+  { by rewrite map_to_list_empty. }
+  intros i x m n ? IH. by rewrite map_to_list_insert, <-IH by done.
+Qed.
 
 Lemma map_choose {A} (m : M A) : m ≠ ∅ → ∃ i x, m !! i = Some x.
 Proof.
@@ -1107,10 +1132,10 @@ Proof. unfold map_imap. by rewrite map_to_list_empty. Qed.
 
 (** ** Properties of the size operation *)
 Lemma map_size_empty {A} : size (∅ : M A) = 0.
-Proof. unfold size, map_size. by rewrite map_to_list_empty. Qed.
+Proof. by rewrite <-map_to_list_length, map_to_list_empty. Qed.
 Lemma map_size_empty_iff {A} (m : M A) : size m = 0 ↔ m = ∅.
 Proof.
-  unfold size, map_size. by rewrite length_zero_iff_nil, map_to_list_empty_iff.
+  by rewrite <-map_to_list_length, length_zero_iff_nil, map_to_list_empty_iff.
 Qed.
 Lemma map_size_empty_inv {A} (m : M A) : size m = 0 → m = ∅.
 Proof. apply map_size_empty_iff. Qed.
@@ -1118,7 +1143,7 @@ Lemma map_size_non_empty_iff {A} (m : M A) : size m ≠ 0 ↔ m ≠ ∅.
 Proof. by rewrite map_size_empty_iff. Qed.
 
 Lemma map_size_singleton {A} i (x : A) : size ({[ i := x ]} : M A) = 1.
-Proof. unfold size, map_size. by rewrite map_to_list_singleton. Qed.
+Proof. by rewrite <-map_to_list_length, map_to_list_singleton. Qed.
 
 Lemma map_size_ne_0_lookup {A} (m : M A) :
   size m ≠ 0 ↔ ∃ i, is_Some (m !! i).
@@ -1139,9 +1164,9 @@ Lemma map_size_insert {A} i x (m : M A) :
 Proof.
   destruct (m !! i) as [y|] eqn:?; simpl.
   - rewrite <-(insert_id m i y) at 2 by done. rewrite <-!(insert_delete_insert m).
-    unfold size, map_size.
+    rewrite <-!map_to_list_length.
     by rewrite !map_to_list_insert by (by rewrite lookup_delete).
-  - unfold size, map_size. by rewrite map_to_list_insert.
+  - by rewrite <-!map_to_list_length, map_to_list_insert.
 Qed.
 Lemma map_size_insert_Some {A} i x (m : M A) :
   is_Some (m !! i) → size (<[i:=x]> m) = size m.
@@ -1154,7 +1179,7 @@ Lemma map_size_delete {A} i (m : M A) :
   size (delete i m) = (match m !! i with Some _ => pred | None => id end) (size m).
 Proof.
   destruct (m !! i) as [y|] eqn:?; simpl.
-  - unfold size, map_size. by rewrite <-(map_to_list_delete m).
+  - by rewrite <-!map_to_list_length, <-(map_to_list_delete m).
   - by rewrite delete_notin.
 Qed.
 Lemma map_size_delete_Some {A} i (m : M A) :
@@ -1165,7 +1190,9 @@ Lemma map_size_delete_None {A} i (m : M A) :
 Proof. intros Hi. by rewrite map_size_delete, Hi. Qed.
 
 Lemma map_size_fmap {A B} (f : A -> B) (m : M A) : size (f <$> m) = size m.
-Proof. intros. unfold size, map_size. by rewrite map_to_list_fmap, fmap_length. Qed.
+Proof.
+  intros. by rewrite <-!map_to_list_length, map_to_list_fmap, fmap_length.
+Qed.
 
 Lemma map_size_list_to_map {A} (l : list (K * A)) :
   NoDup l.*1 →
@@ -1179,12 +1206,16 @@ Qed.
 Lemma map_subseteq_size_eq {A} (m1 m2 : M A) :
   m1 ⊆ m2 → size m2 ≤ size m1 → m1 = m2.
 Proof.
-  intros. apply map_to_list_inj, submseteq_length_Permutation; [|done].
-  by apply map_to_list_submseteq.
+  intros. apply map_to_list_inj, submseteq_length_Permutation.
+  - by apply map_to_list_submseteq.
+  - by rewrite !map_to_list_length.
 Qed.
 
 Lemma map_subseteq_size {A} (m1 m2 : M A) : m1 ⊆ m2 → size m1 ≤ size m2.
-Proof. intros. by apply submseteq_length, map_to_list_submseteq. Qed.
+Proof.
+  intros. rewrite <-!map_to_list_length.
+  by apply submseteq_length, map_to_list_submseteq.
+Qed.
 
 Lemma map_subset_size {A} (m1 m2 : M A) : m1 ⊂ m2 → size m1 < size m2.
 Proof.
@@ -1264,9 +1295,55 @@ Lemma elem_of_map_to_set_pair `{Set_ (K * A) C} (m : M A) i x :
 Proof. rewrite elem_of_map_to_set. naive_solver. Qed.
 
 (** ** The fold operation *)
+Lemma map_fold_foldr {A B} (R : relation B) `{!PreOrder R} (l : list (K * A))
+    (f : K → A → B → B) (b : B) m :
+  (∀ j z, Proper (R ==> R) (f j z)) →
+  (∀ j1 j2 z1 z2 y,
+    j1 ≠ j2 → m !! j1 = Some z1 → m !! j2 = Some z2 →
+    R (f j1 z1 (f j2 z2 y)) (f j2 z2 (f j1 z1 y))) →
+  map_to_list m ≡ₚ l →
+  R (map_fold f b m) (foldr (uncurry f) b l).
+Proof.
+  intros Hf_proper. revert l. apply (map_fold_ind (λ r m, ∀ l,
+    (∀ j1 j2 z1 z2 y,
+      j1 ≠ j2 → m !! j1 = Some z1 → m !! j2 = Some z2 →
+      R (f j1 z1 (f j2 z2 y)) (f j2 z2 (f j1 z1 y))) →
+    map_to_list m ≡ₚ l →
+    R r (foldr (uncurry f) b l))); clear m.
+  { intros [|x l] _; simpl; [done|].
+    by rewrite map_to_list_empty, Permutation_nil_l. }
+  intros i x m r ? IH l Hf Hl. rewrite map_to_list_insert in Hl by done.
+  etrans; [|apply (foldr_permutation R), Hl]; simpl.
+  - f_equiv. apply IH; [|done]. intros j1 j2 z1 z2 y ???.
+    apply Hf; [done|rewrite lookup_insert_Some; naive_solver..].
+  - intros []; apply _.
+  - intros j1 [k1 y1] j2 [k2 y2] c Hj Hj1 Hj2. apply Hf.
+    + intros ->. eapply Hj, (NoDup_lookup ((i,x) :: map_to_list m).*1).
+      * csimpl. apply NoDup_cons_2, NoDup_fst_map_to_list.
+        intros ([??]&?&?%elem_of_map_to_list)%elem_of_list_fmap; naive_solver.
+      * by rewrite list_lookup_fmap, Hj1.
+      * by rewrite list_lookup_fmap, Hj2.
+    + apply elem_of_map_to_list. rewrite map_to_list_insert by done.
+      by eapply elem_of_list_lookup_2.
+    + apply elem_of_map_to_list. rewrite map_to_list_insert by done.
+      by eapply elem_of_list_lookup_2.
+Qed.
+
 Lemma map_fold_empty {A B} (f : K → A → B → B) (b : B) :
   map_fold f b ∅ = b.
-Proof. unfold map_fold; simpl. by rewrite map_to_list_empty. Qed.
+Proof.
+  apply (map_fold_foldr _ []); [solve_proper|..].
+  - intros j1 j2 z1 z2 y. by rewrite !lookup_empty.
+  - by rewrite map_to_list_empty.
+Qed.
+
+Lemma map_fold_singleton {A B} (f : K → A → B → B) (b : B) i x :
+  map_fold f b {[i:=x]} = f i x b.
+Proof.
+  apply (map_fold_foldr _ [(i,x)]); [solve_proper|..].
+  - intros j1 j2 z1 z2 y ?. rewrite !lookup_singleton_Some. naive_solver.
+  - by rewrite map_to_list_singleton.
+Qed.
 
 Lemma map_fold_insert {A B} (R : relation B) `{!PreOrder R}
     (f : K → A → B → B) (b : B) (i : K) (x : A) (m : M A) :
@@ -1277,17 +1354,12 @@ Lemma map_fold_insert {A B} (R : relation B) `{!PreOrder R}
   m !! i = None →
   R (map_fold f b (<[i:=x]> m)) (f i x (map_fold f b m)).
 Proof.
-  intros Hf_proper Hf Hi. unfold map_fold; simpl.
-  assert (∀ kz, Proper (R ==> R) (uncurry f kz)) by (intros []; apply _).
-  trans (foldr (uncurry f) b ((i, x) :: map_to_list m)); [|done].
-  eapply (foldr_permutation R (uncurry f) b), map_to_list_insert; auto.
-  intros j1 [k1 y1] j2 [k2 y2] c Hj Hj1 Hj2. apply Hf.
-  - intros ->.
-    eapply Hj, NoDup_lookup; [apply (NoDup_fst_map_to_list (<[i:=x]> m))| | ].
-    + by rewrite list_lookup_fmap, Hj1.
-    + by rewrite list_lookup_fmap, Hj2.
-  - by eapply elem_of_map_to_list, elem_of_list_lookup_2.
-  - by eapply elem_of_map_to_list, elem_of_list_lookup_2.
+  intros Hf_proper Hf Hi. trans (f i x (foldr (uncurry f) b (map_to_list m))).
+  - apply (map_fold_foldr _ ((i,x) :: map_to_list m)); [solve_proper|done|].
+    by rewrite map_to_list_insert by done.
+  - f_equiv. apply (map_fold_foldr (flip R)); [solve_proper| |done].
+    intros j1 j2 z1 z2 y ???.
+    apply Hf; rewrite ?lookup_insert_Some; naive_solver.
 Qed.
 
 Lemma map_fold_insert_L {A B} (f : K → A → B → B) (b : B) (i : K) (x : A) (m : M A) :
@@ -1321,28 +1393,6 @@ Lemma map_fold_delete_L {A B} (f : K → A → B → B) (b : B) (i : K) (x : A) 
   m !! i = Some x →
   map_fold f b m = f i x (map_fold f b (delete i m)).
 Proof. apply map_fold_delete; apply _. Qed.
-
-Lemma map_fold_ind {A B} (P : B → M A → Prop) (f : K → A → B → B) (b : B) :
-  P b ∅ →
-  (∀ i x m r, m !! i = None → P r m → P (f i x r) (<[i:=x]> m)) →
-  ∀ m, P (map_fold f b m) m.
-Proof.
-  intros Hemp Hinsert.
-  cut (∀ l, NoDup l →
-    ∀ m, (∀ i x, m !! i = Some x ↔ (i,x) ∈ l) → P (foldr (uncurry f) b l) m).
-  { intros help ?. apply help; [apply NoDup_map_to_list|].
-    intros i x. by rewrite elem_of_map_to_list. }
-  induction 1 as [|[i x] l ?? IH]; simpl.
-  { intros m Hm. cut (m = ∅); [by intros ->|]. apply map_empty; intros i.
-    apply eq_None_not_Some; intros [x []%Hm%elem_of_nil]. }
-  intros m Hm. assert (m !! i = Some x) by (apply Hm; by left).
-  rewrite <-(insert_delete m i x) by done.
-  apply Hinsert; auto using lookup_delete.
-  apply IH. intros j y. rewrite lookup_delete_Some, Hm. split.
-  - by intros [? [[= ??]|?]%elem_of_cons].
-  - intros ?; split; [intros ->|by right].
-    assert (m !! j = Some y) by (apply Hm; by right). naive_solver.
-Qed.
 
 (** ** Properties of the [map_Forall] predicate *)
 Section map_Forall.

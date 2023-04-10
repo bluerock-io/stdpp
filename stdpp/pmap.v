@@ -11,8 +11,8 @@ and Leroy, https://hal.inria.fr/hal-03372247. It has various good properties:
   [Inductive test := Test : Pmap test → test]. This is possible because we do
   _not_ use a Sigma type to ensure canonical representations (a Sigma type would
   break Coq's strict positivity check). *)
-From stdpp Require Import mapset countable.
-From stdpp Require Export fin_maps.
+From stdpp Require Export countable fin_maps fin_map_dom.
+From stdpp Require Import mapset.
 From stdpp Require Import options.
 
 Local Open Scope positive_scope.

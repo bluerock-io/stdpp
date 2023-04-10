@@ -228,7 +228,7 @@ Proof.
   unfold set_finite, elem_of at 1, coPset_elem_of; simpl; clear Ht; split.
   - induction t as [b|b l IHl r IHr]; simpl.
     { destruct b; simpl; [intros [l Hl]|done].
-      by apply (is_fresh (list_to_set l : Pset)), elem_of_list_to_set, Hl. }
+      by apply (infinite_is_fresh l), Hl. }
     intros [ll Hll]; rewrite andb_True; split.
     + apply IHl; exists (omap (maybe (~0)) ll); intros i.
       rewrite elem_of_list_omap; intros; exists (i~0); auto.
@@ -341,23 +341,26 @@ Lemma Pset_to_coPset_finite X : set_finite (Pset_to_coPset X).
 Proof. apply coPset_finite_spec; destruct X; apply Pset_to_coPset_raw_finite. Qed.
 
 (** * Conversion to and from gsets of positives *)
-Lemma coPset_to_gset_wf (m : Pmap ()) : gmap_wf positive m.
-Proof. unfold gmap_wf. by rewrite bool_decide_spec. Qed.
 Definition coPset_to_gset (X : coPset) : gset positive :=
   let 'Mapset m := coPset_to_Pset X in
-  Mapset (GMap m (coPset_to_gset_wf m)).
+  Mapset (pmap_to_gmap m).
 
 Definition gset_to_coPset (X : gset positive) : coPset :=
-  let 'Mapset (GMap t _) := X in Pset_to_coPset_raw t ↾ Pset_to_coPset_raw_wf _.
+  let 'Mapset m := X in
+  Pset_to_coPset_raw (gmap_to_pmap m) ↾ Pset_to_coPset_raw_wf _.
 
 Lemma elem_of_coPset_to_gset X i : set_finite X → i ∈ coPset_to_gset X ↔ i ∈ X.
 Proof.
-  intros ?. rewrite <-elem_of_coPset_to_Pset by done.
-  unfold coPset_to_gset. by destruct (coPset_to_Pset X).
+  intros ?. rewrite <-elem_of_coPset_to_Pset by done. destruct X as [X ?].
+  unfold elem_of, gset_elem_of, mapset_elem_of, coPset_to_gset; simpl.
+  by rewrite lookup_pmap_to_gmap.
 Qed.
 
 Lemma elem_of_gset_to_coPset X i : i ∈ gset_to_coPset X ↔ i ∈ X.
-Proof. destruct X as [[?]]; apply elem_of_Pset_to_coPset_raw. Qed.
+Proof.
+  destruct X as [m]. unfold elem_of, coPset_elem_of; simpl.
+  by rewrite elem_of_Pset_to_coPset_raw, lookup_gmap_to_pmap.
+Qed.
 Lemma gset_to_coPset_finite X : set_finite (gset_to_coPset X).
 Proof.
   apply coPset_finite_spec; destruct X as [[?]]; apply Pset_to_coPset_raw_finite.

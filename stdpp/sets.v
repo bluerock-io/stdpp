@@ -978,33 +978,50 @@ Section quantifiers.
   Context `{SemiSet A C} (P : A → Prop).
   Implicit Types X Y : C.
 
+  Global Instance set_unfold_set_Forall X (QX QP : A → Prop) :
+    (∀ x, SetUnfoldElemOf x X (QX x)) →
+    (∀ x, SetUnfold (P x) (QP x)) →
+    SetUnfold (set_Forall P X) (∀ x, QX x → QP x).
+  Proof.
+    intros HX HP; constructor. unfold set_Forall. apply forall_proper; intros x.
+    by rewrite (set_unfold (x ∈ X) _), (set_unfold (P x) _).
+  Qed.
+  Global Instance set_unfold_set_Exists X (QX QP : A → Prop) :
+    (∀ x, SetUnfoldElemOf x X (QX x)) →
+    (∀ x, SetUnfold (P x) (QP x)) →
+    SetUnfold (set_Exists P X) (∃ x, QX x ∧ QP x).
+  Proof.
+    intros HX HP; constructor. unfold set_Exists. f_equiv; intros x.
+    by rewrite (set_unfold (x ∈ X) _), (set_unfold (P x) _).
+  Qed.
+
   Lemma set_Forall_empty : set_Forall P (∅ : C).
-  Proof. unfold set_Forall. set_solver. Qed.
+  Proof. set_solver. Qed.
   Lemma set_Forall_singleton x : set_Forall P ({[ x ]} : C) ↔ P x.
-  Proof. unfold set_Forall. set_solver. Qed.
+  Proof. set_solver. Qed.
   Lemma set_Forall_union X Y :
     set_Forall P X → set_Forall P Y → set_Forall P (X ∪ Y).
-  Proof. unfold set_Forall. set_solver. Qed.
+  Proof. set_solver. Qed.
   Lemma set_Forall_union_inv_1 X Y : set_Forall P (X ∪ Y) → set_Forall P X.
-  Proof. unfold set_Forall. set_solver. Qed.
+  Proof. set_solver. Qed.
   Lemma set_Forall_union_inv_2 X Y : set_Forall P (X ∪ Y) → set_Forall P Y.
-  Proof. unfold set_Forall. set_solver. Qed.
+  Proof. set_solver. Qed.
   Lemma set_Forall_list_to_set l : set_Forall P (list_to_set (C:=C) l) ↔ Forall P l.
-  Proof. rewrite Forall_forall. unfold set_Forall. set_solver. Qed.
+  Proof. rewrite Forall_forall. set_solver. Qed.
 
   Lemma set_Exists_empty : ¬set_Exists P (∅ : C).
-  Proof. unfold set_Exists. set_solver. Qed.
+  Proof. set_solver. Qed.
   Lemma set_Exists_singleton x : set_Exists P ({[ x ]} : C) ↔ P x.
-  Proof. unfold set_Exists. set_solver. Qed.
+  Proof. set_solver. Qed.
   Lemma set_Exists_union_1 X Y : set_Exists P X → set_Exists P (X ∪ Y).
-  Proof. unfold set_Exists. set_solver. Qed.
+  Proof. set_solver. Qed.
   Lemma set_Exists_union_2 X Y : set_Exists P Y → set_Exists P (X ∪ Y).
-  Proof. unfold set_Exists. set_solver. Qed.
+  Proof. set_solver. Qed.
   Lemma set_Exists_union_inv X Y :
     set_Exists P (X ∪ Y) → set_Exists P X ∨ set_Exists P Y.
-  Proof. unfold set_Exists. set_solver. Qed.
+  Proof. set_solver. Qed.
   Lemma set_Exists_list_to_set l : set_Exists P (list_to_set (C:=C) l) ↔ Exists P l.
-  Proof. rewrite Exists_exists. unfold set_Exists. set_solver. Qed.
+  Proof. rewrite Exists_exists. set_solver. Qed.
 End quantifiers.
 
 Section more_quantifiers.
@@ -1013,10 +1030,10 @@ Section more_quantifiers.
 
   Lemma set_Forall_impl (P Q : A → Prop) X :
     set_Forall P X → (∀ x, P x → Q x) → set_Forall Q X.
-  Proof. unfold set_Forall. naive_solver. Qed.
+  Proof. set_solver. Qed.
   Lemma set_Exists_impl (P Q : A → Prop) X :
     set_Exists P X → (∀ x, P x → Q x) → set_Exists Q X.
-  Proof. unfold set_Exists. naive_solver. Qed.
+  Proof. set_solver. Qed.
 End more_quantifiers.
 
 (** * Properties of implementations of sets that form a monad *)

@@ -31,6 +31,7 @@ Coq 8.12 and 8.13 are no longer supported by this release.
   use `map_subset_size` instead.
 - Rename `option_union_Some` → `union_Some`.
 - Rename `prefix_lookup` → `prefix_lookup_Some`.
+- Extend `set_solver` with support for `set_Forall` and `set_Exists`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

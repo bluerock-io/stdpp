@@ -92,6 +92,14 @@ Local Arguments lookup _ _ _ _ _ !_ / : simpl nomatch, assert.
 
 Global Instance Pmap_empty {A} : Empty (Pmap A) := PEmpty.
 
+(** Block reduction, even on concrete [Pmap]s.
+Marking [Pmap_empty] as [simpl never] would not be enough, because of
+https://github.com/coq/coq/issues/2972 and
+https://github.com/coq/coq/issues/2986.
+And marking [Pmap] consumers as [simpl never] does not work either, see:
+https://gitlab.mpi-sws.org/iris/stdpp/-/merge_requests/171#note_53216 *)
+Global Opaque Pmap_empty.
+
 Local Fixpoint Pmap_ne_singleton {A} (i : positive) (x : A) : Pmap_ne A :=
   match i with
   | 1 => PNode010 x
@@ -178,7 +186,7 @@ Global Instance Pmap_fold {A} : MapFold positive A (Pmap A) := λ {B} f,
 Local Definition PNode_valid {A} (ml : Pmap A) (mx : option A) (mr : Pmap A) :=
   match ml, mx, mr with PEmpty, None, PEmpty => False | _, _, _ => True end.
 Local Lemma Pmap_ind {A} (P : Pmap A → Prop) :
-  P ∅ →
+  P PEmpty →
   (∀ ml mx mr, PNode_valid ml mx mr → P ml → P mr → P (PNode ml mx mr)) →
   ∀ mt, P mt.
 Proof.
@@ -325,7 +333,7 @@ Section Pmap_fold.
   Proof. by destruct ml, mx, mr. Qed.
 
   Local Lemma Pmap_fold_ind (P : B → Pmap A → Prop) (b : B) j :
-    P b ∅ →
+    P b PEmpty →
     (∀ i x mt r, mt !! i = None →
       P r mt → P (f (Pos.reverse_go i j) x r) (<[i:=x]> mt)) →
     ∀ mt, P (Pmap_fold f j b mt) mt.
@@ -335,13 +343,14 @@ Section Pmap_fold.
       intros P b j Hemp Hinsert; [done|].
     rewrite Pmap_fold_PNode by done.
     apply (IHr (λ y mt, P y (PNode ml mx mt))).
-    { apply (IHl (λ y mt, P y (PNode mt mx ∅))).
+    { apply (IHl (λ y mt, P y (PNode mt mx PEmpty))).
       { destruct mx as [x|]; [|done].
-        replace (PNode ∅ (Some x) ∅) with (<[1:=x]> ∅ : Pmap A) by done.
+        replace (PNode PEmpty (Some x) PEmpty)
+          with (<[1:=x]> PEmpty : Pmap A) by done.
         by apply Hinsert. }
       intros i x mt r ??.
-      replace (PNode (<[i:=x]> mt) mx ∅)
-        with (<[i~0:=x]> (PNode mt mx ∅)) by (by destruct mt, mx).
+      replace (PNode (<[i:=x]> mt) mx PEmpty)
+        with (<[i~0:=x]> (PNode mt mx PEmpty)) by (by destruct mt, mx).
       apply Hinsert; by rewrite ?Pmap_lookup_PNode. }
     intros i x mt r ??.
     replace (PNode ml mx (<[i:=x]> mt))

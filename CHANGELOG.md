@@ -51,6 +51,22 @@ longer supported by this release.
   redeclaring `intuition`.
 - Rename `option_union_Some` → `union_Some`, and strengthen it to become a
   biimplication.
+- Provide new implementations of `gmap`/`gset`, `Pmap`/`Pset`, `Nmap`/`Nset` and
+  `Zmap`/`Zset` based on the "canonical" version of binary tries by Appel and
+  Leroy (see https://inria.hal.science/hal-03372247) that avoid the use of Sigma
+  types and enjoy:
+  + More definitional equalities, because maps are no longer equipped with a
+    proof of canonicity. This means more equalities can be proved by
+    `reflexivity` or even by conversion as part of unification. For example,
+    `{[ 1 := 1; 2 := 2 ]} = {[ 2 := 2; 1 := 1 ]}` and `{[ 1 ]} ∖ {[ 1 ]} = ∅`
+    hold definitionally.
+  + The use in nested recursive definitions. For example,
+    `Inductive gtest := GTest : gmap nat gtest → gtest`. (The old map types
+    would violate Coq's strict positivity condition due to the Sigma type.)
+- Make `map_fold` a primitive of the `FinMap`, and derive `map_to_list` from it.
+  (Before `map_fold` was derived from `map_to_list`.) This makes it possible to
+  use `map_fold` in nested-recursive definitions on maps. For example,
+  `Fixpoint f (t : gtest) := let 'GTest ts := t in map_fold (λ _ t', plus (f t')) 1 ts`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

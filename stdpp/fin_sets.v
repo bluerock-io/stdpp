@@ -33,6 +33,12 @@ Definition set_bind `{Elements A SA, Empty SB, Union SB}
 Typeclasses Opaque set_bind.
 Global Instance: Params (@set_bind) 6 := {}.
 
+Definition set_omap `{Elements A C, Singleton B D, Empty D, Union D}
+    (f : A → option B) (X : C) : D :=
+  list_to_set (omap f (elements X)).
+Typeclasses Opaque set_omap.
+Global Instance: Params (@set_omap) 8 := {}.
+
 Global Instance set_fresh `{Elements A C, Fresh A (list A)} : Fresh A C :=
   fresh ∘ elements.
 Typeclasses Opaque set_fresh.
@@ -454,7 +460,7 @@ End map.
 
 (** * Bind *)
 Section set_bind.
-  Context `{FinSet B SB}.
+  Context `{Set_ B SB}.
 
   Local Notation set_bind := (set_bind (A:=A) (SA:=C) (SB:=SB)).
 
@@ -498,6 +504,92 @@ Section set_bind.
     X ## Y → set_bind f (X ∪ Y) = set_bind f X ∪ set_bind f Y.
   Proof. unfold_leibniz. apply set_bind_disj_union. Qed.
 End set_bind.
+
+(** * OMap *)
+Section set_omap.
+  Context `{Set_ B D}.
+  Implicit Types (f : A → option B).
+  Implicit Types (x : A) (y : B).
+  Notation set_omap := (set_omap (C:=C) (D:=D)).
+
+  Lemma elem_of_set_omap f X y : y ∈ set_omap f X ↔ ∃ x, x ∈ X ∧ f x = Some y.
+  Proof.
+    unfold set_omap. rewrite elem_of_list_to_set, elem_of_list_omap.
+    by setoid_rewrite elem_of_elements.
+  Qed.
+
+  Global Instance set_unfold_omap f X (P : A → Prop) y :
+    (∀ x, SetUnfoldElemOf x X (P x)) →
+    SetUnfoldElemOf y (set_omap f X) (∃ x, Some y = f x ∧ P x).
+  Proof. constructor. rewrite elem_of_set_omap; naive_solver. Qed.
+
+  Global Instance set_omap_proper :
+    Proper (pointwise_relation _ (=) ==> (≡) ==> (≡)) set_omap.
+  Proof. intros f g Hfg X Y. set_unfold. setoid_rewrite Hfg. naive_solver. Qed.
+  Global Instance set_omap_mono :
+    Proper (pointwise_relation _ (=) ==> (⊆) ==> (⊆)) set_omap.
+  Proof. intros f g Hfg X Y. set_unfold. setoid_rewrite Hfg. naive_solver. Qed.
+
+  Lemma elem_of_set_omap_1 f X y : y ∈ set_omap f X → ∃ x, Some y = f x ∧ x ∈ X.
+  Proof. set_solver. Qed.
+  Lemma elem_of_set_omap_2 f X x y : x ∈ X → f x = Some y → y ∈ set_omap f X.
+  Proof. set_solver. Qed.
+
+  Lemma set_omap_empty f : set_omap f ∅ = ∅.
+  Proof. unfold set_omap. by rewrite elements_empty. Qed.
+  Lemma set_omap_empty_iff f X : set_omap f X ≡ ∅ ↔ set_Forall (λ x, f x = None) X.
+  Proof.
+    split; set_unfold; unfold set_Forall.
+    - intros Hi x Hx. destruct (f x) as [y|] eqn:Hy; naive_solver.
+    - intros Hi y (x & Hf & Hx). specialize (Hi x Hx). by rewrite Hi in Hf.
+  Qed.
+
+  Lemma set_omap_union f X Y : set_omap f (X ∪ Y) ≡ set_omap f X ∪ set_omap f Y.
+  Proof. set_solver. Qed.
+
+  Lemma set_omap_singleton f x :
+    set_omap f {[ x ]} ≡ match f x with Some y => {[ y ]} | None => ∅ end.
+  Proof. set_solver. Qed.
+  Lemma set_omap_singleton_Some f x y : f x = Some y → set_omap f {[ x ]} ≡ {[ y ]}.
+  Proof. intros Hx. by rewrite set_omap_singleton, Hx. Qed.
+  Lemma set_omap_singleton_None f x : f x = None → set_omap f {[ x ]} ≡ ∅.
+  Proof. intros Hx. by rewrite set_omap_singleton, Hx. Qed.
+
+  Lemma set_omap_alt f X : set_omap f X ≡ set_bind (λ x, option_to_set (f x)) X.
+  Proof. set_solver. Qed.
+  Lemma set_map_alt (f : A → B) X : set_map f X = set_omap (λ x, Some (f x)) X.
+  Proof. set_solver. Qed.
+
+  Lemma set_omap_filter P `{∀ x, Decision (P x)} f X :
+    (∀ x, x ∈ X → is_Some (f x) → P x) →
+    set_omap f (filter P X) ≡ set_omap f X.
+  Proof. set_solver. Qed.
+
+  Section leibniz.
+    Context `{!LeibnizEquiv D}.
+
+    Lemma set_omap_union_L f X Y : set_omap f (X ∪ Y) = set_omap f X ∪ set_omap f Y.
+    Proof. unfold_leibniz. apply set_omap_union. Qed.
+
+    Lemma set_omap_singleton_L f x :
+      set_omap f {[ x ]} = match f x with Some y => {[ y ]} | None => ∅ end.
+    Proof. unfold_leibniz. apply set_omap_singleton. Qed.
+    Lemma set_omap_singleton_Some_L f x y :
+      f x = Some y → set_omap f {[ x ]} = {[ y ]}.
+    Proof. unfold_leibniz. apply set_omap_singleton_Some. Qed.
+    Lemma set_omap_singleton_None_L f x : f x = None → set_omap f {[ x ]} = ∅.
+    Proof. unfold_leibniz. apply set_omap_singleton_None. Qed.
+
+    Lemma set_omap_alt_L f X :
+      set_omap f X = set_bind (λ x, option_to_set (f x)) X.
+    Proof. unfold_leibniz. apply set_omap_alt. Qed.
+
+    Lemma set_omap_filter_L P `{∀ x, Decision (P x)} f X :
+      (∀ x, x ∈ X → is_Some (f x) → P x) →
+      set_omap f (filter P X) = set_omap f X.
+    Proof. unfold_leibniz. apply set_omap_filter. Qed.
+  End leibniz.
+End set_omap.
 
 (** * Decision procedures *)
 Lemma set_Forall_elements P X : set_Forall P X ↔ Forall P (elements X).

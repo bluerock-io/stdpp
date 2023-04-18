@@ -300,25 +300,17 @@ Lemma sum_card `{Finite A, Finite B} : card (A + B) = card A + card B.
 Proof. unfold card. simpl. by rewrite app_length, !fmap_length. Qed.
 
 Global Program Instance prod_finite `{Finite A, Finite B} : Finite (A * B)%type :=
-  {| enum := foldr (λ x, (pair x <$> enum B ++.)) [] (enum A) |}.
+  {| enum := a ← enum A; (a,.) <$> enum B |}.
 Next Obligation.
-  intros A ?????. induction (NoDup_enum A) as [|x xs Hx Hxs IH]; simpl.
-  { constructor. }
-  apply NoDup_app; split_and?.
-  - by apply (NoDup_fmap_2 _), NoDup_enum.
-  - intros [? y]. rewrite elem_of_list_fmap. intros (?&?&?); simplify_eq.
-    clear IH. induction Hxs as [|x' xs ?? IH]; simpl.
-    { rewrite elem_of_nil. tauto. }
-    rewrite elem_of_app, elem_of_list_fmap.
-    intros [(?&?&?)|?]; simplify_eq.
-    + destruct Hx. by left.
-    + destruct IH; [ | by auto ]. by intro; destruct Hx; right.
-  - done.
+  intros A ?????. apply NoDup_bind.
+  - intros a1 a2 [a b] ?? (?&?&_)%elem_of_list_fmap (?&?&_)%elem_of_list_fmap.
+    naive_solver.
+  - intros a ?. rewrite (NoDup_fmap _). apply NoDup_enum.
+  - apply NoDup_enum.
 Qed.
 Next Obligation.
-  intros ?????? [x y]. induction (elem_of_enum x); simpl.
-  - rewrite elem_of_app, !elem_of_list_fmap. eauto using elem_of_enum.
-  - rewrite elem_of_app; eauto.
+  intros ?????? [a b]. apply elem_of_list_bind.
+  exists a. eauto using elem_of_enum, elem_of_list_fmap_1.
 Qed.
 Lemma prod_card `{Finite A} `{Finite B} : card (A * B) = card A * card B.
 Proof.
@@ -326,46 +318,43 @@ Proof.
   rewrite app_length, fmap_length. auto.
 Qed.
 
-Definition list_enum {A} (l : list A) : ∀ n, list { l : list A | length l = n } :=
-  fix go n :=
+Fixpoint vec_enum {A} (l : list A) (n : nat) : list (vec A n) :=
   match n with
-  | 0 => [[]↾eq_refl]
-  | S n => foldr (λ x, (sig_map (x ::.) (λ _ H, f_equal S H) <$> (go n) ++.)) [] l
+  | 0 => [[#]]
+  | S m => a ← l; vcons a <$> vec_enum l m
   end.
 
-Global Program Instance list_finite `{Finite A} n : Finite { l : list A | length l = n } :=
-  {| enum := list_enum (enum A) n |}.
+Global Program Instance vec_finite `{Finite A} n : Finite (vec A n) :=
+  {| enum := vec_enum (enum A) n |}.
 Next Obligation.
-  intros A ?? n. induction n as [|n IH]; simpl; [apply NoDup_singleton |].
-  revert IH. generalize (list_enum (enum A) n). intros l Hl.
-  induction (NoDup_enum A) as [|x xs Hx Hxs IH]; simpl; auto; [constructor |].
-  apply NoDup_app; split_and?.
-  - by apply (NoDup_fmap_2 _).
-  - intros [k1 Hk1]. clear Hxs IH. rewrite elem_of_list_fmap.
-    intros ([k2 Hk2]&?&?) Hxk2; simplify_eq/=. destruct Hx. revert Hxk2.
-    induction xs as [|x' xs IH]; simpl in *; [by rewrite elem_of_nil |].
-    rewrite elem_of_app, elem_of_list_fmap, elem_of_cons.
-    intros [([??]&?&?)|?]; simplify_eq/=; auto.
-  - apply IH.
+  intros A ?? n. induction n as [|n IH]; csimpl; [apply NoDup_singleton|].
+  apply NoDup_bind.
+  - intros x1 x2 y ?? (?&?&_)%elem_of_list_fmap (?&?&_)%elem_of_list_fmap.
+    congruence.
+  - intros x ?. rewrite NoDup_fmap by (intros ?; apply vcons_inj_2). done.
+  - apply NoDup_enum.
 Qed.
 Next Obligation.
-  intros A ?? n [l Hl]. revert l Hl.
-  induction n as [|n IH]; intros [|x l] Hl; simpl; simplify_eq.
-  { apply elem_of_list_singleton. by apply (sig_eq_pi _). }
-  revert IH. generalize (list_enum (enum A) n). intros k Hk.
-  induction (elem_of_enum x) as [x xs|x xs]; simpl in *.
-  - rewrite elem_of_app, elem_of_list_fmap. left. injection Hl. intros Hl'.
-    eexists (l↾Hl'). split; [|done]. by apply (sig_eq_pi _).
-  - rewrite elem_of_app. eauto.
+  intros A ?? n v. induction v as [|x n v IH]; csimpl; [apply elem_of_list_here|].
+  apply elem_of_list_bind. eauto using elem_of_enum, elem_of_list_fmap_1.
 Qed.
-
-Lemma list_card `{Finite A} n : card { l : list A | length l = n } = card A ^ n.
+Lemma vec_card `{Finite A} n : card (vec A n) = card A ^ n.
 Proof.
-  unfold card; simpl. induction n as [|n IH]; simpl; auto.
-  rewrite <-IH. clear IH. generalize (list_enum (enum A) n).
-  induction (enum A) as [|x xs IH]; intros l; simpl; auto.
+  unfold card; simpl. induction n as [|n IH]; simpl; [done|].
+  rewrite <-IH. clear IH. generalize (vec_enum (enum A) n).
+  induction (enum A) as [|x xs IH]; intros l; csimpl; auto.
   by rewrite app_length, fmap_length, IH.
 Qed.
+
+Global Instance list_finite `{Finite A} n : Finite { l : list A | length l = n }.
+Proof.
+  refine (bijective_finite (λ v : vec A n, vec_to_list v ↾ vec_to_list_length _)).
+  - abstract (by intros v1 v2 [= ?%vec_to_list_inj2]).
+  - abstract (intros [l <-]; exists (list_to_vec l);
+      apply (sig_eq_pi _), vec_to_list_to_vec).
+Defined.
+Lemma list_card `{Finite A} n : card { l : list A | length l = n } = card A ^ n.
+Proof. unfold card; simpl. rewrite fmap_length. apply vec_card. Qed.
 
 Fixpoint fin_enum (n : nat) : list (fin n) :=
   match n with 0 => [] | S n => 0%fin :: (FS <$> fin_enum n) end.

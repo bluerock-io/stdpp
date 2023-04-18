@@ -35,6 +35,7 @@ Coq 8.12 and 8.13 are no longer supported by this release.
 - Change `lookup_union` lemma statement to use `∪` on maps instead of `union_with`.
 - Add `set_omap` function for finite sets and associated lemmas. (by Dorian
   Lesbre)
+- Add proof that `vec` is `Finite`. (by Herman Bergwerf.)
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

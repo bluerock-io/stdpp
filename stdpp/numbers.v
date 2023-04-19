@@ -173,6 +173,8 @@ Notation "(≤)" := Pos.le (only parsing) : positive_scope.
 Notation "(<)" := Pos.lt (only parsing) : positive_scope.
 Notation "(~0)" := xO (only parsing) : positive_scope.
 Notation "(~1)" := xI (only parsing) : positive_scope.
+Infix "`max`" := Pos.max : positive_scope.
+Infix "`min`" := Pos.min : positive_scope.
 
 Global Arguments Pos.of_nat : simpl never.
 Global Arguments Pos.mul : simpl never.

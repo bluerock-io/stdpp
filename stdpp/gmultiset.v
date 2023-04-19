@@ -4,11 +4,11 @@ From stdpp Require Import options.
 
 (** Multisets [gmultiset A] are represented as maps from [A] to natural numbers,
 which represent the multiplicity. To ensure we have canonical representations,
-the multiplicity is "minus 1". Therefore, [gmultiset_car !! x = None] means [x]
-has multiplicity [0] and [gmultiset_car !! x = Some 0] means [x] has
+the multiplicity is a [positive]. Therefore, [gmultiset_car !! x = None] means
+[x] has multiplicity [0] and [gmultiset_car !! x = Some 1] means [x] has
 multiplicity 1. *)
 
-Record gmultiset A `{Countable A} := GMultiSet { gmultiset_car : gmap A nat }.
+Record gmultiset A `{Countable A} := GMultiSet { gmultiset_car : gmap A positive }.
 Global Arguments GMultiSet {_ _ _} _ : assert.
 Global Arguments gmultiset_car {_ _ _} _ : assert.
 
@@ -25,7 +25,7 @@ Section definitions.
   Context `{Countable A}.
 
   Definition multiplicity (x : A) (X : gmultiset A) : nat :=
-    match gmultiset_car X !! x with Some n => S n | None => 0 end.
+    match gmultiset_car X !! x with Some n => Pos.to_nat n | None => 0 end.
   Global Instance gmultiset_elem_of : ElemOf A (gmultiset A) := λ x X,
     0 < multiplicity x X.
   Global Instance gmultiset_subseteq : SubsetEq (gmultiset A) := λ X Y, ∀ x,
@@ -34,33 +34,29 @@ Section definitions.
     multiplicity x X = multiplicity x Y.
 
   Global Instance gmultiset_elements : Elements A (gmultiset A) := λ X,
-    let (X) := X in '(x,n) ← map_to_list X; replicate (S n) x.
+    let (X) := X in '(x,n) ← map_to_list X; replicate (Pos.to_nat n) x.
   Global Instance gmultiset_size : Size (gmultiset A) := length ∘ elements.
 
   Global Instance gmultiset_empty : Empty (gmultiset A) := GMultiSet ∅.
   Global Instance gmultiset_singleton : SingletonMS A (gmultiset A) := λ x,
-    GMultiSet {[ x := 0 ]}.
+    GMultiSet {[ x := 1%positive ]}.
   Global Instance gmultiset_union : Union (gmultiset A) := λ X Y,
     let (X) := X in let (Y) := Y in
-    GMultiSet $ union_with (λ x y, Some (x `max` y)) X Y.
+    GMultiSet $ union_with (λ x y, Some (x `max` y)%positive) X Y.
   Global Instance gmultiset_intersection : Intersection (gmultiset A) := λ X Y,
     let (X) := X in let (Y) := Y in
-    GMultiSet $ intersection_with (λ x y, Some (x `min` y)) X Y.
+    GMultiSet $ intersection_with (λ x y, Some (x `min` y)%positive) X Y.
   (** Often called the "sum" *)
   Global Instance gmultiset_disj_union : DisjUnion (gmultiset A) := λ X Y,
     let (X) := X in let (Y) := Y in
-    GMultiSet $ union_with (λ x y, Some (S (x + y))) X Y.
+    GMultiSet $ union_with (λ x y, Some (x + y)%positive) X Y.
   Global Instance gmultiset_difference : Difference (gmultiset A) := λ X Y,
     let (X) := X in let (Y) := Y in
     GMultiSet $ difference_with (λ x y,
-      let z := x - y in guard (0 < z); Some (pred z)) X Y.
+      guard (y < x)%positive; Some (x - y)%positive) X Y.
   Global Instance gmultiset_scalar_mul : ScalarMul nat (gmultiset A) := λ n X,
     let (X) := X in GMultiSet $
-      (* Since multiplicities are stored "minus 1", the arithmetic here is a
-      bit subtle: the new mutliplicity is [(S m) * (S n')], which is equal to
-      [S m + (S m) * n'], and then we have to subtract 1 again so the first
-      [S m] becomes [m]. *)
-      match n with 0 => ∅ | S n' => fmap (λ m, m + n' * S m) X end.
+      match n with 0 => ∅ | _ => fmap (λ m, m * Pos.of_nat n)%positive X end.
 
   Global Instance gmultiset_dom : Dom (gmultiset A) (gset A) := λ X,
     let (X) := X in dom X.
@@ -81,7 +77,7 @@ Section basic_lemmas.
     split; [by intros ->|intros HXY].
     destruct X as [X], Y as [Y]; f_equal; apply map_eq; intros x.
     specialize (HXY x); unfold multiplicity in *; simpl in *.
-    repeat case_match; naive_solver.
+    repeat case_match; naive_solver lia.
   Qed.
   Global Instance gmultiset_leibniz : LeibnizEquiv (gmultiset A).
   Proof. intros X Y. by rewrite gmultiset_eq. Qed.
@@ -486,9 +482,10 @@ Section more_lemmas.
   Proof.
     split; [|intros ->; by rewrite gmultiset_elements_empty].
     destruct X as [X]; unfold elements, gmultiset_elements; simpl.
-    intros; apply (f_equal GMultiSet). destruct (map_to_list X) as [|[]] eqn:?.
+    intros; apply (f_equal GMultiSet).
+    destruct (map_to_list X) as [|[x p]] eqn:?; simpl in *.
     - by apply map_to_list_empty_iff.
-    - naive_solver.
+    - pose proof (Pos2Nat.is_pos p). destruct (Pos.to_nat); naive_solver lia.
   Qed.
   Lemma gmultiset_elements_empty_inv X : elements X = [] → X = ∅.
   Proof. apply gmultiset_elements_empty_iff. Qed.
@@ -501,7 +498,7 @@ Section more_lemmas.
     elements (X ⊎ Y) ≡ₚ elements X ++ elements Y.
   Proof.
     destruct X as [X], Y as [Y]; unfold elements, gmultiset_elements.
-    set (f xn := let '(x, n) := xn in replicate (S n) x); simpl.
+    set (f xn := let '(x, n) := xn in replicate (Pos.to_nat n) x); simpl.
     revert Y; induction X as [|x n X HX IH] using map_ind; intros Y.
     { by rewrite (left_id_L _ _ Y), map_to_list_empty. }
     destruct (Y !! x) as [n'|] eqn:HY.
@@ -511,7 +508,7 @@ Section more_lemmas.
         by (by rewrite ?lookup_union_with, ?lookup_delete, ?HX).
       rewrite (assoc_L _), <-(comm (++) (f (_,n'))), <-!(assoc_L _), <-IH.
       rewrite (assoc_L _). f_equiv.
-      rewrite (comm _); simpl. by rewrite replicate_add, Permutation_middle.
+      rewrite (comm _); simpl. by rewrite Pos2Nat.inj_add, replicate_add.
     - rewrite <-insert_union_with_l, !map_to_list_insert, !bind_cons
         by (by rewrite ?lookup_union_with, ?HX, ?HY).
       by rewrite <-(assoc_L (++)), <-IH.
@@ -526,7 +523,7 @@ Section more_lemmas.
   Lemma gmultiset_elem_of_elements x X : x ∈ elements X ↔ x ∈ X.
   Proof.
     destruct X as [X]. unfold elements, gmultiset_elements.
-    set (f xn := let '(x, n) := xn in replicate (S n) x); simpl.
+    set (f xn := let '(x, n) := xn in replicate (Pos.to_nat n) x); simpl.
     unfold elem_of at 2, gmultiset_elem_of, multiplicity; simpl.
     rewrite elem_of_list_bind. split.
     - intros [[??] [[<- ?]%elem_of_replicate ->%elem_of_map_to_list]]; lia.
@@ -614,16 +611,16 @@ Section more_lemmas.
   Global Instance gmultiset_po : PartialOrder (⊆@{gmultiset A}).
   Proof. repeat split; repeat intro; multiset_solver. Qed.
 
-  Lemma gmultiset_subseteq_alt X Y :
+  Local Lemma gmultiset_subseteq_alt X Y :
     X ⊆ Y ↔
-    map_relation (≤) (λ _, False) (λ _, True) (gmultiset_car X) (gmultiset_car Y).
+    map_relation Pos.le (λ _, False) (λ _, True) (gmultiset_car X) (gmultiset_car Y).
   Proof.
     apply forall_proper; intros x. unfold multiplicity.
     destruct (gmultiset_car X !! x), (gmultiset_car Y !! x); naive_solver lia.
   Qed.
   Global Instance gmultiset_subseteq_dec : RelDecision (⊆@{gmultiset A}).
   Proof.
-   refine (λ X Y, cast_if (decide (map_relation (≤)
+   refine (λ X Y, cast_if (decide (map_relation Pos.le
      (λ _, False) (λ _, True) (gmultiset_car X) (gmultiset_car Y))));
      by rewrite gmultiset_subseteq_alt.
   Defined.

@@ -136,6 +136,17 @@ Proof.
   destruct (exist_fresh (dom m)); eauto.
 Qed.
 
+(** Make sure that unification does not eagerly unfold [map_fold] *)
+
+Definition only_evens (m : gmap nat nat) : gmap nat nat :=
+  filter (λ '(_,x), (x | 2)) m.
+
+Lemma only_evens_Some m i n : only_evens m !! i = Some n → (n | 2).
+Proof.
+  intros Hev.
+  apply map_filter_lookup_Some in Hev as [??]. done.
+Qed.
+
 (** Make sure that [pmap] and [gmap] compute *)
 
 Definition pmap_insert_positives (start step num : positive) : Pmap unit :=

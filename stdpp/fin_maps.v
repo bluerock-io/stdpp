@@ -28,6 +28,11 @@ Global Arguments map_fold {_ _ _ _ _} _ _ _.
 Global Hint Mode MapFold - - ! : typeclass_instances.
 Global Hint Mode MapFold ! - - : typeclass_instances.
 
+(** Make sure that [map_fold] (and definitions based on it) are not unfolded
+too eagerly by unification. See [only_evens_Some] in [tests/pmap_gmap] for an
+example. We use level 1 because it is the least level for which the test works. *)
+Global Strategy 1 [map_fold].
+
 (** Finite map implementations are required to implement the [merge] function
 which enables us to give a generic implementation of [union_with],
 [intersection_with], and [difference_with].

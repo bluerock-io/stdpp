@@ -11,7 +11,7 @@ locally (or things moved out of sections) as no default works well enough. *)
 Unset Default Proof Using.
 
 (** * Axiomatization of finite maps *)
-(** We require Leibniz equality of maps to extensional, i.e.,
+(** We require Leibniz equality of finite maps to be extensional, i.e., to enjoy
 [(∀ i, m1 !! i = m2 !! i) → m1 = m2]. This is a very useful property as it
 avoids the need for setoid rewriting in proof. However, it comes at the cost of
 restricting what map implementations we support. Since Coq does not have
@@ -46,6 +46,8 @@ Definition diag_None {A B C} (f : option A → option B → option C)
     (mx : option A) (my : option B) : option C :=
   match mx, my with None, None => None | _, _ => f mx my end.
 
+(** We need the [insert] operation as part of the [map_fold_ind] rule in the
+[FinMap] interface. Hence we define it before the other derived operations. *)
 Global Instance map_insert `{PartialAlter K A M} : Insert K A M :=
   λ i x, partial_alter (λ _, Some x) i.
 

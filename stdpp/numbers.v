@@ -187,8 +187,23 @@ Notation "(~1)" := xI (only parsing) : positive_scope.
 Infix "`max`" := Pos.max : positive_scope.
 Infix "`min`" := Pos.min : positive_scope.
 
+Global Arguments Pos.pred : simpl never.
+Global Arguments Pos.succ : simpl never.
 Global Arguments Pos.of_nat : simpl never.
+Global Arguments Pos.to_nat : simpl never.
 Global Arguments Pos.mul : simpl never.
+Global Arguments Pos.add : simpl never.
+Global Arguments Pos.sub : simpl never.
+Global Arguments Pos.pow : simpl never.
+Global Arguments Pos.shiftl : simpl never.
+Global Arguments Pos.shiftr : simpl never.
+Global Arguments Pos.gcd : simpl never.
+Global Arguments Pos.min : simpl never.
+Global Arguments Pos.max : simpl never.
+Global Arguments Pos.lor : simpl never.
+Global Arguments Pos.land : simpl never.
+Global Arguments Pos.lxor : simpl never.
+Global Arguments Pos.square : simpl never.
 
 Module Pos.
   Export BinPos.Pos.
@@ -366,7 +381,27 @@ Infix "`mod`" := N.modulo (at level 35) : N_scope.
 Infix "`max`" := N.max (at level 35) : N_scope.
 Infix "`min`" := N.min (at level 35) : N_scope.
 
+Global Arguments N.pred : simpl never.
+Global Arguments N.succ : simpl never.
+Global Arguments N.of_nat : simpl never.
+Global Arguments N.to_nat : simpl never.
+Global Arguments N.mul : simpl never.
 Global Arguments N.add : simpl never.
+Global Arguments N.sub : simpl never.
+Global Arguments N.pow : simpl never.
+Global Arguments N.div : simpl never.
+Global Arguments N.modulo : simpl never.
+Global Arguments N.shiftl : simpl never.
+Global Arguments N.shiftr : simpl never.
+Global Arguments N.gcd : simpl never.
+Global Arguments N.lcm : simpl never.
+Global Arguments N.min : simpl never.
+Global Arguments N.max : simpl never.
+Global Arguments N.lor : simpl never.
+Global Arguments N.land : simpl never.
+Global Arguments N.lxor : simpl never.
+Global Arguments N.lnot : simpl never.
+Global Arguments N.square : simpl never.
 
 Global Instance Npos_inj : Inj (=) (=) Npos.
 Proof. by injection 1. Qed.

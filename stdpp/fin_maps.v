@@ -2015,6 +2015,13 @@ Lemma snd_map_zip {A B} (m1 : M A) (m2 : M B) :
   snd <$> map_zip m1 m2 = m2.
 Proof. intros ?. by apply map_fmap_zip_with_r. Qed.
 
+Lemma map_zip_fst_snd {A B} (m : M (A * B)) :
+  map_zip (fst <$> m) (snd <$> m) = m.
+Proof.
+  apply map_eq; intros k.
+  rewrite map_lookup_zip_with, !lookup_fmap. by destruct (m !! k) as [[]|].
+Qed.
+
 (** ** Properties on the [map_relation] relation *)
 Section Forall2.
   Context {A B} (R : A → B → Prop) (P : A → Prop) (Q : B → Prop).

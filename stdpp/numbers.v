@@ -132,7 +132,7 @@ Module Nat.
   Defined.
   Global Instance divide_po : PartialOrder divide.
   Proof.
-    repeat split; try apply _. intros ??. apply Nat.divide_antisym_nonneg; lia.
+    repeat split; try apply _. intros ??. apply Nat.divide_antisym; lia.
   Qed.
   Global Hint Extern 0 (_ | _) => reflexivity : core.
 
@@ -156,6 +156,16 @@ Module Nat.
   Lemma iter_ind {A} (P : A → Prop) f x k :
     P x → (∀ y, P y → P (f y)) → P (Nat.iter k f x).
   Proof. induction k; simpl; auto. Qed.
+
+  (** FIXME: Workaround to support Coq <8.17 and have no warning withs Coq
+  >=8.17 w.r.t. https://github.com/coq/coq/pull/16203 We provide wrappers for
+  the old lemmas (with redundant [≠ 0] condition) and only provide workaround
+  for the lemmas that are actually used in std++ and Iris. *)
+  Local Set Warnings "-deprecated-syntactic-definition".
+  Lemma add_mod_idemp_l a b n : n ≠ 0 → (a mod n + b) mod n = (a + b) mod n.
+  Proof. auto using add_mod_idemp_l. Qed.
+  Lemma div_lt_upper_bound a b q : b ≠ 0 → a < b * q → a / b < q.
+  Proof. auto using div_lt_upper_bound. Qed.
 End Nat.
 
 (** * Notations and properties of [positive] *)
@@ -337,6 +347,8 @@ Export Pos.app_notations.
 Local Close Scope positive_scope.
 
 (** * Notations and properties of [N] *)
+Local Open Scope N_scope.
+
 Typeclasses Opaque N.le.
 Typeclasses Opaque N.lt.
 
@@ -377,6 +389,22 @@ Global Instance N_le_total: Total (≤)%N.
 Proof. repeat intro; lia. Qed.
 
 Global Hint Extern 0 (_ ≤ _)%N => reflexivity : core.
+
+Module N.
+  Export BinNat.N.
+
+  (** FIXME: Workaround to support Coq <8.17 and have no warning withs Coq
+  >=8.17 w.r.t. https://github.com/coq/coq/pull/16203 We provide wrappers for
+  the old lemmas (with redundant [≠ 0] condition) and only provide workaround
+  for the lemmas that are actually used in std++ and Iris. *)
+  Local Set Warnings "-deprecated-syntactic-definition".
+  Lemma add_mod_idemp_l a b n : n ≠ 0 → (a mod n + b) mod n = (a + b) mod n.
+  Proof. auto using add_mod_idemp_l. Qed.
+  Lemma div_lt_upper_bound a b q : b ≠ 0 → a < b * q → a / b < q.
+  Proof. auto using div_lt_upper_bound. Qed.
+End N.
+
+Local Close Scope N_scope.
 
 (** * Notations and properties of [Z] *)
 Local Open Scope Z_scope.

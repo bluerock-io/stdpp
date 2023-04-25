@@ -4,6 +4,8 @@
 -Q stdpp_unstable stdpp.unstable
 # Fixing this one requires Coq 8.15.
 -arg -w -arg -deprecated-typeclasses-transparency-without-locality
+# Fixing this one requires Coq 8.17
+-arg -w -arg -future-coercion-class-field
 
 stdpp/options.v
 stdpp/base.v

@@ -53,6 +53,7 @@ stdpp/nat_cancel.v
 stdpp/namespaces.v
 stdpp/telescopes.v
 stdpp/binders.v
+stdpp/ssreflect.v
 
 stdpp_unstable/bitblast.v
 stdpp_unstable/bitvector.v

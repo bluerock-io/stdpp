@@ -157,10 +157,11 @@ Module Nat.
     P x → (∀ y, P y → P (f y)) → P (Nat.iter k f x).
   Proof. induction k; simpl; auto. Qed.
 
-  (** FIXME: Workaround to support Coq <8.17 and have no warning withs Coq
-  >=8.17 w.r.t. https://github.com/coq/coq/pull/16203 We provide wrappers for
-  the old lemmas (with redundant [≠ 0] condition) and only provide workaround
-  for the lemmas that are actually used in std++ and Iris. *)
+  (** FIXME: Coq 8.17 deprecated some lemmas in https://github.com/coq/coq/pull/16203.
+  We cannot use the intended replacements since we support Coq 8.16. We also do
+  not want to disable [deprecated-syntactic-definition] everywhere, so instead
+  we provide non-deprecated duplicates of those deprecated lemmas that we need
+  in std++ and Iris. *)
   Local Set Warnings "-deprecated-syntactic-definition".
   Lemma add_mod_idemp_l a b n : n ≠ 0 → (a mod n + b) mod n = (a + b) mod n.
   Proof. auto using add_mod_idemp_l. Qed.
@@ -393,10 +394,11 @@ Global Hint Extern 0 (_ ≤ _)%N => reflexivity : core.
 Module N.
   Export BinNat.N.
 
-  (** FIXME: Workaround to support Coq <8.17 and have no warning withs Coq
-  >=8.17 w.r.t. https://github.com/coq/coq/pull/16203 We provide wrappers for
-  the old lemmas (with redundant [≠ 0] condition) and only provide workaround
-  for the lemmas that are actually used in std++ and Iris. *)
+  (** FIXME: Coq 8.17 deprecated some lemmas in https://github.com/coq/coq/pull/16203.
+  We cannot use the intended replacements since we support Coq 8.16. We also do
+  not want to disable [deprecated-syntactic-definition] everywhere, so instead
+  we provide non-deprecated duplicates of those deprecated lemmas that we need
+  in std++ and Iris. *)
   Local Set Warnings "-deprecated-syntactic-definition".
   Lemma add_mod_idemp_l a b n : n ≠ 0 → (a mod n + b) mod n = (a + b) mod n.
   Proof. auto using add_mod_idemp_l. Qed.

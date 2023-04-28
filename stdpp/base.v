@@ -1086,7 +1086,7 @@ in that. Hence, the value of [Params] is 3. *)
 Global Instance: Params (@scalar_mul) 3 := {}.
 (** The notation [*:] and level is taken from ssreflect, see
 https://github.com/math-comp/math-comp/blob/master/mathcomp/ssreflect/ssrnotations.v *)
-Infix "*:" := scalar_mul (at level 40, left associativity) : stdpp_scope.
+Infix "*:" := scalar_mul (at level 40) : stdpp_scope.
 Notation "(*:)" :=  scalar_mul (only parsing) : stdpp_scope.
 Notation "( x *:.)" := (scalar_mul x) (only parsing) : stdpp_scope.
 Notation "(.*: x )" := (λ y, scalar_mul y x) (only parsing) : stdpp_scope.

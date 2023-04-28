@@ -16,12 +16,12 @@ Unset Default Proof Using.
 avoids the need for setoid rewriting in proof. However, it comes at the cost of
 restricting what map implementations we support. Since Coq does not have
 quotient types, it rules out balanced search trees (AVL, red-black, etc.). We
-do provide a reasonable efficient implementation of binary tries (see [gmap]
+do provide a reasonably efficient implementation of binary tries (see [gmap]
 and [Pmap]). *)
 
 (** Finiteness is axiomatized through a fold operation [map_fold f b m], which
 folds a function [f] over each element of the map [m]. The order in which the
-function is called is unspecified. *)
+elements are passed to [f] is unspecified. *)
 
 Class MapFold K A M := map_fold B : (K → A → B → B) → B → M → B.
 Global Arguments map_fold {_ _ _ _ _} _ _ _.

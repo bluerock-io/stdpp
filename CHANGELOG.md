@@ -38,6 +38,7 @@ Coq 8.12 and 8.13 are no longer supported by this release.
 - Add proof that `vec` is `Finite`. (by Herman Bergwerf.)
 - Add `min` and `max` infix notations for `positive`.
 - Add lemma `map_zip_fst_snd`.
+- Add `stdpp.ssreflect` to provide compatibility with the ssreflect tactics.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

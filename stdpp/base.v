@@ -44,7 +44,7 @@ Global Unset Transparent Obligations.
 obligation tactic is [Tactics.program_simpl], which, among other things,
 introduces all variables and gives them fresh names. As such, it becomes
 impossible to refer to hypotheses in a robust way. *)
-Obligation Tactic := idtac.
+Global Obligation Tactic := idtac.
 
 (** 3. Hide obligations and unsealing lemmas from the results of the [Search]
 commands. *)

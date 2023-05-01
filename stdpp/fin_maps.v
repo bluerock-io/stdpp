@@ -2604,6 +2604,13 @@ Proof.
     by auto using map_disjoint_filter_complement.
   destruct (decide (P (i,x))); naive_solver.
 Qed.
+Lemma map_filter_or {A} (P Q : K * A → Prop)
+    `{!∀ x, Decision (P x), !∀ x, Decision (Q x)} (m : M A) :
+  filter (λ x, P x ∨ Q x) m = filter P m ∪ filter Q m.
+Proof.
+  apply map_eq. intros k. rewrite lookup_union. rewrite !map_filter_lookup.
+  destruct (m !! k); simpl; repeat case_option_guard; naive_solver.
+Qed.
 Lemma map_fmap_union {A B} (f : A → B) (m1 m2 : M A) :
   f <$> (m1 ∪ m2) = (f <$> m1) ∪ (f <$> m2).
 Proof.
@@ -2845,6 +2852,11 @@ Qed.
 Global Instance map_intersection_idemp {A} : IdemP (=@{M A}) (∩).
 Proof. intros ?. by apply intersection_with_idemp. Qed.
 
+Lemma lookup_intersection {A} (m1 m2 : M A) i :
+  (m1 ∩ m2) !! i = m1 !! i ∩ m2 !! i.
+Proof.
+  apply lookup_intersection_with.
+Qed.
 Lemma lookup_intersection_Some {A} (m1 m2 : M A) i x :
   (m1 ∩ m2) !! i = Some x ↔ m1 !! i = Some x ∧ is_Some (m2 !! i).
 Proof.
@@ -2863,6 +2875,13 @@ Proof.
   apply map_eq; intros i. apply option_eq; intros x.
   rewrite lookup_intersection_Some, map_filter_lookup_Some, lookup_union; simpl.
   unfold is_Some. destruct (m1 !! i), (m2 !! i); naive_solver.
+Qed.
+Lemma map_filter_and {A} (P Q : K * A → Prop)
+    `{!∀ x, Decision (P x), !∀ x, Decision (Q x)} (m : M A) :
+  filter (λ x, P x ∧ Q x) m = filter P m ∩ filter Q m.
+Proof.
+  apply map_eq. intros k. rewrite lookup_intersection. rewrite !map_filter_lookup.
+  destruct (m !! k); simpl; repeat case_option_guard; naive_solver.
 Qed.
 
 (** ** Properties of the [difference_with] operation *)

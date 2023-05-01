@@ -36,10 +36,6 @@ Notably:
 * It blocks `simpl` on all operations involving integers `Z` (by setting
   `Arguments op : simpl never`). We do this because `simpl` tends to expose
   the internals of said operations (e.g. try `simpl` on `Z.of_nat (S n) + y`).
-  As a consequence of blocking `simpl`, due to
-  [Coq bug #5039](https://github.com/coq/coq/issues/5039) the `omega` tactic
-  becomes unreliable. We do not consider this an issue since we use `lia` (for
-  which the aforementioned Coq bug was fixed) instead of `omega` everywhere.
 
 ## Prerequisites
 

@@ -403,31 +403,31 @@ Global Arguments N.lxor : simpl never.
 Global Arguments N.lnot : simpl never.
 Global Arguments N.square : simpl never.
 
-Global Instance Npos_inj : Inj (=) (=) Npos.
-Proof. by injection 1. Qed.
-
-Global Instance N_eq_dec: EqDecision N := N.eq_dec.
-Global Program Instance N_le_dec : RelDecision N.le := λ x y,
-  match N.compare x y with Gt => right _ | _ => left _ end.
-Solve Obligations with naive_solver.
-Global Program Instance N_lt_dec : RelDecision N.lt := λ x y,
-  match N.compare x y with Lt => left _ | _ => right _ end.
-Solve Obligations with naive_solver.
-Global Instance N_inhabited: Inhabited N := populate 1%N.
-Global Instance N_lt_pi x y : ProofIrrel (x < y)%N.
-Proof. unfold N.lt. apply _. Qed.
-
-Global Instance N_le_po: PartialOrder (≤)%N.
-Proof.
-  repeat split; red; [apply N.le_refl | apply N.le_trans | apply N.le_antisymm].
-Qed.
-Global Instance N_le_total: Total (≤)%N.
-Proof. repeat intro; lia. Qed.
-
 Global Hint Extern 0 (_ ≤ _)%N => reflexivity : core.
 
 Module N.
   Export BinNat.N.
+
+  Global Instance pos_inj : Inj (=) (=) N.pos.
+  Proof. by injection 1. Qed.
+
+  Global Instance eq_dec : EqDecision N := N.eq_dec.
+  Global Program Instance le_dec : RelDecision N.le := λ x y,
+    match N.compare x y with Gt => right _ | _ => left _ end.
+  Solve Obligations with naive_solver.
+  Global Program Instance lt_dec : RelDecision N.lt := λ x y,
+    match N.compare x y with Lt => left _ | _ => right _ end.
+  Solve Obligations with naive_solver.
+  Global Instance inhabited : Inhabited N := populate 1%N.
+  Global Instance lt_pi x y : ProofIrrel (x < y)%N.
+  Proof. unfold N.lt. apply _. Qed.
+
+  Global Instance le_po : PartialOrder (≤)%N.
+  Proof.
+    repeat split; red; [apply N.le_refl | apply N.le_trans | apply N.le_antisymm].
+  Qed.
+  Global Instance le_total : Total (≤)%N.
+  Proof. repeat intro; lia. Qed.
 
   (** FIXME: Coq 8.17 deprecated some lemmas in https://github.com/coq/coq/pull/16203.
   We cannot use the intended replacements since we support Coq 8.16. We also do

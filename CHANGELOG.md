@@ -39,6 +39,7 @@ Coq 8.12 and 8.13 are no longer supported by this release.
 - Add `min` and `max` infix notations for `positive`.
 - Add lemma `map_zip_fst_snd`.
 - Add `stdpp.ssreflect` to provide compatibility with the ssreflect tactics.
+- Set `simpl never` for `Pos` and `N` operations (similar to `Z`).
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

@@ -52,10 +52,8 @@ Add Search Blacklist "_obligation_".
 Add Search Blacklist "_unseal".
 
 (** * Sealing off definitions *)
-Section seal.
-  Local Set Primitive Projections.
-  Record seal {A} (f : A) := { unseal : A; seal_eq : unseal = f }.
-End seal.
+#[projections(primitive=yes)]
+Record seal {A} (f : A) := { unseal : A; seal_eq : unseal = f }.
 Global Arguments unseal {_ _} _ : assert.
 Global Arguments seal_eq {_ _} _ : assert.
 

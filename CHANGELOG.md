@@ -40,6 +40,11 @@ Coq 8.12 and 8.13 are no longer supported by this release.
 - Add lemma `map_zip_fst_snd`.
 - Add `stdpp.ssreflect` to provide compatibility with the ssreflect tactics.
 - Set `simpl never` for `Pos` and `N` operations (similar to `Z`).
+- Add `Intersection` instance for `option`. (by Marijn van Wezel)
+- Add `lookup_intersection` lemma for the distributivity of lookup on an
+  intersection. (by Marijn van Wezel)
+- Add lemmas `map_filter_or` and `map_filter_and` for the union and intersection 
+  of filters on maps. (by Marijn van Wezel)
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

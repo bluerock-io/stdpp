@@ -311,6 +311,36 @@ Proof. by intros [?|]. Qed.
 Global Instance option_union_right_id {A} : RightId (=@{option A}) None union.
 Proof. by intros [?|]. Qed.
 
+Global Instance option_intersection {A} : Intersection (option A) :=
+  intersection_with (λ x _, Some x).
+
+Lemma intersection_Some {A} (mx my : option A) x :
+  mx ∩ my = Some x ↔ mx = Some x ∧ is_Some my.
+Proof. destruct mx, my; unfold is_Some; naive_solver. Qed.
+Lemma intersection_is_Some {A} (mx my : option A) :
+  is_Some (mx ∩ my) ↔ is_Some mx ∧ is_Some my.
+Proof. destruct mx, my; unfold is_Some; naive_solver. Qed.
+Lemma intersection_Some_r {A} (mx : option A) (y : A) :
+  mx ∩ Some y = mx.
+Proof. by destruct mx. Qed.
+Lemma intersection_None {A} (mx my : option A) :
+  mx ∩ my = None ↔ mx = None ∨ my = None.
+Proof. destruct mx, my; naive_solver. Qed.
+Lemma intersection_None_l {A} (my : option A) :
+  None ∩ my = None.
+Proof. destruct my; done. Qed.
+Lemma intersection_None_r {A} (mx : option A) :
+  mx ∩ None = None.
+Proof. destruct mx; done. Qed.
+
+Global Instance option_intersection_right_absorb {A} :
+  RightAbsorb (=@{option A}) None intersection.
+Proof. by intros [?|]. Qed.
+
+Global Instance option_intersection_left_absorb {A} :
+  LeftAbsorb (=@{option A}) None intersection.
+Proof. by intros [?|]. Qed.
+
 Section union_intersection_difference.
   Context {A} (f : A → A → option A).
 

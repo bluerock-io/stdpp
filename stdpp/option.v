@@ -305,6 +305,12 @@ Proof. destruct my; done. Qed.
 Lemma union_Some_r {A} (mx : option A) y :
   mx ∪ Some y = Some (default y mx).
 Proof. destruct mx; done. Qed.
+Lemma union_None {A} (mx my : option A) :
+  mx ∪ my = None ↔ mx = None ∧ my = None.
+Proof. destruct mx, my; naive_solver. Qed.
+Lemma union_is_Some {A} (mx my : option A) :
+  is_Some (mx ∪ my) ↔ is_Some mx ∨ is_Some my.
+Proof. destruct mx, my; naive_solver. Qed.
 
 Global Instance option_union_left_id {A} : LeftId (=@{option A}) None union.
 Proof. by intros [?|]. Qed.

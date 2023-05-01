@@ -297,7 +297,7 @@ Global Instance option_difference_with {A} : DifferenceWith A (option A) := λ f
 Global Instance option_union {A} : Union (option A) := union_with (λ x _, Some x).
 
 Lemma union_Some {A} (mx my : option A) z :
-  mx ∪ my = Some z → mx = Some z ∨ my = Some z.
+  mx ∪ my = Some z ↔ mx = Some z ∨ (mx = None ∧ my = Some z).
 Proof. destruct mx, my; naive_solver. Qed.
 Lemma union_Some_l {A} x (my : option A) :
   Some x ∪ my = Some x.

@@ -192,5 +192,5 @@ Lemma elem_of_coGset_to_top_set `{Countable A, TopSet A C} X x :
   x ∈@{C} coGset_to_top_set X ↔ x ∈ X.
 Proof. destruct X; set_solver. Qed.
 
-Typeclasses Opaque coGset_elem_of coGset_empty coGset_top coGset_singleton.
-Typeclasses Opaque coGset_union coGset_intersection coGset_difference.
+Global Typeclasses Opaque coGset_elem_of coGset_empty coGset_top coGset_singleton.
+Global Typeclasses Opaque coGset_union coGset_intersection coGset_difference.

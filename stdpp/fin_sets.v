@@ -10,38 +10,38 @@ Set Default Proof Using "Type*".
 
 (** Operations *)
 Global Instance set_size `{Elements A C} : Size C := length ∘ elements.
-Typeclasses Opaque set_size.
+Global Typeclasses Opaque set_size.
 
 Definition set_fold `{Elements A C} {B}
   (f : A → B → B) (b : B) : C → B := foldr f b ∘ elements.
-Typeclasses Opaque set_fold.
+Global Typeclasses Opaque set_fold.
 
 Global Instance set_filter
     `{Elements A C, Empty C, Singleton A C, Union C} : Filter A C := λ P _ X,
   list_to_set (filter P (elements X)).
-Typeclasses Opaque set_filter.
+Global Typeclasses Opaque set_filter.
 
 Definition set_map `{Elements A C, Singleton B D, Empty D, Union D}
     (f : A → B) (X : C) : D :=
   list_to_set (f <$> elements X).
-Typeclasses Opaque set_map.
+Global Typeclasses Opaque set_map.
 Global Instance: Params (@set_map) 8 := {}.
 
 Definition set_bind `{Elements A SA, Empty SB, Union SB}
     (f : A → SB) (X : SA) : SB :=
   ⋃ (f <$> elements X).
-Typeclasses Opaque set_bind.
+Global Typeclasses Opaque set_bind.
 Global Instance: Params (@set_bind) 6 := {}.
 
 Definition set_omap `{Elements A C, Singleton B D, Empty D, Union D}
     (f : A → option B) (X : C) : D :=
   list_to_set (omap f (elements X)).
-Typeclasses Opaque set_omap.
+Global Typeclasses Opaque set_omap.
 Global Instance: Params (@set_omap) 8 := {}.
 
 Global Instance set_fresh `{Elements A C, Fresh A (list A)} : Fresh A C :=
   fresh ∘ elements.
-Typeclasses Opaque set_fresh.
+Global Typeclasses Opaque set_fresh.
 
 (** We generalize the [fresh] operation on sets to generate lists of fresh
 elements w.r.t. a set [X]. *)

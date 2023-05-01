@@ -116,7 +116,7 @@ Proof.
 Qed.
 End hashset.
 
-Typeclasses Opaque hashset_elem_of.
+Global Typeclasses Opaque hashset_elem_of.
 
 Section remove_duplicates.
 Context `{EqDecision A} (hash : A → Z).

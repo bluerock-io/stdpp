@@ -19,7 +19,7 @@ Global Instance bool_lexico : Lexico bool := λ b1 b2,
 Global Instance nat_lexico : Lexico nat := (<).
 Global Instance N_lexico : Lexico N := (<)%N.
 Global Instance Z_lexico : Lexico Z := (<)%Z.
-Typeclasses Opaque bool_lexico nat_lexico N_lexico Z_lexico.
+Global Typeclasses Opaque bool_lexico nat_lexico N_lexico Z_lexico.
 Global Instance list_lexico `{Lexico A} : Lexico (list A) :=
   fix go l1 l2 :=
   let _ : Lexico (list A) := @go in

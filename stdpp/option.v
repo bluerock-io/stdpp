@@ -148,7 +148,7 @@ Section setoids.
   Proof. destruct 3; simpl; auto. Qed.
 End setoids.
 
-Typeclasses Opaque option_equiv.
+Global Typeclasses Opaque option_equiv.
 
 (** Equality on [option] is decidable. *)
 Global Instance option_eq_None_dec {A} (mx : option A) : Decision (mx = None) :=

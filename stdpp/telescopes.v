@@ -229,7 +229,7 @@ Proof.
 Qed.
 
 (* Teach typeclass resolution how to make progress on these binders *)
-Typeclasses Opaque tforall texist.
+Global Typeclasses Opaque tforall texist.
 Global Hint Extern 1 (tforall _) =>
   progress cbn [tforall tele_fold tele_bind tele_app] : typeclass_instances.
 Global Hint Extern 1 (texist _) =>

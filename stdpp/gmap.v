@@ -367,4 +367,4 @@ Section gset.
   Qed.
 End gset.
 
-Typeclasses Opaque gset.
+Global Typeclasses Opaque gset.

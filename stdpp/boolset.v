@@ -31,6 +31,6 @@ Qed.
 Global Instance boolset_elem_of_dec {A} : RelDecision (∈@{boolset A}).
 Proof. refine (λ x X, cast_if (decide (boolset_car X x))); done. Defined.
 
-Typeclasses Opaque boolset_elem_of.
+Global Typeclasses Opaque boolset_elem_of.
 Global Opaque boolset_empty boolset_singleton boolset_union
   boolset_intersection boolset_difference.

@@ -17,7 +17,7 @@ Global Instance set_subseteq_instance `{ElemOf A C} : SubsetEq C | 20 := λ X Y,
   ∀ x, x ∈ X → x ∈ Y.
 Global Instance set_disjoint_instance `{ElemOf A C} : Disjoint C | 20 := λ X Y,
   ∀ x, x ∈ X → x ∈ Y → False.
-Typeclasses Opaque set_equiv_instance set_subseteq_instance set_disjoint_instance.
+Global Typeclasses Opaque set_equiv_instance set_subseteq_instance set_disjoint_instance.
 
 (** * Setoids *)
 Section setoids_simple.
@@ -1333,7 +1333,7 @@ End set_seq.
 Definition minimal `{ElemOf A C} (R : relation A) (x : A) (X : C) : Prop :=
   ∀ y, y ∈ X → R y x → R x y.
 Global Instance: Params (@minimal) 5 := {}.
-Typeclasses Opaque minimal.
+Global Typeclasses Opaque minimal.
 
 Section minimal.
   Context `{SemiSet A C} {R : relation A}.

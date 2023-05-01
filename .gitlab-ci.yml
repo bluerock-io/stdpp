@@ -76,10 +76,3 @@ build-coq.8.15.2:
     OPAM_PINS: "coq version 8.15.2"
     DENY_WARNINGS: "1"
 
-build-coq.8.14.1:
-  <<: *template
-  <<: *branches_and_mr
-  variables:
-    OPAM_PINS: "coq version 8.14.1"
-    DENY_WARNINGS: "1"
-    OCAML: "ocaml-base-compiler.4.07.1"

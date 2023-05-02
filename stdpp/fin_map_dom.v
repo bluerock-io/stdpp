@@ -9,7 +9,7 @@ Set Default Proof Using "Type*".
 
 Class FinMapDom K M D `{∀ A, Dom (M A) D, FMap M,
     ∀ A, Lookup K A (M A), ∀ A, Empty (M A), ∀ A, PartialAlter K A (M A),
-    OMap M, Merge M, ∀ A, FinMapToList K A (M A), EqDecision K,
+    OMap M, Merge M, ∀ A, MapFold K A (M A), EqDecision K,
     ElemOf K D, Empty D, Singleton K D,
     Union D, Intersection D, Difference D} := {
   finmap_dom_map :> FinMap K M;
@@ -182,9 +182,11 @@ Qed.
 Lemma size_dom `{!Elements K D, !FinSet K D} {A} (m : M A) :
   size (dom m) = size m.
 Proof.
-  rewrite dom_alt, size_list_to_set.
-  2:{ apply NoDup_fst_map_to_list. }
-  unfold size, map_size. rewrite fmap_length. done.
+  induction m as [|i x m ? IH] using map_ind.
+  { by rewrite dom_empty, map_size_empty, size_empty. }
+  assert ({[i]} ## dom m).
+  { intros j. rewrite elem_of_dom. unfold is_Some. set_solver. }
+  by rewrite dom_insert, size_union, size_singleton, map_size_insert_None, IH.
 Qed.
 
 Lemma dom_subseteq_size {A} (m1 m2 : M A) : dom m2 ⊆ dom m1 → size m2 ≤ size m1.
@@ -250,10 +252,10 @@ Proof.
     rewrite lookup_union_Some, !map_filter_lookup_Some by done.
     destruct (decide (i ∈ X1)); naive_solver.
   - apply dom_filter; intros i; split; [|naive_solver].
-    intros. assert (is_Some (m !! i)) as [x ?] by (apply (elem_of_dom (D:=D)); set_solver).
+    intros. assert (is_Some (m !! i)) as [x ?] by (apply elem_of_dom; set_solver).
     naive_solver.
   - apply dom_filter; intros i; split.
-    + intros. assert (is_Some (m !! i)) as [x ?] by (apply (elem_of_dom (D:=D)); set_solver).
+    + intros. assert (is_Some (m !! i)) as [x ?] by (apply elem_of_dom; set_solver).
       naive_solver.
     + intros (x&?&?). apply dec_stable; intros ?.
       assert (m !! i = None) by (apply not_elem_of_dom; set_solver).

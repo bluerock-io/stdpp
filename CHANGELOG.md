@@ -67,6 +67,9 @@ longer supported by this release.
   (`map_fold` used to be derived from `map_to_list`.) This makes it possible to
   use `map_fold` in nested-recursive definitions on maps. For example,
   `Fixpoint f (t : gtest) := let 'GTest ts := t in map_fold (λ _ t', plus (f t')) 1 ts`.
+- Enable 'light' name mangling in `stdpp.options`, which prefixes auto-generated
+  names with `__`. This only affects developments that explicitly opt-in to
+  following the std++ configuration by importing `stdpp.options`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

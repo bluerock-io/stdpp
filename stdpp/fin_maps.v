@@ -177,7 +177,7 @@ Fixpoint map_seqZ `{Insert Z A M, Empty M} (start : Z) (xs : list A) : M :=
 
 Global Instance map_lookup_total `{!Lookup K A (M A), !Inhabited A} :
   LookupTotal K A (M A) | 20 := λ i m, default inhabitant (m !! i).
-Typeclasses Opaque map_lookup_total.
+Global Typeclasses Opaque map_lookup_total.
 
 (** Given a finite map [m : M] with keys [K] and values [A], the image [map_img m]
 gives a finite set containing with the values [A] of [m]. The type of [map_img]
@@ -185,7 +185,7 @@ is generic to support different map and set implementations. A possible instance
 is [SA:=gset A]. *)
 Definition map_img `{FinMapToList K A M,
   Singleton A SA, Empty SA, Union SA} : M → SA := map_to_set (λ _ x, x).
-Typeclasses Opaque map_img.
+Global Typeclasses Opaque map_img.
 
 (** Given a finite map [m] with keys [K] and values [A], the preimage
 [map_preimg m] gives a finite map with keys [A] and values being sets of [K].
@@ -196,7 +196,7 @@ Definition map_preimg `{FinMapToList K A MKA, Empty MASK,
     PartialAlter A SK MASK, Empty SK, Singleton K SK, Union SK}
     (m : MKA) : MASK :=
   map_fold (λ i, partial_alter (λ mX, Some $ {[ i ]} ∪ default ∅ mX)) ∅ m.
-Typeclasses Opaque map_preimg.
+Global Typeclasses Opaque map_preimg.
 
 (** * Theorems *)
 Section theorems.

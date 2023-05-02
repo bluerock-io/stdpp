@@ -29,7 +29,7 @@ be very bad, so use with care! *)
 (** The tactic [intuition] expands to [intuition auto with *] by default. This
 is rather inefficient when having big hint databases, or expensive [Hint Extern]
 declarations as the ones above. *)
-Tactic Notation "intuition" := intuition auto.
+Ltac intuition_solver ::= auto.
 
 (** The [fast_reflexivity] tactic only works on syntactically equal terms. It
 can be used to avoid expensive failing unification. *)

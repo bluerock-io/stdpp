@@ -52,10 +52,8 @@ Add Search Blacklist "_obligation_".
 Add Search Blacklist "_unseal".
 
 (** * Sealing off definitions *)
-Section seal.
-  Local Set Primitive Projections.
-  Record seal {A} (f : A) := { unseal : A; seal_eq : unseal = f }.
-End seal.
+#[projections(primitive=yes)]
+Record seal {A} (f : A) := { unseal : A; seal_eq : unseal = f }.
 Global Arguments unseal {_ _} _ : assert.
 Global Arguments seal_eq {_ _} _ : assert.
 
@@ -111,7 +109,7 @@ Global Hint Extern 0 (TCIf _ _ _) =>
 (** The constant [tc_opaque] is used to make definitions opaque for just type
 class search. Note that [simpl] is set up to always unfold [tc_opaque]. *)
 Definition tc_opaque {A} (x : A) : A := x.
-Typeclasses Opaque tc_opaque.
+Global Typeclasses Opaque tc_opaque.
 Global Arguments tc_opaque {_} _ /.
 
 (** Below we define type class versions of the common logical operators. It is
@@ -267,8 +265,7 @@ Proof. split; repeat intro; congruence. Qed.
 "canonical" equivalence for a type. The typeclass is tied to the \equiv
 symbol. This is based on (Spitters/van der Weegen, 2011). *)
 Class Equiv A := equiv: relation A.
-(* No Hint Mode set because of Coq bug #14441.
-Global Hint Mode Equiv ! : typeclass_instances. *)
+Global Hint Mode Equiv ! : typeclass_instances.
 
 (** We instruct setoid rewriting to infer [equiv] as a relation on
 type [A] when needed. This allows setoid_rewrite to solve constraints
@@ -604,7 +601,7 @@ Global Arguments id _ _ / : assert.
 Global Arguments compose _ _ _ _ _ _ / : assert.
 Global Arguments flip _ _ _ _ _ _ / : assert.
 Global Arguments const _ _ _ _ / : assert.
-Typeclasses Transparent id compose flip const.
+Global Typeclasses Transparent id compose flip const.
 
 Definition fun_map {A A' B B'} (f: A' → A) (g: B → B') (h : A → B) : A' → B' :=
   g ∘ h ∘ f.
@@ -861,7 +858,7 @@ Section prod_setoid.
             (≡@{A*B*C*D}) ==> (≡@{E})) uncurry4 := _.
 End prod_setoid.
 
-Typeclasses Opaque prod_equiv.
+Global Typeclasses Opaque prod_equiv.
 
 Global Instance prod_leibniz `{LeibnizEquiv A, LeibnizEquiv B} :
   LeibnizEquiv (A * B).
@@ -920,7 +917,7 @@ Global Instance inl_proper `{Equiv A, Equiv B} : Proper ((≡) ==> (≡)) (@inl 
 Global Instance inr_proper `{Equiv A, Equiv B} : Proper ((≡) ==> (≡)) (@inr A B) := _.
 Global Instance inl_equiv_inj `{Equiv A, Equiv B} : Inj (≡) (≡) (@inl A B) := _.
 Global Instance inr_equiv_inj `{Equiv A, Equiv B} : Inj (≡) (≡) (@inr A B) := _.
-Typeclasses Opaque sum_equiv.
+Global Typeclasses Opaque sum_equiv.
 
 (** ** Option *)
 Global Instance option_inhabited {A} : Inhabited (option A) := populate None.

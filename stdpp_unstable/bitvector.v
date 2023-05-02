@@ -251,7 +251,7 @@ Proof. unfold BvWf. apply _. Qed.
 Global Instance bv_wf_dec n z : Decision (BvWf n z).
 Proof. unfold BvWf. apply _. Defined.
 
-Typeclasses Opaque BvWf.
+Global Typeclasses Opaque BvWf.
 
 Ltac solve_BvWf :=
   lazymatch goal with

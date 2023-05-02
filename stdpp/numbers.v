@@ -36,7 +36,7 @@ Global Arguments Nat.max : simpl nomatch.
 
 (** We do not make [Nat.lt] since it is an alias for [lt], which contains the
 actual definition that we want to make opaque. *)
-Typeclasses Opaque lt.
+Global Typeclasses Opaque lt.
 
 Reserved Notation "x ≤ y ≤ z" (at level 70, y at next level).
 Reserved Notation "x ≤ y < z" (at level 70, y at next level).
@@ -172,8 +172,8 @@ End Nat.
 (** * Notations and properties of [positive] *)
 Local Open Scope positive_scope.
 
-Typeclasses Opaque Pos.le.
-Typeclasses Opaque Pos.lt.
+Global Typeclasses Opaque Pos.le.
+Global Typeclasses Opaque Pos.lt.
 
 Infix "≤" := Pos.le : positive_scope.
 Notation "x ≤ y ≤ z" := (x ≤ y ∧ y ≤ z) : positive_scope.
@@ -365,8 +365,8 @@ Local Close Scope positive_scope.
 (** * Notations and properties of [N] *)
 Local Open Scope N_scope.
 
-Typeclasses Opaque N.le.
-Typeclasses Opaque N.lt.
+Global Typeclasses Opaque N.le.
+Global Typeclasses Opaque N.lt.
 
 Infix "≤" := N.le : N_scope.
 Notation "x ≤ y ≤ z" := (x ≤ y ∧ y ≤ z)%N : N_scope.
@@ -446,8 +446,8 @@ Local Close Scope N_scope.
 (** * Notations and properties of [Z] *)
 Local Open Scope Z_scope.
 
-Typeclasses Opaque Z.le.
-Typeclasses Opaque Z.lt.
+Global Typeclasses Opaque Z.le.
+Global Typeclasses Opaque Z.lt.
 
 Infix "≤" := Z.le : Z_scope.
 Notation "x ≤ y ≤ z" := (x ≤ y ∧ y ≤ z) : Z_scope.
@@ -724,8 +724,8 @@ End N2Z.
 (* Add others here. *)
 
 (** * Notations and properties of [Qc] *)
-Typeclasses Opaque Qcle.
-Typeclasses Opaque Qclt.
+Global Typeclasses Opaque Qcle.
+Global Typeclasses Opaque Qclt.
 
 Local Open Scope Qc_scope.
 Delimit Scope Qc_scope with Qc.
@@ -946,7 +946,7 @@ Module Qp.
   Global Arguments inv : simpl never.
 
   Definition div (p q : Qp) : Qp := mul p (inv q).
-  Typeclasses Opaque div.
+  Global Typeclasses Opaque div.
   Global Arguments div : simpl never.
 
   Definition le (p q : Qp) : Prop :=

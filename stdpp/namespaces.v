@@ -4,7 +4,7 @@ From stdpp Require Import options.
 Definition namespace := list positive.
 Global Instance namespace_eq_dec : EqDecision namespace := _.
 Global Instance namespace_countable : Countable namespace := _.
-Typeclasses Opaque namespace.
+Global Typeclasses Opaque namespace.
 
 Definition nroot : namespace := nil.
 

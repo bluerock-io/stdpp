@@ -62,10 +62,10 @@ Section definitions.
     let (X) := X in dom X.
 End definitions.
 
-Typeclasses Opaque gmultiset_elem_of gmultiset_subseteq.
-Typeclasses Opaque gmultiset_elements gmultiset_size gmultiset_empty.
-Typeclasses Opaque gmultiset_singleton gmultiset_union gmultiset_difference.
-Typeclasses Opaque gmultiset_scalar_mul gmultiset_dom.
+Global Typeclasses Opaque gmultiset_elem_of gmultiset_subseteq.
+Global Typeclasses Opaque gmultiset_elements gmultiset_size gmultiset_empty.
+Global Typeclasses Opaque gmultiset_singleton gmultiset_union gmultiset_difference.
+Global Typeclasses Opaque gmultiset_scalar_mul gmultiset_dom.
 
 Section basic_lemmas.
   Context `{Countable A}.

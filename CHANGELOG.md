@@ -46,6 +46,10 @@ longer supported by this release.
   intersection. (by Marijn van Wezel)
 - Add lemmas `map_filter_or` and `map_filter_and` for the union and intersection 
   of filters on maps. (by Marijn van Wezel)
+- Set `Hint Mode Equiv !`; this might need some type annotations for ambiguous
+  uses of `≡`.
+- Set `intuition_solver ::= auto` (the default is `auto with *`) instead of
+  redeclaring `intuition`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

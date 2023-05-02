@@ -30,7 +30,6 @@ longer supported by this release.
   `submseteq_Permutation_length_eq`; use `submseteq_length_Permutation` instead.
 - Remove `map_to_list_length` (which seemed to be an unneeded auxiliary lemma);
   use `map_subset_size` instead.
-- Rename `option_union_Some` → `union_Some`.
 - Rename `prefix_lookup` → `prefix_lookup_Some`.
 - Extend `set_solver` with support for `set_Forall` and `set_Exists`.
 - Change `lookup_union` lemma statement to use `∪` on maps instead of `union_with`.
@@ -50,6 +49,8 @@ longer supported by this release.
   uses of `≡`.
 - Set `intuition_solver ::= auto` (the default is `auto with *`) instead of
   redeclaring `intuition`.
+- Rename `option_union_Some` → `union_Some`, and strengthen it to become a
+  biimplication.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

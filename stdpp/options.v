@@ -7,6 +7,10 @@ Export Set Default Proof Using "Type".
 (* FIXME: cannot enable this yet as some files disable 'Default Proof Using'.
 Export Set Suggest Proof Using. *)
 Export Set Default Goal Selector "!".
+Export Set Mangle Names.
+Export Set Mangle Names Light.
+(** Make these names stand out more, in case one does end up in the proof script. *)
+Export Set Mangle Names Prefix "__".
 
 (* "Fake" import to whitelist this file for the check that ensures we import
 this file everywhere.

@@ -109,11 +109,9 @@ Definition mapset_map_with {A B} (f : bool → A → option B)
     match x, y with
     | Some _, Some a => f true a | None, Some a => f false a | _, None => None
     end) mX.
+
 Definition mapset_dom_with {A} (f : A → bool) (m : M A) : mapset M :=
-  Mapset $ merge (λ x _,
-    match x with
-    | Some a => if f a then Some () else None | None => None
-    end) m (@empty (M A) _).
+  Mapset $ omap (λ a, if f a then Some () else None) m.
 
 Lemma lookup_mapset_map_with {A B} (f : bool → A → option B) X m i :
   mapset_map_with f X m !! i = m !! i ≫= f (bool_decide (i ∈ X)).
@@ -126,7 +124,7 @@ Lemma elem_of_mapset_dom_with {A} (f : A → bool) m i :
   i ∈ mapset_dom_with f m ↔ ∃ x, m !! i = Some x ∧ f x.
 Proof.
   unfold mapset_dom_with, elem_of, mapset_elem_of.
-  simpl. rewrite lookup_merge, lookup_empty. destruct (m !! i) as [a|]; simpl.
+  simpl. rewrite lookup_omap. destruct (m !! i) as [a|]; simpl.
   - destruct (Is_true_reflect (f a)); naive_solver.
   - naive_solver.
 Qed.

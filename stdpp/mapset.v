@@ -128,11 +128,14 @@ Proof.
   - destruct (Is_true_reflect (f a)); naive_solver.
   - naive_solver.
 Qed.
-Local Instance mapset_dom {A} : Dom (M A) (mapset M) := mapset_dom_with (λ _, true).
+
+Local Instance mapset_dom {A} : Dom (M A) (mapset M) := λ m,
+  Mapset $ fmap (λ _, ()) m.
 Local Instance mapset_dom_spec: FinMapDom K M (mapset M).
 Proof.
-  split; try apply _. intros. unfold dom, mapset_dom, is_Some.
-  rewrite elem_of_mapset_dom_with; naive_solver.
+  split; try apply _. intros A m i.
+  unfold dom, mapset_dom, is_Some, elem_of, mapset_elem_of; simpl.
+  rewrite lookup_fmap. destruct (m !! i); naive_solver.
 Qed.
 End mapset.
 

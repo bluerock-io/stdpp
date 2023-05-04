@@ -289,6 +289,13 @@ Theorem gmap_insert_positives_union_reflexivity_1000 :
   = gmap_insert_positives 1 1 1000.
 Proof. (* this should less than a second *) reflexivity. Qed.
 
+(** This should be immediate, see std++ issue #183 *)
+Goal dom ((<[10%positive:=1]> ∅) : Pmap _) = dom ((<[10%positive:=2]> ∅) : Pmap _).
+Proof. reflexivity. Qed.
+
+Goal dom ((<["f":=1]> ∅) : gmap _ _) = dom ((<["f":=2]> ∅) : gmap _ _).
+Proof. reflexivity. Qed.
+
 (** Make sure that [pmap] and [gmap] can be used in nested inductive
 definitions *)
 

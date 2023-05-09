@@ -12,13 +12,6 @@ Export Set Suggest Proof Using. *)
 that bullets and curly braces must be used to structure the proof. *)
 Export Set Default Goal Selector "!".
 
-(** Prevent using auto-generated names in proof scripts (or at least make it
-obvious when that happens) *)
-Export Set Mangle Names.
-Export Set Mangle Names Light.
-(** Make these names stand out more, in case one does end up in the proof script. *)
-Export Set Mangle Names Prefix "__".
-
 (* "Fake" import to whitelist this file for the check that ensures we import
 this file everywhere.
 From stdpp Require Import options.

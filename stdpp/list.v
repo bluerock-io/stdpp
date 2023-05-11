@@ -2726,16 +2726,7 @@ Proof.
   intros (?&E%(inj (cons y))&?). apply IH. by rewrite E.
 Qed.
 Lemma submseteq_app_inv_r l1 l2 k : l1 ++ k ⊆+ l2 ++ k → l1 ⊆+ l2.
-Proof.
-  revert l1 l2. induction k as [|y k IH]; intros l1 l2.
-  { by rewrite !(right_id_L [] (++)). }
-  intros. feed pose proof (IH (l1 ++ [y]) (l2 ++ [y])) as Hl12.
-  { by rewrite <-!(assoc_L (++)). }
-  rewrite submseteq_app_l in Hl12. destruct Hl12 as (k1&k2&E1&?&Hk2).
-  rewrite submseteq_cons_l in Hk2. destruct Hk2 as (k2'&E2&?).
-  rewrite E2, (Permutation_cons_append k2'), (assoc_L (++)) in E1.
-  apply Permutation_app_inv_r in E1. rewrite E1. eauto using submseteq_inserts_r.
-Qed.
+Proof. rewrite <-!(comm (++) k). apply submseteq_app_inv_l. Qed.
 Lemma submseteq_cons_middle x l k1 k2 : l ⊆+ k1 ++ k2 → x :: l ⊆+ k1 ++ x :: k2.
 Proof. rewrite <-Permutation_middle. by apply submseteq_skip. Qed.
 Lemma submseteq_app_middle l1 l2 k1 k2 :

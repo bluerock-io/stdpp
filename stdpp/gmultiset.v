@@ -731,4 +731,19 @@ Section more_lemmas.
     rewrite (gmultiset_disj_union_difference' x X) by done.
     apply Hinsert, IH; multiset_solver.
   Qed.
+
+  (** Properties of the set fold operation **)
+  Lemma gmultiset_set_fold_comm_acc (f : A -> A -> A) (g : A -> A) (b : A) X:
+    Comm (=) f →
+    Assoc (=) f →
+    (∀ x c, g (f x c) = f x (g c)) →
+    g (set_fold f b X) = set_fold f (g b) X.
+  Proof.
+    intros Hcomm Hassoc Hcomm_acc.
+    revert b; induction X as [|x X IH] using gmultiset_ind; intros b; [done|].
+    by rewrite
+      2!gmultiset_set_fold_disj_union,
+      2!gmultiset_set_fold_singleton,
+      IH, Hcomm_acc by done.
+  Qed.
 End more_lemmas.

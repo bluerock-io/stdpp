@@ -1401,6 +1401,30 @@ Lemma map_fold_delete_L {A B} (f : K → A → B → B) (b : B) (i : K) (x : A) 
   map_fold f b m = f i x (map_fold f b (delete i m)).
 Proof. apply map_fold_delete; apply _. Qed.
 
+Lemma map_fold_comm_acc {A} (f : K → A → A → A) (g : A → A) (x : A) (m : M A) :
+  (∀ j1 j2 z1 z2 y,
+    j1 ≠ j2 → m !! j1 = Some z1 → m !! j2 = Some z2 →
+    f j1 z1 (f j2 z2 y) = f j2 z2 (f j1 z1 y)) →
+  (∀ j z y, g (f j z y) = f j z (g y)) →
+  g (map_fold f x m) = map_fold f (g x) m.
+Proof.
+  intros Hf Hg.
+  apply (map_fold_ind (λ z m,
+    (∀ j1 j2 z1 z2 y,
+      j1 ≠ j2 → m !! j1 = Some z1 → m !! j2 = Some z2 →
+      f j1 z1 (f j2 z2 y) = f j2 z2 (f j1 z1 y)) →
+    g z = map_fold f (g x) m)); [by rewrite map_fold_empty| |done].
+  intros i x' m' r Hx' IH Hm'.
+  rewrite map_fold_insert; [|apply _|apply _|done|done].
+  rewrite Hg, IH; [done|].
+  intros j1 j2 z1 z2 y Hjs Hl1 Hl2.
+  apply Hm'; [done| |].
+  + rewrite lookup_insert_ne; [apply Hl1|].
+    contradict Hl1; rewrite <-Hl1; by rewrite Hx'.
+  + rewrite lookup_insert_ne; [apply Hl2|].
+    contradict Hl2; rewrite <-Hl2; by rewrite Hx'.
+Qed.
+
 (** ** Properties of the [map_Forall] predicate *)
 Section map_Forall.
   Context {A} (P : K → A → Prop).

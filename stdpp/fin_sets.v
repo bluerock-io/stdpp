@@ -329,6 +329,25 @@ Proof.
   intros. apply (set_fold_disj_union_strong _ _ _ _ _ _); [|done].
   intros x1 x2 b' _ _ _. by rewrite !(assoc_L f), (comm_L f x1).
 Qed.
+Lemma set_fold_comm_acc (f : A → A → A) (g : A → A) (b : A) X :
+  Comm (=) f →
+  Assoc (=) f →
+  (∀ x c, g (f x c) = f x (g c)) →
+  g (set_fold f b X) = set_fold f (g b) X.
+Proof.
+  intros Hcomm Hassoc Hcomm_acc.
+  assert (∀ x1 x2 b', f x1 (f x2 b') = f x2 (f x1 b')) as Hf.
+  { intros x1 x2 ?. by rewrite !(assoc_L f), (comm_L f x1). }
+  apply (set_fold_ind (λ y Y, g y = set_fold f (g b) Y));
+    [ |by rewrite set_fold_empty| ].
+  { intros ? ? ? ? ? ?.
+    rewrite (set_fold_proper (=) _ _ Hf); [by subst|done].
+  }
+  intros x X' y Hx IH.
+  rewrite (set_fold_proper (≡) _  _ Hf ({[x]} ∪ X') (X' ∪ {[x]})); [|set_solver].
+  rewrite set_fold_disj_union; [|done|done|set_solver].
+  by rewrite set_fold_singleton, Hcomm_acc, IH.
+Qed.
 
 (** * Minimal elements *)
 Lemma minimal_exists R `{!Transitive R, ∀ x y, Decision (R x y)} (X : C) :

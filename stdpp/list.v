@@ -4607,6 +4607,18 @@ Lemma foldr_cons_permute_eq {A} (f : A → A → A) (a : A)
     `{!Assoc (=) f, !Comm (=) f} x l :
   foldr f a (x :: l) = foldr f (f x a) l.
 Proof. eapply (foldr_cons_permute eq); apply _. Qed.
+Lemma foldr_comm_acc {A} (f : A → A → A) (g : A → A) (a : A)
+    `{!Assoc (=) f, !Comm (=) f} l :
+  (∀ x b, g (f x b) = f x (g b)) →
+  g (foldr f a l) = foldr f (g a) l.
+Proof.
+  intros Hcomm_acc.
+  revert a; induction l as [|x l IH]; intros a; [done|].
+  by rewrite
+    (foldr_cons_permute_eq _ (g a)),
+    <-Hcomm_acc, <-IH,
+    foldr_cons_permute_eq by done.
+Qed.
 
 Lemma foldl_app {A B} (f : A → B → A) (l k : list B) (a : A) :
   foldl f a (l ++ k) = foldl f (foldl f a l) k.

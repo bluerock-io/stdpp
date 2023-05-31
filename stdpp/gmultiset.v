@@ -545,13 +545,29 @@ Section more_lemmas.
   Lemma gmultiset_set_fold_singleton {B} (f : A → B → B) (b : B) (a : A) :
     set_fold f b ({[+ a +]} : gmultiset A) = f a b.
   Proof. by unfold set_fold; simpl; rewrite gmultiset_elements_singleton. Qed.
+  Lemma gmultiset_set_fold_disj_union_strong {B} (R : relation B) `{!PreOrder R}
+      (f : A → B → B) (b : B) X Y :
+    (∀ x, Proper (R ==> R) (f x)) →
+    (∀ x1 x2 c, x1 ∈ X ⊎ Y → x2 ∈ X ⊎ Y → R (f x1 (f x2 c)) (f x2 (f x1 c))) →
+    R (set_fold f b (X ⊎ Y)) (set_fold f (set_fold f b X) Y).
+  Proof.
+    intros ? Hf. unfold set_fold; simpl.
+    rewrite <-foldr_app. apply (foldr_permutation R f b).
+    - intros;  rewrite Hf; [done| |].
+      + apply gmultiset_elem_of_elements.
+        apply elem_of_list_lookup; eauto.
+      + apply gmultiset_elem_of_elements.
+        apply elem_of_list_lookup; eauto.
+    - rewrite (comm (++)); apply gmultiset_elements_disj_union.
+  Qed.
   Lemma gmultiset_set_fold_disj_union (f : A → A → A) (b : A) X Y :
     Comm (=) f →
     Assoc (=) f →
     set_fold f b (X ⊎ Y) = set_fold f (set_fold f b X) Y.
   Proof.
-    intros Hcomm Hassoc. unfold set_fold; simpl.
-    by rewrite gmultiset_elements_disj_union, <- foldr_app, (comm (++)).
+    intros ??; apply gmultiset_set_fold_disj_union_strong; [apply _|apply _|].
+    intros x1 x2 ? _ _.
+    by rewrite 2!assoc, (comm f x1 x2).
   Qed.
   Lemma gmultiset_set_fold_scalar_mul (f : A → A → A) (b : A) n X :
     Comm (=) f →

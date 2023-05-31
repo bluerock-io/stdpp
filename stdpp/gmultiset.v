@@ -749,7 +749,7 @@ Section more_lemmas.
   Qed.
 
   (** Properties of the set fold operation **)
-  Lemma gmultiset_set_fold_comm_acc_strong (f : A -> A -> A) (g : A -> A) (b : A) X:
+  Lemma gmultiset_set_fold_comm_accum_strong (f : A -> A -> A) (g : A -> A) (b : A) X:
     (∀ x1 x2 c, x1 ∈ X → x2 ∈ X →  f x1 (f x2 c) = f x2 (f x1 c)) →
     (∀ x c, x ∈ X → g (f x c) = f x (g c)) →
     set_fold f (g b) X = g (set_fold f b X).
@@ -764,14 +764,14 @@ Section more_lemmas.
     - intros; apply Hcomm; multiset_solver.
     - intros; apply Hcomm_acc; multiset_solver.
   Qed.
-  Lemma gmultiset_set_fold_comm_acc (f : A -> A -> A) (g : A -> A) (b : A) X:
+  Lemma gmultiset_set_fold_comm_accum (f : A -> A -> A) (g : A -> A) (b : A) X:
     Comm (=) f →
     Assoc (=) f →
     (∀ x c, g (f x c) = f x (g c)) →
     set_fold f (g b) X = g (set_fold f b X).
   Proof.
     intros Hcomm Hassoc Hcomm_acc.
-    apply gmultiset_set_fold_comm_acc_strong; [|done].
+    apply gmultiset_set_fold_comm_accum_strong; [|done].
     intros x1 x2 ? ?.
     by rewrite !(assoc_L f), (comm_L f x1).
   Qed.

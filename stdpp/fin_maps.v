@@ -1401,7 +1401,7 @@ Lemma map_fold_delete_L {A B} (f : K → A → B → B) (b : B) (i : K) (x : A) 
   map_fold f b m = f i x (map_fold f b (delete i m)).
 Proof. apply map_fold_delete; apply _. Qed.
 
-Lemma map_fold_comm_acc_strong {A B} (R : relation B) `{!PreOrder R}
+Lemma map_fold_comm_accum_strong {A B} (R : relation B) `{!PreOrder R}
       (f : K → A → B → B) (g : B → B) (x : B) (m : M A) :
   Proper ((=) ==> (=) ==> R ==> R) f →
   Proper (R ==> R) g →
@@ -1431,12 +1431,12 @@ Proof.
     rewrite ?lookup_insert_Some; naive_solver.
 Qed.
 
-Lemma map_fold_comm_acc {A} (f : K → A → A → A) (g : A → A) (x : A) (m : M A) :
+Lemma map_fold_comm_accum {A} (f : K → A → A → A) (g : A → A) (x : A) (m : M A) :
   (∀ j1 j2 z1 z2 y, f j1 z1 (f j2 z2 y) = f j2 z2 (f j1 z1 y)) →
   (∀ j z y, f j z (g y) =  g (f j z y)) →
   map_fold f (g x) m = g (map_fold f x m).
 Proof. intros ? ?.
-  rewrite (map_fold_comm_acc_strong eq);
+  rewrite (map_fold_comm_accum_strong eq);
     [done|solve_proper|solve_proper|done|done].
 Qed.
 

@@ -4607,7 +4607,7 @@ Lemma foldr_cons_permute_eq {A} (f : A → A → A) (a : A)
     `{!Assoc (=) f, !Comm (=) f} x l :
   foldr f a (x :: l) = foldr f (f x a) l.
 Proof. eapply (foldr_cons_permute eq); apply _. Qed.
-Lemma foldr_comm_acc_strong {A B} (R : relation B) `{!PreOrder R}
+Lemma foldr_comm_accum_strong {A B} (R : relation B) `{!PreOrder R}
     (f : A → B → B) (g : B → B) b l :
   Proper (eq ==> R ==> R) f →
   Proper (R ==> R) g →
@@ -4622,13 +4622,13 @@ Proof.
   apply Hg.
   by apply elem_of_list_further.
 Qed.
-Lemma foldr_comm_acc {A} (f : A → A → A) (g : A → A) (a : A)
+Lemma foldr_comm_accum {A} (f : A → A → A) (g : A → A) (a : A)
     `{!Assoc (=) f, !Comm (=) f} l :
   (∀ x y, f x (g y) = g (f x y)) →
   foldr f (g a) l = g (foldr f a l).
 Proof.
   intros ?.
-  apply (foldr_comm_acc_strong eq); [solve_proper|solve_proper| |done].
+  apply (foldr_comm_accum_strong eq); [solve_proper|solve_proper| |done].
   intros ? b1 b2; by rewrite 2!assoc, (comm f b1 b2).
 Qed.
 

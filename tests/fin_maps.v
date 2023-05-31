@@ -358,6 +358,21 @@ Proof.
     end); abstract congruence.
 Defined.
 
+Lemma gtest_ind' `{Countable K} (P : gtest K → Prop) :
+  (∀ ts, map_Forall (λ _, P) ts → P (GTest ts)) →
+  ∀ t, P t.
+Proof.
+  intros Hnode t.
+  remember (gtest_size t) as n eqn:Hn. revert t Hn.
+  induction (lt_wf n) as [n _ IH]; intros [ts] ->; simpl in *.
+  apply Hnode. revert ts IH.
+  apply (map_fold_ind (λ r ts, (∀ n', n' < S r → _) → map_Forall (λ _, P) ts)).
+  - intros IH. apply map_Forall_empty.
+  - intros k t m r ? IHm IHt. apply map_Forall_insert; [done|]. split.
+    + eapply IHt; [|done]; lia.
+    + eapply IHm. intros; eapply IHt;[|done]; lia.
+Qed.
+
 (** We show that [gtest K] is countable itself. This means that we can use
 [gtest K] (which involves nested uses of [gmap]) as keys in [gmap]/[gset], i.e.,
 [gmap (gtest K) V] and [gset (gtest K)]. And even [gtest (gtest K)].

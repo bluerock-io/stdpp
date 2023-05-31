@@ -1401,28 +1401,43 @@ Lemma map_fold_delete_L {A B} (f : K → A → B → B) (b : B) (i : K) (x : A) 
   map_fold f b m = f i x (map_fold f b (delete i m)).
 Proof. apply map_fold_delete; apply _. Qed.
 
-Lemma map_fold_comm_acc {A} (f : K → A → A → A) (g : A → A) (x : A) (m : M A) :
+Lemma map_fold_comm_acc_strong {A B} (R : relation B) `{!PreOrder R}
+      (f : K → A → B → B) (g : B → B) (x : B) (m : M A) :
+  Proper ((=) ==> (=) ==> R ==> R) f →
+  Proper (R ==> R) g →
   (∀ j1 j2 z1 z2 y,
     j1 ≠ j2 → m !! j1 = Some z1 → m !! j2 = Some z2 →
-    f j1 z1 (f j2 z2 y) = f j2 z2 (f j1 z1 y)) →
-  (∀ j z y, g (f j z y) = f j z (g y)) →
-  g (map_fold f x m) = map_fold f (g x) m.
+    R (f j1 z1 (f j2 z2 y)) (f j2 z2 (f j1 z1 y))) →
+  (∀ j z y, m !! j = Some z → R (f j z (g y)) (g (f j z y))) →
+  R (map_fold f (g x) m) (g (map_fold f x m)) .
 Proof.
-  intros Hf Hg.
+  intros ? ? Hf Hg.
   apply (map_fold_ind (λ z m,
     (∀ j1 j2 z1 z2 y,
       j1 ≠ j2 → m !! j1 = Some z1 → m !! j2 = Some z2 →
-      f j1 z1 (f j2 z2 y) = f j2 z2 (f j1 z1 y)) →
-    g z = map_fold f (g x) m)); [by rewrite map_fold_empty| |done].
-  intros i x' m' r Hx' IH Hm'.
-  rewrite map_fold_insert; [|apply _|apply _|done|done].
-  rewrite Hg, IH; [done|].
-  intros j1 j2 z1 z2 y Hjs Hl1 Hl2.
-  apply Hm'; [done| |].
-  + rewrite lookup_insert_ne; [apply Hl1|].
-    contradict Hl1; rewrite <-Hl1; by rewrite Hx'.
-  + rewrite lookup_insert_ne; [apply Hl2|].
-    contradict Hl2; rewrite <-Hl2; by rewrite Hx'.
+      R (f j1 z1 (f j2 z2 y)) (f j2 z2 (f j1 z1 y))) →
+    (∀ j z y, m !! j = Some z → R (f j z (g y)) (g (f j z y))) →
+    R  (map_fold f (g x) m) (g z))); [by rewrite map_fold_empty| |apply Hf|apply Hg].
+  intros i x' m' r Hx' IH Hfm' Hgm'.
+  rewrite map_fold_insert; [ |apply _|apply _|assumption|assumption].
+  rewrite <-Hgm', IH; [done| | |apply lookup_insert].
+  - intros j1 j2 z1 z2 y Hjs Hl1 Hl2.
+    apply Hfm'; [done| |].
+    + rewrite ?lookup_insert_Some; naive_solver.
+    + rewrite ?lookup_insert_Some; naive_solver.
+  - intros j z y Hj.
+    apply Hgm'.
+    rewrite lookup_insert_ne; [assumption|].
+    rewrite ?lookup_insert_Some; naive_solver.
+Qed.
+
+Lemma map_fold_comm_acc {A} (f : K → A → A → A) (g : A → A) (x : A) (m : M A) :
+  (∀ j1 j2 z1 z2 y, f j1 z1 (f j2 z2 y) = f j2 z2 (f j1 z1 y)) →
+  (∀ j z y, f j z (g y) =  g (f j z y)) →
+  map_fold f (g x) m = g (map_fold f x m).
+Proof. intros ? ?.
+  rewrite (map_fold_comm_acc_strong eq);
+    [done|solve_proper|solve_proper|done|done].
 Qed.
 
 (** ** Properties of the [map_Forall] predicate *)

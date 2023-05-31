@@ -749,17 +749,30 @@ Section more_lemmas.
   Qed.
 
   (** Properties of the set fold operation **)
+  Lemma gmultiset_set_fold_comm_acc_strong (f : A -> A -> A) (g : A -> A) (b : A) X:
+    (∀ x1 x2 c, x1 ∈ X → x2 ∈ X →  f x1 (f x2 c) = f x2 (f x1 c)) →
+    (∀ x c, x ∈ X → g (f x c) = f x (g c)) →
+    set_fold f (g b) X = g (set_fold f b X).
+  Proof.
+    intros Hcomm Hcomm_acc.
+    revert b; induction X as [|x X IH] using gmultiset_ind; intros b; [done|].
+    rewrite
+      2!(gmultiset_set_fold_disj_union_strong _ _ _ _ _ _ Hcomm),
+      2!gmultiset_set_fold_singleton by done.
+    rewrite <-Hcomm_acc; [|multiset_solver].
+    apply IH.
+    - intros; apply Hcomm; multiset_solver.
+    - intros; apply Hcomm_acc; multiset_solver.
+  Qed.
   Lemma gmultiset_set_fold_comm_acc (f : A -> A -> A) (g : A -> A) (b : A) X:
     Comm (=) f →
     Assoc (=) f →
     (∀ x c, g (f x c) = f x (g c)) →
-    g (set_fold f b X) = set_fold f (g b) X.
+    set_fold f (g b) X = g (set_fold f b X).
   Proof.
     intros Hcomm Hassoc Hcomm_acc.
-    revert b; induction X as [|x X IH] using gmultiset_ind; intros b; [done|].
-    by rewrite
-      2!gmultiset_set_fold_disj_union,
-      2!gmultiset_set_fold_singleton,
-      IH, Hcomm_acc by done.
+    apply gmultiset_set_fold_comm_acc_strong; [|done].
+    intros x1 x2 ? ?.
+    by rewrite !(assoc_L f), (comm_L f x1).
   Qed.
 End more_lemmas.

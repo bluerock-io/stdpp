@@ -4607,17 +4607,29 @@ Lemma foldr_cons_permute_eq {A} (f : A → A → A) (a : A)
     `{!Assoc (=) f, !Comm (=) f} x l :
   foldr f a (x :: l) = foldr f (f x a) l.
 Proof. eapply (foldr_cons_permute eq); apply _. Qed.
+Lemma foldr_comm_acc_strong {A B} (R : relation B) `{!PreOrder R}
+    (f : A → B → B) (g : B → B) b l :
+  Proper (eq ==> R ==> R) f →
+  Proper (R ==> R) g →
+  (∀ x a1 a2, R (f a1 (f a2 x)) (f a2 (f a1 x))) →
+  (∀ x a, a ∈ l → R (f a (g x)) (g (f a x))) →
+  R (foldr f (g b) l) (g (foldr f b l)).
+Proof.
+  intros ? ? Hf Hg.
+  revert b; induction l as [|a l IH]; intros b; [done|].
+  rewrite 2!foldr_cons, IH, Hg; [done|apply elem_of_list_here|].
+  intros x a' Ha'.
+  apply Hg.
+  by apply elem_of_list_further.
+Qed.
 Lemma foldr_comm_acc {A} (f : A → A → A) (g : A → A) (a : A)
     `{!Assoc (=) f, !Comm (=) f} l :
-  (∀ x b, g (f x b) = f x (g b)) →
-  g (foldr f a l) = foldr f (g a) l.
+  (∀ x y, f x (g y) = g (f x y)) →
+  foldr f (g a) l = g (foldr f a l).
 Proof.
-  intros Hcomm_acc.
-  revert a; induction l as [|x l IH]; intros a; [done|].
-  by rewrite
-    (foldr_cons_permute_eq _ (g a)),
-    <-Hcomm_acc, <-IH,
-    foldr_cons_permute_eq by done.
+  intros ?.
+  apply (foldr_comm_acc_strong eq); [solve_proper|solve_proper| |done].
+  intros ? b1 b2; by rewrite 2!assoc, (comm f b1 b2).
 Qed.
 
 Lemma foldl_app {A B} (f : A → B → A) (l k : list B) (a : A) :

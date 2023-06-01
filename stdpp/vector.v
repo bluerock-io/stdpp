@@ -88,9 +88,12 @@ Ltac inv_vec v :=
   match eval hnf in T with
   | vec _ ?n =>
     match eval hnf in n with
-    | 0 => generalize dependent v; match goal with |- ∀ v, @?P v => apply (vec_0_inv P) end
+    | 0 =>
+      generalize dependent v;
+      match goal with |- ∀ v, @?P v => apply (vec_0_inv P) end
     | S ?n =>
-      generalize dependent v; match goal with |- ∀ v, @?P v => apply (vec_S_inv P) end;
+      generalize dependent v;
+      match goal with |- ∀ v, @?P v => apply (vec_S_inv P) end;
       (* Try going on recursively. *)
       try (let x := fresh "x" in intros x v; inv_vec v; revert x)
     end

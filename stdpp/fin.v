@@ -65,9 +65,11 @@ Ltac inv_fin i :=
   | fin ?n =>
     match eval hnf in n with
     | 0 =>
-      revert dependent i; match goal with |- ∀ i, @?P i => apply (fin_0_inv P) end
+      generalize dependent i;
+      match goal with |- ∀ i, @?P i => apply (fin_0_inv P) end
     | S ?n =>
-      revert dependent i; match goal with |- ∀ i, @?P i => apply (fin_S_inv P) end
+      generalize dependent i;
+      match goal with |- ∀ i, @?P i => apply (fin_S_inv P) end
     end
   end.
 

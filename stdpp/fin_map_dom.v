@@ -70,6 +70,14 @@ Lemma dom_filter_subseteq {A} (P : K * A → Prop) `{!∀ x, Decision (P x)} (m 
   dom (filter P m) ⊆ dom m.
 Proof. apply subseteq_dom, map_filter_subseteq. Qed.
 
+Lemma filter_dom {A} `{!Elements K D, !FinSet K D}
+    (P : K → Prop) `{!∀ x, Decision (P x)} (m : M A) :
+  filter P (dom m) ≡ dom (filter (λ kv, P kv.1) m).
+Proof.
+  intros i. rewrite elem_of_filter, !elem_of_dom. unfold is_Some.
+  setoid_rewrite map_filter_lookup_Some. naive_solver.
+Qed.
+
 Lemma dom_empty {A} : dom (@empty (M A) _) ≡ ∅.
 Proof.
   intros x. rewrite elem_of_dom, lookup_empty, <-not_eq_None_Some. set_solver.
@@ -283,6 +291,10 @@ Section leibniz.
     (∀ i, i ∈ X ↔ ∃ x, m !! i = Some x ∧ P (i, x)) →
     dom (filter P m) = X.
   Proof. unfold_leibniz. apply dom_filter. Qed.
+  Lemma filter_dom_L {A} `{!Elements K D, !FinSet K D}
+      (P : K → Prop) `{!∀ x, Decision (P x)} (m : M A) :
+    filter P (dom m) = dom (filter (λ kv, P kv.1) m).
+  Proof. unfold_leibniz. apply filter_dom. Qed.
   Lemma dom_empty_L {A} : dom (@empty (M A) _) = ∅.
   Proof. unfold_leibniz; apply dom_empty. Qed.
   Lemma dom_empty_iff_L {A} (m : M A) : dom m = ∅ ↔ m = ∅.

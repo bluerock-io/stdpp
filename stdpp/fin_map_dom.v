@@ -70,33 +70,32 @@ Lemma dom_filter_subseteq {A} (P : K * A → Prop) `{!∀ x, Decision (P x)} (m 
   dom (filter P m) ⊆ dom m.
 Proof. apply subseteq_dom, map_filter_subseteq. Qed.
 
-(* FIXME: Once [Equiv] has [Mode !], we can remove all these [D] type annotations at [≡]. *)
-Lemma dom_empty {A} : dom (@empty (M A) _) ≡@{D} ∅.
+Lemma dom_empty {A} : dom (@empty (M A) _) ≡ ∅.
 Proof.
   intros x. rewrite elem_of_dom, lookup_empty, <-not_eq_None_Some. set_solver.
 Qed.
-Lemma dom_empty_iff {A} (m : M A) : dom m ≡@{D} ∅ ↔ m = ∅.
+Lemma dom_empty_iff {A} (m : M A) : dom m ≡ ∅ ↔ m = ∅.
 Proof.
   split; [|intros ->; by rewrite dom_empty].
   intros E. apply map_empty. intros. apply not_elem_of_dom.
   rewrite E. set_solver.
 Qed.
-Lemma dom_empty_inv {A} (m : M A) : dom m ≡@{D} ∅ → m = ∅.
+Lemma dom_empty_inv {A} (m : M A) : dom m ≡ ∅ → m = ∅.
 Proof. apply dom_empty_iff. Qed.
-Lemma dom_alter {A} f (m : M A) i : dom (alter f i m) ≡@{D} dom m.
+Lemma dom_alter {A} f (m : M A) i : dom (alter f i m) ≡ dom m.
 Proof.
   apply set_equiv; intros j; rewrite !elem_of_dom; unfold is_Some.
   destruct (decide (i = j)); simplify_map_eq/=; eauto.
   destruct (m !! j); naive_solver.
 Qed.
-Lemma dom_insert {A} (m : M A) i x : dom (<[i:=x]>m) ≡@{D} {[ i ]} ∪ dom m.
+Lemma dom_insert {A} (m : M A) i x : dom (<[i:=x]>m) ≡ {[ i ]} ∪ dom m.
 Proof.
   apply set_equiv. intros j. rewrite elem_of_union, !elem_of_dom.
   unfold is_Some. setoid_rewrite lookup_insert_Some.
   destruct (decide (i = j)); set_solver.
 Qed.
 Lemma dom_insert_lookup {A} (m : M A) i x :
-  is_Some (m !! i) → dom (<[i:=x]>m) ≡@{D} dom m.
+  is_Some (m !! i) → dom (<[i:=x]>m) ≡ dom m.
 Proof.
   intros Hindom. assert (i ∈ dom m) by by apply elem_of_dom.
   rewrite dom_insert. set_solver.
@@ -106,9 +105,9 @@ Proof. rewrite (dom_insert _). set_solver. Qed.
 Lemma dom_insert_subseteq_compat_l {A} (m : M A) i x X :
   X ⊆ dom m → X ⊆ dom (<[i:=x]>m).
 Proof. intros. trans (dom m); eauto using dom_insert_subseteq. Qed.
-Lemma dom_singleton {A} (i : K) (x : A) : dom ({[i := x]} : M A) ≡@{D} {[ i ]}.
+Lemma dom_singleton {A} (i : K) (x : A) : dom ({[i := x]} : M A) ≡ {[ i ]}.
 Proof. rewrite <-insert_empty, dom_insert, dom_empty; set_solver. Qed.
-Lemma dom_delete {A} (m : M A) i : dom (delete i m) ≡@{D} dom m ∖ {[ i ]}.
+Lemma dom_delete {A} (m : M A) i : dom (delete i m) ≡ dom m ∖ {[ i ]}.
 Proof.
   apply set_equiv. intros j. rewrite elem_of_difference, !elem_of_dom.
   unfold is_Some. setoid_rewrite lookup_delete_Some. set_solver.
@@ -128,24 +127,24 @@ Lemma map_disjoint_dom_1 {A} (m1 m2 : M A) : m1 ##ₘ m2 → dom m1 ## dom m2.
 Proof. apply map_disjoint_dom. Qed.
 Lemma map_disjoint_dom_2 {A} (m1 m2 : M A) : dom m1 ## dom m2 → m1 ##ₘ m2.
 Proof. apply map_disjoint_dom. Qed.
-Lemma dom_union {A} (m1 m2 : M A) : dom (m1 ∪ m2) ≡@{D} dom m1 ∪ dom m2.
+Lemma dom_union {A} (m1 m2 : M A) : dom (m1 ∪ m2) ≡ dom m1 ∪ dom m2.
 Proof.
   apply set_equiv. intros i. rewrite elem_of_union, !elem_of_dom.
   unfold is_Some. setoid_rewrite lookup_union_Some_raw.
   destruct (m1 !! i); naive_solver.
 Qed.
-Lemma dom_intersection {A} (m1 m2: M A) : dom (m1 ∩ m2) ≡@{D} dom m1 ∩ dom m2.
+Lemma dom_intersection {A} (m1 m2: M A) : dom (m1 ∩ m2) ≡ dom m1 ∩ dom m2.
 Proof.
   apply set_equiv. intros i. rewrite elem_of_intersection, !elem_of_dom.
   unfold is_Some. setoid_rewrite lookup_intersection_Some. naive_solver.
 Qed.
-Lemma dom_difference {A} (m1 m2 : M A) : dom (m1 ∖ m2) ≡@{D} dom m1 ∖ dom m2.
+Lemma dom_difference {A} (m1 m2 : M A) : dom (m1 ∖ m2) ≡ dom m1 ∖ dom m2.
 Proof.
   apply set_equiv. intros i. rewrite elem_of_difference, !elem_of_dom.
   unfold is_Some. setoid_rewrite lookup_difference_Some.
   destruct (m2 !! i); naive_solver.
 Qed.
-Lemma dom_fmap {A B} (f : A → B) (m : M A) : dom (f <$> m) ≡@{D} dom m.
+Lemma dom_fmap {A B} (f : A → B) (m : M A) : dom (f <$> m) ≡ dom m.
 Proof.
   apply set_equiv. intros i.
   rewrite !elem_of_dom, lookup_fmap, <-!not_eq_None_Some.
@@ -157,13 +156,13 @@ Proof.
   - by apply empty_finite.
   - apply union_finite; [apply singleton_finite|done].
 Qed.
-Global Instance dom_proper `{!Equiv A} : Proper ((≡@{M A}) ==> (≡@{D})) (dom).
+Global Instance dom_proper `{!Equiv A} : Proper ((≡@{M A}) ==> (≡)) dom.
 Proof.
   intros m1 m2 EQm. apply set_equiv. intros i.
   rewrite !elem_of_dom, EQm. done.
 Qed.
 Lemma dom_list_to_map {A} (l : list (K * A)) :
-  dom (list_to_map l : M A) ≡@{D} list_to_set l.*1.
+  dom (list_to_map l : M A) ≡ list_to_set l.*1.
 Proof.
   induction l as [|?? IH].
   - by rewrite dom_empty.
@@ -172,7 +171,7 @@ Qed.
 
 (** Alternative definition of [dom] in terms of [map_to_list]. *)
 Lemma dom_alt {A} (m : M A) :
-  dom m ≡@{D} list_to_set (map_to_list m).*1.
+  dom m ≡ list_to_set (map_to_list m).*1.
 Proof.
   rewrite <-(list_to_map_to_list m) at 1.
   rewrite dom_list_to_map.
@@ -217,11 +216,11 @@ Proof.
 Qed.
 
 Lemma subseteq_dom_eq {A} (m1 m2 : M A) :
-  m1 ⊆ m2 → dom m2 ⊆@{D} dom m1 → m1 = m2.
+  m1 ⊆ m2 → dom m2 ⊆ dom m1 → m1 = m2.
 Proof. intros. apply map_subseteq_size_eq; auto using dom_subseteq_size. Qed.
 
 Lemma dom_singleton_inv {A} (m : M A) i :
-  dom m ≡@{D} {[i]} → ∃ x, m = {[i := x]}.
+  dom m ≡ {[i]} → ∃ x, m = {[i := x]}.
 Proof.
   intros Hdom. assert (is_Some (m !! i)) as [x ?].
   { apply (elem_of_dom (D:=D)); set_solver. }
@@ -231,7 +230,7 @@ Proof.
 Qed.
 
 Lemma dom_map_zip_with {A B C} (f : A → B → C) (ma : M A) (mb : M B) :
-  dom (map_zip_with f ma mb) ≡@{D} dom ma ∩ dom mb.
+  dom (map_zip_with f ma mb) ≡ dom ma ∩ dom mb.
 Proof.
   rewrite set_equiv. intros x.
   rewrite elem_of_intersection, !elem_of_dom, map_lookup_zip_with.
@@ -387,7 +386,7 @@ Proof. constructor. by rewrite dom_fmap, (set_unfold_elem_of _ (dom _) _). Qed.
 End fin_map_dom.
 
 Lemma dom_seq `{FinMapDom nat M D} {A} start (xs : list A) :
-  dom (map_seq start (M:=M A) xs) ≡@{D} set_seq start (length xs).
+  dom (map_seq start (M:=M A) xs) ≡ set_seq start (length xs).
 Proof.
   revert start. induction xs as [|x xs IH]; intros start; simpl.
   - by rewrite dom_empty.

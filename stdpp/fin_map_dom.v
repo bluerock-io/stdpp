@@ -74,14 +74,8 @@ Lemma filter_dom {A} `{!Elements K D, !FinSet K D}
     (P : K → Prop) `{!∀ x, Decision (P x)} (m : M A) :
   filter P (dom m) ≡ dom (filter (λ kv, P kv.1) m).
 Proof.
-  rewrite dom_filter. 1: reflexivity.
-  split; intro He.
-  - apply elem_of_filter in He; destruct He as [Hf He].
-    apply elem_of_dom in He; destruct He.
-    eexists; eauto.
-  - destruct He as [e [He Hf]].
-    apply elem_of_filter. split; [done|].
-    apply elem_of_dom; eauto.
+  intros i. rewrite elem_of_filter, !elem_of_dom. unfold is_Some.
+  setoid_rewrite map_filter_lookup_Some. naive_solver.
 Qed.
 
 Lemma dom_empty {A} : dom (@empty (M A) _) ≡ ∅.

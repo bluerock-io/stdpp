@@ -291,6 +291,10 @@ Section leibniz.
     (∀ i, i ∈ X ↔ ∃ x, m !! i = Some x ∧ P (i, x)) →
     dom (filter P m) = X.
   Proof. unfold_leibniz. apply dom_filter. Qed.
+  Lemma filter_dom_L {A} `{!Elements K D, !FinSet K D}
+      (P : K → Prop) `{!∀ x, Decision (P x)} (m : M A) :
+    filter P (dom m) = dom (filter (λ kv, P kv.1) m).
+  Proof. unfold_leibniz. apply filter_dom. Qed.
   Lemma dom_empty_L {A} : dom (@empty (M A) _) = ∅.
   Proof. unfold_leibniz; apply dom_empty. Qed.
   Lemma dom_empty_iff_L {A} (m : M A) : dom m = ∅ ↔ m = ∅.

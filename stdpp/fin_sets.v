@@ -329,39 +329,20 @@ Proof.
   intros. apply (set_fold_disj_union_strong _ _ _ _ _ _); [|done].
   intros x1 x2 b' _ _ _. by rewrite !(assoc_L f), (comm_L f x1).
 Qed.
-Lemma set_fold_comm_accum_strong {B} (R : relation B) `{!PreOrder R}
+
+Lemma set_fold_comm_acc_strong {B} (R : relation B) `{!PreOrder R}
     (f : A → B → B) (g : B → B) (b : B) X :
-  Proper (eq ==> R ==> R) f →
-  Proper (R ==> R) g →
-  (∀ x1 x2 c, R (f x1 (f x2 c)) (f x2 (f x1 c))) →
-  (∀ x c, x ∈ X → R (f x (g c)) (g (f x c))) →
+  (∀ x, Proper (R ==> R) (f x)) →
+  (∀ x y, x ∈ X → R (f x (g y)) (g (f x y))) →
   R (set_fold f (g b) X) (g (set_fold f b X)).
 Proof.
-  intros ? ? Hcomm Hcomm_acc.
-  apply (set_fold_ind (λ y Y, Y ⊆ X → R (set_fold f (g b) Y) (g y)));
-    [ |by rewrite set_fold_empty| |done].
-  { intros ? ? -> Y Y' HYY'.
-    rewrite (subseteq_proper Y Y' HYY' X X) by done.
-    split.
-    - intros ?; by rewrite (set_fold_proper R) by done.
-    - intros ?; by rewrite (set_fold_proper R) by done.
-  }
-  intros x X' y Hx IH Hsubset.
-  rewrite (set_fold_proper (≡) _  _ Hcomm ({[x]} ∪ X') (X' ∪ {[x]})); [|set_solver].
-  rewrite set_fold_disj_union_strong; [|apply _|apply _|auto|set_solver].
-  by rewrite set_fold_singleton, <-Hcomm_acc, IH by set_solver.
+  intros. unfold set_fold; simpl.
+  apply foldr_comm_acc_strong; [done|solve_proper|set_solver].
 Qed.
-Lemma set_fold_comm_accum (f : A → A → A) (g : A → A) (b : A) X :
-  Comm (=) f →
-  Assoc (=) f →
-  (∀ x c, f x (g c) = g (f x c)) →
-  set_fold f (g b) X = g (set_fold f b X).
-Proof.
-  intros Hcomm Hassoc Hcomm_acc.
-  apply set_fold_comm_accum_strong; [apply _|apply _|apply _| |auto].
-  intros x1 x2 ?.
-  by rewrite Hassoc, Hassoc, (Hcomm x1 x2).
-Qed.
+Lemma set_fold_comm_acc (f : A → A → A) (g : A → A) (a : A) X :
+  (∀ x y, f x (g y) = g (f x y)) →
+  set_fold f (g a) X = g (set_fold f a X).
+Proof. intros. apply (set_fold_comm_acc_strong _); [solve_proper|auto]. Qed.
 
 (** * Minimal elements *)
 Lemma minimal_exists R `{!Transitive R, ∀ x y, Decision (R x y)} (X : C) :

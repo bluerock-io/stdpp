@@ -580,6 +580,23 @@ Section more_lemmas.
       by rewrite (gmultiset_set_fold_disj_union _ _ _ _ _ _), IH.
   Qed.
 
+  Lemma gmultiset_set_fold_comm_acc_strong {B} (R : relation B) `{!PreOrder R}
+      (f : A → B → B) (g : B → B) b X :
+    (∀ x, Proper (R ==> R) (f x)) →
+    (∀ x (y : B), x ∈ X → R (f x (g y)) (g (f x y))) →
+    R (set_fold f (g b) X) (g (set_fold f b X)).
+  Proof.
+    intros ? Hfg. unfold set_fold; simpl.
+    apply foldr_comm_acc_strong; [done|solve_proper|].
+    intros. by apply Hfg, gmultiset_elem_of_elements.
+  Qed.
+  Lemma gmultiset_set_fold_comm_acc (f : A → A → A) (g : A → A) (a : A) X :
+    (∀ x c, g (f x c) = f x (g c)) →
+    set_fold f (g a) X = g (set_fold f a X).
+  Proof.
+    intros. apply (gmultiset_set_fold_comm_acc_strong _); [solve_proper|done].
+  Qed.
+
   (** Properties of the size operation *)
   Lemma gmultiset_size_empty : size (∅ : gmultiset A) = 0.
   Proof. done. Qed.
@@ -746,33 +763,5 @@ Section more_lemmas.
     destruct (gmultiset_choose_or_empty X) as [[x Hx]| ->]; auto.
     rewrite (gmultiset_disj_union_difference' x X) by done.
     apply Hinsert, IH; multiset_solver.
-  Qed.
-
-  (** Properties of the set fold operation **)
-  Lemma gmultiset_set_fold_comm_accum_strong (f : A -> A -> A) (g : A -> A) (b : A) X:
-    (∀ x1 x2 c, x1 ∈ X → x2 ∈ X →  f x1 (f x2 c) = f x2 (f x1 c)) →
-    (∀ x c, x ∈ X → g (f x c) = f x (g c)) →
-    set_fold f (g b) X = g (set_fold f b X).
-  Proof.
-    intros Hcomm Hcomm_acc.
-    revert b; induction X as [|x X IH] using gmultiset_ind; intros b; [done|].
-    rewrite
-      2!(gmultiset_set_fold_disj_union_strong _ _ _ _ _ _ Hcomm),
-      2!gmultiset_set_fold_singleton by done.
-    rewrite <-Hcomm_acc; [|multiset_solver].
-    apply IH.
-    - intros; apply Hcomm; multiset_solver.
-    - intros; apply Hcomm_acc; multiset_solver.
-  Qed.
-  Lemma gmultiset_set_fold_comm_accum (f : A -> A -> A) (g : A -> A) (b : A) X:
-    Comm (=) f →
-    Assoc (=) f →
-    (∀ x c, g (f x c) = f x (g c)) →
-    set_fold f (g b) X = g (set_fold f b X).
-  Proof.
-    intros Hcomm Hassoc Hcomm_acc.
-    apply gmultiset_set_fold_comm_accum_strong; [|done].
-    intros x1 x2 ? ?.
-    by rewrite !(assoc_L f), (comm_L f x1).
   Qed.
 End more_lemmas.

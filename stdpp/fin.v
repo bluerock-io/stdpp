@@ -19,12 +19,10 @@ Declare Scope fin_scope.
 Delimit Scope fin_scope with fin.
 Global Arguments Fin.FS _ _%fin : assert.
 
-Notation "0" := Fin.F1 : fin_scope. Notation "1" := (FS 0) : fin_scope.
-Notation "2" := (FS 1) : fin_scope. Notation "3" := (FS 2) : fin_scope.
-Notation "4" := (FS 3) : fin_scope. Notation "5" := (FS 4) : fin_scope.
-Notation "6" := (FS 5) : fin_scope. Notation "7" := (FS 6) : fin_scope.
-Notation "8" := (FS 7) : fin_scope. Notation "9" := (FS 8) : fin_scope.
-Notation "10" := (FS 9) : fin_scope.
+(** Allow any non-negative number literal to be parsed as a [fin]. For example
+[42%fin : fin 64], or [42%fin : fin _], or [42%fin : fin (43 + _)]. *)
+Number Notation fin Nat.of_num_uint Nat.to_num_uint (via nat
+  mapping [[Fin.F1] => O, [Fin.FS] => S]) : fin_scope.
 
 Fixpoint fin_to_nat {n} (i : fin n) : nat :=
   match i with 0%fin => 0 | FS i => S (fin_to_nat i) end.

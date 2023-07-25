@@ -56,7 +56,7 @@ Add Search Blacklist "_unseal".
 Record seal {A} (f : A) := { unseal : A; seal_eq : unseal = f }.
 Global Arguments unseal {_ _} _ : assert.
 Global Arguments seal_eq {_ _} _ : assert.
-#[global] Typeclasses Opaque unseal.
+Global Typeclasses Opaque unseal.
 
 (** * Solving type class instances *)
 (** The tactic [tc_solve] is used to solve type class goals by invoking type

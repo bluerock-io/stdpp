@@ -316,7 +316,7 @@ Global Instance bv_unsigned_inj n : Inj (=) (=) (@bv_unsigned n).
 Proof. intros ???. by apply bv_eq. Qed.
 
 Definition Z_to_bv_checked (n : N) (z : Z) : option (bv n) :=
-  guard (BvWf n z) as H; Some (@BV n z H).
+  H ← guard (BvWf n z); Some (@BV n z H).
 
 Program Definition Z_to_bv (n : N) (z : Z) : bv n :=
   @BV n (bv_wrap n z) _.
@@ -409,7 +409,7 @@ Qed.
 Lemma Z_to_bv_checked_bv_unsigned n (b : bv n):
   Z_to_bv_checked n (bv_unsigned b) = Some b.
 Proof.
-  unfold Z_to_bv_checked. case_option_guard.
+  unfold Z_to_bv_checked. case_guard; simplify_option_eq.
   - f_equal. by apply bv_eq.
   - by pose proof bv_is_wf b.
 Qed.
@@ -417,7 +417,7 @@ Lemma Z_to_bv_checked_Some n a (b : bv n):
   Z_to_bv_checked n a = Some b ↔ a = bv_unsigned b.
 Proof.
   split.
-  - unfold Z_to_bv_checked. case_option_guard; [|done]. intros ?. by simplify_eq.
+  - unfold Z_to_bv_checked. case_guard; [|done]. intros ?. by simplify_option_eq.
   - intros ->. apply Z_to_bv_checked_bv_unsigned.
 Qed.
 

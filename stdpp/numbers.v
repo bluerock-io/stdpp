@@ -1017,7 +1017,7 @@ Module Qp.
   Definition sub (p q : Qp) : option Qp :=
     let 'mk_Qp p Hp := p in let 'mk_Qp q Hq := q in
     let pq := (p - q)%Qc in
-    guard (0 < pq)%Qc as Hpq; Some (mk_Qp pq Hpq).
+    Hpq ← guard (0 < pq)%Qc; Some (mk_Qp pq Hpq).
   Global Arguments sub : simpl never.
 
   Definition mul (p q : Qp) : Qp :=

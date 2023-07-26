@@ -39,7 +39,7 @@ Qed.
 Global Program Instance hashset_intersection: Intersection (hashset hash) := λ m1 m2,
   let (m1,Hm1) := m1 in let (m2,Hm2) := m2 in
   Hashset (intersection_with (λ l k,
-    let l' := list_intersection l k in guard (l' ≠ []); Some l') m1 m2) _.
+    let l' := list_intersection l k in guard (l' ≠ []);; Some l') m1 m2) _.
 Next Obligation.
   intros _ _ m1 Hm1 m2 Hm2 n l'. rewrite lookup_intersection_with_Some.
   intros (?&?&?&?&?); simplify_option_eq.
@@ -49,7 +49,7 @@ Qed.
 Global Program Instance hashset_difference: Difference (hashset hash) := λ m1 m2,
   let (m1,Hm1) := m1 in let (m2,Hm2) := m2 in
   Hashset (difference_with (λ l k,
-    let l' := list_difference l k in guard (l' ≠ []); Some l') m1 m2) _.
+    let l' := list_difference l k in guard (l' ≠ []);; Some l') m1 m2) _.
 Next Obligation.
   intros _ _ m1 Hm1 m2 Hm2 n l'. rewrite lookup_difference_with_Some.
   intros [[??]|(?&?&?&?&?)]; simplify_option_eq; auto.

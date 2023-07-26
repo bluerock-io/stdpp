@@ -178,6 +178,19 @@ Tactic Notation "case_match" "eqn" ":" ident(Hd) :=
 Ltac case_match :=
   let H := fresh in case_match eqn:H.
 
+Tactic Notation "case_guard" "as" ident(Hx) :=
+  match goal with
+  | H : context C [@guard ?M ?F ?R ?P ?dec] |- _ =>
+      change (@guard M F R P dec) with (
+        match @decide P dec with left H' => @mret M R P H' | _ => @mfail M F P end) in *;
+      destruct_decide (@decide P dec) as Hx
+  | |- context C [@guard ?M ?F ?R ?P ?dec] =>
+      change (@guard M F R P dec) with (
+        match @decide P dec with left H' => @mret M R P H' | _ => @mfail M F P end) in *;
+      destruct_decide (@decide P dec) as Hx
+  end.
+Tactic Notation "case_guard" :=
+  let H := fresh in case_guard as H.
 
 (** The tactic [unless T by tac_fail] succeeds if [T] is not provable by
 the tactic [tac_fail]. *)

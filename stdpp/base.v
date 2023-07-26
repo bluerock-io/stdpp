@@ -1211,14 +1211,16 @@ Notation "ps .*1" := (fmap (M:=list) fst ps)
 Notation "ps .*2" := (fmap (M:=list) snd ps)
   (at level 2, left associativity, format "ps .*2").
 
-Class MGuard (M : Type → Type) :=
-  mguard: ∀ P {dec : Decision P} {A}, (P → M A) → M A.
-Global Arguments mguard _ _ _ !_ _ _ / : assert.
-Global Hint Mode MGuard ! : typeclass_instances.
-Notation "'guard' P ; z" := (mguard P (λ _, z))
-  (at level 20, z at level 200, only parsing, right associativity) : stdpp_scope.
-Notation "'guard' P 'as' H ; z" := (mguard P (λ H, z))
-  (at level 20, z at level 200, only parsing, right associativity) : stdpp_scope.
+Class MFail (M : Type → Type) := mfail : ∀ {A}, M A.
+Global Arguments mfail {_ _ _} : assert.
+Global Instance: Params (@mfail) 3 := {}.
+Global Hint Mode MFail ! : typeclass_instances.
+
+Definition guard `{MFail M, MRet M} P `{Decision P} : M P :=
+  match decide P with
+  | left H => mret H
+  | right _ => mfail
+  end.
 
 (** * Operations on maps *)
 (** In this section we define operational type classes for the operations

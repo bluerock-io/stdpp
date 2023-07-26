@@ -179,8 +179,7 @@ Global Instance option_bind: MBind option := λ A B f mx,
 Global Instance option_join: MJoin option := λ A mmx,
   match mmx with Some mx => mx | None => None end.
 Global Instance option_fmap: FMap option := @option_map.
-Global Instance option_guard: MGuard option := λ P dec A f,
-  match dec with left H => f H | _ => None end.
+Global Instance option_mfail: MFail option := @None.
 
 Lemma option_fmap_inj {A B} (R1 : A → A → Prop) (R2 : B → B → Prop) (f : A → B) :
   Inj R1 R2 f → Inj (option_Forall2 R1) (option_Forall2 R2) (fmap f).
@@ -412,39 +411,24 @@ Section union_intersection_difference.
   Proof. apply union_with_proper. by constructor. Qed.
 End union_intersection_difference.
 
-(** * Tactics *)
-Tactic Notation "case_option_guard" "as" ident(Hx) :=
-  match goal with
-  | H : context C [@mguard option _ ?P ?dec] |- _ =>
-    change (@mguard option _ P dec) with (λ A (f : P → option A),
-      match @decide P dec with left H' => f H' | _ => None end) in *;
-    destruct_decide (@decide P dec) as Hx
-  | |- context C [@mguard option _ ?P ?dec] =>
-    change (@mguard option _ P dec) with (λ A (f : P → option A),
-      match @decide P dec with left H' => f H' | _ => None end) in *;
-    destruct_decide (@decide P dec) as Hx
-  end.
-Tactic Notation "case_option_guard" :=
-  let H := fresh in case_option_guard as H.
 
 Lemma option_guard_True {A} P `{Decision P} (mx : option A) :
-  P → mguard P (λ _, mx) = mx.
-Proof. intros. by case_option_guard. Qed.
-Lemma option_guard_True_pi {A} P `{Decision P, ProofIrrel P} (f : P → option A)
-    (HP : P) :
-  mguard P f = f HP.
-Proof. intros. case_option_guard; [|done]. f_equal; apply proof_irrel. Qed.
-Lemma option_guard_False {A} P `{Decision P} (f : P → option A) :
-  ¬P → mguard P f = None.
-Proof. intros. by case_option_guard. Qed.
+  P → (guard P;; mx) = mx.
+Proof. intros. by case_guard. Qed.
+Lemma option_guard_True_pi P `{Decision P, ProofIrrel P} (HP : P) :
+  guard P = Some HP.
+Proof. case_guard; [|done]. f_equal; apply proof_irrel. Qed.
+Lemma option_guard_False P `{Decision P} :
+  ¬P → guard P = None.
+Proof. intros. by case_guard. Qed.
 Lemma option_guard_iff {A} P Q `{Decision P, Decision Q} (mx : option A) :
-  (P ↔ Q) → (guard P; mx) = guard Q; mx.
-Proof. intros [??]. repeat case_option_guard; intuition. Qed.
+  (P ↔ Q) → (guard P;; mx) = (guard Q;; mx).
+Proof. intros [??]. repeat case_guard; intuition. Qed.
 Lemma option_guard_decide {A} P `{Decision P} (mx : option A) :
-  (guard P; mx) = if decide P then mx else None.
-Proof. done. Qed.
+  (guard P;; mx) = if decide P then mx else None.
+Proof. by case_guard. Qed.
 Lemma option_guard_bool_decide {A} P `{Decision P} (mx : option A) :
-  (guard P; mx) = if bool_decide P then mx else None.
+  (guard P;; mx) = if bool_decide P then mx else None.
 Proof. by rewrite option_guard_decide, decide_bool_decide. Qed.
 
 Tactic Notation "simpl_option" "by" tactic3(tac) :=
@@ -480,8 +464,8 @@ Tactic Notation "simpl_option" "by" tactic3(tac) :=
     end
   | H : context [decide _] |- _ => rewrite decide_True in H by tac
   | H : context [decide _] |- _ => rewrite decide_False in H by tac
-  | H : context [mguard _ _] |- _ => rewrite option_guard_False in H by tac
-  | H : context [mguard _ _] |- _ => rewrite option_guard_True in H by tac
+  | H : context [guard _] |- _ => rewrite option_guard_False in H by tac
+  | H : context [guard _] |- _ => rewrite option_guard_True in H by tac
   | _ => rewrite decide_True by tac
   | _ => rewrite decide_False by tac
   | _ => rewrite option_guard_True by tac
@@ -521,6 +505,6 @@ Tactic Notation "simplify_option_eq" "by" tactic3(tac) :=
     let x := fresh in destruct mx as [x|] eqn:?;
       [change (my = Some (f x)) in H|change (my = None) in H]
   | _ => progress case_decide
-  | _ => progress case_option_guard
+  | _ => progress case_guard
   end.
 Tactic Notation "simplify_option_eq" := simplify_option_eq by eauto.

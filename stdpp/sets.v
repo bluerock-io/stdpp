@@ -941,28 +941,28 @@ Section fin_to_set.
 End fin_to_set.
 
 (** * Guard *)
-Global Instance set_guard `{MonadSet M} : MGuard M :=
-  λ P dec A x, match dec with left H => x H | _ => ∅ end.
+Global Instance set_mfail `{MonadSet M} : MFail M := λ _, ∅.
 
 Section set_monad_base.
   Context `{MonadSet M}.
 
   Lemma elem_of_guard `{Decision P} {A} (x : A) (X : M A) :
-    (x ∈ guard P; X) ↔ P ∧ x ∈ X.
+    x ∈ (guard P;; X) ↔ P ∧ x ∈ X.
   Proof.
-    unfold mguard, set_guard; simpl; case_match;
-      rewrite ?elem_of_empty; naive_solver.
+    case_guard; unfold mfail, set_mfail; rewrite elem_of_bind;
+      [setoid_rewrite elem_of_ret|setoid_rewrite elem_of_empty];
+      naive_solver.
   Qed.
   Lemma elem_of_guard_2 `{Decision P} {A} (x : A) (X : M A) :
-    P → x ∈ X → x ∈ guard P; X.
+    P → x ∈ X → x ∈ (guard P;; X).
   Proof. by rewrite elem_of_guard. Qed.
-  Lemma guard_empty `{Decision P} {A} (X : M A) : (guard P; X) ≡ ∅ ↔ ¬P ∨ X ≡ ∅.
+  Lemma guard_empty `{Decision P} {A} (X : M A) : (guard P;; X) ≡ ∅ ↔ ¬P ∨ X ≡ ∅.
   Proof.
     rewrite !elem_of_equiv_empty; setoid_rewrite elem_of_guard.
     destruct (decide P); naive_solver.
   Qed.
   Global Instance set_unfold_guard `{Decision P} {A} (x : A) (X : M A) Q :
-    SetUnfoldElemOf x X Q → SetUnfoldElemOf x (guard P; X) (P ∧ Q).
+    SetUnfoldElemOf x X Q → SetUnfoldElemOf x (guard P;; X) (P ∧ Q).
   Proof. constructor. by rewrite elem_of_guard, (set_unfold (x ∈ X) Q). Qed.
   Lemma bind_empty {A B} (f : A → M B) X :
     X ≫= f ≡ ∅ ↔ X ≡ ∅ ∨ ∀ x, x ∈ X → f x ≡ ∅.
@@ -1052,7 +1052,7 @@ Section set_monad.
 
   Lemma set_bind_singleton {A B} (f : A → M B) x : {[ x ]} ≫= f ≡ f x.
   Proof. set_solver. Qed.
-  Lemma set_guard_True {A} `{Decision P} (X : M A) : P → (guard P; X) ≡ X.
+  Lemma set_guard_True {A} `{Decision P} (X : M A) : P → (guard P;; X) ≡ X.
   Proof. set_solver. Qed.
   Lemma set_fmap_compose {A B C} (f : A → B) (g : B → C) (X : M A) :
     g ∘ f <$> X ≡ g <$> (f <$> X).

@@ -1623,10 +1623,10 @@ Section map_lookup_filter.
   Implicit Types m : M A.
 
   Lemma map_lookup_filter m i :
-    filter P m !! i = x ← m !! i; guard (P (i,x)); Some x.
+    filter P m !! i = x ← m !! i; guard (P (i,x));; Some x.
   Proof.
     revert m i. apply (map_fold_ind (λ m1 m2,
-      ∀ i, m1 !! i = x ← m2 !! i; guard (P (i,x)); Some x)); intros i.
+      ∀ i, m1 !! i = x ← m2 !! i; guard (P (i,x));; Some x)); intros i.
     { by rewrite lookup_empty. }
     intros y m m' Hm IH j. case (decide (j = i))as [->|?].
     - case_decide.
@@ -1641,7 +1641,7 @@ Section map_lookup_filter.
     filter P m !! i = Some x ↔ m !! i = Some x ∧ P (i, x).
   Proof.
     rewrite map_lookup_filter.
-    destruct (m !! i); simpl; repeat case_option_guard; naive_solver.
+    destruct (m !! i); simpl; repeat case_guard; naive_solver.
   Qed.
   Lemma map_lookup_filter_Some_1_1 m i x :
     filter P m !! i = Some x → m !! i = Some x.
@@ -2723,7 +2723,7 @@ Lemma map_filter_or {A} (P Q : K * A → Prop)
   filter (λ x, P x ∨ Q x) m = filter P m ∪ filter Q m.
 Proof.
   apply map_eq. intros k. rewrite lookup_union. rewrite !map_lookup_filter.
-  destruct (m !! k); simpl; repeat case_option_guard; naive_solver.
+  destruct (m !! k); simpl; repeat case_guard; naive_solver.
 Qed.
 Lemma map_fmap_union {A B} (f : A → B) (m1 m2 : M A) :
   f <$> (m1 ∪ m2) = (f <$> m1) ∪ (f <$> m2).
@@ -2995,7 +2995,7 @@ Lemma map_filter_and {A} (P Q : K * A → Prop)
   filter (λ x, P x ∧ Q x) m = filter P m ∩ filter Q m.
 Proof.
   apply map_eq. intros k. rewrite lookup_intersection. rewrite !map_lookup_filter.
-  destruct (m !! k); simpl; repeat case_option_guard; naive_solver.
+  destruct (m !! k); simpl; repeat case_guard; naive_solver.
 Qed.
 Lemma map_fmap_intersection {A B} (f : A → B) (m1 m2 : M A) :
   f <$> (m1 ∩ m2) = (f <$> m1) ∩ (f <$> m2).
@@ -3256,7 +3256,7 @@ Section setoid.
     Proper ((≡@{M A}) ==> (≡)) (filter P).
   Proof.
     intros ? m1 m2 Hm i. rewrite !map_lookup_filter.
-    destruct (Hm i); simpl; repeat case_option_guard; try constructor; naive_solver.
+    destruct (Hm i); simpl; repeat case_guard; try constructor; naive_solver.
   Qed.
 
   Global Instance map_singleton_equiv_inj :
@@ -3508,7 +3508,7 @@ Section map_seq.
   Qed.
 
   Lemma lookup_map_seq start xs i :
-    map_seq (M:=M A) start xs !! i = guard (start ≤ i); xs !! (i - start).
+    map_seq (M:=M A) start xs !! i = (guard (start ≤ i);; xs !! (i - start)).
   Proof.
     revert start. induction xs as [|x' xs IH]; intros start; simpl.
     { rewrite lookup_empty; simplify_option_eq; by rewrite ?lookup_nil. }
@@ -3529,12 +3529,12 @@ Section map_seq.
   Qed.
   Lemma lookup_map_seq_Some start xs i x :
     map_seq (M:=M A) start xs !! i = Some x ↔ start ≤ i ∧ xs !! (i - start) = Some x.
-  Proof. rewrite lookup_map_seq. case_option_guard; naive_solver. Qed.
+  Proof. rewrite lookup_map_seq. case_guard; naive_solver. Qed.
   Lemma lookup_map_seq_None start xs i :
     map_seq (M:=M A) start xs !! i = None ↔ i < start ∨ start + length xs ≤ i.
   Proof.
     rewrite lookup_map_seq.
-    case_option_guard; rewrite ?lookup_ge_None; naive_solver lia.
+    case_guard; simplify_option_eq; rewrite ?lookup_ge_None; naive_solver lia.
   Qed.
   Lemma lookup_map_seq_is_Some start xs i x :
     is_Some (map_seq (M:=M A) start xs !! i) ↔ start ≤ i < start + length xs.
@@ -3599,7 +3599,7 @@ Section map_seq.
     - rewrite lookup_insert, lookup_map_seq, option_guard_True by lia.
       by rewrite list_lookup_insert by lia.
     - rewrite lookup_insert_ne, !lookup_map_seq by done.
-      case_option_guard; [|done]. by rewrite list_lookup_insert_ne by lia.
+      case_guard; [|done]. by rewrite list_lookup_insert_ne by lia.
   Qed.
   Lemma map_seq_insert start xs i x:
     i < length xs →
@@ -3629,7 +3629,7 @@ Section map_seqZ.
   Qed.
 
   Lemma lookup_map_seqZ start xs i :
-    map_seqZ (M:=M A) start xs !! i = guard (start ≤ i); xs !! Z.to_nat (i - start).
+    map_seqZ (M:=M A) start xs !! i = (guard (start ≤ i);; xs !! Z.to_nat (i - start)).
   Proof.
     revert start. induction xs as [|x' xs IH]; intros start; simpl.
     { rewrite lookup_empty; simplify_option_eq; by rewrite ?lookup_nil. }
@@ -3655,13 +3655,13 @@ Section map_seqZ.
   Lemma lookup_map_seqZ_Some start xs i x :
     map_seqZ (M:=M A) start xs !! i = Some x ↔
       start ≤ i ∧ xs !! Z.to_nat (i - start) = Some x.
-  Proof. rewrite lookup_map_seqZ. case_option_guard; naive_solver. Qed.
+  Proof. rewrite lookup_map_seqZ. case_guard; naive_solver. Qed.
   Lemma lookup_map_seqZ_None start xs i :
     map_seqZ (M:=M A) start xs !! i = None ↔
       i < start ∨ start + Z.of_nat (length xs) ≤ i.
   Proof.
     rewrite lookup_map_seqZ.
-    case_option_guard; rewrite ?lookup_ge_None; naive_solver lia.
+    case_guard; simplify_option_eq; rewrite ?lookup_ge_None; naive_solver lia.
   Qed.
   Lemma lookup_map_seqZ_is_Some start xs i :
     is_Some (map_seqZ (M:=M A) start xs !! i) ↔
@@ -3730,7 +3730,7 @@ Section map_seqZ.
     - rewrite lookup_insert, lookup_map_seqZ, option_guard_True by lia.
       by rewrite list_lookup_insert by lia.
     - rewrite lookup_insert_ne, !lookup_map_seqZ by done.
-      case_option_guard; [|done]. by rewrite list_lookup_insert_ne by lia.
+      case_guard; [|done]. by rewrite list_lookup_insert_ne by lia.
   Qed.
   Lemma map_seqZ_insert start xs i x:
     (i < length xs)%nat →

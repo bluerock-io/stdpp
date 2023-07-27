@@ -856,6 +856,10 @@ Section prod_setoid.
   Global Instance uncurry4_proper `{Equiv C, Equiv D, Equiv E} :
     Proper (((≡) ==> (≡) ==> (≡) ==> (≡) ==> (≡)) ==>
             (≡@{A*B*C*D}) ==> (≡@{E})) uncurry4 := _.
+
+  Lemma pair_equiv (a1 a2 : A) (b1 b2 : B) :
+    (a1, b1) ≡ (a2, b2) ↔ a1 ≡ a2 ∧ b1 ≡ b2.
+  Proof. reflexivity. Qed.
 End prod_setoid.
 
 Global Typeclasses Opaque prod_equiv.

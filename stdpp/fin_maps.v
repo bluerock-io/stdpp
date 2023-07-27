@@ -1449,6 +1449,15 @@ Section map_Forall.
   Lemma map_Forall_lookup_2 m :
     (∀ i x, m !! i = Some x → P i x) → map_Forall P m.
   Proof. intros ?. by apply map_Forall_lookup. Qed.
+  Lemma map_Forall_fmap {B} (f : B → A) (m : M B) :
+    map_Forall P (f <$> m) ↔ map_Forall (λ k, (P k ∘ f)) m.
+  Proof.
+    unfold map_Forall. setoid_rewrite lookup_fmap.
+    split; intros Hall i x.
+    - specialize (Hall i (f x)). destruct (m !! i); naive_solver.
+    - rewrite fmap_Some. intros [y [??]]. specialize (Hall i y). naive_solver.
+  Qed.
+
   Lemma map_Forall_foldr_delete m is :
     map_Forall P m → map_Forall P (foldr delete m is).
   Proof. induction is; eauto using map_Forall_delete. Qed.

@@ -368,6 +368,15 @@ Section union_intersection_difference.
   Proof. by intros [?|]. Qed.
   Global Instance intersection_with_right_ab : RightAbsorb (=) None (intersection_with f).
   Proof. by intros [?|]. Qed.
+  Global Instance intersection_with_comm :
+    Comm (=) f → Comm (=@{option A}) (intersection_with f).
+  Proof. by intros ? [?|] [?|]; compute; rewrite 1?(comm f). Qed.
+  (** These are duplicates of the above [LeftAbsorb]/[RightAbsorb] instances, but
+  easier to find with [SearchAbout]. *)
+  Lemma intersection_with_None_l my : intersection_with f None my = None.
+  Proof. destruct my; done. Qed.
+  Lemma intersection_with_None_r mx : intersection_with f mx None = None.
+  Proof. destruct mx; done. Qed.
 
   Global Instance difference_with_comm :
     Comm (=) f → Comm (=@{option A}) (intersection_with f).

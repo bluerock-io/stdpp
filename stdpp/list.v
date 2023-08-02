@@ -4596,7 +4596,7 @@ Proof.
 Qed.
 Lemma foldr_cons_permute {A} (R : relation A) `{!PreOrder R}
     (f : A → A → A) (a : A)
-`{!∀ a, Proper (R ==> R) (f a), !Assoc R f, !Comm R f} x l :
+    `{!∀ a, Proper (R ==> R) (f a), !Assoc R f, !Comm R f} x l :
   R (foldr f a (x :: l)) (foldr f (f x a) l).
 Proof.
   rewrite <-foldr_snoc.

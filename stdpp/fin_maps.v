@@ -1453,9 +1453,7 @@ Section map_Forall.
     map_Forall P (f <$> m) ↔ map_Forall (λ k, (P k ∘ f)) m.
   Proof.
     unfold map_Forall. setoid_rewrite lookup_fmap.
-    split; intros Hall i x.
-    - specialize (Hall i (f x)). destruct (m !! i); naive_solver.
-    - rewrite fmap_Some. intros [y [??]]. specialize (Hall i y). naive_solver.
+    setoid_rewrite fmap_Some. naive_solver.
   Qed.
 
   Lemma map_Forall_foldr_delete m is :
@@ -2989,7 +2987,10 @@ Lemma lookup_difference_is_Some {A} (m1 m2 : M A) i :
 Proof. unfold is_Some. setoid_rewrite lookup_difference_Some. naive_solver. Qed.
 Lemma lookup_difference_None {A} (m1 m2 : M A) i :
   (m1 ∖ m2) !! i = None ↔ m1 !! i = None ∨ is_Some (m2 !! i).
-Proof. rewrite lookup_difference. destruct (m1 !! i), (m2 !! i); compute; naive_solver. Qed.
+Proof.
+  rewrite lookup_difference.
+  destruct (m1 !! i), (m2 !! i); compute; naive_solver.
+Qed.
 Lemma map_disjoint_difference_l {A} (m1 m2 : M A) : m1 ⊆ m2 → m2 ∖ m1 ##ₘ m1.
 Proof.
   intros Hm i; specialize (Hm i).

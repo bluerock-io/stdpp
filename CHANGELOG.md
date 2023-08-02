@@ -69,6 +69,7 @@ longer supported by this release.
   `Fixpoint f (t : gtest) := let 'GTest ts := t in map_fold (λ _ t', plus (f t')) 1 ts`.
 - Make `fin` number literal notations work with numbers above 10. (by Thibaut
   Pérami)
+- Change premise `Equivalence` into `PreOrder` for `set_fold_proper`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

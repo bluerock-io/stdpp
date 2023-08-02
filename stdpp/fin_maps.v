@@ -1449,6 +1449,13 @@ Section map_Forall.
   Lemma map_Forall_lookup_2 m :
     (∀ i x, m !! i = Some x → P i x) → map_Forall P m.
   Proof. intros ?. by apply map_Forall_lookup. Qed.
+  Lemma map_Forall_fmap {B} (f : B → A) (m : M B) :
+    map_Forall P (f <$> m) ↔ map_Forall (λ k, (P k ∘ f)) m.
+  Proof.
+    unfold map_Forall. setoid_rewrite lookup_fmap.
+    setoid_rewrite fmap_Some. naive_solver.
+  Qed.
+
   Lemma map_Forall_foldr_delete m is :
     map_Forall P m → map_Forall P (foldr delete m is).
   Proof. induction is; eauto using map_Forall_delete. Qed.
@@ -2940,6 +2947,13 @@ Proof.
   apply map_eq. intros k. rewrite lookup_intersection. rewrite !map_filter_lookup.
   destruct (m !! k); simpl; repeat case_option_guard; naive_solver.
 Qed.
+Lemma map_fmap_intersection {A B} (f : A → B) (m1 m2 : M A) :
+  f <$> (m1 ∩ m2) = (f <$> m1) ∩ (f <$> m2).
+Proof.
+  apply map_eq. intros i.
+  rewrite !lookup_intersection, !lookup_fmap, !lookup_intersection.
+  destruct (m1 !! i), (m2 !! i); done.
+Qed.
 
 (** ** Properties of the [difference_with] operation *)
 Lemma lookup_difference_with {A} (f : A → A → option A) (m1 m2 : M A) i :
@@ -2959,19 +2973,22 @@ Proof.
 Qed.
 
 (** ** Properties of the [difference] operation *)
-Lemma lookup_difference_Some {A} (m1 m2 : M A) i x :
-  (m1 ∖ m2) !! i = Some x ↔ m1 !! i = Some x ∧ m2 !! i = None.
+Lemma lookup_difference {A} (m1 m2 : M A) i :
+  (m1 ∖ m2) !! i = match m2 !! i with None => m1 !! i | _ => None end.
 Proof.
   unfold difference, map_difference; rewrite lookup_difference_with.
-  destruct (m1 !! i), (m2 !! i); compute; intuition congruence.
+  destruct (m1 !! i), (m2 !! i); done.
 Qed.
+Lemma lookup_difference_Some {A} (m1 m2 : M A) i x :
+  (m1 ∖ m2) !! i = Some x ↔ m1 !! i = Some x ∧ m2 !! i = None.
+Proof. rewrite lookup_difference. destruct (m1 !! i), (m2 !! i); naive_solver. Qed.
 Lemma lookup_difference_is_Some {A} (m1 m2 : M A) i :
   is_Some ((m1 ∖ m2) !! i) ↔ is_Some (m1 !! i) ∧ m2 !! i = None.
 Proof. unfold is_Some. setoid_rewrite lookup_difference_Some. naive_solver. Qed.
 Lemma lookup_difference_None {A} (m1 m2 : M A) i :
   (m1 ∖ m2) !! i = None ↔ m1 !! i = None ∨ is_Some (m2 !! i).
 Proof.
-  unfold difference, map_difference; rewrite lookup_difference_with.
+  rewrite lookup_difference.
   destruct (m1 !! i), (m2 !! i); compute; naive_solver.
 Qed.
 Lemma map_disjoint_difference_l {A} (m1 m2 : M A) : m1 ⊆ m2 → m2 ∖ m1 ##ₘ m1.
@@ -3004,6 +3021,13 @@ Qed.
 Global Instance map_difference_right_id {A} : RightId (=@{M A}) ∅ (∖) := _.
 Lemma map_difference_empty {A} (m : M A) : m ∖ ∅ = m.
 Proof. by rewrite (right_id _ _). Qed.
+Lemma map_fmap_difference {A B} (f : A → B) (m1 m2 : M A) :
+  f <$> (m1 ∖ m2) = (f <$> m1) ∖ (f <$> m2).
+Proof.
+  apply map_eq. intros i.
+  rewrite !lookup_difference, !lookup_fmap, !lookup_difference.
+  destruct (m1 !! i), (m2 !! i); done.
+Qed.
 
 Lemma insert_difference {A} (m1 m2 : M A) i x :
   <[i:=x]> (m1 ∖ m2) = <[i:=x]> m1 ∖ delete i m2.

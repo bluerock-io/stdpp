@@ -411,7 +411,10 @@ Section union_intersection_difference.
   Proof. apply union_with_proper. by constructor. Qed.
 End union_intersection_difference.
 
-
+(**
+  This lemma includes a bind, to avoid equalities of proofs.
+  A direct proof that `guard P = Some p` would require `decide P = left p`.
+*)
 Lemma option_guard_True {A} P `{Decision P} (mx : option A) :
   P → (guard P;; mx) = mx.
 Proof. intros. by case_guard. Qed.

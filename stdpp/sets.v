@@ -946,6 +946,10 @@ Global Instance set_mfail `{MonadSet M} : MFail M := λ _, ∅.
 Section set_monad_base.
   Context `{MonadSet M}.
 
+  (**
+    This lemma includes a bind, to avoid equalities of proofs.
+    A direct proof that `p ∈ guard P` would require `decide P = left p`.
+  *)
   Lemma elem_of_guard `{Decision P} {A} (x : A) (X : M A) :
     x ∈ (guard P;; X) ↔ P ∧ x ∈ X.
   Proof.

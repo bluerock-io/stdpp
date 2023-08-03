@@ -70,6 +70,9 @@ longer supported by this release.
 - Make `fin` number literal notations work with numbers above 10. (by Thibaut
   Pérami)
 - Change premise `Equivalence` into `PreOrder` for `set_fold_proper`.
+- Weaken `Proper` premises of `set_ind`, `set_fold_ind`, `set_fold_proper`. If
+  you use `solve_proper` to solve these premises, no change should be needed. If
+  you use a manual proof, you have to remove some `intros` and/or a `split`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

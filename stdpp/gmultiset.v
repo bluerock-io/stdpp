@@ -553,21 +553,17 @@ Section more_lemmas.
   Proof.
     intros ? Hf. unfold set_fold; simpl.
     rewrite <-foldr_app. apply (foldr_permutation R f b).
-    - intros;  rewrite Hf; [done| |].
-      + apply gmultiset_elem_of_elements.
-        apply elem_of_list_lookup; eauto.
-      + apply gmultiset_elem_of_elements.
-        apply elem_of_list_lookup; eauto.
-    - rewrite (comm (++)); apply gmultiset_elements_disj_union.
+    - intros j1 a1 j2 a2 c ? Ha1%elem_of_list_lookup_2 Ha2%elem_of_list_lookup_2.
+      rewrite gmultiset_elem_of_elements in Ha1, Ha2. eauto.
+    - rewrite (comm (++)). apply gmultiset_elements_disj_union.
   Qed.
   Lemma gmultiset_set_fold_disj_union (f : A → A → A) (b : A) X Y :
     Comm (=) f →
     Assoc (=) f →
     set_fold f b (X ⊎ Y) = set_fold f (set_fold f b X) Y.
   Proof.
-    intros ??; apply gmultiset_set_fold_disj_union_strong; [apply _|apply _|].
-    intros x1 x2 ? _ _.
-    by rewrite 2!assoc, (comm f x1 x2).
+    intros ??; apply gmultiset_set_fold_disj_union_strong; [apply _..|].
+    intros x1 x2 ? _ _. by rewrite 2!assoc, (comm f x1 x2).
   Qed.
   Lemma gmultiset_set_fold_scalar_mul (f : A → A → A) (b : A) n X :
     Comm (=) f →

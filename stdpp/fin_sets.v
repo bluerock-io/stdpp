@@ -250,7 +250,7 @@ Qed.
 Lemma set_wf : wf (⊂@{C}).
 Proof. apply (wf_projected (<) size); auto using subset_size, lt_wf. Qed.
 Lemma set_ind (P : C → Prop) :
-  Proper ((≡) ==> iff) P →
+  Proper ((≡) ==> impl) P →
   P ∅ → (∀ x X, x ∉ X → P X → P ({[ x ]} ∪ X)) → ∀ X, P X.
 Proof.
   intros ? Hemp Hadd. apply well_founded_induction with (⊂).
@@ -266,7 +266,7 @@ Proof. apply set_ind. by intros ?? ->%leibniz_equiv_iff. Qed.
 
 (** * The [set_fold] operation *)
 Lemma set_fold_ind {B} (P : B → C → Prop) (f : A → B → B) (b : B) :
-  Proper ((=) ==> (≡) ==> iff) P →
+  (∀ x, Proper ((≡) ==> impl) (P x)) →
   P b ∅ → (∀ x X r, x ∉ X → P r X → P (f x r) ({[ x ]} ∪ X)) →
   ∀ X, P (set_fold f b X) X.
 Proof.
@@ -285,9 +285,9 @@ Lemma set_fold_ind_L `{!LeibnizEquiv C}
     {B} (P : B → C → Prop) (f : A → B → B) (b : B) :
   P b ∅ → (∀ x X r, x ∉ X → P r X → P (f x r) ({[ x ]} ∪ X)) →
   ∀ X, P (set_fold f b X) X.
-Proof. apply set_fold_ind. by intros ?? -> ?? ->%leibniz_equiv. Qed.
+Proof. apply set_fold_ind. solve_proper. Qed.
 Lemma set_fold_proper {B} (R : relation B) `{!PreOrder R}
-    (f : A → B → B) (b : B) `{!Proper ((=) ==> R ==> R) f}
+    (f : A → B → B) (b : B) `{!∀ a, Proper (R ==> R) (f a)}
     (Hf : ∀ a1 a2 b, R (f a1 (f a2 b)) (f a2 (f a1 b))) :
   Proper ((≡) ==> R) (set_fold f b : C → B).
 Proof. intros ?? E. apply (foldr_permutation R f b); auto. by rewrite E. Qed.

@@ -73,6 +73,9 @@ longer supported by this release.
 - Weaken `Proper` premises of `set_ind`, `set_fold_ind`, `set_fold_proper`. If
   you use `solve_proper` to solve these premises, no change should be needed. If
   you use a manual proof, you have to remove some `intros` and/or a `split`.
+- Change `Params` of `lookup` and `lookup_total` from 4 to 5 to disable setoid
+  rewriting in the key argument. If you have `Proper ((=) ==> R ==> S) lookup`,
+  you should change that to `∀ k, Proper (R ==> S) (lookup k)`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

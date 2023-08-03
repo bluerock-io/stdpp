@@ -545,13 +545,25 @@ Section more_lemmas.
   Lemma gmultiset_set_fold_singleton {B} (f : A → B → B) (b : B) (a : A) :
     set_fold f b ({[+ a +]} : gmultiset A) = f a b.
   Proof. by unfold set_fold; simpl; rewrite gmultiset_elements_singleton. Qed.
+  Lemma gmultiset_set_fold_disj_union_strong {B} (R : relation B) `{!PreOrder R}
+      (f : A → B → B) (b : B) X Y :
+    (∀ x, Proper (R ==> R) (f x)) →
+    (∀ x1 x2 c, x1 ∈ X ⊎ Y → x2 ∈ X ⊎ Y → R (f x1 (f x2 c)) (f x2 (f x1 c))) →
+    R (set_fold f b (X ⊎ Y)) (set_fold f (set_fold f b X) Y).
+  Proof.
+    intros ? Hf. unfold set_fold; simpl.
+    rewrite <-foldr_app. apply (foldr_permutation R f b).
+    - intros j1 a1 j2 a2 c ? Ha1%elem_of_list_lookup_2 Ha2%elem_of_list_lookup_2.
+      rewrite gmultiset_elem_of_elements in Ha1, Ha2. eauto.
+    - rewrite (comm (++)). apply gmultiset_elements_disj_union.
+  Qed.
   Lemma gmultiset_set_fold_disj_union (f : A → A → A) (b : A) X Y :
     Comm (=) f →
     Assoc (=) f →
     set_fold f b (X ⊎ Y) = set_fold f (set_fold f b X) Y.
   Proof.
-    intros Hcomm Hassoc. unfold set_fold; simpl.
-    by rewrite gmultiset_elements_disj_union, <- foldr_app, (comm (++)).
+    intros ??; apply gmultiset_set_fold_disj_union_strong; [apply _..|].
+    intros x1 x2 ? _ _. by rewrite 2!assoc, (comm f x1 x2).
   Qed.
   Lemma gmultiset_set_fold_scalar_mul (f : A → A → A) (b : A) n X :
     Comm (=) f →
@@ -562,6 +574,23 @@ Section more_lemmas.
     - by rewrite gmultiset_scalar_mul_0, gmultiset_set_fold_empty.
     - rewrite gmultiset_scalar_mul_S_r.
       by rewrite (gmultiset_set_fold_disj_union _ _ _ _ _ _), IH.
+  Qed.
+
+  Lemma gmultiset_set_fold_comm_acc_strong {B} (R : relation B) `{!PreOrder R}
+      (f : A → B → B) (g : B → B) b X :
+    (∀ x, Proper (R ==> R) (f x)) →
+    (∀ x (y : B), x ∈ X → R (f x (g y)) (g (f x y))) →
+    R (set_fold f (g b) X) (g (set_fold f b X)).
+  Proof.
+    intros ? Hfg. unfold set_fold; simpl.
+    apply foldr_comm_acc_strong; [done|solve_proper|].
+    intros. by apply Hfg, gmultiset_elem_of_elements.
+  Qed.
+  Lemma gmultiset_set_fold_comm_acc (f : A → A → A) (g : A → A) (a : A) X :
+    (∀ x c, g (f x c) = f x (g c)) →
+    set_fold f (g a) X = g (set_fold f a X).
+  Proof.
+    intros. apply (gmultiset_set_fold_comm_acc_strong _); [solve_proper|done].
   Qed.
 
   (** Properties of the size operation *)

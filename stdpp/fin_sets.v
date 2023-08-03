@@ -330,6 +330,20 @@ Proof.
   intros x1 x2 b' _ _ _. by rewrite !(assoc_L f), (comm_L f x1).
 Qed.
 
+Lemma set_fold_comm_acc_strong {B} (R : relation B) `{!PreOrder R}
+    (f : A → B → B) (g : B → B) (b : B) X :
+  (∀ x, Proper (R ==> R) (f x)) →
+  (∀ x y, x ∈ X → R (f x (g y)) (g (f x y))) →
+  R (set_fold f (g b) X) (g (set_fold f b X)).
+Proof.
+  intros. unfold set_fold; simpl.
+  apply foldr_comm_acc_strong; [done|solve_proper|set_solver].
+Qed.
+Lemma set_fold_comm_acc (f : A → A → A) (g : A → A) (a : A) X :
+  (∀ x y, f x (g y) = g (f x y)) →
+  set_fold f (g a) X = g (set_fold f a X).
+Proof. intros. apply (set_fold_comm_acc_strong _); [solve_proper|auto]. Qed.
+
 (** * Minimal elements *)
 Lemma minimal_exists R `{!Transitive R, ∀ x y, Decision (R x y)} (X : C) :
   X ≢ ∅ → ∃ x, x ∈ X ∧ minimal R x X.

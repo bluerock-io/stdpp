@@ -1401,12 +1401,13 @@ Lemma map_fold_delete_L {A B} (f : K → A → B → B) (b : B) (i : K) (x : A) 
   map_fold f b m = f i x (map_fold f b (delete i m)).
 Proof. apply map_fold_delete; apply _. Qed.
 
-(** For the fold operation on set/multiset we do not need that [g] is [Proper]
-(second premise) and that [f] is associativity/commutative (third premise).
-That is because the fold operation on set/multiset is defined in terms of
-[foldr] on lists, so we know that both folds ([map_fold f (g x) m] and
-[map_fold f x m]) happen in the same order. The [map_fold_ind] principle does
-not guarantee this happens for [map_fold] too. *)
+(** This lemma for commuting [g] in/out of a [map_fold] requires [g] to be
+[Proper] (second premise) and [f] to be associative/commutative (third premise).
+Those requirements do not show up for the equivalent lemmas on sets/multisets
+because their fold operation is defined in terms of [foldr] on lists, so we know
+that both folds ([set_fold f (g x) m] and [set_fold f x m]) happen in the same
+order. The [map_fold_ind] principle does not guarantee this happens for
+[map_fold] too. *)
 Lemma map_fold_comm_acc_strong {A B} (R : relation B) `{!PreOrder R}
     (f : K → A → B → B) (g : B → B) (x : B) (m : M A) :
   (∀ j z, Proper (R ==> R) (f j z)) →

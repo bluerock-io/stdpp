@@ -85,8 +85,9 @@ longer supported by this release.
   + For the above structures, add strong versions of the above lemmas that
     relate `g (fold f x s)` and `fold f (g x) s` by any preorder respected by
     `f`, `g` restricted to the elements of `s`.
-  + Add `gmultiset_set_fold_disj_union_strong`, which generalises the weak set
-    fold lemma to any preorder for appropriately-chosen fold functions.
+  + Add `gmultiset_set_fold_disj_union_strong`, which generalizes
+    `gmultiset_set_fold_disj_union` to any preorder for appropriately-chosen
+    fold functions.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

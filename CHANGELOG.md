@@ -76,6 +76,17 @@ longer supported by this release.
 - Change `Params` of `lookup` and `lookup_total` from 4 to 5 to disable setoid
   rewriting in the key argument. If you have `Proper ((=) ==> R ==> S) lookup`,
   you should change that to `∀ k, Proper (R ==> S) (lookup k)`.
+- Add lemmas for moving functions in and out of fold operations across data
+  structures: new lemmas exist for sets, gmultisets, finite maps, and lists.
+  (by Isaac van Bakel)
+  + For the above structures, added lemmas which allow rewriting between
+    `g (fold f x s)` and `fold f (g x) s` for appropriately-chosen functions
+    `f`, `g` which commute.
+  + For the above structures, add strong versions of the above lemmas that
+    relate `g (fold f x s)` and `fold f (g x) s` by any preorder respected by
+    `f`, `g` restricted to the elements of `s`.
+  + Add `gmultiset_set_fold_disj_union_strong`, which generalises the weak set
+    fold lemma to any preorder for appropriately-chosen fold functions.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

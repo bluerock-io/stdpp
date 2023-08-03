@@ -180,13 +180,13 @@ Ltac case_match :=
 
 Tactic Notation "case_guard" "as" ident(Hx) :=
   match goal with
-  | H : context C [@guard ?M ?F ?R ?P ?dec] |- _ =>
-      change (@guard M F R P dec) with (
-        match @decide P dec with left H' => @mret M R P H' | _ => @mfail M F P end) in *;
+  | H : context C [@guard_or ?E ?e ?M ?T ?R ?P ?dec] |- _ =>
+      change (@guard_or E e M T R P dec) with (
+        match @decide P dec with left H' => @mret M R P H' | _ => @mthrow E M T P e end) in *;
       destruct_decide (@decide P dec) as Hx
-  | |- context C [@guard ?M ?F ?R ?P ?dec] =>
-      change (@guard M F R P dec) with (
-        match @decide P dec with left H' => @mret M R P H' | _ => @mfail M F P end) in *;
+  | |- context C [@guard_or ?E ?e ?M ?T ?R ?P ?dec] =>
+      change (@guard_or E e M T R P dec) with (
+        match @decide P dec with left H' => @mret M R P H' | _ => @mthrow E M T P e end) in *;
       destruct_decide (@decide P dec) as Hx
   end.
 Tactic Notation "case_guard" :=

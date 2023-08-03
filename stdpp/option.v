@@ -179,7 +179,7 @@ Global Instance option_bind: MBind option := λ A B f mx,
 Global Instance option_join: MJoin option := λ A mmx,
   match mmx with Some mx => mx | None => None end.
 Global Instance option_fmap: FMap option := @option_map.
-Global Instance option_mfail: MFail option := @None.
+Global Instance option_mfail: MFail option := λ _ _, None.
 
 Lemma option_fmap_inj {A B} (R1 : A → A → Prop) (R2 : B → B → Prop) (f : A → B) :
   Inj R1 R2 f → Inj (option_Forall2 R1) (option_Forall2 R2) (fmap f).
@@ -411,10 +411,9 @@ Section union_intersection_difference.
   Proof. apply union_with_proper. by constructor. Qed.
 End union_intersection_difference.
 
-(**
-  This lemma includes a bind, to avoid equalities of proofs.
-  A direct proof that `guard P = Some p` would require `decide P = left p`.
-*)
+(** This lemma includes a bind, to avoid equalities of proofs. We cannot have
+[guard P = Some p ↔ P] unless [P] is proof irrelant. The best (but less usable)
+self-contained alternative would be [guard P = Some p ↔ decide P = left p]. *)
 Lemma option_guard_True {A} P `{Decision P} (mx : option A) :
   P → (guard P;; mx) = mx.
 Proof. intros. by case_guard. Qed.

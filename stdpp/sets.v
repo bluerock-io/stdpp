@@ -941,15 +941,14 @@ Section fin_to_set.
 End fin_to_set.
 
 (** * Guard *)
-Global Instance set_mfail `{MonadSet M} : MFail M := λ _, ∅.
+Global Instance set_mfail `{MonadSet M} : MFail M := λ _ _, ∅.
 
 Section set_monad_base.
   Context `{MonadSet M}.
 
-  (**
-    This lemma includes a bind, to avoid equalities of proofs.
-    A direct proof that `p ∈ guard P` would require `decide P = left p`.
-  *)
+  (** This lemma includes a bind, to avoid equalities of proofs. We cannot have
+  [p ∈ guard P ↔ P] unless [P] is proof irrelant. The best (but less usable)
+  self-contained alternative would be [p ∈ guard P ↔ decide P = left p]. *)
   Lemma elem_of_guard `{Decision P} {A} (x : A) (X : M A) :
     x ∈ (guard P;; X) ↔ P ∧ x ∈ X.
   Proof.

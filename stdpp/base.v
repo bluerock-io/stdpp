@@ -757,6 +757,8 @@ Lemma uncurry4_curry4 {A B C D E} (f : A * B * C * D → E) p :
   uncurry4 (curry4 f) p = f p.
 Proof. destruct p as [[[??] ?] ?]; reflexivity. Qed.
 
+(** [pair_eq] as a name is more consistent with our usual naming. *)
+Definition pair_eq {A B} := @pair_equal_spec A B.
 Global Instance pair_inj {A B} : Inj2 (=) (=) (=) (@pair A B).
 Proof. injection 1; auto. Qed.
 Global Instance prod_map_inj {A A' B B'} (f : A → A') (g : B → B') :

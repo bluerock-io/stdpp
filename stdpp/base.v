@@ -1210,7 +1210,7 @@ on maps. In the file [fin_maps] we will axiomatize finite maps.
 The function look up [m !! k] should yield the element at key [k] in [m]. *)
 Class Lookup (K A M : Type) := lookup: K → M → option A.
 Global Hint Mode Lookup - - ! : typeclass_instances.
-Global Instance: Params (@lookup) 4 := {}.
+Global Instance: Params (@lookup) 5 := {}.
 Notation "m !! i" := (lookup i m) (at level 20) : stdpp_scope.
 Notation "(!!)" := lookup (only parsing) : stdpp_scope.
 Notation "( m !!.)" := (λ i, m !! i) (only parsing) : stdpp_scope.
@@ -1221,7 +1221,7 @@ Global Arguments lookup _ _ _ _ !_ !_ / : simpl nomatch, assert.
 of the partial [lookup] function. *)
 Class LookupTotal (K A M : Type) := lookup_total : K → M → A.
 Global Hint Mode LookupTotal - - ! : typeclass_instances.
-Global Instance: Params (@lookup_total) 4 := {}.
+Global Instance: Params (@lookup_total) 5 := {}.
 Notation "m !!! i" := (lookup_total i m) (at level 20) : stdpp_scope.
 Notation "(!!!)" := lookup_total (only parsing) : stdpp_scope.
 Notation "( m !!!.)" := (λ i, m !!! i) (only parsing) : stdpp_scope.

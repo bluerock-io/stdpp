@@ -757,6 +757,10 @@ Lemma uncurry4_curry4 {A B C D E} (f : A * B * C * D → E) p :
   uncurry4 (curry4 f) p = f p.
 Proof. destruct p as [[[??] ?] ?]; reflexivity. Qed.
 
+(** [pair_eq] as a name is more consistent with our usual naming. *)
+Lemma pair_eq {A B} (a1 a2 : A) (b1 b2 : B) :
+  (a1, b1) = (a2, b2) ↔ a1 = a2 ∧ b1 = b2.
+Proof. apply pair_equal_spec. Qed.
 Global Instance pair_inj {A B} : Inj2 (=) (=) (=) (@pair A B).
 Proof. injection 1; auto. Qed.
 Global Instance prod_map_inj {A A' B B'} (f : A → A') (g : B → B') :
@@ -856,6 +860,10 @@ Section prod_setoid.
   Global Instance uncurry4_proper `{Equiv C, Equiv D, Equiv E} :
     Proper (((≡) ==> (≡) ==> (≡) ==> (≡) ==> (≡)) ==>
             (≡@{A*B*C*D}) ==> (≡@{E})) uncurry4 := _.
+
+  Lemma pair_equiv (a1 a2 : A) (b1 b2 : B) :
+    (a1, b1) ≡ (a2, b2) ↔ a1 ≡ a2 ∧ b1 ≡ b2.
+  Proof. reflexivity. Qed.
 End prod_setoid.
 
 Global Typeclasses Opaque prod_equiv.

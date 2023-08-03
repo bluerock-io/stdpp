@@ -33,6 +33,8 @@ everyone involved!
 
 **Detailed list of changes:**
 
+- Replace `MGuard` with a new typeclass `MFail`.
+- Replace `case_option_guard` with a more general `case_guard`.
 - Rename `difference_difference` → `difference_difference_l` and
   `difference_difference_L` → `difference_difference_l_L`, add
   `difference_difference_r` and `difference_difference_r_L`.

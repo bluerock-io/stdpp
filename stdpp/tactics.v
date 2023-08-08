@@ -455,6 +455,21 @@ Ltac f_equiv :=
   try fast_reflexivity.
 Tactic Notation "f_equiv" "/=" := csimpl in *; f_equiv.
 
+(** The typeclass [SolveProperSubrelation] is used by the [solve_proper] tactic
+when the goal is of the form [R1 x y] and there are assumptions of the form [R2
+x y]. We cannot use Coq's [subrelation] class here as adding the [subrelation]
+instances causes lots of backtracking in the [Proper] hint search, resulting in
+very slow/diverging [rewrite]s due to exponential instance search. *)
+Class SolveProperSubrelation {A} (R R' : relation A) := is_solve_proper_subrelation :
+  ∀ x y, R x y → R' x y.
+Global Hint Mode SolveProperSubrelation + + + : typeclass_instances.
+Global Arguments is_solve_proper_subrelation {A R R' _ x y}.
+
+Global Instance subrelation_solve_proper_subrelation {A} (R R' : relation A) :
+  subrelation R R' →
+  SolveProperSubrelation R R'.
+Proof. intros ???. apply is_subrelation. Qed.
+
 (** The tactic [solve_proper_unfold] unfolds the first head symbol, so that
 we proceed by repeatedly using [f_equiv]. *)
 Ltac solve_proper_unfold :=
@@ -492,13 +507,22 @@ Ltac solve_proper_prepare :=
   (* We try with and without unfolding. We have to backtrack on
      that because unfolding may succeed, but then the proof may fail. *)
   (solve_proper_unfold + idtac); simpl.
+(** [solve_proper_finish] is basically a version of [eassumption] that takes into account [subrelation] *)
+Ltac solve_proper_finish :=
+  match goal with
+  | H : ?R1 ?x ?y |- ?R2 ?x ?y => solve [apply (is_solve_proper_subrelation H)]
+  (* Also support the symmetric case. *)
+  | H : ?R1 ?x ?y |- ?R2 ?y ?x => solve [symmetry; apply (is_solve_proper_subrelation H)]
+  (* Also handle the reflexivity case. *)
+  | |- _ ?x ?x => fast_reflexivity
+  end.
 (** The tactic [solve_proper_core tac] solves goals of the form "Proper (R1 ==> R2)", for
 any number of relations. The actual work is done by repeatedly applying
 [tac]. *)
 Ltac solve_proper_core tac :=
   solve_proper_prepare;
-  (* Now do the job. *)
-  solve [repeat first [eassumption | tac ()] ].
+  (* Now do the job. New [flip] can appear any time and we want to get rid of them. *)
+  solve [repeat (simpl flip in * |- *; first [solve_proper_finish | tac ()]) ].
 
 (** Finally, [solve_proper] tries to apply [f_equiv] in a loop. *)
 Ltac solve_proper := solve_proper_core ltac:(fun _ => f_equiv).

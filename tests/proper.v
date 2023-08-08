@@ -70,6 +70,21 @@ Section tests.
   Goal Proper (pointwise_relation nat (≡) ==> (≡)) test3.
   Proof. solve_proper. Qed.
 
+  Section test_flip.
+    Context `{!Symmetric (≡@{A})}.
+    Definition f (a : A) := a.
+    Typeclasses Opaque f.
+    (* This hits the case in [solve_proper_finish] that uses [symmetry]. *)
+    Local Instance f_proper :
+      Proper (flip (≡) ==> (≡)) f.
+    Proof. solve_proper. Qed.
+
+    (* Here we get a [flip] into the goal and have to know how to handle that. *)
+    Definition test_symm :
+      Proper ((≡) ==> (≡)) (f ∘ foo).
+    Proof. solve_proper. Qed.
+  End test_flip.
+
   (* We mirror [discrete_fun] from Iris to have an equivalence on a function
   space. *)
   Definition discrete_fun {A} (B : A → Type) `{!∀ x, Equiv (B x)} := ∀ x : A, B x.
@@ -81,6 +96,11 @@ Section tests.
   Definition test4 x (f : A -d> A) := f x.
   Goal ∀ x, Proper ((≡) ==> (≡)) (test4 x).
   Proof. solve_proper. Qed.
+
+  Lemma test_subrelation1 (P Q : Prop) :
+    Proper ((↔) ==> impl) id.
+  Proof. solve_proper. Qed.
+
 End tests.
 
 Global Instance from_option_proper_test1 `{Equiv A} {B} (R : relation B) (f : A → B) :

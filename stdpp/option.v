@@ -113,6 +113,14 @@ Section Forall2.
   Proof. destruct 2; inversion_clear 1; constructor; etrans; eauto. Qed.
   Global Instance option_Forall2_equiv : Equivalence R → Equivalence (option_Forall2 R).
   Proof. destruct 1; split; apply _. Qed.
+
+  Lemma option_Forall2_eq (mx my : option A) :
+    option_Forall2 eq mx my ↔ mx = my.
+  Proof.
+    split.
+    - intros [|]; naive_solver.
+    - intros ->. destruct my; constructor; done.
+  Qed.
 End Forall2.
 
 (** Setoids *)
@@ -174,12 +182,17 @@ Global Instance option_fmap: FMap option := @option_map.
 Global Instance option_guard: MGuard option := λ P dec A f,
   match dec with left H => f H | _ => None end.
 
-Global Instance option_fmap_inj {A B} (f : A → B) :
+Lemma option_fmap_inj {A B} (R1 : A → A → Prop) (R2 : B → B → Prop) (f : A → B) :
+  Inj R1 R2 f → Inj (option_Forall2 R1) (option_Forall2 R2) (fmap f).
+Proof.
+  intros ? [x1|] [x2|] Hx; simpl in *; inversion Hx; constructor. subst. by eapply inj.
+Qed.
+Global Instance option_fmap_eq_inj {A B} (f : A → B) :
   Inj (=) (=) f → Inj (=@{option A}) (=@{option B}) (fmap f).
-Proof. intros ? [x1|] [x2|] [=]; naive_solver. Qed.
+Proof. intros ?%option_fmap_inj ?? ?%option_Forall2_eq. apply option_Forall2_eq. by eapply inj. Qed.
 Global Instance option_fmap_equiv_inj `{Equiv A, Equiv B} (f : A → B) :
   Inj (≡) (≡) f → Inj (≡@{option A}) (≡@{option B}) (fmap f).
-Proof. intros ? [x1|] [x2|]; inversion 1; subst; constructor; by apply (inj _). Qed.
+Proof. apply option_fmap_inj. Qed.
 
 Lemma fmap_is_Some {A B} (f : A → B) mx : is_Some (f <$> mx) ↔ is_Some mx.
 Proof. unfold is_Some; destruct mx; naive_solver. Qed.

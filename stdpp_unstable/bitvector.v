@@ -1149,7 +1149,7 @@ Section little.
     m = Z.of_nat (length bs) →
     bv_to_little_endian m n (little_endian_to_bv n bs) = bs.
   Proof.
-    intros ->. eapply (fmap_inj bv_unsigned). { intros ???. by apply bv_eq. }
+    intros ->. eapply (fmap_eq_inj bv_unsigned). { intros ???. by apply bv_eq. }
     rewrite bv_to_litte_endian_unsigned; [|lia].
     apply Z_to_little_endian_to_Z; [by rewrite fmap_length | lia |].
     apply Forall_forall. intros ? [?[->?]]%elem_of_list_fmap_2. apply bv_unsigned_in_range.

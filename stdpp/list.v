@@ -504,6 +504,13 @@ Lemma list_singleton_reflect l :
   option_reflect (λ x, l = [x]) (length l ≠ 1) (maybe (λ x, [x]) l).
 Proof. by destruct l as [|? []]; constructor. Defined.
 
+Lemma Forall2_eq l1 l2 : Forall2 eq l1 l2 ↔ l1 = l2.
+Proof.
+  split.
+  - induction 1; eauto; subst; done.
+  - intros <-. induction l1; eauto using Forall2.
+Qed.
+
 Definition nil_length : length (@nil A) = 0 := eq_refl.
 Definition cons_length x l : length (x :: l) = S (length l) := eq_refl.
 Lemma nil_or_length_pos l : l = [] ∨ length l ≠ 0.
@@ -3946,12 +3953,6 @@ Section fmap.
   Lemma list_fmap_compose {C} (g : B → C) l : g ∘ f <$> l = g <$> (f <$> l).
   Proof. induction l; f_equal/=; auto. Qed.
 
-  Global Instance fmap_inj: Inj (=) (=) f → Inj (=@{list A}) (=) (fmap f).
-  Proof.
-    intros ? l1. induction l1 as [|x l1 IH]; [by intros [|??]|].
-    intros [|??]; intros; f_equal/=; simplify_eq; auto.
-  Qed.
-
   Lemma list_fmap_inj_1 f' l x :
     f <$> l = f' <$> l → x ∈ l → f x = f' x.
   Proof. intros Hf Hin. induction Hin; naive_solver. Qed.
@@ -4058,6 +4059,18 @@ Section fmap.
   Proof.
     naive_solver eauto using elem_of_list_fmap_1, elem_of_list_fmap_2_inj.
   Qed.
+
+  Lemma fmap_inj R1 R2 :
+    Inj R1 R2 f → Inj (Forall2 R1) (Forall2 R2) (fmap f).
+  Proof.
+    intros ? l1. induction l1 as [|x l1 IH].
+    { simpl. intros l2 ?%Forall2_nil_inv_l%fmap_nil_inv. subst. constructor. }
+    simpl. intros l2 (? & l2' & HR & ? & (? & l2'' & ?&?&?)%fmap_cons_inv)%Forall2_cons_inv_l.
+    subst. constructor. 2:by eauto. by eapply inj.
+  Qed.
+
+  Global Instance fmap_eq_inj : Inj (=) (=) f → Inj (=@{list A}) (=) (fmap f).
+  Proof. intros ?%fmap_inj ?? ?%Forall2_eq. apply Forall2_eq. by eapply inj. Qed.
 
   (** A version of [NoDup_fmap_2] that does not require [f] to be injective for
       *all* inputs. *)

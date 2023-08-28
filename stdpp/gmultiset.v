@@ -1,5 +1,6 @@
 From stdpp Require Export countable.
 From stdpp Require Import gmap.
+From stdpp Require ssreflect. (* don't import yet, but we'll later do that to use ssreflect rewrite *)
 From stdpp Require Import options.
 
 (** Multisets [gmultiset A] are represented as maps from [A] to natural numbers,
@@ -294,6 +295,12 @@ Section multiset_unfold.
 End multiset_unfold.
 
 (** Step 3: instantiate hypotheses *)
+(** For these tactics we want to use ssreflect rewrite. ssreflect matching
+interacts better with canonical structures (see
+<https://gitlab.mpi-sws.org/iris/stdpp/-/issues/195>). *)
+Module Export tactics.
+Import ssreflect.
+
 Ltac multiset_instantiate :=
   repeat match goal with
   | H : (∀ x : ?A, @?P x) |- _ =>
@@ -317,15 +324,22 @@ Ltac multiset_simplify_singletons :=
   repeat match goal with
   | H : context [multiplicity ?x {[+ ?y +]}] |- _ =>
      first
-       [progress rewrite ?multiplicity_singleton, ?multiplicity_singleton_ne in H by done
+       [progress rewrite ?multiplicity_singleton ?multiplicity_singleton_ne in H; [|done..]
+       (* This second case does *not* use ssreflect matching (due to [destruct]
+       and the [->] pattern). If the default Coq matching goes wrong it will
+       fail and fall back to the third case, which is strictly more general,
+       just slower. *)
        |destruct (multiplicity_singleton_forget x y) as (?&->&?); clear y
        |rewrite multiplicity_singleton' in H; destruct (decide (x = y)); simplify_eq/=]
   | |- context [multiplicity ?x {[+ ?y +]}] =>
      first
-       [progress rewrite ?multiplicity_singleton, ?multiplicity_singleton_ne by done
+       [progress rewrite ?multiplicity_singleton ?multiplicity_singleton_ne; [|done..]
+       (* This second case does *not* use ssreflect matching, but if the default Coq matching goes wrong
+          it will fail and fall back to the third case, which is strictly more general, just slower. *)
        |destruct (multiplicity_singleton_forget x y) as (?&->&?); clear y
        |rewrite multiplicity_singleton'; destruct (decide (x = y)); simplify_eq/=]
   end.
+End tactics.
 
 (** Putting it all together *)
 (** Similar to [set_solver] and [naive_solver], [multiset_solver] has a [by]

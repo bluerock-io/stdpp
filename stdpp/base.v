@@ -300,7 +300,7 @@ setoid equalities into Leibniz equalities, and [unfold_leibniz] for the
 reverse. *)
 Class LeibnizEquiv A `{Equiv A} :=
   leibniz_equiv (x y : A) : x ≡ y → x = y.
-Global Hint Mode LeibnizEquiv ! - : typeclass_instances.
+Global Hint Mode LeibnizEquiv ! ! : typeclass_instances.
 
 Lemma leibniz_equiv_iff `{LeibnizEquiv A, !Reflexive (≡@{A})} (x y : A) :
   x ≡ y ↔ x = y.

@@ -325,8 +325,10 @@ Ltac multiset_simplify_singletons :=
   | H : context [multiplicity ?x {[+ ?y +]}] |- _ =>
      first
        [progress rewrite ?multiplicity_singleton ?multiplicity_singleton_ne in H; [|done..]
-       (* This second case does *not* use ssreflect matching, but if the default Coq matching goes wrong
-          it will fail and fall back to the third case, which is strictly more general, just slower. *)
+       (* This second case does *not* use ssreflect matching (due to [destruct]
+       and the [->] pattern). If the default Coq matching goes wrong it will
+       fail and fall back to the third case, which is strictly more general,
+       just slower. *)
        |destruct (multiplicity_singleton_forget x y) as (?&->&?); clear y
        |rewrite multiplicity_singleton' in H; destruct (decide (x = y)); simplify_eq/=]
   | |- context [multiplicity ?x {[+ ?y +]}] =>

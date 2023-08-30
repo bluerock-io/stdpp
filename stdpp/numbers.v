@@ -46,6 +46,21 @@ Reserved Notation "x ≤ y ≤ z ≤ z'"
   (at level 70, y at next level, z at next level).
 
 Infix "≤" := le : nat_scope.
+(** We do *not* add notation for [≥] mapping to [ge], and we do also not use the
+[>] notation from the Coq standard library. Using such notations leads to
+annoying problems: if you have [x < y] in the context and need [y > x] for some
+lemma, [assumption] won't work because [x < y] and [y > x] are not
+definitionally equal. It is just generally frustrating to deal with this
+mismatch, and much preferable to state logically equivalent things in syntactically
+equal ways.
+
+As an alternative, we could define [>] and [≥] as [parsing only] notation that
+maps to [<] and [≤], respectively (similar to math-comp). This would change the
+notation for [<] from the Coq standard library to something that is not
+definitionally equal, so we avoid that as well.
+
+This concern applies to all number types: [nat], [N], [Z], [positive], [Qc] and
+[Qp]. *)
 Notation "x ≤ y ≤ z" := (x ≤ y ∧ y ≤ z)%nat : nat_scope.
 Notation "x ≤ y < z" := (x ≤ y ∧ y < z)%nat : nat_scope.
 Notation "x < y ≤ z" := (x < y ∧ y ≤ z)%nat : nat_scope.

@@ -89,6 +89,10 @@ longer supported by this release.
     `gmultiset_set_fold_disj_union` to any preorder for appropriately-chosen
     fold functions.
 
+**Changes in `stdpp_unstable`:**
+
+- Add bitvector number literal notations. (by Thibaut Pérami)
+
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).
 Note that the script is not idempotent, do not run it twice.

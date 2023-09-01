@@ -629,6 +629,33 @@ Infix "`+Z`" := bv_add_Z (at level 50) : bv_scope.
 Infix "`-Z`" := bv_sub_Z (at level 50) : bv_scope.
 Infix "`*Z`" := bv_mul_Z (at level 40) : bv_scope.
 
+(** This adds number notations into [bv_scope].
+If the number literal is positive or 0, it gets expanded to [BV _ {num} _].
+If the number literal is negative, it gets expanded as [Z_to_bv _ {num}].
+In the negative case, the notation is parsing only and the [Z_to_bv] call will be
+printed explicitly. *)
+Inductive bv_number_notation := BVNumNonNeg (z : Z) | BVNumNeg (z : Z).
+Definition bv_number_notation_to_Z (n : bv_number_notation) : option Z :=
+  match n with
+  | BVNumNonNeg z => Some z
+  (** Don't use the notation for negative numbers for printing. *)
+  | BVNumNeg z => None
+  end.
+Definition Z_to_bv_number_notation (z : Z) :=
+  match z with
+  | Zneg _ => BVNumNeg z
+  | _ => BVNumNonNeg z
+  end.
+
+(** We need to temporarily change the implicit arguments of BV and
+Z_to_bv such that we can pass them to [Number Notation]. *)
+Local Arguments Z_to_bv {_} _.
+Local Arguments BV {_} _ {_}.
+Number Notation bv Z_to_bv_number_notation bv_number_notation_to_Z
+  (via bv_number_notation mapping [[BV] => BVNumNonNeg, [Z_to_bv] => BVNumNeg]) : bv_scope.
+Local Arguments BV _ _ {_}.
+Local Arguments Z_to_bv : clear implicits.
+
 (** * [bv_wrap_simplify]: typeclass-based automation for simplifying [bv_wrap] *)
 (** The [bv_wrap_simplify] tactic removes [bv_wrap] where possible by
 using the fact that [bv_wrap n (bv_warp n z) = bv_wrap n z]. The main
@@ -994,7 +1021,7 @@ Section properties.
   Qed.
 
   Lemma bv_add_0_l b1 b2 :
-    bv_unsigned b1 = 0 →
+    bv_unsigned b1 = 0%Z →
     b1 + b2 = b2.
   Proof.
     intros Hb. apply bv_eq.
@@ -1002,7 +1029,7 @@ Section properties.
   Qed.
 
   Lemma bv_add_0_r b1 b2 :
-    bv_unsigned b2 = 0 →
+    bv_unsigned b2 = 0%Z →
     b1 + b2 = b1.
   Proof.
     intros Hb. apply bv_eq.
@@ -1063,12 +1090,12 @@ Section properties.
   Proof. apply bv_eq. by rewrite !bv_or_unsigned, Z.lor_comm. Qed.
 
   Lemma bv_or_0_l b1 b2 :
-    bv_unsigned b1 = 0 →
+    bv_unsigned b1 = 0%Z →
     bv_or b1 b2 = b2.
   Proof. intros Hb. apply bv_eq. by rewrite bv_or_unsigned, Hb, Z.lor_0_l. Qed.
 
   Lemma bv_or_0_r b1 b2 :
-    bv_unsigned b2 = 0 →
+    bv_unsigned b2 = 0%Z →
     bv_or b1 b2 = b1.
   Proof. intros Hb. apply bv_eq. by rewrite bv_or_unsigned, Hb, Z.lor_0_r. Qed.
 
@@ -1087,7 +1114,7 @@ Section properties.
   Qed.
 
   Lemma bv_concat_0 m n2 b1 (b2 : bv n2) :
-    bv_unsigned b1 = 0 →
+    bv_unsigned b1 = 0%Z →
     bv_concat m b1 b2 = bv_zero_extend m b2.
   Proof.
     intros Hb1. apply bv_eq.

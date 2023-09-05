@@ -106,10 +106,11 @@ Proof.
     lazymatch n with
     | 0 => exact (String a (string_of_pos p))
     | S ?n =>
-       let p' := fresh "p" in
-       refine (match p with p'~1 => _ | p'~0 => _ | 1 => EmptyString end%positive);
-         [gen p' (a true) n
-         |gen p' (a false) n]
+       exact (match p with
+              | 1 => EmptyString
+              | p~0 => ltac:(gen p (a false) n)
+              | p~1 => ltac:(gen p (a true) n)
+              end%positive)
     end in
   gen p Ascii 8.
 Defined.

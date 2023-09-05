@@ -71,8 +71,12 @@ Ltac words s :=
 
 (** * Encoding and decoding *)
 (** The [Countable] instance of [string] is particularly useful to allow strings
-to be used as keys in [gmap]. The encoding of [string] to [positive] is from
-https://github.com/xavierleroy/canonical-binary-tries/blob/v2/lib/String2pos.v *)
+to be used as keys in [gmap].
+
+The encoding of [string] to [positive] is taken from
+https://github.com/xavierleroy/canonical-binary-tries/blob/v2/lib/String2pos.v.
+It avoids creating auxilary data structures such as [list bool], thereby
+improving efficiency. *)
 Definition bool_cons_pos (b : bool) (p : positive) : positive :=
   if b then p~1 else p~0.
 Definition ascii_cons_pos (c : ascii) (p : positive) : positive :=
@@ -82,32 +86,36 @@ Definition ascii_cons_pos (c : ascii) (p : positive) : positive :=
        bool_cons_pos b3 $ bool_cons_pos b4 $ bool_cons_pos b5 $
        bool_cons_pos b6 $ bool_cons_pos b7 p
   end.
-
 Fixpoint string_to_pos (s : string) : positive :=
   match s with
   | EmptyString => 1
   | String c s => ascii_cons_pos c (string_to_pos s)
   end.
-Fixpoint digits_of_pos (p : positive) : list bool :=
-  match p with
-  | xH => []
-  | p~0 => false :: digits_of_pos p
-  | p~1 => true :: digits_of_pos p
-  end%positive.
-Fixpoint string_of_digits (βs : list bool) : string :=
-  match βs with
-  | β1 :: β2 :: β3 :: β4 :: β5 :: β6 :: β7 :: β8 :: βs =>
-     String (Ascii β1 β2 β3 β4 β5 β6 β7 β8) (string_of_digits βs)
-  | _ => EmptyString
-  end.
 
-Definition string_of_pos (p : positive) : string :=
-  string_of_digits (digits_of_pos p).
+(* The decoder that turns [positive] into string results in 256 cases (we need
+to peel off 8 times a [~0]/[~1] constructor) and a number of fall through cases.
+We avoid writing these cases explicitly by generating the definition using Ltac.
+The lemma [string_of_to_pos] ensures the generated definition is correct.
+
+Alternatively, we could implement it in two steps. Convert the [positive] to
+[list bool], and convert the list to [string]. This definition will be slower
+since auxilary data structures are created. *)
+Fixpoint string_of_pos (p : positive) : string.
+Proof.
+  let rec gen p a n :=
+    lazymatch n with
+    | 0 => exact (String a (string_of_pos p))
+    | S ?n =>
+       let p' := fresh "p" in
+       refine (match p with p'~1 => _ | p'~0 => _ | 1 => EmptyString end%positive);
+         [gen p' (a true) n
+         |gen p' (a false) n]
+    end in
+  gen p Ascii 8.
+Defined.
 
 Lemma string_of_to_pos s : string_of_pos (string_to_pos s) = s.
-Proof.
-  unfold string_of_pos. by induction s as [|[[][][][][][][][]]]; f_equal/=.
-Qed.
+Proof. induction s as [|[[][][][][][][][]]]; by f_equal/=. Qed.
 Global Program Instance string_countable : Countable string := {|
   encode := string_to_pos; decode p := Some (string_of_pos p)
 |}.

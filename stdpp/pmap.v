@@ -128,7 +128,7 @@ Local Definition Pmap_ne_partial_alter {A} (f : option A → option A) :
 Global Instance Pmap_partial_alter {A} : PartialAlter positive A (Pmap A) := λ f,
   Pmap_partial_alter_aux (Pmap_ne_partial_alter f) f.
 
-Definition Pmap_ne_fmap {A B} (f : A → B) : Pmap_ne A → Pmap_ne B :=
+Local Definition Pmap_ne_fmap {A B} (f : A → B) : Pmap_ne A → Pmap_ne B :=
   fix go t :=
     match t with
     | PNode001 r => PNode001 (go r)

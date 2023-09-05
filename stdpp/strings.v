@@ -109,7 +109,11 @@ Proof.
   applied so that the [constr] has type ascii. *)
   let rec gen p a n :=
     lazymatch n with
+    (* This character is done. Stop the ltac recursion; recursively invoke
+    [pos_to_string] on the Gallina level for the remaining bits. *)
     | 0 => exact (String a (pos_to_string p))
+    (* There are more bits to consume for this character, generate an
+    appropriate [match] with ltac. *)
     | S ?n =>
        exact (match p with
               | 1 => EmptyString

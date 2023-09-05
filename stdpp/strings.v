@@ -70,43 +70,40 @@ Ltac words s :=
   end.
 
 (** * Encoding and decoding *)
-(** In order to reuse or existing implementation of radix-2 search trees over
-positive binary naturals [positive], we define an injection [string_to_pos]
-from [string] into [positive]. *)
-Fixpoint digits_to_pos (βs : list bool) : positive :=
-  match βs with
-  | [] => xH
-  | false :: βs => (digits_to_pos βs)~0
-  | true :: βs => (digits_to_pos βs)~1
-  end%positive.
-Definition ascii_to_digits (a : Ascii.ascii) : list bool :=
-  match a with
-  | Ascii.Ascii β1 β2 β3 β4 β5 β6 β7 β8 => [β1;β2;β3;β4;β5;β6;β7;β8]
+(** The [Countable] instance of [string] is particularly useful to allow strings
+to be used as keys in [gmap]. The encoding of [string] to [positive] is from
+https://github.com/xavierleroy/canonical-binary-tries/blob/v2/lib/String2pos.v *)
+Definition bool_cons_pos (b : bool) (p : positive) : positive :=
+  if b then p~1 else p~0.
+Definition ascii_cons_pos (c : ascii) (p : positive) : positive :=
+  match c with
+  | Ascii b0 b1 b2 b3 b4 b5 b6 b7 =>
+     bool_cons_pos b0 $ bool_cons_pos b1 $ bool_cons_pos b2 $
+       bool_cons_pos b3 $ bool_cons_pos b4 $ bool_cons_pos b5 $
+       bool_cons_pos b6 $ bool_cons_pos b7 p
   end.
+
 Fixpoint string_to_pos (s : string) : positive :=
   match s with
-  | EmptyString => xH
-  | String a s => string_to_pos s ++ digits_to_pos (ascii_to_digits a)
-  end%positive.
+  | EmptyString => 1
+  | String c s => ascii_cons_pos c (string_to_pos s)
+  end.
 Fixpoint digits_of_pos (p : positive) : list bool :=
   match p with
   | xH => []
   | p~0 => false :: digits_of_pos p
   | p~1 => true :: digits_of_pos p
   end%positive.
-Fixpoint ascii_of_digits (βs : list bool) : ascii :=
-  match βs with
-  | [] => zero
-  | β :: βs => Ascii.shift β (ascii_of_digits βs)
-  end.
 Fixpoint string_of_digits (βs : list bool) : string :=
   match βs with
   | β1 :: β2 :: β3 :: β4 :: β5 :: β6 :: β7 :: β8 :: βs =>
-     String (ascii_of_digits [β1;β2;β3;β4;β5;β6;β7;β8]) (string_of_digits βs)
+     String (Ascii β1 β2 β3 β4 β5 β6 β7 β8) (string_of_digits βs)
   | _ => EmptyString
   end.
+
 Definition string_of_pos (p : positive) : string :=
   string_of_digits (digits_of_pos p).
+
 Lemma string_of_to_pos s : string_of_pos (string_to_pos s) = s.
 Proof.
   unfold string_of_pos. by induction s as [|[[][][][][][][][]]]; f_equal/=.
@@ -115,7 +112,8 @@ Global Program Instance string_countable : Countable string := {|
   encode := string_to_pos; decode p := Some (string_of_pos p)
 |}.
 Solve Obligations with naive_solver eauto using string_of_to_pos with f_equal.
-Lemma ascii_of_to_digits a : ascii_of_digits (ascii_to_digits a) = a.
-Proof. by destruct a as [[][][][][][][][]]. Qed.
+
 Global Instance ascii_countable : Countable ascii :=
-  inj_countable' ascii_to_digits ascii_of_digits ascii_of_to_digits.
+  inj_countable (λ a, String a EmptyString)
+                (λ s, match s with String a _ => Some a | _ => None end)
+                (λ a, eq_refl).

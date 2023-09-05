@@ -77,16 +77,16 @@ The encoding of [string] to [positive] is taken from
 https://github.com/xavierleroy/canonical-binary-tries/blob/v2/lib/String2pos.v.
 It avoids creating auxilary data structures such as [list bool], thereby
 improving efficiency. *)
-Definition bool_cons_pos (b : bool) (p : positive) : positive :=
+Local Definition bool_cons_pos (b : bool) (p : positive) : positive :=
   if b then p~1 else p~0.
-Definition ascii_cons_pos (c : ascii) (p : positive) : positive :=
+Local Definition ascii_cons_pos (c : ascii) (p : positive) : positive :=
   match c with
   | Ascii b0 b1 b2 b3 b4 b5 b6 b7 =>
      bool_cons_pos b0 $ bool_cons_pos b1 $ bool_cons_pos b2 $
        bool_cons_pos b3 $ bool_cons_pos b4 $ bool_cons_pos b5 $
        bool_cons_pos b6 $ bool_cons_pos b7 p
   end.
-Fixpoint string_to_pos (s : string) : positive :=
+Local Fixpoint string_to_pos (s : string) : positive :=
   match s with
   | EmptyString => 1
   | String c s => ascii_cons_pos c (string_to_pos s)
@@ -100,11 +100,16 @@ The lemma [string_of_to_pos] ensures the generated definition is correct.
 Alternatively, we could implement it in two steps. Convert the [positive] to
 [list bool], and convert the list to [string]. This definition will be slower
 since auxilary data structures are created. *)
-Fixpoint string_of_pos (p : positive) : string.
+Local Fixpoint pos_to_string (p : positive) : string.
 Proof.
+  (** The argument [p] is the [positive] that we are peeling off.
+  The argument [a] is the constructor [Ascii] partially applied to some number
+  of Booleans (so its Coq type changes during the iteration).
+  The argument [n] says how many more Booleans are needed to make this fully
+  applied so that the [constr] has type ascii. *)
   let rec gen p a n :=
     lazymatch n with
-    | 0 => exact (String a (string_of_pos p))
+    | 0 => exact (String a (pos_to_string p))
     | S ?n =>
        exact (match p with
               | 1 => EmptyString
@@ -115,12 +120,14 @@ Proof.
   gen p Ascii 8.
 Defined.
 
-Lemma string_of_to_pos s : string_of_pos (string_to_pos s) = s.
+Local Lemma pos_to_string_string_to_pos s : pos_to_string (string_to_pos s) = s.
 Proof. induction s as [|[[][][][][][][][]]]; by f_equal/=. Qed.
+
 Global Program Instance string_countable : Countable string := {|
-  encode := string_to_pos; decode p := Some (string_of_pos p)
+  encode := string_to_pos; decode p := Some (pos_to_string p)
 |}.
-Solve Obligations with naive_solver eauto using string_of_to_pos with f_equal.
+Solve Obligations with
+  naive_solver eauto using pos_to_string_string_to_pos with f_equal.
 
 Global Instance ascii_countable : Countable ascii :=
   inj_countable (λ a, String a EmptyString)

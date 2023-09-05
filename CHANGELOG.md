@@ -88,6 +88,7 @@ longer supported by this release.
   + Add `gmultiset_set_fold_disj_union_strong`, which generalizes
     `gmultiset_set_fold_disj_union` to any preorder for appropriately-chosen
     fold functions.
+- Improve efficiency of `encode`/`decode` for `string` and `ascii`.
 
 **Changes in `stdpp_unstable`:**
 

@@ -17,6 +17,7 @@ Notation FS := Fin.FS.
 
 Declare Scope fin_scope.
 Delimit Scope fin_scope with fin.
+Bind Scope fin_scope with fin.
 Global Arguments Fin.FS _ _%fin : assert.
 
 (** Allow any non-negative number literal to be parsed as a [fin]. For example

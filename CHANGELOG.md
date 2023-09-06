@@ -69,6 +69,8 @@ longer supported by this release.
   `Fixpoint f (t : gtest) := let 'GTest ts := t in map_fold (λ _ t', plus (f t')) 1 ts`.
 - Make `fin` number literal notations work with numbers above 10. (by Thibaut
   Pérami)
+- Bind `fin` type to `fin` scope, so function taking a `fin` as argument will
+  implicitly parse it in `fin` scope (by Thibaut Pérami).
 - Change premise `Equivalence` into `PreOrder` for `set_fold_proper`.
 - Weaken `Proper` premises of `set_ind`, `set_fold_ind`, `set_fold_proper`. If
   you use `solve_proper` to solve these premises, no change should be needed. If

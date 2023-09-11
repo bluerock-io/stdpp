@@ -95,6 +95,8 @@ longer supported by this release.
 - Rename `fmap_inj` → `list_fmap_eq_inj` and `option_fmap_inj` →
   `option_fmap_eq_inj`. The new lemmas `list_fmap_inj`/`option_fmap_inj`
   generalize injectivity to `Forall2`/`option_Forall2`.
+- Generalize `set_map`, `set_bind`, `set_omap`, `map_to_set` and `map_img`
+  lemmas from `Set_` to `SemiSet`.
 
 **Changes in `stdpp_unstable`:**
 

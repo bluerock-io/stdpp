@@ -104,7 +104,7 @@ s/\bloopup_total_empty\b/lookup_total_empty/g
 # map_preimg
 s/\bmap_preimage/map_preimg/g
 s/\blookup_preimage/lookup_preimg/g
-s/\blookup_total_preimg/lookup_total_preimg/g
+s/\blookup_total_preimage/lookup_total_preimg/g
 # union_Some
 s/\boption_union_Some\b/union_Some/g
 # prefix_lookup

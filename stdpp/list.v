@@ -504,6 +504,13 @@ Lemma list_singleton_reflect l :
   option_reflect (λ x, l = [x]) (length l ≠ 1) (maybe (λ x, [x]) l).
 Proof. by destruct l as [|? []]; constructor. Defined.
 
+Lemma list_eq_Forall2 l1 l2 : l1 = l2 ↔ Forall2 eq l1 l2.
+Proof.
+  split.
+  - intros <-. induction l1; eauto using Forall2.
+  - induction 1; naive_solver.
+Qed.
+
 Definition nil_length : length (@nil A) = 0 := eq_refl.
 Definition cons_length x l : length (x :: l) = S (length l) := eq_refl.
 Lemma nil_or_length_pos l : l = [] ∨ length l ≠ 0.
@@ -3686,21 +3693,21 @@ Section setoid.
   Context `{Equiv A}.
   Implicit Types l k : list A.
 
-  Lemma equiv_Forall2 l k : l ≡ k ↔ Forall2 (≡) l k.
+  Lemma list_equiv_Forall2 l k : l ≡ k ↔ Forall2 (≡) l k.
   Proof. split; induction 1; constructor; auto. Qed.
   Lemma list_equiv_lookup l k : l ≡ k ↔ ∀ i, l !! i ≡ k !! i.
   Proof.
-    rewrite equiv_Forall2, Forall2_lookup.
-    by setoid_rewrite equiv_option_Forall2.
+    rewrite list_equiv_Forall2, Forall2_lookup.
+    by setoid_rewrite option_equiv_Forall2.
   Qed.
 
   Global Instance list_equivalence :
     Equivalence (≡@{A}) → Equivalence (≡@{list A}).
   Proof.
     split.
-    - intros l. by apply equiv_Forall2.
-    - intros l k; rewrite !equiv_Forall2; by intros.
-    - intros l1 l2 l3; rewrite !equiv_Forall2; intros; by trans l2.
+    - intros l. by apply list_equiv_Forall2.
+    - intros l k; rewrite !list_equiv_Forall2; by intros.
+    - intros l1 l2 l3; rewrite !list_equiv_Forall2; intros; by trans l2.
   Qed.
   Global Instance list_leibniz `{!LeibnizEquiv A} : LeibnizEquiv (list A).
   Proof. induction 1; f_equal; fold_leibniz; auto. Qed.
@@ -3744,13 +3751,13 @@ Section setoid.
   Proof. destruct 1; repeat constructor; auto. Qed.
   Global Instance list_filter_proper P `{∀ x, Decision (P x)} :
     Proper ((≡) ==> iff) P → Proper ((≡) ==> (≡@{list A})) (filter P).
-  Proof. intros ???. rewrite !equiv_Forall2. by apply Forall2_filter. Qed.
+  Proof. intros ???. rewrite !list_equiv_Forall2. by apply Forall2_filter. Qed.
   Global Instance replicate_proper n : Proper ((≡@{A}) ==> (≡)) (replicate n).
   Proof. induction n; constructor; auto. Qed.
   Global Instance rotate_proper n : Proper ((≡@{list A}) ==> (≡)) (rotate n).
-  Proof. intros ??. rewrite !equiv_Forall2. by apply Forall2_rotate. Qed.
+  Proof. intros ??. rewrite !list_equiv_Forall2. by apply Forall2_rotate. Qed.
   Global Instance rotate_take_proper s e : Proper ((≡@{list A}) ==> (≡)) (rotate_take s e).
-  Proof. intros ??. rewrite !equiv_Forall2. by apply Forall2_rotate_take. Qed.
+  Proof. intros ??. rewrite !list_equiv_Forall2. by apply Forall2_rotate_take. Qed.
   Global Instance reverse_proper : Proper ((≡) ==> (≡@{list A})) reverse.
   Proof.
     induction 1; rewrite ?reverse_cons; simpl; [constructor|].
@@ -3773,7 +3780,7 @@ Section setoid.
     l ≡ k1 ++ k2 ↔ ∃ k1' k2', l = k1' ++ k2' ∧ k1' ≡ k1 ∧ k2' ≡ k2.
   Proof.
     split; [|intros (?&?&->&?&?); by f_equiv].
-    setoid_rewrite equiv_Forall2. rewrite Forall2_app_inv_r. naive_solver.
+    setoid_rewrite list_equiv_Forall2. rewrite Forall2_app_inv_r. naive_solver.
   Qed.
 
   Lemma equiv_Permutation l1 l2 l3 :
@@ -3946,12 +3953,6 @@ Section fmap.
   Lemma list_fmap_compose {C} (g : B → C) l : g ∘ f <$> l = g <$> (f <$> l).
   Proof. induction l; f_equal/=; auto. Qed.
 
-  Global Instance fmap_inj: Inj (=) (=) f → Inj (=@{list A}) (=) (fmap f).
-  Proof.
-    intros ? l1. induction l1 as [|x l1 IH]; [by intros [|??]|].
-    intros [|??]; intros; f_equal/=; simplify_eq; auto.
-  Qed.
-
   Lemma list_fmap_inj_1 f' l x :
     f <$> l = f' <$> l → x ∈ l → f x = f' x.
   Proof. intros Hf Hin. induction Hin; naive_solver. Qed.
@@ -4057,6 +4058,20 @@ Section fmap.
   Lemma elem_of_list_fmap_inj `{!Inj (=) (=) f} l x : f x ∈ f <$> l ↔ x ∈ l.
   Proof.
     naive_solver eauto using elem_of_list_fmap_1, elem_of_list_fmap_2_inj.
+  Qed.
+
+  Lemma list_fmap_inj R1 R2 :
+    Inj R1 R2 f → Inj (Forall2 R1) (Forall2 R2) (fmap f).
+  Proof.
+    intros ? l1. induction l1; intros [|??]; inversion 1; constructor; auto.
+  Qed.
+  Global Instance list_fmap_eq_inj : Inj (=) (=) f → Inj (=@{list A}) (=) (fmap f).
+  Proof. intros ?%list_fmap_inj ?? ?%list_eq_Forall2%(inj _). by apply list_eq_Forall2. Qed.
+  Global Instance list_fmap_equiv_inj `{!Equiv A, !Equiv B} :
+    Inj (≡) (≡) f → Inj (≡@{list A}) (≡) (fmap f).
+  Proof.
+    intros ?%list_fmap_inj ?? ?%list_equiv_Forall2%(inj _).
+    by apply list_equiv_Forall2.
   Qed.
 
   (** A version of [NoDup_fmap_2] that does not require [f] to be injective for

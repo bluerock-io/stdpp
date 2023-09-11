@@ -422,7 +422,7 @@ End filter.
 
 (** * Map *)
 Section map.
-  Context `{Set_ B D}.
+  Context `{SemiSet B D}.
 
   Lemma elem_of_map (f : A → B) (X : C) y :
     y ∈ set_map (D:=D) f X ↔ ∃ x, y = f x ∧ x ∈ X.
@@ -474,7 +474,7 @@ End map.
 
 (** * Bind *)
 Section set_bind.
-  Context `{Set_ B SB}.
+  Context `{SemiSet B SB}.
 
   Local Notation set_bind := (set_bind (A:=A) (SA:=C) (SB:=SB)).
 
@@ -521,7 +521,7 @@ End set_bind.
 
 (** * OMap *)
 Section set_omap.
-  Context `{Set_ B D}.
+  Context `{SemiSet B D}.
   Implicit Types (f : A → option B).
   Implicit Types (x : A) (y : B).
   Notation set_omap := (set_omap (C:=C) (D:=D)).

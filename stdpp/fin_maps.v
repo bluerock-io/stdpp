@@ -1272,7 +1272,7 @@ Proof.
 Qed.
 
 Section map_to_set.
-  Context {A : Type} `{Set_ B C}.
+  Context {A : Type} `{SemiSet B C}.
 
   Lemma elem_of_map_to_set (f : K → A → B) (m : M A) (y : B) :
     y ∈ map_to_set (C:=C) f m ↔ ∃ i x, m !! i = Some x ∧ f i x = y.
@@ -1297,7 +1297,7 @@ Section map_to_set.
   Proof. unfold_leibniz. apply map_to_set_insert. Qed.
 End map_to_set.
 
-Lemma elem_of_map_to_set_pair `{Set_ (K * A) C} (m : M A) i x :
+Lemma elem_of_map_to_set_pair `{SemiSet (K * A) C} (m : M A) i x :
   (i,x) ∈@{C} map_to_set pair m ↔ m !! i = Some x.
 Proof. rewrite elem_of_map_to_set. naive_solver. Qed.
 
@@ -3988,7 +3988,7 @@ End preimg.
 
 (** ** The [map_img] (image/codomain) operation *)
 Section img.
-  Context `{FinMap K M, Set_ A SA}.
+  Context `{FinMap K M, SemiSet A SA}.
   Implicit Types m : M A.
   Implicit Types x y : A.
   Implicit Types X : SA.
@@ -4197,26 +4197,26 @@ Section img.
   Proof. constructor. by rewrite map_img_singleton, elem_of_singleton. Qed.
 End img.
 
-Lemma map_img_fmap `{FinMap K M, FinSet A SA, Set_ B SB} (f : A → B) (m : M A) :
+Lemma map_img_fmap `{FinMap K M, FinSet A SA, SemiSet B SB} (f : A → B) (m : M A) :
   map_img (f <$> m) ≡@{SB} set_map (C:=SA) f (map_img m).
 Proof.
   apply set_equiv. intros y. rewrite elem_of_map_img, elem_of_map.
   setoid_rewrite lookup_fmap. setoid_rewrite fmap_Some.
   setoid_rewrite elem_of_map_img. naive_solver.
 Qed.
-Lemma map_img_fmap_L `{FinMap K M, FinSet A SA, Set_ B SB, !LeibnizEquiv SB}
+Lemma map_img_fmap_L `{FinMap K M, FinSet A SA, SemiSet B SB, !LeibnizEquiv SB}
     (f : A → B) (m : M A) :
   map_img (f <$> m) =@{SB} set_map (C:=SA) f (map_img m).
 Proof. unfold_leibniz. apply map_img_fmap. Qed.
 
-Lemma map_img_kmap `{FinMap K M, FinMap K2 M2, Set_ A SA}
+Lemma map_img_kmap `{FinMap K M, FinMap K2 M2, SemiSet A SA}
     (f : K → K2) `{!Inj (=) (=) f} m :
   map_img (kmap (M2:=M2) f m) ≡@{SA} map_img m.
 Proof.
   apply set_equiv. intros x. rewrite !elem_of_map_img.
   setoid_rewrite (lookup_kmap_Some f). naive_solver.
 Qed.
-Lemma map_img_kmap_L `{FinMap K M, FinMap K2 M2, Set_ A SA, !LeibnizEquiv SA}
+Lemma map_img_kmap_L `{FinMap K M, FinMap K2 M2, SemiSet A SA, !LeibnizEquiv SA}
     (f : K → K2) `{!Inj (=) (=) f} m :
   map_img (kmap (M2:=M2) f m) =@{SA} map_img m.
 Proof. unfold_leibniz. by apply map_img_kmap. Qed.

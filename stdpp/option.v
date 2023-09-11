@@ -114,12 +114,12 @@ Section Forall2.
   Global Instance option_Forall2_equiv : Equivalence R → Equivalence (option_Forall2 R).
   Proof. destruct 1; split; apply _. Qed.
 
-  Lemma option_Forall2_eq (mx my : option A) :
-    option_Forall2 eq mx my ↔ mx = my.
+  Lemma option_eq_Forall2 (mx my : option A) :
+    mx = my ↔ option_Forall2 eq mx my.
   Proof.
     split.
-    - intros [|]; naive_solver.
     - intros ->. destruct my; constructor; done.
+    - intros [|]; naive_solver.
   Qed.
 End Forall2.
 
@@ -130,7 +130,7 @@ Section setoids.
   Context `{Equiv A}.
   Implicit Types mx my : option A.
 
-  Lemma equiv_option_Forall2 mx my : mx ≡ my ↔ option_Forall2 (≡) mx my.
+  Lemma option_equiv_Forall2 mx my : mx ≡ my ↔ option_Forall2 (≡) mx my.
   Proof. done. Qed.
 
   Global Instance option_equivalence :
@@ -184,12 +184,13 @@ Global Instance option_guard: MGuard option := λ P dec A f,
 
 Lemma option_fmap_inj {A B} (R1 : A → A → Prop) (R2 : B → B → Prop) (f : A → B) :
   Inj R1 R2 f → Inj (option_Forall2 R1) (option_Forall2 R2) (fmap f).
-Proof.
-  intros ? [x1|] [x2|] Hx; simpl in *; inversion Hx; constructor. subst. by eapply inj.
-Qed.
+Proof. intros ? [?|] [?|]; inversion 1; constructor; auto. Qed.
 Global Instance option_fmap_eq_inj {A B} (f : A → B) :
   Inj (=) (=) f → Inj (=@{option A}) (=@{option B}) (fmap f).
-Proof. intros ?%option_fmap_inj ?? ?%option_Forall2_eq. apply option_Forall2_eq. by eapply inj. Qed.
+Proof.
+  intros ?%option_fmap_inj ?? ?%option_eq_Forall2%(inj _).
+  by apply option_eq_Forall2.
+Qed.
 Global Instance option_fmap_equiv_inj `{Equiv A, Equiv B} (f : A → B) :
   Inj (≡) (≡) f → Inj (≡@{option A}) (≡@{option B}) (fmap f).
 Proof. apply option_fmap_inj. Qed.

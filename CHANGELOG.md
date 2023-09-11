@@ -89,6 +89,12 @@ longer supported by this release.
     `gmultiset_set_fold_disj_union` to any preorder for appropriately-chosen
     fold functions.
 - Improve efficiency of `encode`/`decode` for `string` and `ascii`.
+- Rename `equiv_Forall2` → `list_equiv_Forall2` and `equiv_option_Forall2` →
+  `option_equiv_Forall2`. Add similar lemmas `list_eq_Forall2` and
+  `option_eq_Forall2` for `=` instead of `≡`.
+- Rename `fmap_inj` → `list_fmap_eq_inj` and `option_fmap_inj` →
+  `option_fmap_eq_inj`. The new lemmas `list_fmap_inj`/`option_fmap_inj`
+  generalize injectivity to `Forall2`/`option_Forall2`.
 
 **Changes in `stdpp_unstable`:**
 
@@ -109,6 +115,11 @@ s/\blookup_total_preimg/lookup_total_preimg/g
 s/\boption_union_Some\b/union_Some/g
 # prefix_lookup
 s/\bprefix_lookup\b/prefix_lookup_Some/g
+# Forall2
+s/\bequiv_Forall2\b/list_equiv_Forall2/g
+s/\bequiv_option_Forall2\b/option_equiv_Forall2/g
+s/\bfmap_inj\b/list_fmap_eq_inj/g
+s/\boption_fmap_inj\b/option_fmap_eq_inj/g
 EOF
 ```
 

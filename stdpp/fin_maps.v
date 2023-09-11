@@ -206,8 +206,9 @@ Definition map_preimg `{MapFold K A MKA, Empty MASK,
   map_fold (λ i, partial_alter (λ mX, Some $ {[ i ]} ∪ default ∅ mX)) ∅ m.
 Global Typeclasses Opaque map_preimg.
 
-Definition map_compose {A B C MA MB} `{FA:FinMap A MA, FB:FinMap B MB}
-  (m : MB C) (n : MA B) := omap (m !!.) n.
+Definition map_compose `{OMap MA, Lookup B C MB}
+  (m : MB) (n : MA B) : MA C := omap (m !!.) n.
+
 Infix "∘ₘ" := map_compose (at level 65, right associativity) : stdpp_scope.
 Notation "(∘ₘ)" := map_compose (only parsing) : stdpp_scope.
 Notation "( m ∘ₘ.)" := (map_compose m) (only parsing) : stdpp_scope.
@@ -4230,173 +4231,166 @@ Proof. unfold_leibniz. by apply map_img_kmap. Qed.
 
 (** ** The [map_compose] operation *)
 Section map_compose.
-  Context {A MA B MB} `{FA:FinMap A MA} `{FB:FinMap B MB}.
-  Context {C : Type}.
+  Context `{FinMap A MA, FinMap B MB} {C : Type}.
   Implicit Types (m : MB C) (n : MA B) (a : A) (b : B) (c : C).
 
-  Lemma map_compose_lookup m n a : (m ∘ₘ n) !! a = n !! a ≫= λ b, m !! b.
+  Lemma map_lookup_compose m n a : (m ∘ₘ n) !! a = n !! a ≫= (m !!.).
   Proof. apply lookup_omap. Qed.
 
-  Lemma map_compose_lookup_Some m n a c :
-    (m ∘ₘ n) !! a = Some c ↔
-    ∃ b, n !! a = Some b ∧ m !! b = Some c.
-  Proof.
-    rewrite map_compose_lookup.
-    destruct (n !! a) as [b|] eqn:Hm; naive_solver.
-  Qed.
-  Lemma map_compose_lookup_Some_1 m n a c :
-    (m ∘ₘ n) !! a = Some c →
-    ∃ b, n !! a = Some b ∧ m !! b = Some c.
-  Proof. by rewrite map_compose_lookup_Some. Qed.
-  Lemma map_compose_lookup_Some_2 m n a b c :
-    n !! a = Some b → m !! b = Some c →
-    (m ∘ₘ n) !! a = Some c.
-  Proof. intros. apply map_compose_lookup_Some. by exists b. Qed.
+  Lemma map_lookup_compose_Some m n a c :
+    (m ∘ₘ n) !! a = Some c ↔ ∃ b, n !! a = Some b ∧ m !! b = Some c.
+  Proof. rewrite map_lookup_compose. destruct (n !! a) eqn:?; naive_solver. Qed.
+  Lemma map_lookup_compose_Some_1 m n a c :
+    (m ∘ₘ n) !! a = Some c → ∃ b, n !! a = Some b ∧ m !! b = Some c.
+  Proof. by rewrite map_lookup_compose_Some. Qed.
+  Lemma map_lookup_compose_Some_2 m n a b c :
+    n !! a = Some b → m !! b = Some c → (m ∘ₘ n) !! a = Some c.
+  Proof. intros. apply map_lookup_compose_Some. by exists b. Qed.
 
-  Lemma map_compose_lookup_None m n a :
+  Lemma map_lookup_compose_None m n a :
     (m ∘ₘ n) !! a = None ↔
     n !! a = None ∨ ∃ b, n !! a = Some b ∧ m !! b = None.
-  Proof.
-    rewrite map_compose_lookup.
-    destruct (n!!a) as [b|] eqn:Hn; naive_solver.
-  Qed.
-  Lemma map_compose_lookup_None_1 m n a :
-    (m ∘ₘ n) !! a = None →
-    n !! a = None ∨ ∃ b, n !! a = Some b ∧ m !! b = None.
-  Proof. apply map_compose_lookup_None. Qed.
-  Lemma map_compose_lookup_None_2 m n a :
-    (n !! a = None ∨ ∃ b, n !! a = Some b ∧ m !! b = None) →
-    (m ∘ₘ n) !! a = None.
-  Proof. apply map_compose_lookup_None. Qed.
-  Lemma map_compose_lookup_None_2l m n a : n !! a = None → (m ∘ₘ n) !! a = None.
-  Proof. intros. apply map_compose_lookup_None. by left. Qed.
-  Lemma map_compose_lookup_None_2r m n a b :
+  Proof. rewrite map_lookup_compose. destruct (n !! a) eqn:?; naive_solver. Qed.
+  Lemma map_lookup_compose_None_1 m n a :
+    (m ∘ₘ n) !! a = None → n !! a = None ∨ ∃ b, n !! a = Some b ∧ m !! b = None.
+  Proof. apply map_lookup_compose_None. Qed.
+  Lemma map_lookup_compose_None_2_1 m n a : n !! a = None → (m ∘ₘ n) !! a = None.
+  Proof. intros. apply map_lookup_compose_None. by left. Qed.
+  Lemma map_lookup_compose_None_2_2 m n a b :
     n !! a = Some b → m !! b = None → (m ∘ₘ n) !! a = None.
-  Proof. intros. apply map_compose_lookup_None. naive_solver. Qed.
+  Proof. intros. apply map_lookup_compose_None. naive_solver. Qed.
 
-  Lemma map_compose_img_subseteq `{Set_ C D} m n : map_img (m ∘ₘ n) ⊆@{D} map_img m.
+  Lemma map_compose_img_subseteq `{SemiSet C D} m n :
+    map_img (m ∘ₘ n) ⊆@{D} map_img m.
   Proof.
     intros c. rewrite !elem_of_map_img.
-    setoid_rewrite map_compose_lookup_Some. naive_solver.
+    setoid_rewrite map_lookup_compose_Some. naive_solver.
   Qed.
 
-  Lemma map_compose_empty_r m : m ∘ₘ ∅ = (∅ : MA C).
+  Lemma map_compose_empty_r m : m ∘ₘ ∅ =@{MA C} ∅.
   Proof. apply omap_empty. Qed.
-  Lemma map_compose_empty_l n : (∅ : MB C) ∘ₘ n = (∅ : MA C).
+  Lemma map_compose_empty_l n : (∅ : MB C) ∘ₘ n =@{MA C} ∅.
   Proof.
-    apply map_eq. intros k. rewrite map_compose_lookup, lookup_empty.
-    destruct (n!!k); simpl; [apply lookup_empty|reflexivity].
+    apply map_eq. intros k. rewrite map_lookup_compose, lookup_empty.
+    destruct (n !! k); simpl; [|done]. apply lookup_empty.
   Qed.
   Lemma map_compose_empty_iff m n :
-    m ∘ₘ n = ∅ ↔
-    ∀ b, is_Some (m !! b) → (∃ a, n !! a = Some b) → False.
+    m ∘ₘ n = ∅ ↔ ∀ a b, n !! a = Some b → m !! b = None.
   Proof.
-    rewrite map_empty. setoid_rewrite map_compose_lookup_None.
-    split.
-    - intros Hmn b [c Hbc] [a Hab]. destruct (Hmn a); naive_solver.
-    - intros Hmn a. destruct (n !! a) as [b|] eqn:Hn; [right|by left].
-      destruct (m !! b) eqn:Hm; naive_solver.
+    rewrite map_empty. setoid_rewrite map_lookup_compose_None.
+    apply forall_proper; intros a. destruct (n !! a); naive_solver.
   Qed.
+
+  Lemma map_disjoint_compose_l m1 m2 n : m1 ##ₘ m2 → m1 ∘ₘ n ##ₘ m2 ∘ₘ n.
+  Proof.
+    rewrite !map_disjoint_spec; intros Hdisj a c1 c2.
+    rewrite !map_lookup_compose. destruct (n !! a); naive_solver.
+  Qed.
+  Lemma map_disjoint_compose_r m n1 n2 : n1 ##ₘ n2 → m ∘ₘ n1 ##ₘ m ∘ₘ n2.
+  Proof. apply map_disjoint_omap. Qed.
 
   Lemma map_compose_union_l m1 m2 n : (m1 ∪ m2) ∘ₘ n = (m1 ∘ₘ n) ∪ (m2 ∘ₘ n).
   Proof.
-    apply map_eq. intros a. rewrite map_compose_lookup.
-    destruct (n!!a) as [b|] eqn:Hn; simpl.
-    - destruct (m1!!b) as [c|] eqn:Hm1.
-      + rewrite (lookup_union_Some_l _ _ _ c Hm1). symmetry.
-        apply lookup_union_Some_l. apply map_compose_lookup_Some. by exists b.
-      + rewrite (lookup_union_r _ _ _ Hm1). symmetry.
-        rewrite lookup_union_r; [|by apply (map_compose_lookup_None_2r m1 n a b)].
-        by rewrite map_compose_lookup, Hn.
-    - symmetry. rewrite lookup_union_None.
-      split; by apply map_compose_lookup_None_2l.
+    apply map_eq; intros a. rewrite lookup_union, !map_lookup_compose.
+    destruct (n !! a) as [b|] eqn:?; simpl; [|done]. by rewrite lookup_union.
   Qed.
   Lemma map_compose_union_r m n1 n2 :
     n1 ##ₘ n2 → m ∘ₘ (n1 ∪ n2) = (m ∘ₘ n1) ∪ (m ∘ₘ n2).
   Proof. intros Hs. by apply map_omap_union. Qed.
 
-  Global Instance map_compose_mono_l n : Proper ((⊆) ==> (⊆)) (λ m, map_compose m n).
+  Lemma map_compose_mono_l m n1 n2 : n1 ⊆ n2 → m ∘ₘ n1 ⊆ m ∘ₘ n2.
+  Proof. by apply map_omap_mono. Qed.
+  Lemma map_compose_mono_r m1 m2 n : m1 ⊆ m2 → m1 ∘ₘ n ⊆ m2 ∘ₘ n.
   Proof.
-    intros m1 m2 Hinf. apply map_subseteq_spec. intros a c Ha.
-    apply map_compose_lookup_Some. apply map_compose_lookup_Some in Ha as [b [Hn Hm]].
-    exists b. split; [done|]. rewrite map_subseteq_spec in Hinf. by apply Hinf.
+    rewrite !map_subseteq_spec; intros ? a c.
+    rewrite !map_lookup_compose_Some. naive_solver.
   Qed.
-  Global Instance map_compose_mono_r m : Proper ((⊆@{MA B}) ==> (⊆)) (m ∘ₘ.).
-  Proof. intros n1 n2 Hn1n2. by apply map_omap_mono. Qed.
-  Global Instance map_compose_mono : Proper ((⊆@{MB C}) ==> (⊆@{MA B}) ==> (⊆)) (∘ₘ).
+  Lemma map_compose_mono m1 m2 n1 n2 :
+    m1 ⊆ m2 → n1 ⊆ n2 → m1 ∘ₘ n1 ⊆ m2 ∘ₘ n2.
   Proof.
-    intros m1 m2 Hm n1 n2 Hn. transitivity (map_compose m1 n2);
-    [ by apply map_compose_mono_r | by apply map_compose_mono_l ].
-  Qed.
-
-  Lemma map_compose_disjoint m1 m2 n : m1 ##ₘ m2 → m1 ∘ₘ n ##ₘ m2 ∘ₘ n.
-  Proof.
-    intros Hdisj. rewrite map_disjoint_spec. intros a c1 c2 Ha1 Ha2.
-    rewrite map_disjoint_spec in Hdisj. rewrite !map_compose_lookup in Ha1, Ha2.
-    destruct (n!!a); [ apply (Hdisj _ _ _ Ha1 Ha2) | done].
+    intros. transitivity (m1 ∘ₘ n2);
+      [by apply map_compose_mono_l|by apply map_compose_mono_r].
   Qed.
 
-  (** Alternative definition of [map_compose m n] by induction on [n] *)
+  (** Alternative definition of [m ∘ₘ n] by recursion on [n] *)
   Lemma map_compose_alt m n :
-    m ∘ₘ n = map_fold (λ a b (mn: MA C), match m !! b with
-      | Some c => <[a:=c]> mn
-      | None => mn
-      end) ∅ n.
+    m ∘ₘ n = map_fold (λ a b,
+               match m !! b with
+               | Some c => <[a:=c]>
+               | None => id
+               end) ∅ n.
   Proof.
-    apply (map_fold_ind (λ (mn : MA C) n, omap (m !!.) n = mn)).
-    - apply map_compose_empty_r.
-    - intros k b n' mn Hn' IH. rewrite omap_insert, <- IH.
-      destruct (m!!b); [ done | by apply delete_notin, map_compose_lookup_None_2l ].
+    apply (map_fold_ind (λ mn n, omap (m !!.) n = mn)).
+    { apply map_compose_empty_r. }
+    intros k b n' mn Hn' IH. rewrite omap_insert, <-IH.
+    destruct (m !! b); [done|].
+    by apply delete_notin, map_lookup_compose_None_2_1.
   Qed.
 
-  Lemma map_compose_filter_subseteq_l (P : B*C → Prop) `{∀ x, Decision (P x)} m n :
-    (filter P m) ∘ₘ n ⊆ m ∘ₘ n.
-  Proof. apply map_compose_mono_l, map_filter_subseteq. Qed.
-  Lemma map_compose_filter_subseteq_r (P : A*B → Prop) `{∀ x, Decision (P x)} m n :
-    m ∘ₘ (filter P n) ⊆ m ∘ₘ n.
-  Proof. apply map_compose_mono_r, map_filter_subseteq. Qed.
-
-  Lemma map_compose_min_l `{Set_ B D, !RelDecision (∈@{D})} m n :
-    m ∘ₘ n = (filter (λ '(b,_), b ∈ map_img (SA:=D) n) m) ∘ₘ n.
+  Lemma map_compose_min_l `{SemiSet B D, !RelDecision (∈@{D})} m n :
+    m ∘ₘ n = filter (λ '(b,_), b ∈ map_img (SA:=D) n) m ∘ₘ n.
   Proof.
-    apply map_eq. intro a. rewrite !map_compose_lookup.
-    destruct (n!!a) as [b|] eqn:Hn; [ simpl | done ].
-    destruct (m!!b) eqn:Hm; symmetry.
-    - apply map_filter_lookup_Some. split; [ done |].
-      rewrite elem_of_map_img. by exists a.
-    - apply map_filter_lookup_None. by left.
+    apply map_eq; intros a. rewrite !map_lookup_compose.
+    destruct (n !! a) as [b|] eqn:?; simpl; [|done].
+    rewrite map_lookup_filter. destruct (m !! b) eqn:?; simpl; [|done].
+    by rewrite option_guard_True by (by eapply elem_of_map_img_2).
   Qed.
   Lemma map_compose_min_r m n :
-    map_compose (FB:=FB) m n = map_compose (FB:=FB) m (filter (λ '(_,b), is_Some (m !! b)) n).
+    m ∘ₘ n = m ∘ₘ filter (λ '(_,b), is_Some (m !! b)) n.
   Proof.
-    apply map_eq. intro a. rewrite !map_compose_lookup.
-    destruct (n!!a) as [b|] eqn:Hn; simpl; symmetry.
-    - destruct (m!!b) eqn:Hm.
-      + apply bind_Some. exists b. split;
-        [ by apply map_filter_lookup_Some | done ].
-      + apply bind_None. left. apply map_filter_lookup_None. right.
-        intros x Hx [z Hz]. by simplify_eq.
-    - apply bind_None. left. apply map_filter_lookup_None. by left.
+    apply map_eq; intros a. rewrite !map_lookup_compose, map_lookup_filter.
+    destruct (n !! a) as [b|] eqn:?; simpl; [|done]. by destruct (m !! b) eqn:?.
   Qed.
+
+  Lemma map_compose_insert_Some m n a b c :
+    m !! b = Some c →
+    m ∘ₘ <[a:=b]> n =@{MA C} <[a:=c]> (m ∘ₘ n).
+  Proof. intros. by apply omap_insert_Some. Qed.
+  Lemma map_compose_insert_None m n a b :
+    m !! b = None →
+    m ∘ₘ <[a:=b]> n =@{MA C} delete a (m ∘ₘ n).
+  Proof. intros. by apply omap_insert_None. Qed.
+
+  Lemma map_compose_delete m n a :
+    m ∘ₘ delete a n =@{MA C} delete a (m ∘ₘ n).
+  Proof. intros. by apply omap_delete. Qed.
 
   Lemma map_compose_singleton_Some m a b c :
     m !! b = Some c →
-    m ∘ₘ {[a := b]} = {[a := c]}.
+    m ∘ₘ {[a := b]} =@{MA C} {[a := c]}.
   Proof. intros. by apply omap_singleton_Some. Qed.
   Lemma map_compose_singleton_None m a b :
     m !! b = None →
-    m ∘ₘ {[a := b]} = ∅.
+    m ∘ₘ {[a := b]} =@{MA C} ∅.
   Proof. intros. by apply omap_singleton_None. Qed.
-  Lemma map_compose_singletons a b c : {[b := c]} ∘ₘ {[a := b]} = {[a := c]}.
-  Proof. rewrite (map_compose_singleton_Some _ a b c); [done|apply lookup_insert]. Qed.
+
+  Lemma map_compose_singletons a b c :
+    ({[b := c]} : MB C) ∘ₘ {[a := b]} =@{MA C} {[a := c]}.
+  Proof. by apply map_compose_singleton_Some, lookup_insert. Qed.
 End map_compose.
 
 Lemma map_compose_assoc `{FinMap A MA, FinMap B MB, FinMap C MC} {D}
     (m : MC D) (n : MB C) (o : MA B) :
   m ∘ₘ (n ∘ₘ o) = (m ∘ₘ n) ∘ₘ o.
 Proof.
-  apply map_eq. intros a. rewrite !map_compose_lookup.
-  destruct (o!!a); [simpl|done]. by rewrite map_compose_lookup.
+  apply map_eq; intros a. rewrite !map_lookup_compose.
+  destruct (o !! a); simpl; [|done]. by rewrite map_lookup_compose.
+Qed.
+
+Lemma map_fmap_map_compose `{FinMap A MA, FinMap B MB} {C1 C2} (f : C1 → C2)
+    (m : MB C1) (n : MA B) :
+  f <$> (m ∘ₘ n) = (f <$> m) ∘ₘ n.
+Proof.
+  apply map_eq; intros a. rewrite lookup_fmap, !map_lookup_compose.
+  destruct (n !! a); simpl; [|done]. by rewrite lookup_fmap.
+Qed.
+
+Lemma map_omap_map_compose `{FinMap A MA, FinMap B MB} {C1 C2} (f : C1 → option C2)
+    (m : MB C1) (n : MA B) :
+  omap f (m ∘ₘ n) = omap f m ∘ₘ n.
+Proof.
+  apply map_eq; intros a. rewrite lookup_omap, !map_lookup_compose.
+  destruct (n !! a); simpl; [|done]. by rewrite lookup_omap.
 Qed.
 
 (** * Tactics *)
@@ -4456,8 +4450,10 @@ Global Hint Extern 2 (foldr delete _ _ ##ₘ _) =>
   apply map_disjoint_foldr_delete_l : map_disjoint.
 Global Hint Extern 2 (_ ##ₘ foldr delete _ _) =>
   apply map_disjoint_foldr_delete_r : map_disjoint.
-Global Hint Extern 3 (_ ∘ₘ ?n ##ₘ _ ∘ₘ ?n) =>
-  apply map_compose_disjoint : map_disjoint.
+Global Hint Extern 3 (_ ∘ₘ _ ##ₘ _ ∘ₘ _) =>
+  apply map_disjoint_compose_l : map_disjoint.
+Global Hint Extern 3 (_ ∘ₘ _ ##ₘ _ ∘ₘ _) =>
+  apply map_disjoint_compose_r : map_disjoint.
 
 (** The tactic [simpl_map by tac] simplifies occurrences of finite map look
 ups. It uses [tac] to discharge generated inequalities. Look ups in unions do

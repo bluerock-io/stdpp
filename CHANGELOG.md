@@ -98,6 +98,9 @@ longer supported by this release.
 - Generalize `set_map`, `set_bind`, `set_omap`, `map_to_set` and `map_img`
   lemmas from `Set_` to `SemiSet`.
 - Rename `sub_add'` to `add_sub'` for consistency with Coq's `add_sub` lemma.
+- Rename `map_filter_lookup` → `map_lookup_filter` and
+  `map_filter_lookup_Some` → `map_lookup_filter_Some` and
+  `map_filter_lookup_None` → `map_lookup_filter_None`.
 
 **Changes in `stdpp_unstable`:**
 
@@ -125,6 +128,8 @@ s/\bfmap_inj\b/list_fmap_eq_inj/g
 s/\boption_fmap_inj\b/option_fmap_eq_inj/g
 # add_sub
 s/\bsub_add'\b/add_sub'/g
+# map filter
+s/\bmap_filter_lookup/map_lookup_filter/g
 EOF
 ```
 

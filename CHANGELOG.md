@@ -97,6 +97,7 @@ longer supported by this release.
   generalize injectivity to `Forall2`/`option_Forall2`.
 - Generalize `set_map`, `set_bind`, `set_omap`, `map_to_set` and `map_img`
   lemmas from `Set_` to `SemiSet`.
+- Rename `sub_add'` to `add_sub'` for consistency with Coq's `add_sub` lemma.
 
 **Changes in `stdpp_unstable`:**
 
@@ -122,6 +123,8 @@ s/\bequiv_Forall2\b/list_equiv_Forall2/g
 s/\bequiv_option_Forall2\b/option_equiv_Forall2/g
 s/\bfmap_inj\b/list_fmap_eq_inj/g
 s/\boption_fmap_inj\b/option_fmap_eq_inj/g
+# add_sub
+s/\bsub_add'\b/add_sub'/g
 EOF
 ```
 

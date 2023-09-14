@@ -3859,7 +3859,7 @@ Section find.
           naive_solver eauto using lookup_app_l_Some with lia. }
         apply list_find_Some. split_and!; [done..|].
         intros j z ??. eapply (Hleast (length l1 + j)); [|lia].
-        by rewrite lookup_app_r, Nat.sub_add' by lia.
+        by rewrite lookup_app_r, Nat.add_sub' by lia.
     - intros [(?&?&Hleast)%list_find_Some|(?&Hl1&(?&?&Hleast)%list_find_Some)].
       + apply list_find_Some. split_and!; [by auto using lookup_app_l_Some..|].
         assert (i < length l1) by eauto using lookup_lt_Some.

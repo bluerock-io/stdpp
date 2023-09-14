@@ -3,7 +3,7 @@ API-breaking change is listed.
 
 ## std++ master
 
-Coq 8.17 is newly supported by this release. Coq 8.12, 8.13 and 8.14 are no
+Coq 8.17 is newly supported by this release. Coq 8.12, 8.13, 8.14, and 8.15 are no
 longer supported by this release.
 
 - Rename `difference_difference` → `difference_difference_l` and

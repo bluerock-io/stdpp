@@ -43,7 +43,7 @@ Notably:
 
 This version is known to compile with:
 
- - Coq version 8.15.2 / 8.16.1 / 8.17.0 / 8.18.0
+ - Coq version 8.15.2 / 8.16.1 / 8.17.1 / 8.18.0
 
 Generally we always aim to support the last two stable Coq releases. Support for
 older versions will be dropped when it is convenient.

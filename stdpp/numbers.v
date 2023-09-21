@@ -113,10 +113,10 @@ Module Nat.
   Lemma le_sum (x y : nat) : x ≤ y ↔ ∃ z, y = x + z.
   Proof. split; [exists (y - x); lia | intros [z ->]; lia]. Qed.
 
-  (** [Arith.Minus.minus_plus] is deprecated starting in 8.16 *)
-  Lemma sub_add' n m : n + m - n = m.
+  (** This is similar to but slightly different than Coq's
+      [add_sub : ∀ n m : nat, n + m - m = n]. *)
+  Lemma add_sub' n m : n + m - n = m.
   Proof. lia. Qed.
-  (** [Arith.Minus.le_plus_minus] is deprecated starting in 8.16 *)
   Lemma le_add_sub n m : n ≤ m → m = n + (m - n).
   Proof. lia. Qed.
 

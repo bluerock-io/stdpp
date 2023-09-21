@@ -64,7 +64,7 @@ Lemma dom_filter {A} (P : K * A → Prop) `{!∀ x, Decision (P x)} (m : M A) (X
   dom (filter P m) ≡ X.
 Proof.
   intros HX i. rewrite elem_of_dom, HX.
-  unfold is_Some. by setoid_rewrite map_filter_lookup_Some.
+  unfold is_Some. by setoid_rewrite map_lookup_filter_Some.
 Qed.
 Lemma dom_filter_subseteq {A} (P : K * A → Prop) `{!∀ x, Decision (P x)} (m : M A):
   dom (filter P m) ⊆ dom m.
@@ -75,7 +75,7 @@ Lemma filter_dom {A} `{!Elements K D, !FinSet K D}
   filter P (dom m) ≡ dom (filter (λ kv, P kv.1) m).
 Proof.
   intros i. rewrite elem_of_filter, !elem_of_dom. unfold is_Some.
-  setoid_rewrite map_filter_lookup_Some. naive_solver.
+  setoid_rewrite map_lookup_filter_Some. naive_solver.
 Qed.
 
 Lemma dom_empty {A} : dom (@empty (M A) _) ≡ ∅.
@@ -256,7 +256,7 @@ Proof.
   { apply map_disjoint_filter_complement. }
   split_and!; [|done| |].
   - apply map_eq; intros i. apply option_eq; intros x.
-    rewrite lookup_union_Some, !map_filter_lookup_Some by done.
+    rewrite lookup_union_Some, !map_lookup_filter_Some by done.
     destruct (decide (i ∈ X1)); naive_solver.
   - apply dom_filter; intros i; split; [|naive_solver].
     intros. assert (is_Some (m !! i)) as [x ?] by (apply elem_of_dom; set_solver).

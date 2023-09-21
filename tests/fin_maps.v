@@ -144,7 +144,7 @@ Definition only_evens (m : gmap nat nat) : gmap nat nat :=
 Lemma only_evens_Some m i n : only_evens m !! i = Some n → (n | 2).
 Proof.
   intros Hev.
-  apply map_filter_lookup_Some in Hev as [??]. done.
+  apply map_lookup_filter_Some in Hev as [??]. done.
 Qed.
 
 (** Make sure that [pmap] and [gmap] compute *)

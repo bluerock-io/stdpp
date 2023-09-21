@@ -1610,11 +1610,11 @@ Section map_Exists.
 End map_Exists.
 
 (** ** The filter operation *)
-Section map_filter_lookup.
+Section map_lookup_filter.
   Context {A} (P : K * A → Prop) `{!∀ x, Decision (P x)}.
   Implicit Types m : M A.
 
-  Lemma map_filter_lookup m i :
+  Lemma map_lookup_filter m i :
     filter P m !! i = x ← m !! i; guard (P (i,x)); Some x.
   Proof.
     revert m i. apply (map_fold_ind (λ m1 m2,
@@ -1629,46 +1629,46 @@ Section map_filter_lookup.
       + by rewrite !lookup_insert_ne.
   Qed.
 
-  Lemma map_filter_lookup_Some m i x :
+  Lemma map_lookup_filter_Some m i x :
     filter P m !! i = Some x ↔ m !! i = Some x ∧ P (i, x).
   Proof.
-    rewrite map_filter_lookup.
+    rewrite map_lookup_filter.
     destruct (m !! i); simpl; repeat case_option_guard; naive_solver.
   Qed.
-  Lemma map_filter_lookup_Some_1_1 m i x :
+  Lemma map_lookup_filter_Some_1_1 m i x :
     filter P m !! i = Some x → m !! i = Some x.
-  Proof. apply map_filter_lookup_Some. Qed.
-  Lemma map_filter_lookup_Some_1_2 m i x :
+  Proof. apply map_lookup_filter_Some. Qed.
+  Lemma map_lookup_filter_Some_1_2 m i x :
     filter P m !! i = Some x → P (i, x).
-  Proof. apply map_filter_lookup_Some. Qed.
-  Lemma map_filter_lookup_Some_2 m i x :
+  Proof. apply map_lookup_filter_Some. Qed.
+  Lemma map_lookup_filter_Some_2 m i x :
     m !! i = Some x →
     P (i, x) →
     filter P m !! i = Some x.
-  Proof. intros. by apply map_filter_lookup_Some. Qed.
+  Proof. intros. by apply map_lookup_filter_Some. Qed.
 
-  Lemma map_filter_lookup_None m i :
+  Lemma map_lookup_filter_None m i :
     filter P m !! i = None ↔ m !! i = None ∨ ∀ x, m !! i = Some x → ¬ P (i, x).
   Proof.
     rewrite eq_None_not_Some. unfold is_Some.
-    setoid_rewrite map_filter_lookup_Some. naive_solver.
+    setoid_rewrite map_lookup_filter_Some. naive_solver.
   Qed.
-  Lemma map_filter_lookup_None_1 m i :
+  Lemma map_lookup_filter_None_1 m i :
     filter P m !! i = None →
     m !! i = None ∨ ∀ x, m !! i = Some x → ¬ P (i, x).
-  Proof. apply map_filter_lookup_None. Qed.
-  Lemma map_filter_lookup_None_2 m i :
+  Proof. apply map_lookup_filter_None. Qed.
+  Lemma map_lookup_filter_None_2 m i :
     m !! i = None ∨ (∀ x : A, m !! i = Some x → ¬ P (i, x)) →
     filter P m !! i = None.
-  Proof. apply map_filter_lookup_None. Qed.
+  Proof. apply map_lookup_filter_None. Qed.
 
   Lemma map_filter_empty_not_lookup m i x :
     filter P m = ∅ → P (i,x) → m !! i ≠ Some x.
   Proof.
-    rewrite map_empty. setoid_rewrite map_filter_lookup_None. intros Hm ?.
+    rewrite map_empty. setoid_rewrite map_lookup_filter_None. intros Hm ?.
     destruct (Hm i); naive_solver.
   Qed.
-End map_filter_lookup.
+End map_lookup_filter.
 
 Section map_filter_ext.
   Context {A} (P Q : K * A → Prop) `{!∀ x, Decision (P x), !∀ x, Decision (Q x)}.
@@ -1678,7 +1678,7 @@ Section map_filter_ext.
     (∀ i x, (P (i, x) ∧ m1 !! i = Some x) ↔ (Q (i, x) ∧ m2 !! i = Some x)).
   Proof.
     intros. rewrite map_eq_iff. setoid_rewrite option_eq.
-    setoid_rewrite map_filter_lookup_Some. naive_solver.
+    setoid_rewrite map_lookup_filter_Some. naive_solver.
   Qed.
   Lemma map_filter_strong_ext_1 (m1 m2 : M A) :
     (∀ i x, (P (i, x) ∧ m1 !! i = Some x) ↔ (Q (i, x) ∧ m2 !! i = Some x)) →
@@ -1698,7 +1698,7 @@ Section map_filter_ext.
     (∀ i x, (P (i, x) ∧ m1 !! i = Some x) → (Q (i, x) ∧ m2 !! i = Some x)).
   Proof.
     rewrite map_subseteq_spec.
-    setoid_rewrite map_filter_lookup_Some. naive_solver.
+    setoid_rewrite map_lookup_filter_Some. naive_solver.
   Qed.
   Lemma map_filter_subseteq_ext (m : M A) :
     filter P m ⊆ filter Q m ↔
@@ -1715,7 +1715,7 @@ Section map_filter.
   Lemma map_filter_empty_iff m :
     filter P m = ∅ ↔ map_Forall (λ i x, ¬P (i,x)) m.
   Proof.
-    rewrite map_empty. setoid_rewrite map_filter_lookup_None. split.
+    rewrite map_empty. setoid_rewrite map_lookup_filter_None. split.
     - intros Hm i x Hi. destruct (Hm i); naive_solver.
     - intros Hm i. destruct (m !! i) as [x|] eqn:?; [|by auto].
       right; intros ? [= <-]. by apply Hm.
@@ -1725,8 +1725,8 @@ Section map_filter.
   Proof.
     apply map_eq. intros j. apply option_eq; intros y.
     destruct (decide (j = i)) as [->|?].
-    - rewrite map_filter_lookup_Some, !lookup_delete. naive_solver.
-    - rewrite lookup_delete_ne, !map_filter_lookup_Some, lookup_delete_ne by done.
+    - rewrite map_lookup_filter_Some, !lookup_delete. naive_solver.
+    - rewrite lookup_delete_ne, !map_lookup_filter_Some, lookup_delete_ne by done.
       naive_solver.
   Qed.
   Lemma map_filter_delete_not m i:
@@ -1742,9 +1742,9 @@ Section map_filter.
     = if decide (P (i, x)) then <[i:=x]> (filter P m) else filter P (delete i m).
   Proof.
     apply map_eq. intros j. apply option_eq; intros y.
-    rewrite map_filter_lookup_Some, lookup_insert_Some. case_decide.
-    - rewrite lookup_insert_Some, map_filter_lookup_Some. naive_solver.
-    - rewrite map_filter_lookup_Some, lookup_delete_Some. naive_solver.
+    rewrite map_lookup_filter_Some, lookup_insert_Some. case_decide.
+    - rewrite lookup_insert_Some, map_lookup_filter_Some. naive_solver.
+    - rewrite map_lookup_filter_Some, lookup_delete_Some. naive_solver.
   Qed.
   Lemma map_filter_insert_True m i x :
     P (i, x) → filter P (<[i:=x]> m) = <[i:=x]> (filter P m).
@@ -1782,7 +1782,7 @@ Section map_filter.
     { by rewrite map_to_list_empty, map_filter_empty, map_to_list_empty. }
     rewrite map_to_list_insert, filter_cons by done. destruct (decide (P _)).
     - rewrite map_filter_insert_True by done.
-      by rewrite map_to_list_insert, IH by (rewrite map_filter_lookup_None; auto).
+      by rewrite map_to_list_insert, IH by (rewrite map_lookup_filter_None; auto).
     - by rewrite map_filter_insert_not' by naive_solver.
   Qed.
 
@@ -1790,7 +1790,7 @@ Section map_filter.
     filter P (f <$> m) = f <$> filter (λ '(i, x), P (i, (f x))) m.
   Proof.
     apply map_eq. intros i. apply option_eq; intros x.
-    repeat (rewrite lookup_fmap, fmap_Some || setoid_rewrite map_filter_lookup_Some).
+    repeat (rewrite lookup_fmap, fmap_Some || setoid_rewrite map_lookup_filter_Some).
     naive_solver.
   Qed.
 
@@ -1798,7 +1798,7 @@ Section map_filter.
     filter P (filter Q m) = filter (λ '(i, x), P (i, x) ∧ Q (i, x)) m.
   Proof.
     apply map_filter_strong_ext. intros ??.
-    rewrite map_filter_lookup_Some. naive_solver.
+    rewrite map_lookup_filter_Some. naive_solver.
   Qed.
   Lemma map_filter_filter_l Q `{!∀ x, Decision (Q x)} m :
     (∀ i x, m !! i = Some x → P (i, x) → Q (i, x)) →
@@ -1812,13 +1812,13 @@ Section map_filter.
   Lemma map_filter_id m :
     (∀ i x, m !! i = Some x → P (i, x)) → filter P m = m.
   Proof.
-    intros Hi. apply map_eq. intros i. rewrite map_filter_lookup.
+    intros Hi. apply map_eq. intros i. rewrite map_lookup_filter.
     destruct (m !! i) eqn:Hlook; [|done].
     apply option_guard_True, Hi, Hlook.
   Qed.
 
   Lemma map_filter_subseteq m : filter P m ⊆ m.
-  Proof. apply map_subseteq_spec, map_filter_lookup_Some_1_1. Qed.
+  Proof. apply map_subseteq_spec, map_lookup_filter_Some_1_1. Qed.
 
   Lemma map_filter_subseteq_mono m1 m2 : m1 ⊆ m2 → filter P m1 ⊆ filter P m2.
   Proof.
@@ -2242,7 +2242,7 @@ Lemma map_agree_filter {A} (P : K * A → Prop)
   map_agree m1 m2 → map_agree (filter P m1) (filter P m2).
 Proof.
   rewrite !map_agree_spec. intros ? i x y.
-  rewrite !map_filter_lookup_Some. naive_solver.
+  rewrite !map_lookup_filter_Some. naive_solver.
 Qed.
 
 Lemma map_agree_fmap_1 {A B} (f : A → B) (m1 m2 : M A) `{!Inj (=) (=) f}:
@@ -2328,14 +2328,14 @@ Lemma map_disjoint_filter {A} (P : K * A → Prop)
   m1 ##ₘ m2 → filter P m1 ##ₘ filter P m2.
 Proof.
   rewrite !map_disjoint_spec. intros ? i x y.
-  rewrite !map_filter_lookup_Some. naive_solver.
+  rewrite !map_lookup_filter_Some. naive_solver.
 Qed.
 Lemma map_disjoint_filter_complement {A} (P : K * A → Prop)
     `{!∀ x, Decision (P x)} (m : M A) :
   filter P m ##ₘ filter (λ v, ¬ P v) m.
 Proof.
   apply map_disjoint_spec. intros i x y.
-  rewrite !map_filter_lookup_Some. naive_solver.
+  rewrite !map_lookup_filter_Some. naive_solver.
 Qed.
 
 Lemma map_disjoint_fmap {A B} (f1 f2 : A → B) (m1 m2 : M A) :
@@ -2697,7 +2697,7 @@ Lemma map_filter_union {A} (P : K * A → Prop) `{!∀ x, Decision (P x)} (m1 m2
   filter P (m1 ∪ m2) = filter P m1 ∪ filter P m2.
 Proof.
   intros. apply map_eq; intros i. apply option_eq; intros x.
-  rewrite lookup_union_Some, !map_filter_lookup_Some,
+  rewrite lookup_union_Some, !map_lookup_filter_Some,
     lookup_union_Some by auto using map_disjoint_filter.
   naive_solver.
 Qed.
@@ -2706,7 +2706,7 @@ Lemma map_filter_union_complement {A} (P : K * A → Prop)
   filter P m ∪ filter (λ v, ¬ P v) m = m.
 Proof.
   apply map_eq; intros i. apply option_eq; intros x.
-  rewrite lookup_union_Some, !map_filter_lookup_Some
+  rewrite lookup_union_Some, !map_lookup_filter_Some
     by auto using map_disjoint_filter_complement.
   destruct (decide (P (i,x))); naive_solver.
 Qed.
@@ -2714,7 +2714,7 @@ Lemma map_filter_or {A} (P Q : K * A → Prop)
     `{!∀ x, Decision (P x), !∀ x, Decision (Q x)} (m : M A) :
   filter (λ x, P x ∨ Q x) m = filter P m ∪ filter Q m.
 Proof.
-  apply map_eq. intros k. rewrite lookup_union. rewrite !map_filter_lookup.
+  apply map_eq. intros k. rewrite lookup_union. rewrite !map_lookup_filter.
   destruct (m !! k); simpl; repeat case_option_guard; naive_solver.
 Qed.
 Lemma map_fmap_union {A B} (f : A → B) (m1 m2 : M A) :
@@ -2764,11 +2764,11 @@ Proof.
     map_filter_union_complement..| |].
   - rewrite <-map_filter_union, Hab by done.
     apply map_eq; intros k. apply option_eq; intros x.
-    rewrite map_filter_lookup_Some, lookup_union_Some, <-not_eq_None_Some by done.
+    rewrite map_lookup_filter_Some, lookup_union_Some, <-not_eq_None_Some by done.
     rewrite map_disjoint_alt in Hcd_disj; naive_solver.
   - rewrite <-map_filter_union, Hab by done.
     apply map_eq; intros k. apply option_eq; intros x.
-    rewrite map_filter_lookup_Some, lookup_union_Some, <-not_eq_None_Some by done.
+    rewrite map_lookup_filter_Some, lookup_union_Some, <-not_eq_None_Some by done.
     rewrite map_disjoint_alt in Hcd_disj; naive_solver.
 Qed.
 
@@ -2979,14 +2979,14 @@ Lemma map_intersection_filter {A} (m1 m2 : M A) :
   m1 ∩ m2 = filter (λ kx, is_Some (m1 !! kx.1) ∧ is_Some (m2 !! kx.1)) (m1 ∪ m2).
 Proof.
   apply map_eq; intros i. apply option_eq; intros x.
-  rewrite lookup_intersection_Some, map_filter_lookup_Some, lookup_union; simpl.
+  rewrite lookup_intersection_Some, map_lookup_filter_Some, lookup_union; simpl.
   unfold is_Some. destruct (m1 !! i), (m2 !! i); naive_solver.
 Qed.
 Lemma map_filter_and {A} (P Q : K * A → Prop)
     `{!∀ x, Decision (P x), !∀ x, Decision (Q x)} (m : M A) :
   filter (λ x, P x ∧ Q x) m = filter P m ∩ filter Q m.
 Proof.
-  apply map_eq. intros k. rewrite lookup_intersection. rewrite !map_filter_lookup.
+  apply map_eq. intros k. rewrite lookup_intersection. rewrite !map_lookup_filter.
   destruct (m !! k); simpl; repeat case_option_guard; naive_solver.
 Qed.
 Lemma map_fmap_intersection {A B} (f : A → B) (m1 m2 : M A) :
@@ -3118,7 +3118,7 @@ Lemma map_difference_filter {A} (m1 m2 : M A) :
   m1 ∖ m2 = filter (λ kx, m2 !! kx.1 = None) m1.
 Proof.
   apply map_eq; intros i. apply option_eq; intros x.
-  by rewrite lookup_difference_Some, map_filter_lookup_Some.
+  by rewrite lookup_difference_Some, map_lookup_filter_Some.
 Qed.
 
 (** ** Misc properties about the order *)
@@ -3247,7 +3247,7 @@ Section setoid.
     (∀ k, Proper ((≡) ==> iff) (curry P k)) →
     Proper ((≡@{M A}) ==> (≡)) (filter P).
   Proof.
-    intros ? m1 m2 Hm i. rewrite !map_filter_lookup.
+    intros ? m1 m2 Hm i. rewrite !map_lookup_filter.
     destruct (Hm i); simpl; repeat case_option_guard; try constructor; naive_solver.
   Qed.
 
@@ -4021,7 +4021,7 @@ Section img.
     map_img (filter P m) ≡ X.
   Proof.
     intros HX x. rewrite elem_of_map_img, HX.
-    unfold is_Some. by setoid_rewrite map_filter_lookup_Some.
+    unfold is_Some. by setoid_rewrite map_lookup_filter_Some.
   Qed.
   Lemma map_img_filter_subseteq (P : K * A → Prop) `{!∀ ix, Decision (P ix)} m :
     map_img (filter P m) ⊆ map_img m.

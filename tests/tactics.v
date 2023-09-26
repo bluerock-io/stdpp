@@ -116,3 +116,24 @@ Proof.
   let f' := get_head (f 0 1 2) in unify f f'.
   let f' := get_head f in unify f f'.
 Abort.
+
+(** (e)feed tests *)
+Lemma feed1 (P Q R : Prop) :
+  P → Q → (P → Q → R) → R.
+Proof.
+  intros HP HQ HR.
+  feed specialize HR; [exact HP|exact HQ|exact HR].
+Restart.
+  intros HP HQ HR.
+  feed pose proof HR as HR'; [exact HP|exact HQ|exact HR'].
+Qed.
+Lemma efeed1 (P Q R : nat → Prop) :
+  P 1 → Q 1 → (∀ n, P n → Q n → R n) → R 1.
+Proof.
+  intros HP HQ HR.
+  Fail progress feed specialize HR.
+  efeed specialize HR; [exact HP|exact HQ|exact HR].
+Restart.
+  intros HP HQ HR.
+  efeed pose proof HR as HR'; [exact HP|exact HQ|exact HR'].
+Qed.

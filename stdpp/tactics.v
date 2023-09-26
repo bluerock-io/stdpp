@@ -545,7 +545,7 @@ Tactic Notation "efeed_core" constr(H) "using" tactic3(tac) :=
   | ?T1 → ?T2 =>
     let HT1 := fresh "feed" in assert T1 as HT1;
       [| go (H HT1); clear HT1 ]
-  | ?T1 → _ =>
+  | ∀ x : ?T1, _ =>
     let e := mk_evar T1 in
     go (H e)
   | ?T1 => tac H

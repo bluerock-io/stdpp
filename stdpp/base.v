@@ -625,17 +625,17 @@ Proof.
   destruct (surj f y) as [z ?]. exists z. congruence.
 Qed.
 
-Global Instance id_comm {A B} (x : B) : Comm (=) (λ _ _ : A, x).
+Global Instance const2_comm {A B} (x : B) : Comm (=) (λ _ _ : A, x).
 Proof. intros ?; reflexivity. Qed.
-Global Instance id_assoc {A} (x : A) : Assoc (=) (λ _ _ : A, x).
+Global Instance const2_assoc {A} (x : A) : Assoc (=) (λ _ _ : A, x).
 Proof. intros ???; reflexivity. Qed.
-Global Instance const1_assoc {A} : Assoc (=) (λ x _ : A, x).
+Global Instance id1_assoc {A} : Assoc (=) (λ x _ : A, x).
 Proof. intros ???; reflexivity. Qed.
-Global Instance const2_assoc {A} : Assoc (=) (λ _ x : A, x).
+Global Instance id2_assoc {A} : Assoc (=) (λ _ x : A, x).
 Proof. intros ???; reflexivity. Qed.
-Global Instance const1_idemp {A} : IdemP (=) (λ x _ : A, x).
+Global Instance id1_idemp {A} : IdemP (=) (λ x _ : A, x).
 Proof. intros ?; reflexivity. Qed.
-Global Instance const2_idemp {A} : IdemP (=) (λ _ x : A, x).
+Global Instance id2_idemp {A} : IdemP (=) (λ _ x : A, x).
 Proof. intros ?; reflexivity. Qed.
 
 (** ** Lists *)

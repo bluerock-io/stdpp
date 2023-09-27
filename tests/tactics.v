@@ -1,4 +1,6 @@
-From stdpp Require Import tactics option.
+From stdpp Require Import tactics option strings.
+
+Local Unset Mangle Names. (* for stable goal printing *)
 
 Goal ∀ P1 P2 P3 P4 (P: Prop),
   P1 ∨ (Is_true (P2 || P3)) ∨ P4 →
@@ -136,4 +138,35 @@ Proof.
 Restart.
   intros HP HQ HR.
   efeed pose proof HR as HR'; [exact HP|exact HQ|exact HR'].
+Qed.
+
+(** o-tactic tests *)
+Check "otest".
+Lemma otest (P Q R : nat → Prop) :
+  (∀ m n, P n → Q m → R (n + m)) →
+  (∀ m n, P n → Q m → R (n + m) ∧ R 2) →
+  P 0 → P 1 → Q 5 → R 6.
+Proof.
+  intros HPQR1 HPQR2 HP0 HP1 HQ.
+  (** Imagine we couldn't [apply] since the goal is still very different, we
+  need forward reasoning. Also we don't have proof terms for [P n] and [Q m] but
+  a short proof script can solve them. [n] needs to be specified, but [m] is
+  huge and we don't want to specify it. We cannot use [efeed] as that will make
+  both [n] and [m] into evars. What do we do? The "o" family of tactics for
+  working with "o"pen terms helps. *)
+  opose proof (HPQR1 _ 1 _ _) as HR; [exact HP1|exact HQ|]. exact HR.
+Undo. Undo.
+  (** Same deal for [generalize]. *)
+  ogeneralize (HPQR1 _ 1 _ _); [exact HP1|exact HQ|]. intros HR; exact HR.
+Undo. Undo.
+  (** [odestruct] also automatically adds subgoals until there is something
+  to destruct, as usual. Note that [edestruct] wouldn't help here,
+  it just complains that it cannot infer the placeholder. *)
+  Fail edestruct (HPQR2 _ 1).
+  odestruct (HPQR2 _ 1) as [HR1 HR2]; [exact HP1|exact HQ|]. exact HR1.
+Undo. Undo.
+  (** [ospecialize] is like [opose proof] but it reuses the name.
+  It only works on local assumptions. *)
+  Fail ospecialize (mk_is_Some None).
+  ospecialize (HPQR1 _ 1 _ _); [exact HP1|exact HQ|]. exact HPQR1.
 Qed.

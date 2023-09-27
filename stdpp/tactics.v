@@ -505,6 +505,70 @@ Tactic Notation "iter" tactic(tac) tactic(l) :=
   let rec go l :=
   match l with ?x :: ?l => tac x || go l end in go l.
 
+(** * The "o" family of tactics equips [destruct], [pose proof], [specialize] with
+ support for "o"pen terms. You can leaving underscores that become evars or
+ subgoals, similar to [refine]. *)
+
+(** Introduces the uconstr [p] as a term into the context, making all
+underscores inside it evars and shelving all the ones that are unifiable (but
+leaving the non-unifiable ones unshelved). [tac] will be called with the name of
+that term in the context as argument (i.e., we have [i := p : type_of p]). That
+name is supposed to be temporary, and if [tac] doesn't rename/clear that name
+then it will be removed after [tac] is done.
+
+This may seem unnecessarily round-about, and indeed most users of [opose_core]
+could use a much simpler implementation, but some users need to inspect the term
+[p]. As a [uconstr] it cannot be inspected, and as an [open_constr] it will
+introduce a fresh set of shelved evars too early, before we can unshelve them.
+So we need to somehow convert [p] to a [constr], create the evars, shelve them,
+and do that all only once, and that's what this tactic does. *)
+Ltac opose_core p tac :=
+  (* If the user picked a name, this "fresh" runs *before* that name is
+     in the context, so we better make sure we don't use the name the user picked. *)
+  let i := fresh "opose" in
+  unshelve (epose _ as i); [
+    shelve (*type of [p]*)
+  | refine p (* will create the subgoals *)
+  | tac i; try clear i (* [try] because [tac] might have already removed it *)
+  ].
+
+Tactic Notation "opose" "proof" uconstr(p) "as" ident(name) :=
+  opose_core p ltac:(fun i => epose proof i as name).
+
+Tactic Notation "ogeneralize" uconstr(p) :=
+  opose_core p ltac:(fun i => clearbody i; revert i).
+
+(** Similar to [edestruct], [odestruct] will never clear the destructed variable. *)
+Tactic Notation "odestruct" uconstr(p) "as" simple_intropattern(pat) :=
+  opose_core p ltac:(fun i => edestruct i as pat);
+  (* [destruct] can add more goals and so previously ununifiable evars
+     can now be unifiable, and we want them shelved. *)
+  shelve_unifiable.
+
+Ltac ospecialize_ident_head_of t k :=
+  lazymatch t with
+  | ?f _ => ospecialize_ident_head_of f k
+  | _ => first [ is_var t | fail 1 "ospecialize can only specialize a local hypothesis; use opose proof instead" ]; k t
+  end.
+
+Tactic Notation "ospecialize" uconstr(p) :=
+  (* Unfortunately there does not seem to be a way to reuse [specialize] here,
+  so we need to re-implement the logic for reusing the name. *)
+  opose_core p ltac:(fun i =>
+    (* [i] is the name of a variable with value [p],
+       we need to get the value. *)
+    let t := eval cbv delta [i] in i in
+    ospecialize_ident_head_of t ltac:(fun H =>
+      (* The body of [i] refers to [H] so it needs to be cleared first. *)
+      clearbody i; clear H; rename i into H
+  )).
+
+(** * The [feed]/[efeed] family of tactics is similar to the "o" tactics above,
+but instead of writing a term with a bunch of underscores these tactics
+will autoamtically add subgoals for all implications and (for [efeed] only)
+evars for all universally quantified variables. This means less control
+over what happens, but also no need to write [ospecialize (H _ _ _)]. *)
+
 (** Given [H : A_1 → ... → A_n → B] (where each [A_i] is non-dependent
 and [B] is not convertible to an arrow), the tactic [feed_core H using
 tac] creates a subgoal for each [A_i]  (in front of the original goal)

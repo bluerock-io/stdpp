@@ -4312,8 +4312,11 @@ Section map_compose.
       [by apply map_compose_mono_l|by apply map_compose_mono_r].
   Qed.
 
+  Lemma map_compose_as_omap m n : m ∘ₘ n = omap (m !!.) n.
+  Proof. done. Qed.
+
   (** Alternative definition of [m ∘ₘ n] by recursion on [n] *)
-  Lemma map_compose_alt m n :
+  Lemma map_compose_as_fold m n :
     m ∘ₘ n = map_fold (λ a b,
                match m !! b with
                | Some c => <[a:=c]>

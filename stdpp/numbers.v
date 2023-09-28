@@ -82,15 +82,15 @@ Notation "( x | y )" := (divide x y) : nat_scope.
 Module Nat.
   Export PeanoNat.Nat.
 
-  Global Instance add_assoc_ : Assoc (=) Nat.add := Nat.add_assoc.
-  Global Instance add_comm_ : Comm (=) Nat.add := Nat.add_comm.
+  Global Instance add_assoc' : Assoc (=) Nat.add := Nat.add_assoc.
+  Global Instance add_comm' : Comm (=) Nat.add := Nat.add_comm.
   Global Instance add_left_id : LeftId (=) 0 Nat.add := Nat.add_0_l.
   Global Instance add_right_id : RightId (=) 0 Nat.add := Nat.add_0_r.
 
   Global Instance sub_right_id : RightId (=) 0 Nat.sub := Nat.sub_0_r.
 
-  Global Instance mul_assoc_ : Assoc (=) Nat.mul := Nat.mul_assoc.
-  Global Instance mul_comm_ : Comm (=) Nat.mul := Nat.mul_comm.
+  Global Instance mul_assoc' : Assoc (=) Nat.mul := Nat.mul_assoc.
+  Global Instance mul_comm' : Comm (=) Nat.mul := Nat.mul_comm.
   Global Instance mul_left_id : LeftId (=) 1 Nat.mul := Nat.mul_1_l.
   Global Instance mul_right_id : RightId (=) 1 Nat.mul := Nat.mul_1_r.
   Global Instance mul_left_absorb : LeftAbsorb (=) 0 Nat.mul := Nat.mul_0_l.
@@ -239,11 +239,11 @@ Global Arguments Pos.square : simpl never.
 Module Pos.
   Export BinPos.Pos.
 
-  Global Instance add_assoc_ : Assoc (=) Pos.add := Pos.add_assoc.
-  Global Instance add_comm_ : Comm (=) Pos.add := Pos.add_comm.
+  Global Instance add_assoc' : Assoc (=) Pos.add := Pos.add_assoc.
+  Global Instance add_comm' : Comm (=) Pos.add := Pos.add_comm.
 
-  Global Instance mul_assoc_ : Assoc (=) Pos.mul := Pos.mul_assoc.
-  Global Instance mul_comm_ : Comm (=) Pos.mul := Pos.mul_comm.
+  Global Instance mul_assoc' : Assoc (=) Pos.mul := Pos.mul_assoc.
+  Global Instance mul_comm' : Comm (=) Pos.mul := Pos.mul_comm.
   Global Instance mul_left_id : LeftId (=) 1 Pos.mul := Pos.mul_1_l.
   Global Instance mul_right_id : RightId (=) 1 Pos.mul := Pos.mul_1_r.
 
@@ -447,15 +447,15 @@ Global Hint Extern 0 (_ ≤ _)%N => reflexivity : core.
 Module N.
   Export BinNat.N.
 
-  Global Instance add_assoc_ : Assoc (=) N.add := N.add_assoc.
-  Global Instance add_comm_ : Comm (=) N.add := N.add_comm.
+  Global Instance add_assoc' : Assoc (=) N.add := N.add_assoc.
+  Global Instance add_comm' : Comm (=) N.add := N.add_comm.
   Global Instance add_left_id : LeftId (=) 0 N.add := N.add_0_l.
   Global Instance add_right_id : RightId (=) 0 N.add := N.add_0_r.
 
   Global Instance sub_right_id : RightId (=) 0 N.sub := N.sub_0_r.
 
-  Global Instance mul_assoc_ : Assoc (=) N.mul := N.mul_assoc.
-  Global Instance mul_comm_ : Comm (=) N.mul := N.mul_comm.
+  Global Instance mul_assoc' : Assoc (=) N.mul := N.mul_assoc.
+  Global Instance mul_comm' : Comm (=) N.mul := N.mul_comm.
   Global Instance mul_left_id : LeftId (=) 1 N.mul := N.mul_1_l.
   Global Instance mul_right_id : RightId (=) 1 N.mul := N.mul_1_r.
   Global Instance mul_left_absorb : LeftAbsorb (=) 0 N.mul := N.mul_0_l.
@@ -551,15 +551,15 @@ Global Arguments Z.abs : simpl never.
 Module Z.
   Export BinInt.Z.
 
-  Global Instance add_assoc_ : Assoc (=) Z.add := Z.add_assoc.
-  Global Instance add_comm_ : Comm (=) Z.add := Z.add_comm.
+  Global Instance add_assoc' : Assoc (=) Z.add := Z.add_assoc.
+  Global Instance add_comm' : Comm (=) Z.add := Z.add_comm.
   Global Instance add_left_id : LeftId (=) 0 Z.add := Z.add_0_l.
   Global Instance add_right_id : RightId (=) 0 Z.add := Z.add_0_r.
 
   Global Instance sub_right_id : RightId (=) 0 Z.sub := Z.sub_0_r.
 
-  Global Instance mul_assoc_ : Assoc (=) Z.mul := Z.mul_assoc.
-  Global Instance mul_comm_ : Comm (=) Z.mul := Z.mul_comm.
+  Global Instance mul_assoc' : Assoc (=) Z.mul := Z.mul_assoc.
+  Global Instance mul_comm' : Comm (=) Z.mul := Z.mul_comm.
   Global Instance mul_left_id : LeftId (=) 1 Z.mul := Z.mul_1_l.
   Global Instance mul_right_id : RightId (=) 1 Z.mul := Z.mul_1_r.
   Global Instance mul_left_absorb : LeftAbsorb (=) 0 Z.mul := Z.mul_0_l.
@@ -816,16 +816,16 @@ Notation "(<)" := Qclt (only parsing) : Qc_scope.
 Global Hint Extern 1 (_ ≤ _) => reflexivity || discriminate : core.
 Global Arguments Qred : simpl never.
 
-Global Instance Qcplus_assoc_ : Assoc (=) Qcplus := Qcplus_assoc.
-Global Instance Qcplus_comm_ : Comm (=) Qcplus := Qcplus_comm.
+Global Instance Qcplus_assoc' : Assoc (=) Qcplus := Qcplus_assoc.
+Global Instance Qcplus_comm' : Comm (=) Qcplus := Qcplus_comm.
 Global Instance Qcplus_left_id : LeftId (=) 0 Qcplus := Qcplus_0_l.
 Global Instance Qcplus_right_id : RightId (=) 0 Qcplus := Qcplus_0_r.
 
 Global Instance Qcminus_right_id : RightId (=) 0 Qcminus.
 Proof. unfold RightId. intros. ring. Qed.
 
-Global Instance Qcmult_assoc_ : Assoc (=) Qcmult := Qcmult_assoc.
-Global Instance Qcmult_comm_ : Comm (=) Qcmult := Qcmult_comm.
+Global Instance Qcmult_assoc' : Assoc (=) Qcmult := Qcmult_assoc.
+Global Instance Qcmult_comm' : Comm (=) Qcmult := Qcmult_comm.
 Global Instance Qcmult_left_id : LeftId (=) 1 Qcmult := Qcmult_1_l.
 Global Instance Qcmult_right_id : RightId (=) 1 Qcmult := Qcmult_1_r.
 Global Instance Qcmult_left_absorb : LeftAbsorb (=) 0 Qcmult := Qcmult_0_l.

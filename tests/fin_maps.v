@@ -9,9 +9,22 @@ Section map_disjoint.
   Lemma solve_map_disjoint_singleton_1 {A} (m1 m2 : M A) i x :
     m1 ##ₘ <[i:=x]> m2 → {[ i:= x ]} ∪ m2 ##ₘ m1 ∧ m2 ##ₘ ∅.
   Proof. intros. solve_map_disjoint. Qed.
-
   Lemma solve_map_disjoint_singleton_2 {A} (m1 m2 : M A) i x :
     m2 !! i = None → m1 ##ₘ {[ i := x ]} ∪ m2 → m2 ##ₘ <[i:=x]> m1 ∧ m1 !! i = None.
+  Proof. intros. solve_map_disjoint. Qed.
+
+  Lemma solve_map_disjoint_compose_l_singleton_1 {A} (n : M K) (m1 m2 : M A) i x :
+    m1 ##ₘ <[i:=x]> m2 → ({[ i:= x ]} ∪ m2) ∘ₘ n ##ₘ m1 ∘ₘ n ∧ m2 ##ₘ ∅.
+  Proof. intros. solve_map_disjoint. Qed.
+  Lemma solve_map_disjoint_compose_l_singleton_2 {A} (n : M K) (m1 m2 : M A) i x :
+    m2 !! i = None → m1 ##ₘ {[ i := x ]} ∪ m2 → m2 ∘ₘ n ##ₘ <[i:=x]> m1 ∘ₘ n ∧ m1 !! i = None.
+  Proof. intros. solve_map_disjoint. Qed.
+
+  Lemma solve_map_disjoint_compose_r_singleton_1 {A} (m1 m2 : M K) (n : M A) i x :
+    m1 ##ₘ <[i:=x]> m2 → n ∘ₘ ({[ i:= x ]} ∪ m2) ##ₘ n ∘ₘ m1 ∧ m2 ##ₘ ∅.
+  Proof. intros. solve_map_disjoint. Qed.
+  Lemma solve_map_disjoint_compose_r_singleton_2 {A} (m1 m2 : M K) (n : M A) i x :
+    m2 !! i = None → m1 ##ₘ {[ i := x ]} ∪ m2 → n ∘ₘ m2 ##ₘ n ∘ₘ <[i:=x]> m1 ∧ m1 !! i = None.
   Proof. intros. solve_map_disjoint. Qed.
 End map_disjoint.
 

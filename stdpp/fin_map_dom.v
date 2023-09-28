@@ -278,6 +278,33 @@ Proof.
   by setoid_rewrite elem_of_dom.
 Qed.
 
+Lemma dom_omap_subseteq {A B} (f : A → option B) (m : M A) :
+  dom (omap f m) ⊆ dom m.
+Proof.
+  intros a. rewrite !elem_of_dom. intros [c Hm].
+  apply lookup_omap_Some in Hm. naive_solver.
+Qed.
+
+Lemma map_compose_dom_subseteq {C} `{FinMap K' M'} (m: M' C) (n : M K') :
+  dom (m ∘ₘ n : M C) ⊆@{D} dom n.
+Proof. apply dom_omap_subseteq. Qed.
+Lemma map_compose_min_r_dom {C} `{FinMap K' M', !RelDecision (∈@{D})}
+    (m : M C) (n : M' K) :
+  m ∘ₘ n = m ∘ₘ filter (λ '(_,b), b ∈ dom m) n.
+Proof.
+  rewrite map_compose_min_r. f_equal.
+  apply map_filter_ext. intros. by rewrite elem_of_dom.
+Qed.
+
+Lemma map_compose_empty_iff_dom_img {C} `{FinMap K' M', !RelDecision (∈@{D})}
+    (m : M C) (n : M' K) :
+  m ∘ₘ n = ∅ ↔ dom m ## map_img n.
+Proof.
+  rewrite map_compose_empty_iff, elem_of_disjoint.
+  setoid_rewrite elem_of_dom. setoid_rewrite eq_None_not_Some.
+  setoid_rewrite elem_of_map_img. naive_solver.
+Qed.
+
 (** If [D] has Leibniz equality, we can show an even stronger result.  This is a
 common case e.g. when having a [gmap K A] where the key [K] has Leibniz equality
 (and thus also [gset K], the usual domain) but the value type [A] does not. *)

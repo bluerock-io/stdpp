@@ -832,7 +832,7 @@ Global Instance Qcmult_left_absorb : LeftAbsorb (=) 0 Qcmult := Qcmult_0_l.
 Global Instance Qcmult_right_absorb : RightAbsorb (=) 0 Qcmult := Qcmult_0_r.
 
 Global Instance Qcdiv_right_id : RightId (=) 1 Qcdiv.
-Proof. unfold RightId. intros x. rewrite <-(Qcmult_1_l (x / 1)), Qcmult_div_r; done. Qed.
+Proof. intros x. rewrite <-(Qcmult_1_l (x / 1)), Qcmult_div_r; done. Qed.
 
 Lemma inject_Z_Qred n : Qred (inject_Z n) = inject_Z n.
 Proof. apply Qred_identity; auto using Z.gcd_1_r. Qed.

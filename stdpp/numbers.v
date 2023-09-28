@@ -788,10 +788,6 @@ Qed.
 Global Instance Qc_le_total: Total Qcle.
 Proof. intros x y. destruct (Qclt_le_dec x y); auto using Qclt_le_weak. Qed.
 
-Lemma Qcmult_0_l x : 0 * x = 0.
-Proof. ring. Qed.
-Lemma Qcmult_0_r x : x * 0 = 0.
-Proof. ring. Qed.
 Lemma Qcplus_diag x : (x + x)%Qc = (2 * x)%Qc.
 Proof. ring. Qed.
 Lemma Qcle_ngt (x y : Qc) : x ≤ y ↔ ¬y < x.

@@ -18,4 +18,5 @@ HP0 : P 0
 HP1 : P 1
 HQ : Q 5
 The command has indeed failed with message:
-Tactic failure: ospecialize can only specialize a local hypothesis; use opose proof instead.
+Tactic failure: ospecialize can only specialize a local hypothesis;
+use opose proof instead.

@@ -505,16 +505,16 @@ Tactic Notation "iter" tactic(tac) tactic(l) :=
   let rec go l :=
   match l with ?x :: ?l => tac x || go l end in go l.
 
-(** * The "o" family of tactics equips [destruct], [pose proof], [specialize] with
- support for "o"pen terms. You can leaving underscores that become evars or
- subgoals, similar to [refine]. *)
+(** * The "o" family of tactics equips [destruct], [pose proof], [specialize]
+with support for "o"pen terms. You can leaving underscores that become evars or
+subgoals, similar to [refine]. *)
 
-(** Introduces the uconstr [p] as a term into the context, making all
-underscores inside it evars and shelving all the ones that are unifiable (but
-leaving the non-unifiable ones unshelved). [tac] will be called with the name of
-that term in the context as argument (i.e., we have [i := p : type_of p]). That
-name is supposed to be temporary, and if [tac] doesn't rename/clear that name
-then it will be removed after [tac] is done.
+(** The helper [opose_core] introduces the uconstr [p] as a term into the
+context, making all underscores inside it evars and shelving all the ones that
+are unifiable (but leaving the non-unifiable ones unshelved). [tac] will be
+called with the name of that term in the context as argument (i.e., we have
+[i := p : type_of p]). That name is supposed to be temporary, and if [tac]
+does not rename/clear that name then it will be removed after [tac] is done.
 
 This may seem unnecessarily round-about, and indeed most users of [opose_core]
 could use a much simpler implementation, but some users need to inspect the term
@@ -548,7 +548,12 @@ Tactic Notation "odestruct" uconstr(p) "as" simple_intropattern(pat) :=
 Ltac ospecialize_ident_head_of t k :=
   lazymatch t with
   | ?f _ => ospecialize_ident_head_of f k
-  | _ => first [ is_var t | fail 1 "ospecialize can only specialize a local hypothesis; use opose proof instead" ]; k t
+  | _ =>
+    first
+      [is_var t
+      |fail 1 "ospecialize can only specialize a local hypothesis;"
+              "use opose proof instead"];
+    k t
   end.
 
 Tactic Notation "ospecialize" uconstr(p) :=

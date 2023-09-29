@@ -43,7 +43,7 @@ longer supported by this release.
 - Add `Intersection` instance for `option`. (by Marijn van Wezel)
 - Add `lookup_intersection` lemma for the distributivity of lookup on an
   intersection. (by Marijn van Wezel)
-- Add lemmas `map_filter_or` and `map_filter_and` for the union and intersection 
+- Add lemmas `map_filter_or` and `map_filter_and` for the union and intersection
   of filters on maps. (by Marijn van Wezel)
 - Set `Hint Mode Equiv !`; this might need some type annotations for ambiguous
   uses of `≡`.

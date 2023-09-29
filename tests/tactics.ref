@@ -5,10 +5,6 @@ Failed to progress.
 The command has indeed failed with message:
 Failed to progress.
 The command has indeed failed with message:
-Failed to progress.
-"otest"
-     : string
-The command has indeed failed with message:
 Cannot infer this placeholder of type "nat" in
 environment:
 P, Q, R : nat → Prop

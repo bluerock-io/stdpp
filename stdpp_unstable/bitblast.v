@@ -521,8 +521,8 @@ Tactic Notation "bitblast" ident(H) "with" constr(i) "as" ident(H') :=
   lazymatch type of H with
   (* We cannot use [efeed pose proof] since this causes weird failures
   in combination with [Set Mangle Names]. *)
-  | @eq Z _ _ => pose proof (Z_bits_inj'' _ _ H i) as H'; efeed specialize H'; [try bitblast_done..|]
-  | ∀ x, _ => pose proof (H i) as H'; efeed specialize H'; [try bitblast_done..|]
+  | @eq Z _ _ => opose proof* (Z_bits_inj'' _ _ H i) as H'; [try bitblast_done..|]
+  | ∀ x, _ => opose proof* (H i) as H'; [try bitblast_done..|]
   end; bitblast H'.
 Tactic Notation "bitblast" ident(H) "with" constr(i) :=
   let H' := fresh "H" in bitblast H with i as H'.

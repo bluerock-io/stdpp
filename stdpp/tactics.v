@@ -505,11 +505,11 @@ Tactic Notation "iter" tactic(tac) tactic(l) :=
   let rec go l :=
   match l with ?x :: ?l => tac x || go l end in go l.
 
-(** * The "o" family of tactics equips [destruct], [pose proof], [specialize]
-with support for "o"pen terms. You can leaving underscores that become evars or
-subgoals, similar to [refine]. *)
+(** * The "o" family of tactics equips [pose proof], [destruct], [inversion],
+[generalize] and [specialize] with support for "o"pen terms. You can leave
+underscores that become evars or subgoals, similar to [refine]. *)
 
-(** The helper [opose_core] introduces the uconstr [p] as a term into the
+(** The helper [opose_core p tac] introduces the uconstr [p] as a term into the
 context, making all underscores inside it evars and shelving all the ones that
 are unifiable (but leaving the non-unifiable ones unshelved). [tac] will be
 called with the name of that term in the context as argument (i.e., we have
@@ -523,38 +523,67 @@ introduce a fresh set of shelved evars too early, before we can unshelve them.
 So we need to somehow convert [p] to a [constr], create the evars, shelve them,
 and do that all only once, and that's what this tactic does. *)
 Ltac opose_core p tac :=
-  (* If the user picked a name, this "fresh" runs *before* that name is
-     in the context, so we better make sure we don't use the name the user picked. *)
+  (* If the user picked a name, this "fresh" runs *before* that name is in the
+  context, so we better make sure we do not use the name the user picked. *)
   let i := fresh "opose" in
-  unshelve (epose _ as i); [
-    shelve (*type of [p]*)
-  | refine p (* will create the subgoals *)
-  | tac i; try clear i (* [try] because [tac] might have already removed it *)
-  ].
-
-Tactic Notation "opose" "proof" uconstr(p) "as" ident(name) :=
-  opose_core p ltac:(fun i => epose proof i as name).
-
-Tactic Notation "ogeneralize" uconstr(p) :=
-  opose_core p ltac:(fun i => clearbody i; revert i).
-
-(** Similar to [edestruct], [odestruct] will never clear the destructed variable. *)
-Tactic Notation "odestruct" uconstr(p) "as" simple_intropattern(pat) :=
-  opose_core p ltac:(fun i => edestruct i as pat);
-  (* [destruct] can add more goals and so previously ununifiable evars
-     can now be unifiable, and we want them shelved. *)
+  unshelve (epose _ as i);
+    [shelve (*type of [p]*)
+    |refine p; shelve_unifiable (* will create the subgoals *)
+    |let t := eval cbv delta [i] in i in
+     clear i;
+     tac t];
   shelve_unifiable.
 
-Ltac ospecialize_ident_head_of t k :=
-  lazymatch t with
-  | ?f _ => ospecialize_ident_head_of f k
-  | _ =>
-    first
-      [is_var t
-      |fail 1 "ospecialize can only specialize a local hypothesis;"
-              "use opose proof instead"];
-    k t
+Ltac ospecialize_foralls p tac :=
+  let T := type of p in
+  lazymatch eval hnf in T with
+  | ?T1 → ?T2 =>
+    (* Similar to [opose_core] we need to ensure freshness. *)
+    let pT1 := fresh "opose" in
+    assert T1 as pT1; [| ospecialize_foralls (p pT1) tac; clear pT1]
+  | ∀ x : ?T1, _ =>
+    let e := mk_evar T1 in
+    ospecialize_foralls (p e) tac
+  | ?T1 => tac p
   end.
+
+Ltac opose_specialize_foralls_core p tac :=
+  opose_core p ltac:(fun p => ospecialize_foralls p tac).
+
+Tactic Notation "opose" "proof" uconstr(p) "as" simple_intropattern(pat) :=
+  opose_core p ltac:(fun i => pose proof i as pat).
+Tactic Notation "opose" "proof" "*" uconstr(p) "as" simple_intropattern(pat) :=
+  opose_specialize_foralls_core p ltac:(fun i => pose proof i as pat).
+
+Tactic Notation "opose" "proof" uconstr(p) := opose proof p as ?.
+Tactic Notation "opose" "proof" "*" uconstr(p) := opose proof* p as ?.
+
+Tactic Notation "ogeneralize" uconstr(p) :=
+  opose_core p ltac:(fun i => generalize i).
+Tactic Notation "ogeneralize" "*" uconstr(p) :=
+  opose_specialize_foralls_core p ltac:(fun i => generalize i).
+
+(** Similar to [edestruct], [odestruct] will never clear the destructed
+variable. *)
+(** No [*] versions for [odestruct] and [oinversion]; we always specialize all
+foralls and implications; otherwise it does not make sense to destruct/invert. *)
+Tactic Notation "odestruct" uconstr(p) "as" simple_intropattern(pat) :=
+  opose_specialize_foralls_core p ltac:(fun i => destruct i as pat).
+
+Tactic Notation "oinversion" uconstr(p) "as" simple_intropattern(pat) :=
+  opose_specialize_foralls_core p ltac:(fun i =>
+    let Hi := fresh in pose proof i as Hi; inversion Hi as pat; clear Hi).
+Tactic Notation "oinversion" uconstr(p) :=
+  opose_specialize_foralls_core p ltac:(fun i =>
+    let Hi := fresh in pose proof i as Hi; inversion Hi; clear Hi).
+
+Ltac ospecialize_ident_head_of t tac :=
+  let h := get_head t in
+  first
+    [is_var h
+    |fail 1 "ospecialize can only specialize a local hypothesis;"
+              "use opose proof instead"];
+  tac h.
 
 Tactic Notation "ospecialize" uconstr(p) :=
   (* Unfortunately there does not seem to be a way to reuse [specialize] here,
@@ -562,133 +591,17 @@ Tactic Notation "ospecialize" uconstr(p) :=
   opose_core p ltac:(fun i =>
     (* [i] is the name of a variable with value [p],
        we need to get the value. *)
-    let t := eval cbv delta [i] in i in
-    ospecialize_ident_head_of t ltac:(fun H =>
+    ospecialize_ident_head_of i ltac:(fun H =>
       (* The body of [i] refers to [H] so it needs to be cleared first. *)
-      clearbody i; clear H; rename i into H
+      let H' := fresh in
+      pose proof i as H'; clear H; rename H' into H
   )).
-
-(** * The [feed]/[efeed] family of tactics is similar to the "o" tactics above,
-but instead of writing a term with a bunch of underscores these tactics
-will autoamtically add subgoals for all implications and (for [efeed] only)
-evars for all universally quantified variables. This means less control
-over what happens, but also no need to write [ospecialize (H _ _ _)]. *)
-
-(** Given [H : A_1 → ... → A_n → B] (where each [A_i] is non-dependent
-and [B] is not convertible to an arrow), the tactic [feed_core H using
-tac] creates a subgoal for each [A_i]  (in front of the original goal)
-and calls [tac p] with the generated proof [p] of [B].
-
-For example, given [H : P → Q → R], [feed_core H using (fun p
-=> pose proof p)] creates the subgoals [P] and [Q] in front of the
-original goal, and then in the original goal executes
-[pose proof Hfeed] where [Hfeed : R], which adds [R] to the context. *)
-Tactic Notation "feed_core" constr(H) "using" tactic3(tac) :=
-  let rec go H :=
-  let T := type of H in
-  lazymatch eval hnf in T with
-  | ?T1 → ?T2 =>
-    (* Use a separate counter for fresh names to make it more likely that
-    the generated name is "fresh" with respect to those generated before
-    calling the [feed] tactic. In particular, this hack makes sure that
-    tactics like [let H' := fresh in feed (fun p => pose proof p as H') H] do
-    not break. *)
-    let HT1 := fresh "feed" in assert T1 as HT1;
-      [| go (H HT1); clear HT1 ]
-  | ?T1 => tac H
-  end in go H.
-
-(** The tactic [efeed_core H using tac] is similar to [feed_core], but
-it also instantiates dependent premises of [H] with evars.
-
-For example, given [H : ∀ x y, P x → Q y → R x y] (where [R x y] is
-not convertible to an arrow/forall), [efeed_core H using (fun p
-=> pose proof p)] creates evars [?x] and [?y] for [x] and [y] and
-subgoals [P ?x] and [Q ?y] in front of the original goal, and then
-in the original goal executes [pose proof Hfeed] where
-[Hfeed : R ?x ?y], which adds [R ?x ?y] to the context. *)
-Tactic Notation "efeed_core" constr(H) "using" tactic3(tac) :=
-  let rec go H :=
-  let T := type of H in
-  lazymatch eval hnf in T with
-  | ?T1 → ?T2 =>
-    let HT1 := fresh "feed" in assert T1 as HT1;
-      [| go (H HT1); clear HT1 ]
-  | ∀ x : ?T1, _ =>
-    let e := mk_evar T1 in
-    go (H e)
-  | ?T1 => tac H
-  end in go H.
-
-(** The following variants of [pose proof], [specialize], [inversion], and
-[destruct], use the [(e)feed_core] tactic before invoking the actual tactic. *)
-(** [feed pose proof H as H'] on [H : P → Q → R] creates two new
-subgoals [P] and [Q] in front of the original goal and adds [H' : R] to
-the context of the original goal. *)
-Tactic Notation "feed" "pose" "proof" constr(H) "as" ident(H') :=
-  feed_core H using (fun p => pose proof p as H').
-Tactic Notation "feed" "pose" "proof" constr(H) :=
-  feed_core H using (fun p => pose proof p).
-
-Tactic Notation "efeed" "pose" "proof" constr(H) "as" ident(H') :=
-  efeed_core H using (fun p => pose proof p as H').
-Tactic Notation "efeed" "pose" "proof" constr(H) :=
-  efeed_core H using (fun p => pose proof p).
-
-(** [feed specialize H] on hypothesis [H : P → Q → R] creates two new
-subgoals [P] and [Q] in front of the original goal and changes [H] to have
-type [R] in the original goal.
-
-Note that [(e)feed specialize] only works on hypotheses. For arbitrary
-proof terms, use [(e)feed pose proof]. *)
-Tactic Notation "feed" "specialize" hyp(H) :=
-  feed_core H using (fun p => specialize p).
-Tactic Notation "efeed" "specialize" hyp(H) :=
-  efeed_core H using (fun p => specialize p).
-
-(** [feed generalize H] on [H : P → Q → R] creates two new
-subgoals [P] and [Q] in front of the original goal and adds [R] to
-the original goal (i.e. [Goal] becomes [R → Goal]).
-
-[efeed generalize] is also sometimes called [exploit] (e.g. in
-CompCert). *)
-Tactic Notation "feed" "generalize" constr(H) :=
-  feed_core H using (fun p => let H':=fresh in pose proof p as H'; revert H').
-Tactic Notation "efeed" "generalize" constr(H) :=
-  efeed_core H using (fun p => let H':=fresh in pose proof p as H'; revert H').
-
-(** [feed inversion H] on [H : P → Q → R] creates two new subgoals [P]
-and [Q] in front of the original goal and performs [inversion] on [R]
-in the original goal.
-
-Note that [(e)feed inversion] allows passing terms, not just
-identifiers (unlike standard [inversion]). *)
-Tactic Notation "feed" "inversion" constr(H) :=
-  feed_core H using (fun p => let H':=fresh in pose proof p as H'; inversion H').
-Tactic Notation "efeed" "inversion" constr(H) :=
-  efeed_core H using (fun p => let H':=fresh in pose proof p as H'; inversion H').
-
-Tactic Notation "feed" "inversion" constr(H) "as" simple_intropattern(IP) :=
-  feed_core H using (fun p => let H':=fresh in pose proof p as H'; inversion H' as IP).
-Tactic Notation "efeed" "inversion" constr(H) "as" simple_intropattern(IP) :=
-  efeed_core H using (fun p => let H':=fresh in pose proof p as H'; inversion H' as IP).
-
-(** [feed destruct H] on [H : P → Q → R] creates two new subgoals [P]
-and [Q] in front of the original goal and performs [destruct] on [R]
-in the original goal.
-
-[destruct] and [edestruct] already provide the functionality of
-[feed destruct] and [efeed destruct], but we provide [feed destruct]
-and [efeed destruct] for consistency. *)
-Tactic Notation "feed" "destruct" constr(H) :=
-  feed_core H using (fun p => let H':=fresh in pose proof p as H'; destruct H').
-Tactic Notation "efeed" "destruct" constr(H) :=
-  efeed_core H using (fun p => let H':=fresh in pose proof p as H'; destruct H').
-
-Tactic Notation "feed" "destruct" constr(H) "as" simple_intropattern(IP) :=
-  feed_core H using (fun p => let H':=fresh in pose proof p as H'; destruct H' as IP).
-Tactic Notation "efeed" "destruct" constr(H) "as" simple_intropattern(IP) :=
-  efeed_core H using (fun p => let H':=fresh in pose proof p as H'; destruct H' as IP).
+Tactic Notation "ospecialize" "*" uconstr(p) :=
+  opose_specialize_foralls_core p ltac:(fun i =>
+    ospecialize_ident_head_of i ltac:(fun H =>
+      let H' := fresh in
+      pose proof i as H'; clear H; rename H' into H
+  )).
 
 (** The block definitions are taken from [Coq.Program.Equality] and can be used
 by tactics to separate their goal from hypotheses they generalize over. *)
@@ -847,7 +760,7 @@ Tactic Notation "naive_solver" tactic(tac) :=
       | H : _ → _ |- _ =>
         is_non_dependent H;
         no_new_unsolved_evars
-          ltac:(first [eapply H | efeed pose proof H]; clear H; go n')
+          ltac:(first [eapply H | opose proof* H]; clear H; go n')
       end
     end
   end

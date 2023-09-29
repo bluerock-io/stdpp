@@ -4520,7 +4520,7 @@ Tactic Notation "simplify_map_eq" "by" tactic3(tac) :=
     rewrite lookup_singleton_Some in H; destruct H
   | H1 : ?m1 !! ?i = Some ?x, H2 : ?m2 !! ?i = Some ?y |- _ =>
     let H3 := fresh in
-    feed pose proof (lookup_weaken_inv m1 m2 i x y) as H3; [done|by tac|done|];
+    opose proof* (lookup_weaken_inv m1 m2 i x y) as H3; [done|by tac|done|];
     clear H2; symmetry in H3
   | H1 : ?m1 !! ?i = Some ?x, H2 : ?m2 !! ?i = None |- _ =>
     let H3 := fresh in

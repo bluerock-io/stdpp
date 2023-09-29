@@ -105,6 +105,8 @@ longer supported by this release.
   `map_filter_lookup_None` → `map_lookup_filter_None`.
 - Add `map_compose` operation, notation `m ∘ₘ n`, and associated lemmas.
   (by Dorian Lesbre)
+- Add `Assoc`, `Comm`, `LeftId`, `RightId`, `LeftAbsorb`, `RightAbsorb`
+  instances for number types.
 
 **Changes in `stdpp_unstable`:**
 

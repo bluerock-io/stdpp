@@ -82,6 +82,22 @@ Notation "( x | y )" := (divide x y) : nat_scope.
 Module Nat.
   Export PeanoNat.Nat.
 
+  Global Instance add_assoc' : Assoc (=) Nat.add := Nat.add_assoc.
+  Global Instance add_comm' : Comm (=) Nat.add := Nat.add_comm.
+  Global Instance add_left_id : LeftId (=) 0 Nat.add := Nat.add_0_l.
+  Global Instance add_right_id : RightId (=) 0 Nat.add := Nat.add_0_r.
+
+  Global Instance sub_right_id : RightId (=) 0 Nat.sub := Nat.sub_0_r.
+
+  Global Instance mul_assoc' : Assoc (=) Nat.mul := Nat.mul_assoc.
+  Global Instance mul_comm' : Comm (=) Nat.mul := Nat.mul_comm.
+  Global Instance mul_left_id : LeftId (=) 1 Nat.mul := Nat.mul_1_l.
+  Global Instance mul_right_id : RightId (=) 1 Nat.mul := Nat.mul_1_r.
+  Global Instance mul_left_absorb : LeftAbsorb (=) 0 Nat.mul := Nat.mul_0_l.
+  Global Instance mul_right_absorb : RightAbsorb (=) 0 Nat.mul := Nat.mul_0_r.
+
+  Global Instance div_right_id : RightId (=) 1 Nat.div := Nat.div_1_r.
+
   Global Instance eq_dec: EqDecision nat := eq_nat_dec.
   Global Instance le_dec: RelDecision le := le_dec.
   Global Instance lt_dec: RelDecision lt := lt_dec.
@@ -222,6 +238,14 @@ Global Arguments Pos.square : simpl never.
 
 Module Pos.
   Export BinPos.Pos.
+
+  Global Instance add_assoc' : Assoc (=) Pos.add := Pos.add_assoc.
+  Global Instance add_comm' : Comm (=) Pos.add := Pos.add_comm.
+
+  Global Instance mul_assoc' : Assoc (=) Pos.mul := Pos.mul_assoc.
+  Global Instance mul_comm' : Comm (=) Pos.mul := Pos.mul_comm.
+  Global Instance mul_left_id : LeftId (=) 1 Pos.mul := Pos.mul_1_l.
+  Global Instance mul_right_id : RightId (=) 1 Pos.mul := Pos.mul_1_r.
 
   Global Instance eq_dec: EqDecision positive := Pos.eq_dec.
   Global Instance le_dec: RelDecision Pos.le.
@@ -423,6 +447,22 @@ Global Hint Extern 0 (_ ≤ _)%N => reflexivity : core.
 Module N.
   Export BinNat.N.
 
+  Global Instance add_assoc' : Assoc (=) N.add := N.add_assoc.
+  Global Instance add_comm' : Comm (=) N.add := N.add_comm.
+  Global Instance add_left_id : LeftId (=) 0 N.add := N.add_0_l.
+  Global Instance add_right_id : RightId (=) 0 N.add := N.add_0_r.
+
+  Global Instance sub_right_id : RightId (=) 0 N.sub := N.sub_0_r.
+
+  Global Instance mul_assoc' : Assoc (=) N.mul := N.mul_assoc.
+  Global Instance mul_comm' : Comm (=) N.mul := N.mul_comm.
+  Global Instance mul_left_id : LeftId (=) 1 N.mul := N.mul_1_l.
+  Global Instance mul_right_id : RightId (=) 1 N.mul := N.mul_1_r.
+  Global Instance mul_left_absorb : LeftAbsorb (=) 0 N.mul := N.mul_0_l.
+  Global Instance mul_right_absorb : RightAbsorb (=) 0 N.mul := N.mul_0_r.
+
+  Global Instance div_right_id : RightId (=) 1 N.div := N.div_1_r.
+
   Global Instance pos_inj : Inj (=) (=) N.pos.
   Proof. by injection 1. Qed.
 
@@ -510,6 +550,22 @@ Global Arguments Z.abs : simpl never.
 
 Module Z.
   Export BinInt.Z.
+
+  Global Instance add_assoc' : Assoc (=) Z.add := Z.add_assoc.
+  Global Instance add_comm' : Comm (=) Z.add := Z.add_comm.
+  Global Instance add_left_id : LeftId (=) 0 Z.add := Z.add_0_l.
+  Global Instance add_right_id : RightId (=) 0 Z.add := Z.add_0_r.
+
+  Global Instance sub_right_id : RightId (=) 0 Z.sub := Z.sub_0_r.
+
+  Global Instance mul_assoc' : Assoc (=) Z.mul := Z.mul_assoc.
+  Global Instance mul_comm' : Comm (=) Z.mul := Z.mul_comm.
+  Global Instance mul_left_id : LeftId (=) 1 Z.mul := Z.mul_1_l.
+  Global Instance mul_right_id : RightId (=) 1 Z.mul := Z.mul_1_r.
+  Global Instance mul_left_absorb : LeftAbsorb (=) 0 Z.mul := Z.mul_0_l.
+  Global Instance mul_right_absorb : RightAbsorb (=) 0 Z.mul := Z.mul_0_r.
+
+  Global Instance div_right_id : RightId (=) 1 Z.div := Z.div_1_r.
 
   Global Instance pos_inj : Inj (=) (=) Z.pos.
   Proof. by injection 1. Qed.
@@ -759,6 +815,24 @@ Notation "(<)" := Qclt (only parsing) : Qc_scope.
 
 Global Hint Extern 1 (_ ≤ _) => reflexivity || discriminate : core.
 Global Arguments Qred : simpl never.
+
+Global Instance Qcplus_assoc' : Assoc (=) Qcplus := Qcplus_assoc.
+Global Instance Qcplus_comm' : Comm (=) Qcplus := Qcplus_comm.
+Global Instance Qcplus_left_id : LeftId (=) 0 Qcplus := Qcplus_0_l.
+Global Instance Qcplus_right_id : RightId (=) 0 Qcplus := Qcplus_0_r.
+
+Global Instance Qcminus_right_id : RightId (=) 0 Qcminus.
+Proof. unfold RightId. intros. ring. Qed.
+
+Global Instance Qcmult_assoc' : Assoc (=) Qcmult := Qcmult_assoc.
+Global Instance Qcmult_comm' : Comm (=) Qcmult := Qcmult_comm.
+Global Instance Qcmult_left_id : LeftId (=) 1 Qcmult := Qcmult_1_l.
+Global Instance Qcmult_right_id : RightId (=) 1 Qcmult := Qcmult_1_r.
+Global Instance Qcmult_left_absorb : LeftAbsorb (=) 0 Qcmult := Qcmult_0_l.
+Global Instance Qcmult_right_absorb : RightAbsorb (=) 0 Qcmult := Qcmult_0_r.
+
+Global Instance Qcdiv_right_id : RightId (=) 1 Qcdiv.
+Proof. intros x. rewrite <-(Qcmult_1_l (x / 1)), Qcmult_div_r; done. Qed.
 
 Lemma inject_Z_Qred n : Qred (inject_Z n) = inject_Z n.
 Proof. apply Qred_identity; auto using Z.gcd_1_r. Qed.
@@ -1058,6 +1132,8 @@ Module Qp.
   Proof. destruct p; apply Qp.to_Qc_inj_iff, Qcmult_1_l. Qed.
   Lemma mul_1_r p : p * 1 = p.
   Proof. destruct p; apply Qp.to_Qc_inj_iff, Qcmult_1_r. Qed.
+  Global Instance mul_left_id : LeftId (=) 1 mul := mul_1_l.
+  Global Instance mul_right_id : RightId (=) 1 mul := mul_1_r.
 
   Lemma add_1_1 : 1 + 1 = 2.
   Proof. compute_done. Qed.
@@ -1120,6 +1196,7 @@ Module Qp.
   Qed.
   Lemma div_2_mul p q : p / (2 * q) + p / (2 * q) = p / q.
   Proof. by rewrite <-div_add_distr, add_diag, div_mul_cancel_l. Qed.
+  Global Instance div_right_id : RightId (=) 1 div := div_1.
 
   Lemma half_half : 1 / 2 + 1 / 2 = 1.
   Proof. compute_done. Qed.

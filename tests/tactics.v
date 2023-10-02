@@ -1,6 +1,10 @@
+(** Basic tests for atctics that don't import anything else
+(and hence can be run even when nothing else even builds. *)
+From Coq Require Import String.
 From stdpp Require Import tactics.
 
 Local Unset Mangle Names. (* for stable goal printing *)
+Local Open Scope string_scope.
 
 Goal ∀ P1 P2 P3 P4 (P: Prop),
   P1 ∨ (Is_true (P2 || P3)) ∨ P4 →
@@ -106,7 +110,7 @@ Proof.
 Abort.
 
 (** o-tactic tests *)
-(* Check "otest". *)
+Check "otest".
 Lemma otest (P Q R : nat → Prop)
   (HPQR1 : ∀ m n, P n → Q m → R (n + m))
   (HPQR2 : ∀ m n, P n → Q m → R (n + m) ∧ R 2)
@@ -164,23 +168,8 @@ Restart.
   opose proof* HR as HR'; [exact HP|exact HQ|exact HR'].
 Qed.
 
-(** Now that we have seen that the basic tactics are working,
-we are okay importing some other files. We don't want to do this
-above since it can make debugging hard: if a tactic breaks,
-[option] breaks, and then we cannot even use the tests here to figure out
-what is going on! *)
-From stdpp Require Import option.
-
-(** Make sure that [done] is not called recursively when solving [is_Some],
-which might leave an unresolved evar before performing ex falso. *)
-Goal False → is_Some (@None nat).
-Proof. done. Qed.
-Goal ∀ mx, mx = Some 10 → is_Some mx.
-Proof. done. Qed.
-Goal ∀ mx, Some 10 = mx → is_Some mx.
-Proof. done. Qed.
-
-(** Regression tests for [naive_solver]. *)
+(** Regression tests for [naive_solver].
+Requires a bunch of other tactics to work so it comes last in this file. *)
 Lemma naive_solver_issue_115 (P : nat → Prop) (x : nat) :
   (∀ x', P x' → x' = 10) → P x → x + 1 = 11.
 Proof. naive_solver. Qed.

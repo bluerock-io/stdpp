@@ -1,4 +1,4 @@
-From stdpp Require Import tactics option.
+From stdpp Require Import tactics.
 
 Local Unset Mangle Names. (* for stable goal printing *)
 
@@ -84,11 +84,6 @@ Restart.
   - left. exact H2.
 Qed.
 
-(** Regression tests for [naive_solver]. *)
-Lemma naive_solver_issue_115 (P : nat → Prop) (x : nat) :
-  (∀ x', P x' → x' = 10) → P x → x + 1 = 11.
-Proof. naive_solver. Qed.
-
 (** [mk_evar] works on things that coerce to types. *)
 (** This is a feature when we have packed structures, for example Iris's [ofe]
 (fields other than the carrier omitted). *)
@@ -103,41 +98,12 @@ Goal True.
 let x := mk_evar true in idtac.
 Abort.
 
-(** Make sure that [done] is not called recursively when solving [is_Some],
-which might leave an unresolved evar before performing ex falso. *)
-Goal False → is_Some (@None nat).
-Proof. done. Qed.
-Goal ∀ mx, mx = Some 10 → is_Some mx.
-Proof. done. Qed.
-Goal ∀ mx, Some 10 = mx → is_Some mx.
-Proof. done. Qed.
-
 (** get_head tests. *)
 Lemma test_get_head (f : nat → nat → nat → nat) : True.
 Proof.
   let f' := get_head (f 0 1 2) in unify f f'.
   let f' := get_head f in unify f f'.
 Abort.
-
-Lemma o_tactic_without_forall (P Q R : Prop) :
-  P → Q → (P → Q → R) → R.
-Proof.
-  intros HP HQ HR.
-  ospecialize* HR; [exact HP|exact HQ|exact HR].
-Restart.
-  intros HP HQ HR.
-  opose proof* HR as HR'; [exact HP|exact HQ|exact HR'].
-Qed.
-
-Lemma o_tactic_with_forall (P Q R : nat → Prop) :
-  P 1 → Q 1 → (∀ n, P n → Q n → R n) → R 1.
-Proof.
-  intros HP HQ HR.
-  ospecialize* HR; [exact HP|exact HQ|exact HR].
-Restart.
-  intros HP HQ HR.
-  opose proof* HR as HR'; [exact HP|exact HQ|exact HR'].
-Qed.
 
 (** o-tactic tests *)
 (* Check "otest". *)
@@ -153,20 +119,23 @@ Proof.
   a short proof script can solve them. [n] needs to be specified, but [m] is
   huge and we don't want to specify it. What do we do? The "o" family of tactics
   for working with "o"pen terms helps. *)
-  opose proof* (HPQR1 _ (S _)) as HR; [exact HP1|exact HQ|]. exact HR.
+  opose proof (HPQR1 _ (S _) _ _) as HR; [exact HP1|exact HQ|]. exact HR.
 Restart.
-  (** If we omit the [*] no goals are created *)
-  opose proof (HPQR1 _ (S _)) as HR. exact (HR HP1 HQ).
-Restart.
-  (** If we want to specify how many goals we get, we can use [_]s. *)
+  (** We can have fewer [_]. *)
   opose proof (HPQR1 _ (S _) _) as HR; [exact HP1|]. exact (HR HQ).
 Restart.
-  (** Same deal for [generalize]. *)
-  ogeneralize* (HPQR1 _ 1); [exact HP1|exact HQ|]. intros HR. exact HR.
+  (** And even fewer. *)
+  opose proof (HPQR1 _ (S _)) as HR. exact (HR HP1 HQ).
 Restart.
+  (** The [*] variant automatically adds [_]. *)
+  opose proof* (HPQR1 _ (S _)) as HR; [exact HP1|exact HQ|]. exact HR.
+Restart.
+  (** Same deal for [generalize]. *)
   ogeneralize (HPQR1 _ 1). intros HR. exact (HR HP1 HQ).
 Restart.
   ogeneralize (HPQR1 _ 1 _); [exact HP1|]. intros HR. exact (HR HQ).
+Restart.
+  ogeneralize* (HPQR1 _ 1); [exact HP1|exact HQ|]. intros HR. exact HR.
 Restart.
   (** [odestruct] also automatically adds subgoals until there is something
   to destruct, as usual. Note that [edestruct] wouldn't help here,
@@ -176,10 +145,42 @@ Restart.
 Restart.
   (** [ospecialize] is like [opose proof] but it reuses the name.
   It only works on local assumptions. *)
-  Fail ospecialize (mk_is_Some None).
-  ospecialize* (HPQR1 _ 1); [exact HP1|exact HQ|]. exact HPQR1.
+  Fail ospecialize (plus 0 0).
+  ospecialize (HPQR1 _ 1 _); [exact HP1|]. exact (HPQR1 HQ).
 Restart.
   ospecialize (HPQR1 _ 1). exact (HPQR1 HP1 HQ).
 Restart.
-  ospecialize (HPQR1 _ 1 _); [exact HP1|]. exact (HPQR1 HQ).
+  ospecialize* (HPQR1 _ 1); [exact HP1|exact HQ|]. exact HPQR1.
 Qed.
+
+(** Make sure [∀] also get auto-instantiated by the [*] variant. *)
+Lemma o_tactic_with_forall (P Q R : nat → Prop) :
+  P 1 → Q 1 → (∀ n, P n → Q n → R n) → R 1.
+Proof.
+  intros HP HQ HR.
+  ospecialize* HR; [exact HP|exact HQ|exact HR].
+Restart.
+  intros HP HQ HR.
+  opose proof* HR as HR'; [exact HP|exact HQ|exact HR'].
+Qed.
+
+(** Now that we have seen that the basic tactics are working,
+we are okay importing some other files. We don't want to do this
+above since it can make debugging hard: if a tactic breaks,
+[option] breaks, and then we cannot even use the tests here to figure out
+what is going on! *)
+From stdpp Require Import option.
+
+(** Make sure that [done] is not called recursively when solving [is_Some],
+which might leave an unresolved evar before performing ex falso. *)
+Goal False → is_Some (@None nat).
+Proof. done. Qed.
+Goal ∀ mx, mx = Some 10 → is_Some mx.
+Proof. done. Qed.
+Goal ∀ mx, Some 10 = mx → is_Some mx.
+Proof. done. Qed.
+
+(** Regression tests for [naive_solver]. *)
+Lemma naive_solver_issue_115 (P : nat → Prop) (x : nat) :
+  (∀ x', P x' → x' = 10) → P x → x + 1 = 11.
+Proof. naive_solver. Qed.

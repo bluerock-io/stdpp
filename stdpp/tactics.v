@@ -509,98 +509,117 @@ Tactic Notation "iter" tactic(tac) tactic(l) :=
 [generalize] and [specialize] with support for "o"pen terms. You can leave
 underscores that become evars or subgoals, similar to [refine]. *)
 
-(** The helper [opose_core p tac] introduces the uconstr [p] as a term into the
-context, making all underscores inside it evars and shelving all the ones that
-are unifiable (but leaving the non-unifiable ones unshelved). [tac] will be
-called with the name of that term in the context as argument (i.e., we have
-[i := p : type_of p]). That name is supposed to be temporary, and if [tac]
-does not rename/clear that name then it will be removed after [tac] is done.
+(** The helper [opose_core p tac] takes a uconstr [p] and turns it into a constr
+that is passed to [tac]. All underscores inside [p] become evars, and the ones
+that are unifiable (i.e, appear in the type of other evars) are shelved.
 
-This may seem unnecessarily round-about, and indeed most users of [opose_core]
-could use a much simpler implementation, but some users need to inspect the term
-[p]. As a [uconstr] it cannot be inspected, and as an [open_constr] it will
-introduce a fresh set of shelved evars too early, before we can unshelve them.
-So we need to somehow convert [p] to a [constr], create the evars, shelve them,
-and do that all only once, and that's what this tactic does. *)
+This is similar to creating a [open_constr], except that we have control over
+what does and does not get shelved. Creating a [open_constr] would shelve every
+created evar, which is not what we want, and it is hard to avoid since it
+happens very early (before we can easily wrap things in [unshelve]). *)
 Ltac opose_core p tac :=
-  (* If the user picked a name, this "fresh" runs *before* that name is in the
-  context, so we better make sure we do not use the name the user picked. *)
-  let i := fresh "opose" in
+  (* The "opose_internal" here is useful for debugging but not helpful for name
+  collisions since it gets ignored with name mangling. The [clear] below is what
+  ensures we don't get name collisions. *)
+  let i := fresh "opose_internal" in
   unshelve (epose _ as i);
     [shelve (*type of [p]*)
-    |refine p; shelve_unifiable (* will create the subgoals *)
-    |let t := eval cbv delta [i] in i in
+    |refine p (* will create the subgoals, and shelve some of them *)
+    |(* Now we have [i := t] in the context, let's get the [t] and remove [i]. *)
+     let t := eval unfold i in i in
+     (* We want to leave the context exactly as we found it, to avoid
+     any issues with fresh name generation. So clear [i] before calling
+     the user-visible tactic. *)
      clear i;
      tac t];
+  (* [tac] might have added more subgoals, making some existing ones
+  unifiable, so we need to shelve again. *)
   shelve_unifiable.
 
-Ltac ospecialize_foralls p tac :=
+(** Turn all leading ∀ and → of [p] into evars (∀-evars will be shelved), and
+call [tac] with the term applied with those evars. This fill unfold definitions
+to find leading ∀/→.
+
+[_name_guard] is an unused argument where you can pass anything you want. If the
+argument is an intro pattern, those will be taken into account by the [fresh]
+that is inside this tactic, avoiding name collisions that can otherwise arise.
+This is a work-around for https://github.com/coq/coq/issues/18109. *)
+Ltac ospecialize_foralls p _name_guard tac :=
   let T := type of p in
   lazymatch eval hnf in T with
   | ?T1 → ?T2 =>
-    (* Similar to [opose_core] we need to ensure freshness. *)
-    let pT1 := fresh "opose" in
-    assert T1 as pT1; [| ospecialize_foralls (p pT1) tac; clear pT1]
+    (* This is the [fresh] where the presence of [_name_guard] matters.
+    Note that the "opose_internal" is nice but not sufficient because
+    it gets ignored when name mangling is enabled. *)
+    let pT1 := fresh "opose_internal" in
+    assert T1 as pT1; [| ospecialize_foralls (p pT1) _name_guard tac; clear pT1]
   | ∀ x : ?T1, _ =>
     let e := mk_evar T1 in
-    ospecialize_foralls (p e) tac
+    ospecialize_foralls (p e) _name_guard tac
   | ?T1 => tac p
   end.
 
-Ltac opose_specialize_foralls_core p tac :=
-  opose_core p ltac:(fun p => ospecialize_foralls p tac).
+Ltac opose_specialize_foralls_core p _name_guard tac :=
+  opose_core p ltac:(fun p => ospecialize_foralls p _name_guard tac).
 
 Tactic Notation "opose" "proof" uconstr(p) "as" simple_intropattern(pat) :=
-  opose_core p ltac:(fun i => pose proof i as pat).
+  opose_core p ltac:(fun p => pose proof p as pat).
 Tactic Notation "opose" "proof" "*" uconstr(p) "as" simple_intropattern(pat) :=
-  opose_specialize_foralls_core p ltac:(fun i => pose proof i as pat).
+  opose_specialize_foralls_core p pat ltac:(fun p => pose proof p as pat).
 
 Tactic Notation "opose" "proof" uconstr(p) := opose proof p as ?.
 Tactic Notation "opose" "proof" "*" uconstr(p) := opose proof* p as ?.
 
 Tactic Notation "ogeneralize" uconstr(p) :=
-  opose_core p ltac:(fun i => generalize i).
+  opose_core p ltac:(fun p => generalize p).
 Tactic Notation "ogeneralize" "*" uconstr(p) :=
-  opose_specialize_foralls_core p ltac:(fun i => generalize i).
+  opose_specialize_foralls_core p () ltac:(fun p => generalize p).
 
 (** Similar to [edestruct], [odestruct] will never clear the destructed
 variable. *)
-(** No [*] versions for [odestruct] and [oinversion]; we always specialize all
-foralls and implications; otherwise it does not make sense to destruct/invert. *)
+(** No [*] versions for [odestruct] and [oinversion]: we always specialize all
+foralls and implications; otherwise it does not make sense to destruct/invert.
+We also do not support [eqn:EQ]; this would not make sense for most users of
+this tactic since the term being destructed is [some_lemma ?evar ?proofterm]. *)
+Tactic Notation "odestruct" uconstr(p) :=
+  opose_specialize_foralls_core p () ltac:(fun p => destruct p).
 Tactic Notation "odestruct" uconstr(p) "as" simple_intropattern(pat) :=
-  opose_specialize_foralls_core p ltac:(fun i => destruct i as pat).
+  opose_specialize_foralls_core p pat ltac:(fun p => destruct p as pat).
 
 Tactic Notation "oinversion" uconstr(p) "as" simple_intropattern(pat) :=
-  opose_specialize_foralls_core p ltac:(fun i =>
-    let Hi := fresh in pose proof i as Hi; inversion Hi as pat; clear Hi).
+  opose_specialize_foralls_core p pat ltac:(fun p =>
+    let Hp := fresh in pose proof p as Hp; inversion Hp as pat; clear Hp).
 Tactic Notation "oinversion" uconstr(p) :=
-  opose_specialize_foralls_core p ltac:(fun i =>
-    let Hi := fresh in pose proof i as Hi; inversion Hi; clear Hi).
+  opose_specialize_foralls_core p () ltac:(fun p =>
+    let Hp := fresh in pose proof p as Hp; inversion Hp; clear Hp).
 
+(** Helper for [ospecialize]: call [tac] with the name of the head term *if*
+that term is a variable.
+
+Written in CPS to get around weird thunking limitations. *)
 Ltac ospecialize_ident_head_of t tac :=
   let h := get_head t in
-  first
-    [is_var h
-    |fail 1 "ospecialize can only specialize a local hypothesis;"
-              "use opose proof instead"];
-  tac h.
+  tryif is_var h then tac h else
+    fail "ospecialize can only specialize a local hypothesis;"
+         "use opose proof instead".
 
 Tactic Notation "ospecialize" uconstr(p) :=
   (* Unfortunately there does not seem to be a way to reuse [specialize] here,
   so we need to re-implement the logic for reusing the name. *)
-  opose_core p ltac:(fun i =>
-    (* [i] is the name of a variable with value [p],
-       we need to get the value. *)
-    ospecialize_ident_head_of i ltac:(fun H =>
-      (* The body of [i] refers to [H] so it needs to be cleared first. *)
+  opose_core p ltac:(fun p =>
+    ospecialize_ident_head_of p ltac:(fun H =>
+      (* The term of [p] (but not its type) can refer to [H], so we need to use
+      a temporary [H'] here to hold the type of [p] before we can clear [H]. *)
       let H' := fresh in
-      pose proof i as H'; clear H; rename H' into H
+      pose proof p as H'; clear H; rename H' into H
   )).
 Tactic Notation "ospecialize" "*" uconstr(p) :=
-  opose_specialize_foralls_core p ltac:(fun i =>
-    ospecialize_ident_head_of i ltac:(fun H =>
+  opose_specialize_foralls_core p () ltac:(fun p =>
+    ospecialize_ident_head_of p ltac:(fun H =>
+      (* The term of [p] (but not its type) can refer to [H], so we need to use
+      a temporary [H'] here to hold the type of [p] before we can clear [H]. *)
       let H' := fresh in
-      pose proof i as H'; clear H; rename H' into H
+      pose proof p as H'; clear H; rename H' into H
   )).
 
 (** The block definitions are taken from [Coq.Program.Equality] and can be used

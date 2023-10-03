@@ -425,7 +425,7 @@ Section properties.
     assert (x' ∈ xs) as (xs1&xs2&->)%elem_of_list_split by eauto using tc_once.
     refine (IH (length xs1 + length xs2) _ _ (xs1 ++ xs2) _ _);
       [rewrite app_length; simpl; lia..|].
-    intros x'' Hx'x''. feed pose proof (Hfin x'') as Hx''; [by econstructor|].
+    intros x'' Hx'x''. opose proof* (Hfin x'') as Hx''; [by econstructor|].
     cut (x' ≠ x''); [set_solver|].
     intros ->. by apply (Hirr x'').
   Qed.

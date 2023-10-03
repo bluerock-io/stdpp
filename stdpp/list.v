@@ -1056,7 +1056,7 @@ Proof.
   split; eauto using NoDup_lookup.
   induction l as [|x l IH]; intros Hl; constructor.
   - rewrite elem_of_list_lookup. intros [i ?].
-    by feed pose proof (Hl (S i) 0 x); auto.
+    opose proof* (Hl (S i) 0); by auto.
   - apply IH. intros i j x' ??. by apply (inj S), (Hl (S i) (S j) x').
 Qed.
 
@@ -2490,7 +2490,7 @@ Lemma sublist_app_inv_r k l1 l2 : l1 ++ k `sublist_of` l2 ++ k → l1 `sublist_o
 Proof.
   revert l1 l2. induction k as [|y k IH]; intros l1 l2.
   { by rewrite !(right_id_L [] (++)). }
-  intros. feed pose proof (IH (l1 ++ [y]) (l2 ++ [y])) as Hl12.
+  intros. opose proof* (IH (l1 ++ [_]) (l2 ++ [_])) as Hl12.
   { by rewrite <-!(assoc_L (++)). }
   rewrite sublist_app_l in Hl12. destruct Hl12 as (k1&k2&E&?&Hk2).
   destruct k2 as [|z k2] using rev_ind; [inversion Hk2|].
@@ -3149,8 +3149,8 @@ Lemma Forall2_forall `{Inhabited A} B C (Q : A → B → C → Prop) l k :
 Proof.
   split; [induction 1; constructor; auto|].
   intros Hlk. induction (Hlk inhabitant) as [|x y l k _ _ IH]; constructor.
-  - intros z. by feed inversion (Hlk z).
-  - apply IH. intros z. by feed inversion (Hlk z).
+  - intros z. by oinversion Hlk.
+  - apply IH. intros z. by oinversion Hlk.
 Qed.
 
 Lemma Forall2_same_length {A B} (l : list A) (k : list B) :
@@ -3283,9 +3283,9 @@ Section Forall2.
     split; [induction 1; intros [|?]; simpl; try constructor; eauto|].
     revert k. induction l as [|x l IH]; intros [| y k] H.
     - done.
-    - feed inversion (H 0).
-    - feed inversion (H 0).
-    - constructor; [by feed inversion (H 0)|]. apply (IH _ $ λ i, H (S i)).
+    - oinversion (H 0).
+    - oinversion (H 0).
+    - constructor; [by oinversion (H 0)|]. apply (IH _ $ λ i, H (S i)).
   Qed.
   Lemma Forall2_lookup_lr l k i x y :
     Forall2 P l k → l !! i = Some x → k !! i = Some y → P x y.

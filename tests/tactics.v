@@ -1,4 +1,10 @@
-From stdpp Require Import tactics option.
+(** Basic tests for atctics that don't import anything else
+(and hence can be run even when nothing else even builds. *)
+From Coq Require Import String.
+From stdpp Require Import tactics.
+
+Local Unset Mangle Names. (* for stable goal printing *)
+Local Open Scope string_scope.
 
 Goal ∀ P1 P2 P3 P4 (P: Prop),
   P1 ∨ (Is_true (P2 || P3)) ∨ P4 →
@@ -82,11 +88,6 @@ Restart.
   - left. exact H2.
 Qed.
 
-(** Regression tests for [naive_solver]. *)
-Lemma naive_solver_issue_115 (P : nat → Prop) (x : nat) :
-  (∀ x', P x' → x' = 10) → P x → x + 1 = 11.
-Proof. naive_solver. Qed.
-
 (** [mk_evar] works on things that coerce to types. *)
 (** This is a feature when we have packed structures, for example Iris's [ofe]
 (fields other than the carrier omitted). *)
@@ -101,15 +102,6 @@ Goal True.
 let x := mk_evar true in idtac.
 Abort.
 
-(** Make sure that [done] is not called recursively when solving [is_Some],
-which might leave an unresolved evar before performing ex falso. *)
-Goal False → is_Some (@None nat).
-Proof. done. Qed.
-Goal ∀ mx, mx = Some 10 → is_Some mx.
-Proof. done. Qed.
-Goal ∀ mx, Some 10 = mx → is_Some mx.
-Proof. done. Qed.
-
 (** get_head tests. *)
 Lemma test_get_head (f : nat → nat → nat → nat) : True.
 Proof.
@@ -117,23 +109,67 @@ Proof.
   let f' := get_head f in unify f f'.
 Abort.
 
-(** (e)feed tests *)
-Lemma feed1 (P Q R : Prop) :
-  P → Q → (P → Q → R) → R.
+(** o-tactic tests *)
+Check "otest".
+Lemma otest (P Q R : nat → Prop)
+  (HPQR1 : ∀ m n, P n → Q m → R (n + m))
+  (HPQR2 : ∀ m n, P n → Q m → R (n + m) ∧ R 2)
+  (HP0 : P 0)
+  (HP1 : P 1)
+  (HQ : Q 5) : R 6.
 Proof.
-  intros HP HQ HR.
-  feed specialize HR; [exact HP|exact HQ|exact HR].
+  (** Imagine we couldn't [apply] since the goal is still very different, we
+  need forward reasoning. Also we don't have proof terms for [P n] and [Q m] but
+  a short proof script can solve them. [n] needs to be specified, but [m] is
+  huge and we don't want to specify it. What do we do? The "o" family of tactics
+  for working with "o"pen terms helps. *)
+  opose proof (HPQR1 _ (S _) _ _) as HR; [exact HP1|exact HQ|]. exact HR.
 Restart.
-  intros HP HQ HR.
-  feed pose proof HR as HR'; [exact HP|exact HQ|exact HR'].
+  (** We can have fewer [_]. *)
+  opose proof (HPQR1 _ (S _) _) as HR; [exact HP1|]. exact (HR HQ).
+Restart.
+  (** And even fewer. *)
+  opose proof (HPQR1 _ (S _)) as HR. exact (HR HP1 HQ).
+Restart.
+  (** The [*] variant automatically adds [_]. *)
+  opose proof* (HPQR1 _ (S _)) as HR; [exact HP1|exact HQ|]. exact HR.
+Restart.
+  (** Same deal for [generalize]. *)
+  ogeneralize (HPQR1 _ 1). intros HR. exact (HR HP1 HQ).
+Restart.
+  ogeneralize (HPQR1 _ 1 _); [exact HP1|]. intros HR. exact (HR HQ).
+Restart.
+  ogeneralize* (HPQR1 _ 1); [exact HP1|exact HQ|]. intros HR. exact HR.
+Restart.
+  (** [odestruct] also automatically adds subgoals until there is something
+  to destruct, as usual. Note that [edestruct] wouldn't help here,
+  it just complains that it cannot infer the placeholder. *)
+  Fail edestruct (HPQR2 _ 1).
+  odestruct (HPQR2 _ 1) as [HR1 HR2]; [exact HP1|exact HQ|]. exact HR1.
+Restart.
+  (** [ospecialize] is like [opose proof] but it reuses the name.
+  It only works on local assumptions. *)
+  Fail ospecialize (plus 0 0).
+  ospecialize (HPQR1 _ 1 _); [exact HP1|]. exact (HPQR1 HQ).
+Restart.
+  ospecialize (HPQR1 _ 1). exact (HPQR1 HP1 HQ).
+Restart.
+  ospecialize* (HPQR1 _ 1); [exact HP1|exact HQ|]. exact HPQR1.
 Qed.
-Lemma efeed1 (P Q R : nat → Prop) :
+
+(** Make sure [∀] also get auto-instantiated by the [*] variant. *)
+Lemma o_tactic_with_forall (P Q R : nat → Prop) :
   P 1 → Q 1 → (∀ n, P n → Q n → R n) → R 1.
 Proof.
   intros HP HQ HR.
-  Fail progress feed specialize HR.
-  efeed specialize HR; [exact HP|exact HQ|exact HR].
+  ospecialize* HR; [exact HP|exact HQ|exact HR].
 Restart.
   intros HP HQ HR.
-  efeed pose proof HR as HR'; [exact HP|exact HQ|exact HR'].
+  opose proof* HR as HR'; [exact HP|exact HQ|exact HR'].
 Qed.
+
+(** Regression tests for [naive_solver].
+Requires a bunch of other tactics to work so it comes last in this file. *)
+Lemma naive_solver_issue_115 (P : nat → Prop) (x : nat) :
+  (∀ x', P x' → x' = 10) → P x → x + 1 = 11.
+Proof. naive_solver. Qed.

@@ -107,6 +107,17 @@ longer supported by this release.
   (by Dorian Lesbre)
 - Add `Assoc`, `Comm`, `LeftId`, `RightId`, `LeftAbsorb`, `RightAbsorb`
   instances for number types.
+- Add tactics `odestruct`, `oinversion`, `opose proof`, `ospecialize`,
+  `ogeneralize` that work with open terms. All `_` remaining after inference
+  will be turned into evars or subgoals using the same heuristic as `refine`.
+  For instance, with `H: ∀ n, P n → Q n`, `ospecialize (H _ _)` will create an
+  evar for `n` and open a subgoal for `P ?n`. `odestruct` is a more powerful
+  version of `edestruct` that does not require all `_` in the destructed term to
+  be immediately inferred.
+- Replace `feed`/`efeed` tactics by variants of the `o` tactics that
+  automatically add extra `_` until there are no more leading `∀`/`→`. `efeed
+  tac` becomes `otac*`; the `feed` variants (that only specialize `→` but not
+  `∀`) are no longer provided.
 
 **Changes in `stdpp_unstable`:**
 

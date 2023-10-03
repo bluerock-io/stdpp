@@ -507,7 +507,11 @@ Tactic Notation "iter" tactic(tac) tactic(l) :=
 
 (** * The "o" family of tactics equips [pose proof], [destruct], [inversion],
 [generalize] and [specialize] with support for "o"pen terms. You can leave
-underscores that become evars or subgoals, similar to [refine]. *)
+underscores that become evars or subgoals, similar to [refine]. You can suffix
+the tactic with [*] (e.g., [opose proof*]) to eliminate all remaining ∀ and →
+(i.e., add underscores for the remaining arguments). For [odestruct] and
+[oinversion], eliminating all remaining ∀ and → is the default (hence there is
+no [*] version). *)
 
 (** The helper [opose_core p tac] takes a uconstr [p] and turns it into a constr
 that is passed to [tac]. All underscores inside [p] become evars, and the ones

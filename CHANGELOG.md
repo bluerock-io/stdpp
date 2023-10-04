@@ -1,10 +1,16 @@
 This file lists "large-ish" changes to the std++ Coq library, but not every
 API-breaking change is listed.
 
-## std++ master
+## std++ 1.9.0 (2023-10-??)
 
-Coq 8.17 is newly supported by this release. Coq 8.12, 8.13, 8.14, and 8.15 are no
-longer supported by this release.
+Coq 8.18 is newly supported by this release, and Coq 8.16 and 8.17 remain
+supported. Coq 8.12 to 8.15 are no longer supported.
+
+This release of std++ was managed by Ralf Jung, Robbert Krebbers, and Johannes
+Hostert, with contributions from Isaak van Bakel, Herman Bergwerf, Tej Chajed,
+Paolo Giarrusso, Jan-Oliver Kaiser, Jonas Kastberg, Dorian Lesbre, Ike Mulder,
+Thibaut Pérami, Michael Sammler, and Marijn van Wezel. Thanks a lot to everyone
+involved!
 
 - Rename `difference_difference` → `difference_difference_l` and
   `difference_difference_L` → `difference_difference_l_L`, add

@@ -1243,22 +1243,37 @@ Lemma take_nil n : take n [] =@{list A} [].
 Proof. by destruct n. Qed.
 Lemma take_S_r l n x : l !! n = Some x → take (S n) l = take n l ++ [x].
 Proof. revert n. induction l; intros []; naive_solver eauto with f_equal. Qed.
-Lemma take_app l k : take (length l) (l ++ k) = l.
-Proof. induction l; f_equal/=; auto. Qed.
-Lemma take_app_alt l k n : n = length l → take n (l ++ k) = l.
-Proof. intros ->. by apply take_app. Qed.
-Lemma take_app3_alt l1 l2 l3 n : n = length l1 → take n ((l1 ++ l2) ++ l3) = l1.
-Proof. intros ->. by rewrite <-(assoc_L (++)), take_app. Qed.
-Lemma take_app_le l k n : n ≤ length l → take n (l ++ k) = take n l.
-Proof. revert n. induction l; intros [|?] ?; f_equal/=; auto with lia. Qed.
-Lemma take_add_app l k n m :
-  length l = n → take (n + m) (l ++ k) = l ++ take m k.
-Proof. intros <-. induction l; f_equal/=; auto. Qed.
-Lemma take_app_ge l k n :
-  length l ≤ n → take n (l ++ k) = l ++ take (n - length l) k.
-Proof. revert n. induction l; intros [|?] ?; f_equal/=; auto with lia. Qed.
 Lemma take_ge l n : length l ≤ n → take n l = l.
 Proof. revert n. induction l; intros [|?] ?; f_equal/=; auto with lia. Qed.
+
+(** [take_app] is the most general lemma for [take] and [app]. Below that we
+establish a number of useful corollaries. *)
+Lemma take_app l k n : take n (l ++ k) = take n l ++ take (n - length l) k.
+Proof. apply firstn_app. Qed.
+
+Lemma take_app_ge l k n :
+  length l ≤ n → take n (l ++ k) = l ++ take (n - length l) k.
+Proof. intros. by rewrite take_app, take_ge. Qed.
+Lemma take_app_le l k n : n ≤ length l → take n (l ++ k) = take n l.
+Proof.
+  intros. by rewrite take_app, (proj2 (Nat.sub_0_le _ _)), take_0, (right_id _ _).
+Qed.
+Lemma take_app_add l k m :
+  take (length l + m) (l ++ k) = l ++ take m k.
+Proof. rewrite take_app, take_ge by lia. repeat f_equal; lia. Qed.
+Lemma take_app_add' l k n m :
+  n = length l → take (n + m) (l ++ k) = l ++ take m k.
+Proof. intros ->. apply take_app_add. Qed.
+Lemma take_app_length l k : take (length l) (l ++ k) = l.
+Proof. by rewrite take_app, take_ge, Nat.sub_diag, take_0, (right_id _ _). Qed.
+Lemma take_app_length' l k n : n = length l → take n (l ++ k) = l.
+Proof. intros ->. by apply take_app_length. Qed.
+Lemma take_app3_length l1 l2 l3 : take (length l1) ((l1 ++ l2) ++ l3) = l1.
+Proof. by rewrite <-(assoc_L (++)), take_app_length. Qed.
+Lemma take_app3_length' l1 l2 l3 n :
+  n = length l1 → take n ((l1 ++ l2) ++ l3) = l1.
+Proof. intros ->. by apply take_app3_length. Qed.
+
 Lemma take_take l n m : take n (take m l) = take (min n m) l.
 Proof. revert n m. induction l; intros [|?] [|?]; f_equal/=; auto. Qed.
 Lemma take_idemp l n : take n (take n l) = take n l.
@@ -1330,25 +1345,35 @@ Lemma drop_all l : drop (length l) l = [].
 Proof. by apply drop_ge. Qed.
 Lemma drop_drop l n1 n2 : drop n1 (drop n2 l) = drop (n2 + n1) l.
 Proof. revert n2. induction l; intros [|?]; simpl; rewrite ?drop_nil; auto. Qed.
-Lemma drop_app_le l k n :
-  n ≤ length l → drop n (l ++ k) = drop n l ++ k.
-Proof. revert n. induction l; intros [|?]; simpl; auto with lia. Qed.
-Lemma drop_app l k : drop (length l) (l ++ k) = k.
-Proof. by rewrite drop_app_le, drop_all. Qed.
-Lemma drop_app_alt l k n : n = length l → drop n (l ++ k) = k.
-Proof. intros ->. by apply drop_app. Qed.
-Lemma drop_app3_alt l1 l2 l3 n :
-  n = length l1 → drop n ((l1 ++ l2) ++ l3) = l2 ++ l3.
-Proof. intros ->. by rewrite <-(assoc_L (++)), drop_app. Qed.
+
+(** [drop_app] is the most general lemma for [drop] and [app]. Below we prove a
+number of useful corollaries. *)
+Lemma drop_app l k n : drop n (l ++ k) = drop n l ++ drop (n - length l) k.
+Proof. apply skipn_app. Qed.
+
 Lemma drop_app_ge l k n :
   length l ≤ n → drop n (l ++ k) = drop (n - length l) k.
-Proof.
-  intros. rewrite <-(Nat.sub_add (length l) n) at 1 by done.
-  by rewrite Nat.add_comm, <-drop_drop, drop_app.
-Qed.
-Lemma drop_add_app l k n m :
-  length l = n → drop (n + m) (l ++ k) = drop m k.
-Proof. intros <-. by rewrite <-drop_drop, drop_app. Qed.
+Proof. intros. by rewrite drop_app, drop_ge. Qed.
+Lemma drop_app_le l k n :
+  n ≤ length l → drop n (l ++ k) = drop n l ++ k.
+Proof. intros. by rewrite drop_app, (proj2 (Nat.sub_0_le _ _)), drop_0. Qed.
+Lemma drop_app_add l k m :
+  drop (length l + m) (l ++ k) = drop m k.
+Proof. rewrite drop_app, drop_ge by lia. simpl. f_equal; lia. Qed.
+Lemma drop_app_add' l k n m :
+  n = length l → drop (n + m) (l ++ k) = drop m k.
+Proof. intros ->. apply drop_app_add. Qed.
+Lemma drop_app_length l k : drop (length l) (l ++ k) = k.
+Proof. by rewrite drop_app_le, drop_all. Qed.
+Lemma drop_app_length' l k n : n = length l → drop n (l ++ k) = k.
+Proof. intros ->. by apply drop_app_length. Qed.
+Lemma drop_app3_length l1 l2 l3 :
+  drop (length l1) ((l1 ++ l2) ++ l3) = l2 ++ l3.
+Proof. by rewrite <-(assoc_L (++)), drop_app_length. Qed.
+Lemma drop_app3_length' l1 l2 l3 n :
+  n = length l1 → drop n ((l1 ++ l2) ++ l3) = l2 ++ l3.
+Proof. intros ->. apply drop_app3_length. Qed.
+
 Lemma lookup_drop l n i : drop n l !! i = l !! (n + i).
 Proof. revert n i. induction l; intros [|i] ?; simpl; auto. Qed.
 Lemma lookup_total_drop `{!Inhabited A} l n i : drop n l !!! i = l !!! (n + i).
@@ -1793,7 +1818,7 @@ Lemma sublist_lookup_alter f l i n k :
 Proof.
   unfold sublist_lookup. intros Hk ?. erewrite sublist_alter_length by eauto.
   unfold sublist_alter; simplify_option_eq.
-  by rewrite Hk, drop_app_alt, take_app_alt by (rewrite ?take_length; lia).
+  by rewrite Hk, drop_app_length', take_app_length' by (rewrite ?take_length; lia).
 Qed.
 Lemma sublist_lookup_alter_ne f l i j n k :
   sublist_lookup j n l = Some k → length (f k) = n → i + n ≤ j ∨ j + n ≤ i →
@@ -1818,8 +1843,8 @@ Lemma sublist_alter_compose f g l i n k :
   sublist_alter (f ∘ g) i n l = sublist_alter f i n (sublist_alter g i n l).
 Proof.
   unfold sublist_alter, sublist_lookup. intros Hk ??; simplify_option_eq.
-  by rewrite !take_app_alt, drop_app_alt, !(assoc_L (++)), drop_app_alt,
-    take_app_alt by (rewrite ?app_length, ?take_length, ?Hk; lia).
+  by rewrite !take_app_length', drop_app_length', !(assoc_L (++)), drop_app_length',
+    take_app_length' by (rewrite ?app_length, ?take_length, ?Hk; lia).
 Qed.
 
 (** ** Properties of the [mask] function *)
@@ -5220,14 +5245,14 @@ Ltac simplify_list_eq ::= repeat
     apply app_inj_2 in H; [destruct H|solve_length]
   | |- context [zip_with _ (_ ++ _) (_ ++ _)] =>
     rewrite zip_with_app by solve_length
-  | |- context [take _ (_ ++ _)] => rewrite take_app_alt by solve_length
-  | |- context [drop _ (_ ++ _)] => rewrite drop_app_alt by solve_length
+  | |- context [take _ (_ ++ _)] => rewrite take_app_length' by solve_length
+  | |- context [drop _ (_ ++ _)] => rewrite drop_app_length' by solve_length
   | H : context [zip_with _ (_ ++ _) (_ ++ _)] |- _ =>
     rewrite zip_with_app in H by solve_length
   | H : context [take _ (_ ++ _)] |- _ =>
-    rewrite take_app_alt in H by solve_length
+    rewrite take_app_length' in H by solve_length
   | H : context [drop _ (_ ++ _)] |- _ =>
-    rewrite drop_app_alt in H by solve_length
+    rewrite drop_app_length' in H by solve_length
   | H : ?l !! ?i = _, H2 : context [(_ <$> ?l) !! ?i] |- _ =>
      rewrite list_lookup_fmap, H in H2
   end.

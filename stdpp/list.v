@@ -1386,6 +1386,25 @@ Proof.
   done.
 Qed.
 
+(** ** Interaction between the [take]/[drop]/[reverse] functions *)
+Lemma take_reverse l n : take n (reverse l) = reverse (drop (length l - n) l).
+Proof. unfold reverse; rewrite <-!rev_alt. apply firstn_rev. Qed.
+Lemma drop_reverse l n : drop n (reverse l) = reverse (take (length l - n) l).
+Proof. unfold reverse; rewrite <-!rev_alt. apply skipn_rev. Qed.
+Lemma reverse_take l n : reverse (take n l) = drop (length l - n) (reverse l).
+Proof.
+  rewrite drop_reverse. destruct (decide (n ≤ length l)).
+  - repeat f_equal; lia.
+  - by rewrite !take_ge by lia.
+Qed.
+Lemma reverse_drop l n : reverse (drop n l) = take (length l - n) (reverse l).
+Proof.
+  rewrite take_reverse. destruct (decide (n ≤ length l)).
+  - repeat f_equal; lia.
+  - by rewrite !drop_ge by lia.
+Qed.
+
+(** ** Other lemmas that use [take]/[drop] in their proof. *)
 Lemma app_eq_inv l1 l2 k1 k2 :
   l1 ++ l2 = k1 ++ k2 →
   (∃ k, l1 = k1 ++ k ∧ k2 = k ++ l2) ∨ (∃ k, k1 = l1 ++ k ∧ l2 = k ++ k2).

@@ -118,7 +118,7 @@ longer supported by this release.
   automatically add extra `_` until there are no more leading `∀`/`→`. `efeed
   tac` becomes `otac*`; the `feed` variants (that only specialize `→` but not
   `∀`) are no longer provided.
-- Add lemmas for `reverse` of `take`/`drop`.
+- Add lemmas for `reverse` of `take`/`drop` and `take`/`drop` of `reverse`.
 
 **Changes in `stdpp_unstable`:**
 

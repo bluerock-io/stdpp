@@ -119,6 +119,15 @@ longer supported by this release.
   tac` becomes `otac*`; the `feed` variants (that only specialize `→` but not
   `∀`) are no longer provided.
 - Add lemmas for `reverse` of `take`/`drop` and `take`/`drop` of `reverse`.
+- Rework lemmas for `take`/`drop` of an `++`:
+  + Add `take_app` and `drop_app`, which are the strongest versions, and use
+    `take_app_X` for derived versions.
+  + Consistently use `'` suffix for version with premise `n = length`, and have
+    versions without `'` with `length` inlined.
+  + Rename `take_app` → `take_app_length`, `take_app_alt` → `take_app_length'`,
+    `take_add_app` → `take_app_add'`, `take_app3_alt` → `take_app3_length'`,
+    `drop_app` → `drop_app_length`, `drop_app_alt` → `drop_app_length'`,
+    `drop_add_app` → `drop_app_add'`, `drop_app3_alt` → `drop_app3_length'`.
 
 **Changes in `stdpp_unstable`:**
 
@@ -148,6 +157,11 @@ s/\boption_fmap_inj\b/option_fmap_eq_inj/g
 s/\bsub_add'\b/add_sub'/g
 # map filter
 s/\bmap_filter_lookup/map_lookup_filter/g
+# take/drop app
+s/\b(take|drop)_app\b/\1_app_length/g
+s/\b(take|drop)_app_alt\b/\1_app_length'/g
+s/\b(take|drop)_add_app\b/\1_app_add'/g
+s/\b(take|drop)_app3_alt\b/\1_app3_length'/g
 EOF
 ```
 

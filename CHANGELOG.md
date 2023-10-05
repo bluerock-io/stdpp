@@ -119,7 +119,7 @@ longer supported by this release.
   tac` becomes `otac*`; the `feed` variants (that only specialize `→` but not
   `∀`) are no longer provided.
 - Add lemmas for `reverse` of `take`/`drop` and `take`/`drop` of `reverse`.
-- Rework lemmas for `take/drop` of an `++`:
+- Rework lemmas for `take`/`drop` of an `++`:
   + Add `take_app` and `drop_app`, which are the strongest versions, and use
     `take_app_X` for derived versions.
   + Consistently use `'` suffix for version with premise `n = length`, and have

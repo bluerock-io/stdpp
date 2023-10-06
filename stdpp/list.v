@@ -468,8 +468,9 @@ Context {A : Type}.
 Implicit Types x y z : A.
 Implicit Types l k : list A.
 
-Global Instance: Inj2 (=) (=) (=) (@cons A).
+Global Instance cons_eq_inj : Inj2 (=) (=) (=) (@cons A).
 Proof. by injection 1. Qed.
+
 Global Instance: ∀ k, Inj (=) (=) (k ++.).
 Proof. intros ???. apply app_inv_head. Qed.
 Global Instance: ∀ k, Inj (=) (=) (.++ k).
@@ -3813,6 +3814,9 @@ Section setoid.
   Proof.
     induction n; destruct 2; simpl; repeat (constructor || f_equiv); auto.
   Qed.
+
+  Global Instance cons_equiv_inj : Inj2 (≡) (≡) (≡) (@cons A).
+  Proof. inversion 1; auto. Qed.
 
   Lemma nil_equiv_eq l : l ≡ [] ↔ l = [].
   Proof. split; [by inversion_clear 1|intros ->; constructor]. Qed.

@@ -18,6 +18,8 @@ API-breaking change is listed.
   and an assumption `R' x y` is found, we search for an instance of
   `SolveProperSubrelation R' R` and if we find one, that finishes the proof.
 - Remove `wf` alias for the standard `well_founded`.
+- Add lemmas `Nat.lt_wf_0_projected`, `N.lt_wf_0_projected`, `Z.lt_wf_projected`
+  for easy measure/size induction.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

@@ -3,7 +3,8 @@ API-breaking change is listed.
 
 ## std++ master
 
-(nothing yet)
+- Add `TCSimpl` type class that is similar to `TCEq` but performs `simpl`
+  before proving the goal by reflexivity.
 
 ## std++ 1.9.0 (2023-10-11)
 

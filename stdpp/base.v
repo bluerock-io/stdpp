@@ -209,10 +209,14 @@ Global Hint Mode TCEq ! - - : typeclass_instances.
 Lemma TCEq_eq {A} (x1 x2 : A) : TCEq x1 x2 ↔ x1 = x2.
 Proof. split; destruct 1; reflexivity. Qed.
 
-(** The [TCSimpl] type class is similar to [TCEq] but performs [simpl] before
-proving the goal by reflexivity. *)
+(** The [TCSimpl x y] type class is similar to [TCEq] but performs [simpl]
+before proving the goal by reflexivity. Similar to [TCEq], the argument [x]
+is the input and [y] the output. When solving [TCEq x y], the argument [x]
+should be a concrete term and [y] an evar for the [simpl]ed result. *)
 Class TCSimpl {A} (x x' : A) := TCSimpl_TCEq : TCEq x x'.
 Global Hint Extern 0 (TCSimpl _ _) =>
+  (* Since the second argument should be an evar, we can call [simpl] on the
+  whole goal. *)
   simpl; notypeclasses refine (TCEq_refl _) : typeclass_instances.
 Global Hint Mode TCSimpl ! - - : typeclass_instances.
 

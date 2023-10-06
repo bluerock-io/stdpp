@@ -5,6 +5,16 @@ API-breaking change is listed.
 
 - Add `TCSimpl` type class that is similar to `TCEq` but performs `simpl`
   before proving the goal by reflexivity.
+- Add new typeclass `MThrow E M` to generally represent throwing an error of
+  type `E` in monad `M`. (by Thibaut Pérami and Mathias Adam Møller)
+  As a consequence:
+  + Replace `MGuard` with `MThrow` and define `guard` in terms of `MThrow`.
+  + The new `guard` is an ordinary function, while the old guard was a notation.
+    Hence, use the monadic bind to compose guards. For example, write
+    `guard P;; m`/`p ← guard P; m` instead of `guard P; m`/`guard P as p; m`.
+  + Replace the tactic `case_option_guard` with a more general `case_guard`
+    version.
+
 
 ## std++ 1.9.0 (2023-10-11)
 
@@ -33,8 +43,6 @@ everyone involved!
 
 **Detailed list of changes:**
 
-- Replace `MGuard` with a new typeclass `MFail`.
-- Replace `case_option_guard` with a more general `case_guard`.
 - Rename `difference_difference` → `difference_difference_l` and
   `difference_difference_L` → `difference_difference_l_L`, add
   `difference_difference_r` and `difference_difference_r_L`.

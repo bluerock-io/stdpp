@@ -128,6 +128,7 @@ longer supported by this release.
     `take_add_app` → `take_app_add'`, `take_app3_alt` → `take_app3_length'`,
     `drop_app` → `drop_app_length`, `drop_app_alt` → `drop_app_length'`,
     `drop_add_app` → `drop_app_add'`, `drop_app3_alt` → `drop_app3_length'`.
+- Add instance `cons_equiv_inj`.
 
 **Changes in `stdpp_unstable`:**
 

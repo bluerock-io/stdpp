@@ -415,12 +415,12 @@ Global Program Instance gtest_countable `{Countable K} : Countable (gtest K) :=
   inj_countable' enc dec _.
 Next Obligation.
   intros K ?? enc dec_list dec t.
-  remember (gtest_size t) as n eqn:Hn. revert t Hn.
-  induction (lt_wf n) as [n _ IH]; intros [ts] ->; simpl in *; f_equal.
+  induction (Nat.lt_wf_0_projected gtest_size t) as [[ts] _ IH].
+  simpl in *; f_equal.
   revert ts IH. apply (map_fold_ind (λ r ts, _ → dec_list dec r = ts)); [done|].
   intros i t ts r ? IHts IHt; simpl. f_equal.
-  - eapply IHt; [|done]. rewrite map_fold_insert_L by auto with lia. lia.
-  - apply IHts; intros n ? t' ->. eapply IHt; [|done].
+  - eapply IHt. rewrite map_fold_insert_L by auto with lia. lia.
+  - apply IHts; intros t' ?. eapply IHt.
     rewrite map_fold_insert_L by auto with lia. lia.
 Qed.
 

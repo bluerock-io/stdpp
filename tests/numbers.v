@@ -1,26 +1,26 @@
-From stdpp Require base numbers prelude.
+From stdpp Require Import list.
 
-(** Check that we always get the [le] and [lt] functions on [nat]. *)
-Module test1.
-  Import stdpp.base.
-  Check le.
-  Check lt.
-End test1.
+(** Simple example of measure induction on lists using [Nat.lt_wf_0_projected]. *)
+Fixpoint evens {A} (l : list A) : list A :=
+  match l with
+  | x :: _ :: l => x :: evens l
+  | [x] => [x]
+  | _ => []
+  end.
 
-Module test2.
-  Import stdpp.prelude.
-  Check le.
-  Check lt.
-End test2.
+Fixpoint odds {A} (l : list A) : list A :=
+  match l with
+  | _ :: y :: l => y :: odds l
+  | _ => []
+  end.
 
-Module test3.
-  Import stdpp.numbers.
-  Check le.
-  Check lt.
-End test3.
-
-Module test4.
-  Import stdpp.list.
-  Check le.
-  Check lt.
-End test4.
+Lemma lt_wf_projected_induction_sample {A} (l : list A) :
+  evens l ++ odds l ≡ₚ l.
+Proof.
+  (** Note that we do not use [induction .. using ..]. The term
+  [Nat.lt_wf_0_projected length l] has type [Acc ..], so we perform induction
+  on the [Acc] predicate. *)
+  induction (Nat.lt_wf_0_projected length l) as [l _ IH].
+  destruct l as [|x [|y l]]; simpl; [done..|].
+  rewrite <-Permutation_middle. rewrite IH by (simpl; lia). done.
+Qed.

@@ -195,10 +195,12 @@ Global Existing Instance TCElemOf_here.
 Global Existing Instance TCElemOf_further.
 Global Hint Mode TCElemOf ! ! ! : typeclass_instances.
 
-(** We declare both arguments [x] and [y] of [TCEq x y] as outputs, which means
-[TCEq] can also be used to unify evars. This is harmless: since the only
-instance of [TCEq] is [TCEq_refl] below, it can never cause loops. See
-https://gitlab.mpi-sws.org/iris/iris/merge_requests/391 for a use case. *)
+(** The intended use of [TCEq x y] is to use [x] as input and [y] as output, but
+this is not enforced. We use output mode [-] (instead of [!]) for [x] to ensure
+that type class search succeed on goals like [TCEq (if ? then e1 else e2) ?y],
+see https://gitlab.mpi-sws.org/iris/iris/merge_requests/391 for a use case.
+Mode [-] is harmless, the only instance of [TCEq] is [TCEq_refl] below, so we
+cannot create loops. *)
 Inductive TCEq {A} (x : A) : A → Prop := TCEq_refl : TCEq x x.
 Existing Class TCEq.
 Global Existing Instance TCEq_refl.

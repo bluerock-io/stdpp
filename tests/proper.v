@@ -13,6 +13,11 @@ Lemma test_f_equiv_refl_nested {A} (R : relation A) `{!Equivalence R} g x y z :
   R (g x y) (g x z).
 Proof. intros ? Hyz. f_equiv. apply Hyz. Qed.
 
+(* Ensure we can handle [flip]. *)
+Lemma f_equiv_flip {A} (R : relation A) `{!PreOrder R} (f : A → A) :
+  Proper (R ==> R) f → Proper (flip R ==> flip R) f.
+Proof. intros ? ?? EQ. f_equiv. exact EQ. Qed.
+
 Section f_equiv.
   Context `{!Equiv A, !Equiv B, !SubsetEq A}.
 
@@ -49,6 +54,10 @@ Lemma test_solve_proper_const {A} (R : relation A) `{!Equivalence R} x :
   Proper (R ==> R) (λ _, x).
 Proof. solve_proper. Qed.
 
+Lemma solve_proper_flip {A} (R : relation A) `{!PreOrder R} (f : A → A) :
+  Proper (R ==> R) f → Proper (flip R ==> flip R) f.
+Proof. solve_proper. Qed.
+
 Section tests.
   Context {A B : Type} `{!Equiv A, !Equiv B}.
   Context (foo : A → A) (bar : A → B) (baz : B → A → A).
@@ -69,21 +78,6 @@ Section tests.
     baz (bar (f 0)) (f 2).
   Goal Proper (pointwise_relation nat (≡) ==> (≡)) test3.
   Proof. solve_proper. Qed.
-
-  Section test_flip.
-    Context `{!Symmetric (≡@{A})}.
-    Definition f (a : A) := a.
-    Typeclasses Opaque f.
-    (* This hits the case in [solve_proper_finish] that uses [symmetry]. *)
-    Local Instance f_proper :
-      Proper (flip (≡) ==> (≡)) f.
-    Proof. solve_proper. Qed.
-
-    (* Here we get a [flip] into the goal and have to know how to handle that. *)
-    Definition test_symm :
-      Proper ((≡) ==> (≡)) (f ∘ foo).
-    Proof. solve_proper. Qed.
-  End test_flip.
 
   (* We mirror [discrete_fun] from Iris to have an equivalence on a function
   space. *)

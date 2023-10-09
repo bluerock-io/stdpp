@@ -389,10 +389,15 @@ we try to "maintain" the relation of the current goal. For example,
 when having [Proper (equiv ==> dist) f] and [Proper (dist ==> dist) f], it will
 favor the second because the relation (dist) stays the same. *)
 Ltac f_equiv :=
+  (* Simplify away [flip], they would get in the way later. *)
+  try match goal with
+  | |- (flip ?R) ?x ?y => change (R y x)
+  end;
+  (* Find out what kind of goal we have, and try to make progress. *)
   match goal with
   | |- pointwise_relation _ _ _ _ => intros ?
   (* We support matches on both sides, *if* they concern the same variable, or
-     variables in some relation. *)
+     terms in some relation. *)
   | |- ?R (match ?x with _ => _ end) (match ?x with _ => _ end) =>
     destruct x
   | H : ?R ?x ?y |- ?R2 (match ?x with _ => _ end) (match ?y with _ => _ end) =>
@@ -503,26 +508,32 @@ Ltac solve_proper_prepare :=
      (* Now forcefully introduce the first ∀ and other ∀s that show up in the
      goal afterwards. *)
      intros ?; intros
-  end; simplify_eq;
+  end;
+  (* Simplify things, if we can. *)
+  simplify_eq;
   (* We try with and without unfolding. We have to backtrack on
      that because unfolding may succeed, but then the proof may fail. *)
   (solve_proper_unfold + idtac); simpl.
-(** [solve_proper_finish] is basically a version of [eassumption] that takes into account [subrelation] *)
+(** [solve_proper_finish] is basically a version of [reflexivity || eassumption]
+that takes into account [subrelation] *)
 Ltac solve_proper_finish :=
   match goal with
-  | H : ?R1 ?x ?y |- ?R2 ?x ?y => solve [apply (is_solve_proper_subrelation H)]
-  (* Also support the symmetric case. *)
-  | H : ?R1 ?x ?y |- ?R2 ?y ?x => solve [symmetry; apply (is_solve_proper_subrelation H)]
-  (* Also handle the reflexivity case. *)
+  (* First try the fast reflexivity case. *)
   | |- _ ?x ?x => fast_reflexivity
+  (* Fall back to the smart-but-slow case, with support for some (or all) of the
+  involved relations to be [flip]ed. *)
+  | H : ?R1 ?x ?y |- ?R2 ?x ?y =>
+    solve [simpl flip in H |- *; apply (is_solve_proper_subrelation H)]
+  | H : ?R1 ?x ?y |- ?R2 ?y ?x =>
+    solve [simpl flip in H |- *; apply (is_solve_proper_subrelation H)]
   end.
 (** The tactic [solve_proper_core tac] solves goals of the form "Proper (R1 ==> R2)", for
 any number of relations. The actual work is done by repeatedly applying
 [tac]. *)
 Ltac solve_proper_core tac :=
   solve_proper_prepare;
-  (* Now do the job. New [flip] can appear any time and we want to get rid of them. *)
-  solve [repeat (simpl flip in * |- *; first [solve_proper_finish | tac ()]) ].
+  (* Now do the job. *)
+  solve [repeat (first [solve_proper_finish | tac ()]) ].
 
 (** Finally, [solve_proper] tries to apply [f_equiv] in a loop. *)
 Ltac solve_proper := solve_proper_core ltac:(fun _ => f_equiv).

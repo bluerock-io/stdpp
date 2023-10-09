@@ -942,9 +942,17 @@ End fin_to_set.
 
 (** * Guard *)
 Global Instance set_mfail `{MonadSet M} : MFail M := λ _ _, ∅.
+Global Typeclasses Opaque set_mfail.
 
 Section set_monad_base.
   Context `{MonadSet M}.
+
+  Lemma elem_of_mfail {A} x : x ∈@{M A} mfail ↔ False.
+  Proof. unfold mfail, set_mfail. by rewrite elem_of_empty. Qed.
+
+  Global Instance set_unfold_elem_of_mfail {A} (x : A) :
+    SetUnfoldElemOf x (mfail : M A) False.
+  Proof. constructor. by apply elem_of_mfail. Qed.
 
   (** This lemma includes a bind, to avoid equalities of proofs. We cannot have
   [p ∈ guard P ↔ P] unless [P] is proof irrelant. The best (but less usable)
@@ -952,8 +960,8 @@ Section set_monad_base.
   Lemma elem_of_guard `{Decision P} {A} (x : A) (X : M A) :
     x ∈ (guard P;; X) ↔ P ∧ x ∈ X.
   Proof.
-    case_guard; unfold mfail, set_mfail; rewrite elem_of_bind;
-      [setoid_rewrite elem_of_ret|setoid_rewrite elem_of_empty];
+    case_guard; rewrite elem_of_bind;
+      [setoid_rewrite elem_of_ret | setoid_rewrite elem_of_mfail];
       naive_solver.
   Qed.
   Lemma elem_of_guard_2 `{Decision P} {A} (x : A) (X : M A) :

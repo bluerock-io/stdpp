@@ -380,6 +380,14 @@ Ltac setoid_subst :=
   | H : @equiv ?A ?e _ ?x |- _ => symmetry in H; setoid_subst_aux (@equiv A e) x
   end.
 
+(** A little helper for [f_equiv] and [solve_proper] that simplifies away [flip]
+relations. *)
+Ltac clean_flip :=
+  repeat match goal with
+  | |- (flip ?R) ?x ?y => change (R y x)
+  | H : (flip ?R) ?x ?y |- _ => change (R y x) in H
+  end.
+
 (** f_equiv works on goals of the form [f _ = f _], for any relation and any
 number of arguments. It looks for an appropriate [Proper] instance, and applies
 it. The tactic is somewhat limited, since it cannot be used to backtrack on
@@ -390,9 +398,7 @@ when having [Proper (equiv ==> dist) f] and [Proper (dist ==> dist) f], it will
 favor the second because the relation (dist) stays the same. *)
 Ltac f_equiv :=
   (* Simplify away [flip], they would get in the way later. *)
-  try match goal with
-  | |- (flip ?R) ?x ?y => change (R y x)
-  end;
+  clean_flip;
   (* Find out what kind of goal we have, and try to make progress. *)
   match goal with
   | |- pointwise_relation _ _ _ _ => intros ?
@@ -467,6 +473,8 @@ instances causes lots of backtracking in the [Proper] hint search, resulting in
 very slow/diverging [rewrite]s due to exponential instance search. *)
 Class SolveProperSubrelation {A} (R R' : relation A) := is_solve_proper_subrelation :
   ∀ x y, R x y → R' x y.
+(** We use [+] instead of [!] since [solve_proper] should never be called on a
+goal with evars. *)
 Global Hint Mode SolveProperSubrelation + + + : typeclass_instances.
 Global Arguments is_solve_proper_subrelation {A R R' _ x y}.
 
@@ -514,26 +522,24 @@ Ltac solve_proper_prepare :=
   (* We try with and without unfolding. We have to backtrack on
      that because unfolding may succeed, but then the proof may fail. *)
   (solve_proper_unfold + idtac); simpl.
-(** [solve_proper_finish] is basically a version of [reflexivity || eassumption]
-that takes into account [subrelation] *)
+(** [solve_proper_finish] is basically a version of [reflexivity || assumption]
+that is restricted to relations and takes into account [subrelation]. *)
 Ltac solve_proper_finish :=
   match goal with
   (* First try the fast reflexivity case. *)
   | |- _ ?x ?x => fast_reflexivity
-  (* Fall back to the smart-but-slow case, with support for some (or all) of the
-  involved relations to be [flip]ed. *)
-  | H : ?R1 ?x ?y |- ?R2 ?x ?y =>
-    solve [simpl flip in H |- *; apply (is_solve_proper_subrelation H)]
-  | H : ?R1 ?x ?y |- ?R2 ?y ?x =>
-    solve [simpl flip in H |- *; apply (is_solve_proper_subrelation H)]
+  (* Fall back to the smart-but-slow case. We rely on the instance for
+  [subrelation R R] (via [subrelation_solve_proper_subrelation]) to cover the
+  case where [R1 = R2]. *)
+  | H : ?R1 ?x ?y |- ?R2 ?x ?y => solve [apply (is_solve_proper_subrelation H)]
   end.
 (** The tactic [solve_proper_core tac] solves goals of the form "Proper (R1 ==> R2)", for
 any number of relations. The actual work is done by repeatedly applying
 [tac]. *)
 Ltac solve_proper_core tac :=
   solve_proper_prepare;
-  (* Now do the job. *)
-  solve [repeat (first [solve_proper_finish | tac ()]) ].
+  (* Now do the job. The inner tactics can rely on [flip] having been cleaned. *)
+  solve [repeat (clean_flip; first [solve_proper_finish | tac ()]) ].
 
 (** Finally, [solve_proper] tries to apply [f_equiv] in a loop. *)
 Ltac solve_proper := solve_proper_core ltac:(fun _ => f_equiv).

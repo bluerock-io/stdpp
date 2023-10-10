@@ -401,6 +401,9 @@ Ltac f_equiv :=
   clean_flip;
   (* Find out what kind of goal we have, and try to make progress. *)
   match goal with
+  (* Similar to [f_equal] also handle the reflexivity case. *)
+  | |- _ ?x ?x => fast_reflexivity
+  (* Making progress on [pointwise_relation] is as simple as introducing the variable. *)
   | |- pointwise_relation _ _ _ _ => intros ?
   (* We support matches on both sides, *if* they concern the same variable, or
      terms in some relation. *)
@@ -458,9 +461,6 @@ Ltac f_equiv :=
   | |- ?R (?f _ _ _) _ => simple apply (_ : Proper (_ ==> _ ==> _ ==> R) f)
   | |- ?R (?f _ _ _ _) _ => simple apply (_ : Proper (_ ==> _ ==> _ ==> _ ==> R) f)
   | |- ?R (?f _ _ _ _ _) _ => simple apply (_ : Proper (_ ==> _ ==> _ ==> _ ==> _ ==> R) f)
-
-  (* Similar to [f_equal] also handle the reflexivity case. *)
-  | |- _ ?x ?x => fast_reflexivity
   end;
   (* Similar to [f_equal] immediately solve trivial goals *)
   try fast_reflexivity.

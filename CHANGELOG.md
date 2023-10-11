@@ -1,7 +1,7 @@
 This file lists "large-ish" changes to the std++ Coq library, but not every
 API-breaking change is listed.
 
-## std++ 1.9.0 (2023-10-??)
+## std++ 1.9.0 (2023-10-11)
 
 This highlights of this release are:
 * `gmap` and related types are re-implemented based on Appel and Leroy's

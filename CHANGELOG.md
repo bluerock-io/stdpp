@@ -18,8 +18,7 @@ This highlights of this release are:
   information, see the test cases provided here:
   https://gitlab.mpi-sws.org/iris/stdpp/-/blob/master/tests/tactics.v#L114
 
-Coq 8.18 is newly supported by this release, and Coq 8.16 and 8.17 remain
-supported. Coq 8.12 to 8.15 are no longer supported.
+std++ 1.9 supports Coq 8.16 to 8.18. Coq 8.12 to 8.15 are no longer supported.
 
 This release of std++ was managed by Ralf Jung, Robbert Krebbers, and Johannes
 Hostert, with contributions from Dorian Lesbre, Herman Bergwerf, Ike Mulder,

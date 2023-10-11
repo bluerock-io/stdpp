@@ -1,10 +1,33 @@
 This file lists "large-ish" changes to the std++ Coq library, but not every
 API-breaking change is listed.
 
-## std++ master
+## std++ 1.9.0 (2023-10-??)
 
-Coq 8.17 is newly supported by this release. Coq 8.12, 8.13, 8.14, and 8.15 are no
-longer supported by this release.
+This highlights of this release are:
+* `gmap` and related types are re-implemented based on Appel and Leroy's
+  [Efficient Extensional Binary Tries](https://inria.hal.science/hal-03372247),
+  making them usable in nested inductive definitions and improving
+  extensionality. More information can be found in Robbert Krebbers' Coq
+  Workshop talk, see https://coq-workshop.gitlab.io/2023/
+* New tactics `ospecialize`, `odestruct`, `oinversion` etc are added. These
+  tactics improve upon `efeed` / `edestruct` by allowing one to leave more terms
+  open when specializing arguments. For instance, `odestruct (H _ x)` will turn
+  the `_` into an evar rather than trying to infer it immediately, making it
+  usable in many situations where `edestruct` fails. This can significantly
+  shorten the overhead involved in forward reasoning proofs. For more
+  information, see the test cases provided here:
+  https://gitlab.mpi-sws.org/iris/stdpp/-/blob/master/tests/tactics.v#L114
+
+Coq 8.18 is newly supported by this release, and Coq 8.16 and 8.17 remain
+supported. Coq 8.12 to 8.15 are no longer supported.
+
+This release of std++ was managed by Ralf Jung, Robbert Krebbers, and Johannes
+Hostert, with contributions from Dorian Lesbre, Herman Bergwerf, Ike Mulder,
+Isaak van Bakel, Jan-Oliver Kaiser, Jonas Kastberg, Marijn van Wezel, Michael
+Sammler, Paolo Giarrusso, Tej Chajed, and Thibaut Pérami. Thanks a lot to
+everyone involved!
+
+**Detailed list of changes:**
 
 - Rename `difference_difference` → `difference_difference_l` and
   `difference_difference_L` → `difference_difference_l_L`, add

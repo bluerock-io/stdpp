@@ -226,16 +226,19 @@ Lemma solve_proper_flip {A} (R : relation A) `{!PreOrder R} (f : A → A) :
   Proper (R ==> R) f → Proper (flip R ==> flip R) f.
 Proof. solve_proper. Qed.
 
+(* Test that [solve_proper_finish] uses [eassumption].
+Think of [R] being Iris's [dist]. *)
 Lemma solve_proper_finish_evar {A} (R : nat → relation A) (x y : A) :
-  R 0 x y → exists n, R n x y.
+  R 0 x y → ∃ n, R n x y.
 Proof. intros. eexists. solve_proper. Qed.
 
 (** This is a more realistic version of the previous test, showing how such
 goals can arise for real. Needs to involve a subrelation so that the
-[eassumption] in [solve_proper_finish] doesn't already do the whole job. *)
+[eassumption] in [solve_proper_finish] doesn't already do the whole job, i.e.,
+we need the right mode for [SolveProperSubrelation]. *)
 Lemma solve_proper_finish_evar' {A} (R1 R2 : nat → relation A) (f : A → nat) :
   (∀ n, subrelation (R2 n) (R1 n)) →
-  (∀ n, Proper (R1 n ==> eq) f ) →
+  (∀ n, Proper (R1 n ==> eq) f) →
   ∀ n, Proper (R2 n ==> eq) (λ x, S (f x)).
 Proof.
   intros Hsub Hf. solve_proper_core ltac:(fun _ => eapply Hf || f_equiv).
@@ -243,9 +246,9 @@ Qed.
 
 Definition option_rel {A} (R : relation A) (mx my : option A) :=
   match mx, my with
-    | Some x, Some y => R x y
-    | None, None => True
-    | _, _ => False
+  | Some x, Some y => R x y
+  | None, None => True
+  | _, _ => False
   end.
 Arguments option_rel : simpl never.
 Lemma solve_proper_convertible {A} (R : relation A) (x y : A) :

@@ -295,16 +295,16 @@ Qed.
 Global Program Instance Qp_countable : Countable Qp :=
   inj_countable
     Qp_to_Qc
-    (λ p : Qc, guard (0 < p)%Qc as Hp; Some (mk_Qp p Hp)) _.
+    (λ p : Qc, Hp ← guard (0 < p)%Qc; Some (mk_Qp p Hp)) _.
 Next Obligation.
-  intros [p Hp]. unfold mguard, option_guard; simpl.
-  case_match; [|done]. f_equal. by apply Qp.to_Qc_inj_iff.
+  intros [p Hp]. case_guard; simplify_eq/=; [|done].
+  f_equal. by apply Qp.to_Qc_inj_iff.
 Qed.
 
 Global Program Instance fin_countable n : Countable (fin n) :=
   inj_countable
     fin_to_nat
-    (λ m : nat, guard (m < n)%nat as Hm; Some (nat_to_fin Hm)) _.
+    (λ m : nat, Hm ← guard (m < n)%nat; Some (nat_to_fin Hm)) _.
 Next Obligation.
   intros n i; simplify_option_eq.
   - by rewrite nat_to_fin_to_nat.
@@ -370,7 +370,7 @@ Qed.
 Global Program Instance countable_sig `{Countable A} (P : A → Prop)
         `{!∀ x, Decision (P x), !∀ x, ProofIrrel (P x)} :
   Countable { x : A | P x } :=
-  inj_countable proj1_sig (λ x, guard (P x) as Hx; Some (x ↾ Hx)) _.
+  inj_countable proj1_sig (λ x, Hx ← guard (P x); Some (x ↾ Hx)) _.
 Next Obligation.
   intros A ?? P ?? [x Hx]. by erewrite (option_guard_True_pi (P x)).
 Qed.

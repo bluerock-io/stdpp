@@ -336,8 +336,8 @@ Global Instance vec_inhabited `{Inhabited T} n : Inhabited (vec T n) :=
 Global Instance vec_countable `{Countable A} n : Countable (vec A n).
 Proof.
   apply (inj_countable vec_to_list (λ l,
-    guard (n = length l) as H; Some (eq_rect _ _ (list_to_vec l) _ (eq_sym H)))).
-  intros v. case_option_guard as Hn.
+    H ← guard (n = length l); Some (eq_rect _ _ (list_to_vec l) _ (eq_sym H)))).
+  intros v. case_guard as Hn; simplify_eq/=.
   - rewrite list_to_vec_to_list.
     rewrite (proof_irrel (eq_sym _) Hn). by destruct Hn.
   - by rewrite vec_to_list_length in Hn.

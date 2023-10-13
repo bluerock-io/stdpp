@@ -54,7 +54,7 @@ Section definitions.
   Global Instance gmultiset_difference : Difference (gmultiset A) := λ X Y,
     let (X) := X in let (Y) := Y in
     GMultiSet $ difference_with (λ x y,
-      guard (y < x)%positive; Some (x - y)%positive) X Y.
+      guard (y < x)%positive;; Some (x - y)%positive) X Y.
   Global Instance gmultiset_scalar_mul : ScalarMul nat (gmultiset A) := λ n X,
     let (X) := X in GMultiSet $
       match n with 0 => ∅ | _ => fmap (λ m, m * Pos.of_nat n)%positive X end.

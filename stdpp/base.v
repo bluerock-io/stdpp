@@ -1211,14 +1211,24 @@ Notation "ps .*1" := (fmap (M:=list) fst ps)
 Notation "ps .*2" := (fmap (M:=list) snd ps)
   (at level 2, left associativity, format "ps .*2").
 
-Class MGuard (M : Type → Type) :=
-  mguard: ∀ P {dec : Decision P} {A}, (P → M A) → M A.
-Global Arguments mguard _ _ _ !_ _ _ / : assert.
-Global Hint Mode MGuard ! : typeclass_instances.
-Notation "'guard' P ; z" := (mguard P (λ _, z))
-  (at level 20, z at level 200, only parsing, right associativity) : stdpp_scope.
-Notation "'guard' P 'as' H ; z" := (mguard P (λ H, z))
-  (at level 20, z at level 200, only parsing, right associativity) : stdpp_scope.
+(** For any monad that has a builtin way to throw an exception/error *)
+Class MThrow (E : Type) (M : Type → Type) := mthrow : ∀ {A}, E → M A.
+Global Arguments mthrow {_ _ _ _} _ : assert.
+Global Instance: Params (@mthrow) 4 := {}.
+Global Hint Mode MThrow ! ! : typeclass_instances.
+
+(** We use unit as the error content for monads that can only report an error
+    without any payload like an option *)
+Global Notation MFail := (MThrow ()).
+Global Notation mfail := (mthrow ()).
+
+Definition guard_or {E} (e : E) `{MThrow E M, MRet M} P `{Decision P} : M P :=
+  match decide P with
+  | left H => mret H
+  | right _ => mthrow e
+  end.
+Global Notation guard := (guard_or ()).
+
 
 (** * Operations on maps *)
 (** In this section we define operational type classes for the operations

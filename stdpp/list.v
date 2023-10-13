@@ -197,7 +197,7 @@ Fixpoint reshape {A} (szs : list nat) (l : list A) : list (list A) :=
 Global Instance: Params (@reshape) 2 := {}.
 
 Definition sublist_lookup {A} (i n : nat) (l : list A) : option (list A) :=
-  guard (i + n ≤ length l); Some (take n (drop i l)).
+  guard (i + n ≤ length l);; Some (take n (drop i l)).
 Definition sublist_alter {A} (f : list A → list A)
     (i n : nat) (l : list A) : list A :=
   take i l ++ f (take n (drop i l)) ++ drop (i + n) l.
@@ -1734,7 +1734,7 @@ Proof.
 Qed.
 Lemma sublist_lookup_all l n : length l = n → sublist_lookup 0 n l = Some l.
 Proof.
-  intros. unfold sublist_lookup; case_option_guard; [|lia].
+  intros. unfold sublist_lookup; case_guard; [|lia].
   by rewrite take_ge by (rewrite drop_length; lia).
 Qed.
 Lemma sublist_lookup_Some l i n :
@@ -1742,7 +1742,7 @@ Lemma sublist_lookup_Some l i n :
 Proof. by unfold sublist_lookup; intros; simplify_option_eq. Qed.
 Lemma sublist_lookup_Some' l i n l' :
   sublist_lookup i n l = Some l' ↔ l' = take n (drop i l) ∧ i + n ≤ length l.
-Proof. unfold sublist_lookup. case_option_guard; naive_solver lia. Qed.
+Proof. unfold sublist_lookup. case_guard; naive_solver lia. Qed.
 Lemma sublist_lookup_None l i n :
   length l < i + n → sublist_lookup i n l = None.
 Proof. by unfold sublist_lookup; intros; simplify_option_eq by lia. Qed.
@@ -1784,14 +1784,14 @@ Lemma sublist_lookup_reshape l i n m :
   reshape (replicate m n) l !! i = sublist_lookup (i * n) n l.
 Proof.
   intros Hn Hl. unfold sublist_lookup.  apply option_eq; intros x; split.
-  - intros Hx. case_option_guard as Hi.
+  - intros Hx. case_guard as Hi; simplify_eq/=.
     { f_equal. clear Hi. revert i l Hl Hx.
       induction m as [|m IH]; intros [|i] l ??; simplify_eq/=; auto.
       rewrite <-drop_drop. apply IH; rewrite ?drop_length; auto with lia. }
     destruct Hi. rewrite Hl, <-Nat.mul_succ_l.
     apply Nat.mul_le_mono_r, Nat.le_succ_l. apply lookup_lt_Some in Hx.
     by rewrite reshape_length, replicate_length in Hx.
-  - intros Hx. case_option_guard as Hi; simplify_eq/=.
+  - intros Hx. case_guard as Hi; simplify_eq/=.
     revert i l Hl Hi. induction m as [|m IH]; [auto with lia|].
     intros [|i] l ??; simpl; [done|]. rewrite <-drop_drop.
     rewrite IH; rewrite ?drop_length; auto with lia.

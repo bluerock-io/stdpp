@@ -716,12 +716,12 @@ Section gset.
     (λ _, x) <$> mapset_car X.
 
   Lemma lookup_gset_to_gmap {A} (x : A) (X : gset K) i :
-    gset_to_gmap x X !! i = guard (i ∈ X); Some x.
+    gset_to_gmap x X !! i = (guard (i ∈ X);; Some x).
   Proof.
     destruct X as [X].
     unfold gset_to_gmap, gset_elem_of, elem_of, mapset_elem_of; simpl.
     rewrite lookup_fmap.
-    case_option_guard; destruct (X !! i) as [[]|]; naive_solver.
+    case_guard; destruct (X !! i) as [[]|]; naive_solver.
   Qed.
   Lemma lookup_gset_to_gmap_Some {A} (x : A) (X : gset K) i y :
     gset_to_gmap x X !! i = Some y ↔ i ∈ X ∧ x = y.

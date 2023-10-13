@@ -19,3 +19,13 @@ Proof. set_solver. Qed.
 
 Lemma set_Forall_set_solver `{Set_ A C} (X : C) x : set_Forall (.≠ x) X ↔ x ∉ X.
 Proof. set_solver. Qed.
+
+Lemma set_guard_case_guard `{MonadSet M} `{Decision P} A (x : A) (X : M A) :
+  x ∈ (guard P;; X) ↔ P ∧ x ∈ X.
+Proof.
+  (* Test that [case_guard] works for sets and indeed generates two goals *)
+  case_guard; [set_solver|set_solver].
+Restart.
+  (* Test that [set_solver] supports [guard]. *)
+  set_solver.
+Qed.

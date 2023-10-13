@@ -226,6 +226,37 @@ Lemma solve_proper_flip {A} (R : relation A) `{!PreOrder R} (f : A → A) :
   Proper (R ==> R) f → Proper (flip R ==> flip R) f.
 Proof. solve_proper. Qed.
 
+Lemma solve_proper_finish_evar {A} (R : nat → relation A) (x y : A) :
+  R 0 x y → exists n, R n x y.
+Proof. intros. eexists. solve_proper. Qed.
+
+(** This is a more realistic version of the previous test, showing how such
+goals can arise for real. Needs to involve a subrelation so that the
+[eassumption] in [solve_proper_finish] doesn't already do the whole job. *)
+Lemma solve_proper_finish_evar' {A} (R1 R2 : nat → relation A) (f : A → nat) :
+  (∀ n, subrelation (R2 n) (R1 n)) →
+  (∀ n, Proper (R1 n ==> eq) f ) →
+  ∀ n, Proper (R2 n ==> eq) (λ x, S (f x)).
+Proof.
+  intros Hsub Hf. solve_proper_core ltac:(fun _ => eapply Hf || f_equiv).
+Qed.
+
+Definition option_rel {A} (R : relation A) (mx my : option A) :=
+  match mx, my with
+    | Some x, Some y => R x y
+    | None, None => True
+    | _, _ => False
+  end.
+Arguments option_rel : simpl never.
+Lemma solve_proper_convertible {A} (R : relation A) (x y : A) :
+  R x y → (option_rel R) (Some x) (Some y).
+Proof.
+  (* This needs [solve_proper] to use an assumption that doesn't syntactically
+  seem to be about the same variables, but actually up to conversion it exactly
+  matches the goal. *)
+  intros R'. solve_proper.
+Qed.
+
 Section tests.
   Context {A B : Type} `{!Equiv A, !Equiv B}.
   Context (foo : A → A) (bar : A → B) (baz : B → A → A).

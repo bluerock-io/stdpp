@@ -168,6 +168,172 @@ Restart.
   opose proof* HR as HR'; [exact HP|exact HQ|exact HR'].
 Qed.
 
+(** Some tests for f_equiv. *)
+(* Similar to [f_equal], it should solve goals by [reflexivity]. *)
+Lemma test_f_equiv_refl {A} (R : relation A) `{!Equivalence R} x :
+  R x x.
+Proof. f_equiv. Qed.
+
+(* And immediately solve sub-goals by reflexivity *)
+Lemma test_f_equiv_refl_nested {A} (R : relation A) `{!Equivalence R} g x y z :
+  Proper (R ==> R ==> R) g →
+  R y z →
+  R (g x y) (g x z).
+Proof. intros ? Hyz. f_equiv. apply Hyz. Qed.
+
+(* Ensure we can handle [flip]. *)
+Lemma f_equiv_flip {A} (R : relation A) `{!PreOrder R} (f : A → A) :
+  Proper (R ==> R) f → Proper (flip R ==> flip R) f.
+Proof. intros ? ?? EQ. f_equiv. exact EQ. Qed.
+
+Section f_equiv.
+  Context `{!Equiv A, !Equiv B, !SubsetEq A}.
+
+  Lemma f_equiv1 (fn : A → B) (x1 x2 : A) :
+    Proper ((≡) ==> (≡)) fn →
+    x1 ≡ x2 →
+    fn x1 ≡ fn x2.
+  Proof. intros. f_equiv. assumption. Qed.
+
+  Lemma f_equiv2 (fn : A → B) (x1 x2 : A) :
+    Proper ((⊆) ==> (≡)) fn →
+    x1 ⊆ x2 →
+    fn x1 ≡ fn x2.
+  Proof. intros. f_equiv. assumption. Qed.
+
+  (* Ensure that we prefer the ≡. *)
+  Lemma f_equiv3 (fn : A → B) (x1 x2 : A) :
+    Proper ((≡) ==> (≡)) fn →
+    Proper ((⊆) ==> (≡)) fn →
+    x1 ≡ x2 →
+    fn x1 ≡ fn x2.
+  Proof.
+    (* The Coq tactic prefers the ⊆. *)
+    intros. Morphisms.f_equiv. Fail assumption.
+  Restart.
+    intros. f_equiv. assumption.
+  Qed.
+End f_equiv.
+
+(** Some tests for solve_proper (also testing f_equiv indirectly). *)
+
+(** Test case for #161 *)
+Lemma test_solve_proper_const {A} (R : relation A) `{!Equivalence R} x :
+  Proper (R ==> R) (λ _, x).
+Proof. solve_proper. Qed.
+
+Lemma solve_proper_flip {A} (R : relation A) `{!PreOrder R} (f : A → A) :
+  Proper (R ==> R) f → Proper (flip R ==> flip R) f.
+Proof. solve_proper. Qed.
+
+(* Test that [solve_proper_finish] uses [eassumption].
+Think of [R] being Iris's [dist]. *)
+Lemma solve_proper_finish_evar {A} (R : nat → relation A) (x y : A) :
+  R 0 x y → ∃ n, R n x y.
+Proof. intros. eexists. solve_proper. Qed.
+
+(** This is a more realistic version of the previous test, showing how such
+goals can arise for real. Needs to involve a subrelation so that the
+[eassumption] in [solve_proper_finish] doesn't already do the whole job, i.e.,
+we need the right mode for [SolveProperSubrelation]. *)
+Lemma solve_proper_finish_evar' {A} (R1 R2 : nat → relation A) (f : A → nat) :
+  (∀ n, subrelation (R2 n) (R1 n)) →
+  (∀ n, Proper (R1 n ==> eq) f) →
+  ∀ n, Proper (R2 n ==> eq) (λ x, S (f x)).
+Proof.
+  intros Hsub Hf. solve_proper_core ltac:(fun _ => eapply Hf || f_equiv).
+Qed.
+
+Definition option_rel {A} (R : relation A) (mx my : option A) :=
+  match mx, my with
+  | Some x, Some y => R x y
+  | None, None => True
+  | _, _ => False
+  end.
+Arguments option_rel : simpl never.
+Lemma solve_proper_convertible {A} (R : relation A) (x y : A) :
+  R x y → (option_rel R) (Some x) (Some y).
+Proof.
+  (* This needs [solve_proper] to use an assumption that doesn't syntactically
+  seem to be about the same variables, but actually up to conversion it exactly
+  matches the goal. *)
+  intros R'. solve_proper.
+Qed.
+
+Section tests.
+  Context {A B : Type} `{!Equiv A, !Equiv B}.
+  Context (foo : A → A) (bar : A → B) (baz : B → A → A).
+  Context `{!Proper ((≡) ==> (≡)) foo,
+            !Proper ((≡) ==> (≡)) bar,
+            !Proper ((≡) ==> (≡) ==> (≡)) baz}.
+
+  Definition test1 (x : A) := baz (bar (foo x)) x.
+  Goal Proper ((≡) ==> (≡)) test1.
+  Proof. solve_proper. Qed.
+
+  Definition test2 (b : bool) (x : A) :=
+    if b then bar (foo x) else bar x.
+  Goal ∀ b, Proper ((≡) ==> (≡)) (test2 b).
+  Proof. solve_proper. Qed.
+
+  Definition test3 (f : nat → A) :=
+    baz (bar (f 0)) (f 2).
+  Goal Proper (pointwise_relation nat (≡) ==> (≡)) test3.
+  Proof. solve_proper. Qed.
+
+  (* We mirror [discrete_fun] from Iris to have an equivalence on a function
+  space. *)
+  Definition discrete_fun {A} (B : A → Type) `{!∀ x, Equiv (B x)} := ∀ x : A, B x.
+  Local Instance discrete_fun_equiv  {A} {B : A → Type} `{!∀ x, Equiv (B x)} :
+      Equiv (discrete_fun B) :=
+    λ f g, ∀ x, f x ≡ g x.
+  Notation "A -d> B" :=
+    (@discrete_fun A (λ _, B) _) (at level 99, B at level 200, right associativity).
+  Definition test4 x (f : A -d> A) := f x.
+  Goal ∀ x, Proper ((≡) ==> (≡)) (test4 x).
+  Proof. solve_proper. Qed.
+
+  Lemma test_subrelation1 (P Q : Prop) :
+    Proper ((↔) ==> impl) id.
+  Proof. solve_proper. Qed.
+
+End tests.
+
+(** The following tests are inspired by Iris's [ofe] structure (here, simplified
+to just a type an arbitrary relation), and the discrete function space [A -d> B]
+on a Type [A] and OFE [B]. The tests occur when proving [Proper]s for
+higher-order functions, which typically occurs while defining functions using
+Iris's [fixpoint] operator. *)
+Record setoid :=
+  Setoid { setoid_car :> Type; setoid_equiv : relation setoid_car }.
+Arguments setoid_equiv {_} _ _.
+
+Definition myfun (A : Type) (B : setoid) := A → B.
+Definition myfun_equiv {A B} : relation (myfun A B) :=
+  pointwise_relation _ setoid_equiv.
+Definition myfunS (A : Type) (B : setoid) := Setoid (myfun A B) myfun_equiv.
+
+Section setoid_tests.
+  Context {A : setoid} (f : A → A) (h : A → A → A).
+  Context `{!Proper (setoid_equiv ==> setoid_equiv) f,
+            !Proper (setoid_equiv ==> setoid_equiv ==> setoid_equiv) h}.
+
+  Definition setoid_test1 (rec : myfunS nat A) : myfunS nat A :=
+    λ n, h (f (rec n)) (rec n).
+  Goal Proper (setoid_equiv ==> setoid_equiv) setoid_test1.
+  Proof. solve_proper. Qed.
+
+  Definition setoid_test2 (rec : myfunS nat (myfunS nat A)) : myfunS nat A :=
+    λ n, h (f (rec n n)) (rec n n).
+  Goal Proper (setoid_equiv ==> setoid_equiv) setoid_test2.
+  Proof. solve_proper. Qed.
+
+  Definition setoid_test3 (rec : myfunS nat A) : myfunS nat (myfunS nat A) :=
+    λ n m, h (f (rec n)) (rec m).
+  Goal Proper (setoid_equiv ==> setoid_equiv) setoid_test3.
+  Proof. solve_proper. Qed.
+End setoid_tests.
+
 (** Regression tests for [naive_solver].
 Requires a bunch of other tactics to work so it comes last in this file. *)
 Lemma naive_solver_issue_115 (P : nat → Prop) (x : nat) :

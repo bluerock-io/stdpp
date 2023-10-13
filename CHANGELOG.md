@@ -14,7 +14,9 @@ API-breaking change is listed.
     `guard P;; m`/`p ← guard P; m` instead of `guard P; m`/`guard P as p; m`.
   + Replace the tactic `case_option_guard` with a more general `case_guard`
     version.
-
+- Equip `solve_proper` with support for subrelations. When the goal is `R x y`
+  and an assumption `R' x y` is found, we search for an instance of
+  `SolveProperSubrelation R' R` and if we find one, that finishes the proof.
 
 ## std++ 1.9.0 (2023-10-11)
 

@@ -279,6 +279,10 @@ unifies a successor. *)
 Tactic Notation "eunify" open_constr(x) open_constr(y) :=
   unify x y.
 
+(** The tactic [no_new_unsolved_evars tac] executes [tac] and fails if it
+creates any new evars or leaves behind any subgoals. *)
+Ltac no_new_unsolved_evars tac := solve [unshelve tac].
+
 (** Operational type class projections in recursive calls are not folded back
 appropriately by [simpl]. The tactic [csimpl] uses the [fold_classes] tactics
 to refold recursive calls of [fmap], [mbind], [omap] and [alter]. A
@@ -380,6 +384,14 @@ Ltac setoid_subst :=
   | H : @equiv ?A ?e _ ?x |- _ => symmetry in H; setoid_subst_aux (@equiv A e) x
   end.
 
+(** A little helper for [f_equiv] and [solve_proper] that simplifies away [flip]
+relations. *)
+Ltac clean_flip :=
+  repeat match goal with
+  | |- (flip ?R) ?x ?y => change (R y x)
+  | H : (flip ?R) ?x ?y |- _ => change (R y x) in H
+  end.
+
 (** f_equiv works on goals of the form [f _ = f _], for any relation and any
 number of arguments. It looks for an appropriate [Proper] instance, and applies
 it. The tactic is somewhat limited, since it cannot be used to backtrack on
@@ -389,10 +401,16 @@ we try to "maintain" the relation of the current goal. For example,
 when having [Proper (equiv ==> dist) f] and [Proper (dist ==> dist) f], it will
 favor the second because the relation (dist) stays the same. *)
 Ltac f_equiv :=
+  (* Simplify away [flip], they would get in the way later. *)
+  clean_flip;
+  (* Find out what kind of goal we have, and try to make progress. *)
   match goal with
+  (* Similar to [f_equal] also handle the reflexivity case. *)
+  | |- _ ?x ?x => fast_reflexivity
+  (* Making progress on [pointwise_relation] is as simple as introducing the variable. *)
   | |- pointwise_relation _ _ _ _ => intros ?
   (* We support matches on both sides, *if* they concern the same variable, or
-     variables in some relation. *)
+     terms in some relation. *)
   | |- ?R (match ?x with _ => _ end) (match ?x with _ => _ end) =>
     destruct x
   | H : ?R ?x ?y |- ?R2 (match ?x with _ => _ end) (match ?y with _ => _ end) =>
@@ -447,13 +465,27 @@ Ltac f_equiv :=
   | |- ?R (?f _ _ _) _ => simple apply (_ : Proper (_ ==> _ ==> _ ==> R) f)
   | |- ?R (?f _ _ _ _) _ => simple apply (_ : Proper (_ ==> _ ==> _ ==> _ ==> R) f)
   | |- ?R (?f _ _ _ _ _) _ => simple apply (_ : Proper (_ ==> _ ==> _ ==> _ ==> _ ==> R) f)
-
-  (* Similar to [f_equal] also handle the reflexivity case. *)
-  | |- _ ?x ?x => fast_reflexivity
   end;
   (* Similar to [f_equal] immediately solve trivial goals *)
   try fast_reflexivity.
 Tactic Notation "f_equiv" "/=" := csimpl in *; f_equiv.
+
+(** The typeclass [SolveProperSubrelation] is used by the [solve_proper] tactic
+when the goal is of the form [R1 x y] and there are assumptions of the form [R2
+x y]. We cannot use Coq's [subrelation] class here as adding the [subrelation]
+instances causes lots of backtracking in the [Proper] hint search, resulting in
+very slow/diverging [rewrite]s due to exponential instance search. *)
+Class SolveProperSubrelation {A} (R R' : relation A) :=
+  is_solve_proper_subrelation x y : R x y → R' x y.
+(** We use [!] to handle indexed relations such as [dist], where we
+can have an [R n] assumption and a [R ?m] goal. *)
+Global Hint Mode SolveProperSubrelation + ! ! : typeclass_instances.
+Global Arguments is_solve_proper_subrelation {A R R' _ x y}.
+
+Global Instance subrelation_solve_proper_subrelation {A} (R R' : relation A) :
+  subrelation R R' →
+  SolveProperSubrelation R R'.
+Proof. intros ???. apply is_subrelation. Qed.
 
 (** The tactic [solve_proper_unfold] unfolds the first head symbol, so that
 we proceed by repeatedly using [f_equiv]. *)
@@ -488,17 +520,30 @@ Ltac solve_proper_prepare :=
      (* Now forcefully introduce the first ∀ and other ∀s that show up in the
      goal afterwards. *)
      intros ?; intros
-  end; simplify_eq;
+  end;
+  (* Simplify things, if we can. *)
+  simplify_eq;
   (* We try with and without unfolding. We have to backtrack on
      that because unfolding may succeed, but then the proof may fail. *)
   (solve_proper_unfold + idtac); simpl.
+(** [solve_proper_finish] is basically a version of [eassumption]
+that can also take into account [subrelation]. *)
+Ltac solve_proper_finish :=
+  (* We always try this first, since the syntactic match below is not always
+  able to find the assumptions we are looking for (e.g. when [Some x ⊑ Some y]
+  is convertible to [x ⊑ y]). *)
+  eassumption ||
+  match goal with
+  | H : ?R1 ?x ?y |- ?R2 ?x ?y =>
+    no_new_unsolved_evars ltac:(eapply (is_solve_proper_subrelation H))
+  end.
 (** The tactic [solve_proper_core tac] solves goals of the form "Proper (R1 ==> R2)", for
 any number of relations. The actual work is done by repeatedly applying
 [tac]. *)
 Ltac solve_proper_core tac :=
   solve_proper_prepare;
-  (* Now do the job. *)
-  solve [repeat first [eassumption | tac ()] ].
+  (* Now do the job. The inner tactics can rely on [flip] having been cleaned. *)
+  solve [repeat (clean_flip; first [solve_proper_finish | tac ()]) ].
 
 (** Finally, [solve_proper] tries to apply [f_equiv] in a loop. *)
 Ltac solve_proper := solve_proper_core ltac:(fun _ => f_equiv).
@@ -738,11 +783,6 @@ goal. *)
 Lemma forall_and_distr (A : Type) (P Q : A → Prop) :
   (∀ x, P x ∧ Q x) ↔ (∀ x, P x) ∧ (∀ x, Q x).
 Proof. firstorder. Qed.
-
-(** The tactic [no_new_unsolved_evars tac] executes [tac] and fails if it
-creates any new evars. *)
-
-Ltac no_new_unsolved_evars tac := solve [unshelve tac].
 
 Tactic Notation "naive_solver" tactic(tac) :=
   unfold iff, not in *;

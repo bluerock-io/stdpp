@@ -313,7 +313,10 @@ Notation "X ≢@{ A } Y":= (¬X ≡@{ A } Y)
 (** The type class [LeibnizEquiv] collects setoid equalities that coincide
 with Leibniz equality. We provide the tactic [fold_leibniz] to transform such
 setoid equalities into Leibniz equalities, and [unfold_leibniz] for the
-reverse. *)
+reverse.
+
+Various std++ tactics assume that this class is only instantiated if [≡]
+is an equivalence relation. *)
 Class LeibnizEquiv A `{Equiv A} :=
   leibniz_equiv (x y : A) : x ≡ y → x = y.
 Global Hint Mode LeibnizEquiv ! ! : typeclass_instances.

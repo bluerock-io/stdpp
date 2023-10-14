@@ -4114,7 +4114,9 @@ Section fmap.
     intros ? l1. induction l1; intros [|??]; inversion 1; constructor; auto.
   Qed.
   Global Instance list_fmap_eq_inj : Inj (=) (=) f → Inj (=@{list A}) (=) (fmap f).
-  Proof. intros ?%list_fmap_inj ?? ?%list_eq_Forall2%(inj _). by apply list_eq_Forall2. Qed.
+  Proof.
+    intros ?%list_fmap_inj ?? ?%list_eq_Forall2%(inj _). by apply list_eq_Forall2.
+  Qed.
   Global Instance list_fmap_equiv_inj `{!Equiv A, !Equiv B} :
     Inj (≡) (≡) f → Inj (≡@{list A}) (≡) (fmap f).
   Proof.

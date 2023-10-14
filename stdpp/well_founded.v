@@ -13,7 +13,8 @@ reach implementation limits before running into the opaque [well_founded] proof.
 
 This trick is originally due to Georges Gonthier, see
 https://sympa.inria.fr/sympa/arc/coq-club/2007-07/msg00013.html *)
-Definition wf_guard `{R : relation A} (n : nat) (wfR : well_founded R) : well_founded R :=
+Definition wf_guard `{R : relation A} (n : nat)
+    (wfR : well_founded R) : well_founded R :=
   Acc_intro_generator n wfR.
 
 (* Generally we do not want [wf_guard] to be expanded (neither by tactics,
@@ -41,7 +42,8 @@ Lemma Fix_F_proper `{R : relation A} (B : A → Type) (E : ∀ x, relation (B x)
   E _ (Fix_F B F acc1) (Fix_F B F acc2).
 Proof. revert x acc1 acc2. fix FIX 2. intros x [acc1] [acc2]; simpl; auto. Qed.
 
-Lemma Fix_unfold_rel `{R : relation A} (wfR : well_founded R) (B : A → Type) (E : ∀ x, relation (B x))
+Lemma Fix_unfold_rel `{R : relation A} (wfR : well_founded R)
+    (B : A → Type) (E : ∀ x, relation (B x))
     (F: ∀ x, (∀ y, R y x → B y) → B x)
     (HF: ∀ (x: A) (f g: ∀ y, R y x → B y),
            (∀ y Hy Hy', E _ (f y Hy) (g y Hy')) → E _ (F x f) (F x g))

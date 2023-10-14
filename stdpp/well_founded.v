@@ -6,16 +6,14 @@ Lemma Acc_impl {A} (R1 R2 : relation A) x :
   Acc R1 x → (∀ y1 y2, R2 y1 y2 → R1 y1 y2) → Acc R2 x.
 Proof. induction 1; constructor; auto. Qed.
 
-Notation wf := well_founded.
-
 (** The function [wf_guard n wfR] adds [2 ^ n - 1] times an [Acc_intro]
 constructor ahead of the [wfR] proof. This definition can be used to make
-opaque [wf] proofs "compute". For big enough [n], say [32], computation will
-reach implementation limits before running into the opaque [wf] proof.
+opaque [well_founded] proofs "compute". For big enough [n], say [32], computation will
+reach implementation limits before running into the opaque [well_founded] proof.
 
 This trick is originally due to Georges Gonthier, see
 https://sympa.inria.fr/sympa/arc/coq-club/2007-07/msg00013.html *)
-Definition wf_guard `{R : relation A} (n : nat) (wfR : wf R) : wf R :=
+Definition wf_guard `{R : relation A} (n : nat) (wfR : well_founded R) : well_founded R :=
   Acc_intro_generator n wfR.
 
 (* Generally we do not want [wf_guard] to be expanded (neither by tactics,
@@ -26,7 +24,7 @@ Strategy 100 [wf_guard].
 
 Lemma wf_projected `{R1 : relation A} `(R2 : relation B) (f : A → B) :
   (∀ x y, R1 x y → R2 (f x) (f y)) →
-  wf R2 → wf R1.
+  well_founded R2 → well_founded R1.
 Proof.
   intros Hf Hwf.
   cut (∀ y, Acc R2 y → ∀ x, y = f x → Acc R1 x).
@@ -43,7 +41,7 @@ Lemma Fix_F_proper `{R : relation A} (B : A → Type) (E : ∀ x, relation (B x)
   E _ (Fix_F B F acc1) (Fix_F B F acc2).
 Proof. revert x acc1 acc2. fix FIX 2. intros x [acc1] [acc2]; simpl; auto. Qed.
 
-Lemma Fix_unfold_rel `{R : relation A} (wfR : wf R) (B : A → Type) (E : ∀ x, relation (B x))
+Lemma Fix_unfold_rel `{R : relation A} (wfR : well_founded R) (B : A → Type) (E : ∀ x, relation (B x))
     (F: ∀ x, (∀ y, R y x → B y) → B x)
     (HF: ∀ (x: A) (f g: ∀ y, R y x → B y),
            (∀ y Hy Hy', E _ (f y Hy) (g y Hy')) → E _ (F x f) (F x g))

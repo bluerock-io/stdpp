@@ -37,7 +37,7 @@ Section search_infinite.
 
   Context `{!Inj (=) (=) f, !EqDecision B}.
 
-  Lemma search_infinite_R_wf xs : wf (R xs).
+  Lemma search_infinite_R_wf xs : well_founded (R xs).
   Proof.
     revert xs. assert (help : ∀ xs n n',
       Acc (R (filter (.≠ f n') xs)) n → n' < n → Acc (R xs) n).

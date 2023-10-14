@@ -247,7 +247,7 @@ Proof.
 Qed.
 
 (** * Induction principles *)
-Lemma set_wf : wf (⊂@{C}).
+Lemma set_wf : well_founded (⊂@{C}).
 Proof. apply (wf_projected (<) size); auto using subset_size, lt_wf. Qed.
 Lemma set_ind (P : C → Prop) :
   Proper ((≡) ==> impl) P →

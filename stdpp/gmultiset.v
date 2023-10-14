@@ -760,7 +760,7 @@ Section more_lemmas.
   Qed.
 
   (** Well-foundedness *)
-  Lemma gmultiset_wf : wf (⊂@{gmultiset A}).
+  Lemma gmultiset_wf : well_founded (⊂@{gmultiset A}).
   Proof.
     apply (wf_projected (<) size); auto using gmultiset_subset_size, lt_wf.
   Qed.

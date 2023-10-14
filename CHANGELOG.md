@@ -22,6 +22,7 @@ API-breaking change is listed.
   for easy measure/size induction.
 - Add `inv` tactic as a more well-behaved alternative to `inversion_clear`
   (inspired by CompCert), and `oinv` as its version on open terms.
+- Add `prod_swap : A * B → B * A` and some basic theory about it.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

@@ -748,10 +748,12 @@ Global Instance: Params (@curry4) 5 := {}.
 
 Definition prod_map {A A' B B'} (f: A → A') (g: B → B') (p : A * B) : A' * B' :=
   (f (p.1), g (p.2)).
+Global Instance: Params (@prod_map) 4 := {}.
 Global Arguments prod_map {_ _ _ _} _ _ !_ / : assert.
 
 Definition prod_zip {A A' A'' B B' B''} (f : A → A' → A'') (g : B → B' → B'')
     (p : A * B) (q : A' * B') : A'' * B'' := (f (p.1) (q.1), g (p.2) (q.2)).
+Global Instance: Params (@prod_zip) 6 := {}.
 Global Arguments prod_zip {_ _ _ _ _ _} _ _ !_ !_ / : assert.
 
 Global Instance prod_inhabited {A B} (iA : Inhabited A)

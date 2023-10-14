@@ -754,6 +754,10 @@ Definition prod_zip {A A' A'' B B' B''} (f : A → A' → A'') (g : B → B' →
     (p : A * B) (q : A' * B') : A'' * B'' := (f (p.1) (q.1), g (p.2) (q.2)).
 Global Arguments prod_zip {_ _ _ _ _ _} _ _ !_ !_ / : assert.
 
+Definition prod_swap {A B} (p : A * B) : B * A := (p.2, p.1).
+Global Arguments prod_swap {_ _} !_ /.
+Global Instance: Params (@prod_swap) 2 := {}.
+
 Global Instance prod_inhabited {A B} (iA : Inhabited A)
     (iB : Inhabited B) : Inhabited (A * B) :=
   match iA, iB with populate x, populate y => populate (x,y) end.
@@ -780,6 +784,7 @@ Proof. destruct p as [[[??] ?] ?]; reflexivity. Qed.
 Lemma pair_eq {A B} (a1 a2 : A) (b1 b2 : B) :
   (a1, b1) = (a2, b2) ↔ a1 = a2 ∧ b1 = b2.
 Proof. apply pair_equal_spec. Qed.
+
 Global Instance pair_inj {A B} : Inj2 (=) (=) (=) (@pair A B).
 Proof. injection 1; auto. Qed.
 Global Instance prod_map_inj {A A' B B'} (f : A → A') (g : B → B') :
@@ -788,6 +793,14 @@ Proof.
   intros ?? [??] [??] ?; simpl in *; f_equal;
     [apply (inj f)|apply (inj g)]; congruence.
 Qed.
+
+Global Instance prod_swap_cancel {A B} :
+  Cancel (=) (@prod_swap A B) (@prod_swap B A).
+Proof. intros [??]; reflexivity. Qed.
+Global Instance prod_swap_inj {A B} : Inj (=) (=) (@prod_swap A B).
+Proof. apply cancel_inj. Qed.
+Global Instance prod_swap_surj {A B} : Surj (=) (@prod_swap A B).
+Proof. apply cancel_surj. Qed.
 
 Definition prod_relation {A B} (R1 : relation A) (R2 : relation B) :
   relation (A * B) := λ x y, R1 (x.1) (y.1) ∧ R2 (x.2) (y.2).
@@ -815,6 +828,10 @@ Section prod_relation.
   Global Instance fst_proper' : Proper (prod_relation RA RB ==> RA) fst.
   Proof. firstorder eauto. Qed.
   Global Instance snd_proper' : Proper (prod_relation RA RB ==> RB) snd.
+  Proof. firstorder eauto. Qed.
+
+  Global Instance prod_swap_proper' :
+    Proper (prod_relation RA RB ==> prod_relation RB RA) prod_swap.
   Proof. firstorder eauto. Qed.
 
   Global Instance curry_proper' `{RC : relation C} :
@@ -860,6 +877,9 @@ Section prod_setoid.
   Global Instance pair_equiv_inj : Inj2 (≡) (≡) (≡@{A*B}) pair := _.
   Global Instance fst_proper : Proper ((≡@{A*B}) ==> (≡)) fst := _.
   Global Instance snd_proper : Proper ((≡@{A*B}) ==> (≡)) snd := _.
+
+  Global Instance prod_swap_proper :
+    Proper ((≡@{A*B}) ==> (≡@{B*A})) prod_swap := _.
 
   Global Instance curry_proper `{Equiv C} :
     Proper (((≡@{A*B}) ==> (≡@{C})) ==> (≡) ==> (≡) ==> (≡)) curry := _.

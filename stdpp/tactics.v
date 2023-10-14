@@ -203,7 +203,8 @@ Tactic Notation "repeat_on_hyps" tactic3(tac) :=
   repeat match goal with H : _ |- _ => progress tac H end.
 
 (** The tactic [clear dependent H1 ... Hn] clears the hypotheses [Hi] and
-their dependencies. *)
+their dependencies. This provides an n-ary variant of Coq's standard
+[clear dependent]. *)
 Tactic Notation "clear" "dependent" hyp(H1) hyp(H2) :=
   clear dependent H1; clear dependent H2.
 Tactic Notation "clear" "dependent" hyp(H1) hyp(H2) hyp(H3) :=
@@ -563,6 +564,17 @@ Tactic Notation "iter" tactic(tac) tactic(l) :=
   let rec go l :=
   match l with ?x :: ?l => tac x || go l end in go l.
 
+(** The tactic [inv] is a fixed version of [inversion_clear] from the standard
+library that works around <https://github.com/coq/coq/issues/2465>. It also
+has a shorter name since clearing is the default for [destruct], why wouldn't
+it also be the default for inversion?
+This is inspired by CompCert's [inv] tactic
+<https://github.com/AbsInt/CompCert/blob/5f761eb8456609d102acd8bc780b6fd3481131ef/lib/Coqlib.v#L30>. *)
+Tactic Notation "inv" ident(H) "as" simple_intropattern(ipat) :=
+  inversion H as ipat; clear H; simplify_eq.
+Tactic Notation "inv" ident(H) :=
+  inversion H; clear H; simplify_eq.
+
 (** * The "o" family of tactics equips [pose proof], [destruct], [inversion],
 [generalize] and [specialize] with support for "o"pen terms. You can leave
 underscores that become evars or subgoals, similar to [refine]. You can suffix
@@ -650,10 +662,28 @@ Tactic Notation "odestruct" uconstr(p) "as" simple_intropattern(pat) :=
 
 Tactic Notation "oinversion" uconstr(p) "as" simple_intropattern(pat) :=
   opose_specialize_foralls_core p pat ltac:(fun p =>
+    (* We have to create a temporary as [inversion] does not support
+    general terms; then we clear the temporary. *)
     let Hp := fresh in pose proof p as Hp; inversion Hp as pat; clear Hp).
 Tactic Notation "oinversion" uconstr(p) :=
   opose_specialize_foralls_core p () ltac:(fun p =>
     let Hp := fresh in pose proof p as Hp; inversion Hp; clear Hp).
+
+Tactic Notation "oinv" uconstr(p) "as" simple_intropattern(pat) :=
+  opose_specialize_foralls_core p pat ltac:(fun p =>
+    (* If it is a variable we want to call [inv] on it directly
+    so that it gets cleared. *)
+    tryif is_var p then
+      inv p as pat
+    else
+      (* No need to [clear Hp]; [inv] does that. *)
+      let Hp := fresh in pose proof p as Hp; inv Hp as pat).
+Tactic Notation "oinv" uconstr(p) :=
+  opose_specialize_foralls_core p () ltac:(fun p =>
+    tryif is_var p then
+      inv p
+    else
+      let Hp := fresh in pose proof p as Hp; inv Hp).
 
 (** Helper for [ospecialize]: call [tac] with the name of the head term *if*
 that term is a variable.

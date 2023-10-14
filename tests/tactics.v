@@ -109,6 +109,18 @@ Proof.
   let f' := get_head f in unify f f'.
 Abort.
 
+(** inv tests *)
+Inductive even : nat → Prop :=
+  | Even0 : even 0
+  | Even2 n : even n → even (S (S n)).
+Lemma inv_test_1 n : even (2 + n) → even n.
+Proof. intros H. inv H as [|? H']. Show. done. Qed.
+Lemma inv_test_2 (a b c d : nat) : a ≠ c → (a, b) = (c, d) → False.
+Proof.
+  (* Test taken from https://github.com/coq/coq/issues/2465 *)
+  intros DIFF EQ. inv EQ. (* Thanks to the simplify_eq this solves the goal. *)
+Qed.
+
 (** o-tactic tests *)
 Check "otest".
 Lemma otest (P Q R : nat → Prop)
@@ -167,6 +179,18 @@ Restart.
   intros HP HQ HR.
   opose proof* HR as HR'; [exact HP|exact HQ|exact HR'].
 Qed.
+
+(* Like [inversion], this does *not* clear. *)
+Check "oinversion_test1".
+Lemma oinversion_test1 n : even (2 + n) → even n.
+Proof. intros H. oinversion H as [|n' Hn' EQ]. Show. done. Qed.
+
+Lemma oinv_test1 : ~(∀ n, even n).
+Proof. intros H. oinv (H 1). Qed.
+(* Ensure we clear the [H] if appropriate. *)
+Check "oinv_test1".
+Lemma oinv_test2 n : even (2 + n) → even n.
+Proof. intros H. oinv H as [|? H']. Show. done. Qed.
 
 (** Some tests for f_equiv. *)
 (* Similar to [f_equal], it should solve goals by [reflexivity]. *)

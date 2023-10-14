@@ -20,6 +20,8 @@ API-breaking change is listed.
 - Remove `wf` alias for the standard `well_founded`.
 - Add lemmas `Nat.lt_wf_0_projected`, `N.lt_wf_0_projected`, `Z.lt_wf_projected`
   for easy measure/size induction.
+- Add `inv` tactic as a more well-behaved alternative to `inversion_clear`
+  (inspired by CompCert), and `oinv` as its version on open terms.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

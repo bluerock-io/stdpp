@@ -24,6 +24,7 @@ https://gitlab.mpi-sws.org/iris/stdpp/-/issues/147. *)
 From Coq Require Export EqdepFacts PArith NArith ZArith NPeano.
 From Coq Require Import QArith Qcanon.
 From stdpp Require Export base decidable option.
+From stdpp Require Import well_founded.
 From stdpp Require Import options.
 Local Open Scope nat_scope.
 
@@ -125,6 +126,11 @@ Module Nat.
   Qed.
   Global Instance lt_pi: ∀ x y : nat, ProofIrrel (x < y).
   Proof. unfold Peano.lt. apply _. Qed.
+
+  (** Given a measure/size [f : B → nat], you can do induction on the size of
+  [b : B] using [induction (lt_wf_0_projected f b)]. *)
+  Lemma lt_wf_0_projected {B} (f : B → nat) : well_founded (λ x y, f x < f y).
+  Proof. by apply (wf_projected (<) f), lt_wf_0. Qed.
 
   Lemma le_sum (x y : nat) : x ≤ y ↔ ∃ z, y = x + z.
   Proof. split; [exists (y - x); lia | intros [z ->]; lia]. Qed.
@@ -484,6 +490,9 @@ Module N.
   Global Instance le_total : Total (≤)%N.
   Proof. repeat intro; lia. Qed.
 
+  Lemma lt_wf_0_projected {B} (f : B → N) : well_founded (λ x y, f x < f y).
+  Proof. by apply (wf_projected (<) f), lt_wf_0. Qed.
+
   (** FIXME: Coq 8.17 deprecated some lemmas in https://github.com/coq/coq/pull/16203.
   We cannot use the intended replacements since we support Coq 8.16. We also do
   not want to disable [deprecated-syntactic-definition] everywhere, so instead
@@ -587,6 +596,9 @@ Module Z.
   Qed.
   Global Instance le_total: Total Z.le.
   Proof. repeat intro; lia. Qed.
+
+  Lemma lt_wf_projected {B} (f : B → Z) z : well_founded (λ x y, z ≤ f x < f y).
+  Proof. by apply (wf_projected (λ x y, z ≤ x < y) f), lt_wf. Qed.
 
   Lemma pow_pred_r n m : 0 < m → n * n ^ (Z.pred m) = n ^ m.
   Proof.

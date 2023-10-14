@@ -143,7 +143,7 @@ Section general.
   Lemma nsteps_once x y : R x y → nsteps R 1 x y.
   Proof. eauto. Qed.
   Lemma nsteps_once_inv x y : nsteps R 1 x y → R x y.
-  Proof. inversion 1 as [|???? Hhead Htail]; inversion Htail; by subst. Qed.
+  Proof. inversion 1 as [|???? Hhead Htail]; by inv Htail. Qed.
   Lemma nsteps_trans n m x y z :
     nsteps R n x y → nsteps R m y z → nsteps R (n + m) x z.
   Proof. induction 1; simpl; eauto. Qed.
@@ -155,7 +155,7 @@ Section general.
   Proof.
     revert x.
     induction n as [|n IH]; intros x Hx; simpl; [by eauto|].
-    inversion Hx; naive_solver.
+    inv Hx; naive_solver.
   Qed.
 
   Lemma nsteps_inv_r n x z : nsteps R (S n) x z → ∃ y, nsteps R n x y ∧ R y z.

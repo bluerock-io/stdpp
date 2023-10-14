@@ -2492,7 +2492,7 @@ Lemma sublist_cons_l x l k :
   x :: l `sublist_of` k ↔ ∃ k1 k2, k = k1 ++ x :: k2 ∧ l `sublist_of` k2.
 Proof.
   split.
-  - intros Hlk. induction k as [|y k IH]; inversion Hlk.
+  - intros Hlk. induction k as [|y k IH]; inv Hlk.
     + eexists [], k. by repeat constructor.
     + destruct IH as (k1&k2&->&?); auto. by exists (y :: k1), k2.
   - intros (k1&k2&->&?). by apply sublist_inserts_l, sublist_skip.
@@ -2538,7 +2538,7 @@ Proof.
   intros. opose proof* (IH (l1 ++ [_]) (l2 ++ [_])) as Hl12.
   { by rewrite <-!(assoc_L (++)). }
   rewrite sublist_app_l in Hl12. destruct Hl12 as (k1&k2&E&?&Hk2).
-  destruct k2 as [|z k2] using rev_ind; [inversion Hk2|].
+  destruct k2 as [|z k2] using rev_ind; [inv Hk2|].
   rewrite (assoc_L (++)) in E; simplify_list_eq.
   eauto using sublist_inserts_r.
 Qed.
@@ -3059,7 +3059,7 @@ Section Forall_Exists.
     split.
     - induction 1 as [x|y ?? [x [??]]]; exists x; by repeat constructor.
     - intros [x [Hin ?]]. induction l; [by destruct (not_elem_of_nil x)|].
-      inversion Hin; subst; [left|right]; auto.
+      inv Hin; subst; [left|right]; auto.
   Qed.
   Lemma Exists_inv x l : Exists P (x :: l) → P x ∨ Exists P l.
   Proof. inversion 1; intuition trivial. Qed.
@@ -3194,8 +3194,8 @@ Lemma Forall2_forall `{Inhabited A} B C (Q : A → B → C → Prop) l k :
 Proof.
   split; [induction 1; constructor; auto|].
   intros Hlk. induction (Hlk inhabitant) as [|x y l k _ _ IH]; constructor.
-  - intros z. by oinversion Hlk.
-  - apply IH. intros z. by oinversion Hlk.
+  - intros z. by oinv Hlk.
+  - apply IH. intros z. by oinv Hlk.
 Qed.
 
 Lemma Forall2_same_length {A B} (l : list A) (k : list B) :
@@ -3328,9 +3328,9 @@ Section Forall2.
     split; [induction 1; intros [|?]; simpl; try constructor; eauto|].
     revert k. induction l as [|x l IH]; intros [| y k] H.
     - done.
-    - oinversion (H 0).
-    - oinversion (H 0).
-    - constructor; [by oinversion (H 0)|]. apply (IH _ $ λ i, H (S i)).
+    - oinv (H 0).
+    - oinv (H 0).
+    - constructor; [by oinv (H 0)|]. apply (IH _ $ λ i, H (S i)).
   Qed.
   Lemma Forall2_lookup_lr l k i x y :
     Forall2 P l k → l !! i = Some x → k !! i = Some y → P x y.

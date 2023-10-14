@@ -17,6 +17,17 @@ API-breaking change is listed.
 - Equip `solve_proper` with support for subrelations. When the goal is `R x y`
   and an assumption `R' x y` is found, we search for an instance of
   `SolveProperSubrelation R' R` and if we find one, that finishes the proof.
+- Remove `wf` alias for the standard `well_founded`.
+
+The following `sed` script should perform most of the renaming
+(on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).
+Note that the script is not idempotent, do not run it twice.
+```
+sed -i -E -f- $(find theories -name "*.v") <<EOF
+# well_founded
+s/\bwf\b/well_founded/g
+EOF
+```
 
 ## std++ 1.9.0 (2023-10-11)
 

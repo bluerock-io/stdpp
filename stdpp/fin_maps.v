@@ -1241,7 +1241,7 @@ Proof.
 Qed.
 
 (** ** Induction principles *)
-Lemma map_wf {A} : wf (⊂@{M A}).
+Lemma map_wf {A} : well_founded (⊂@{M A}).
 Proof. apply (wf_projected (<) size); auto using map_subset_size, lt_wf. Qed.
 
 Lemma map_ind {A} (P : M A → Prop) :

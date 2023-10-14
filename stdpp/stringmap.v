@@ -17,7 +17,7 @@ Let R {A} (s : string) (m : stringmap A) (n1 n2 : N) :=
 Lemma fresh_string_step {A} s (m : stringmap A) n x :
   m !! (s +:+ pretty n) = Some x → R s m (1 + n) n.
 Proof. split; [lia|]. replace (1 + n - 1) with n by lia; eauto. Qed.
-Lemma fresh_string_R_wf {A} s (m : stringmap A) : wf (R s m).
+Lemma fresh_string_R_wf {A} s (m : stringmap A) : well_founded (R s m).
 Proof.
   induction (map_wf m) as [m _ IH]. intros n1; constructor; intros n2 [Hn Hs].
   specialize (IH _ (delete_subset m (s +:+ pretty (n2 - 1)) Hs) n2).

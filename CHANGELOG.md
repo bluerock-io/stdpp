@@ -28,6 +28,8 @@ Coq 8.19 is newly supported by this version of std++.
   to refer to a hypothesis on the goal (`inv 1`).
 - Add `prod_swap : A * B → B * A` and some basic theory about it.
 - Add lemma `join_app`.
+- Allow patterns and type annotations in propset notation, e.g.
+  `{[ (x, y) : nat * nat | x = y ]}`
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

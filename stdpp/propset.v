@@ -6,8 +6,13 @@ Record propset (A : Type) : Type := PropSet { propset_car : A → Prop }.
 Add Printing Constructor propset.
 Global Arguments PropSet {_} _ : assert.
 Global Arguments propset_car {_} _ _ : assert.
+(** Here we are using the notation "at level 200 as pattern" because we want to
+    be compatible with all the rules that start with [ {[ TERM ] such as
+    records, singletons, and map singletons. See
+    https://coq.inria.fr/refman/user-extensions/syntax-extensions.html#binders-bound-in-the-notation-and-parsed-as-terms
+    and https://gitlab.mpi-sws.org/iris/stdpp/-/merge_requests/533#note_98003 *)
 Notation "{[ x | P ]}" := (PropSet (λ x, P))
-  (at level 1, format "{[  x  |  P  ]}") : stdpp_scope.
+  (at level 1, x at level 200 as pattern, format "{[  x  |  P  ]}") : stdpp_scope.
 
 Global Instance propset_elem_of {A} : ElemOf A (propset A) := λ x X, propset_car X x.
 

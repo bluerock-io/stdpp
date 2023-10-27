@@ -105,7 +105,7 @@ Proof.
   - unfold elements, hashset_elements. intros [m Hm]; simpl.
     rewrite map_Forall_to_list in Hm. generalize (NoDup_fst_map_to_list m).
     induction Hm as [|[n l] m' [??] Hm];
-      csimpl; inversion_clear 1 as [|?? Hn]; [constructor|].
+      csimpl; inv 1 as [|?? Hn]; [constructor|].
     apply NoDup_app; split_and?; eauto.
     setoid_rewrite elem_of_list_bind; intros x ? ([n' l']&?&?); simpl in *.
     assert (hash x = n ∧ hash x = n') as [??]; subst.

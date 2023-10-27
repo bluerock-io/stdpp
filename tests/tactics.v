@@ -120,6 +120,15 @@ Proof.
   (* Test taken from https://github.com/coq/coq/issues/2465 *)
   intros DIFF EQ. inv EQ. (* Thanks to the simplify_eq this solves the goal. *)
 Qed.
+Check "inv_test_num".
+Lemma inv_test_num n : True → even (2 + n) → even n.
+Proof.
+  (* Make sure we do the same thing as [inversion_clear] when there are
+  other hypotheses before the one we invert. *)
+  inversion_clear 2 as [|? H']. Show.
+Restart.
+  inv 2 as [|? H']. Show. done.
+Qed.
 
 (** o-tactic tests *)
 Check "otest".

@@ -575,6 +575,21 @@ Tactic Notation "inv" ident(H) "as" simple_intropattern(ipat) :=
 Tactic Notation "inv" ident(H) :=
   inversion H; clear H; simplify_eq.
 
+(* We overload the notation with [integer] and [ident] to support
+[inv H] and [inv 1], like the regular [inversion] tactic. *)
+Tactic Notation "inv" integer(n) "as" simple_intropattern(ipat) :=
+  intros until n;
+  lazymatch goal with
+  | H : _ |- _ => (* matches the last hypothesis, which is what we want *)
+      inv H as ipat
+  end.
+Tactic Notation "inv" integer(n) :=
+  intros until n;
+  lazymatch goal with
+  | H : _ |- _ => (* matches the last hypothesis, which is what we want *)
+      inv H
+  end.
+
 (** * The "o" family of tactics equips [pose proof], [destruct], [inversion],
 [generalize] and [specialize] with support for "o"pen terms. You can leave
 underscores that become evars or subgoals, similar to [refine]. You can suffix

@@ -59,13 +59,13 @@ Section sorted.
     StronglySorted R (l1 ++ l2) → StronglySorted R l1.
   Proof.
     induction l1 as [|x1' l1 IH]; simpl;
-      [|inversion_clear 1]; decompose_Forall; constructor; auto.
+      [|inv 1]; decompose_Forall; constructor; auto.
   Qed.
   Lemma StronglySorted_app_inv_r l1 l2 :
     StronglySorted R (l1 ++ l2) → StronglySorted R l2.
   Proof.
     induction l1 as [|x1' l1 IH]; simpl;
-      [|inversion_clear 1]; decompose_Forall; auto.
+      [|inv 1]; decompose_Forall; auto.
   Qed.
 
   Lemma Sorted_StronglySorted `{!Transitive R} l :

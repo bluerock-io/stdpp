@@ -215,7 +215,7 @@ Lemma Forall2_vlookup {A B} (P : A → B → Prop) {n}
 Proof.
   split.
   - vec_double_ind v1 v2; [intros _ i; inv_fin i |].
-    intros n v1 v2 IH a b; simpl. inversion_clear 1.
+    intros n v1 v2 IH a b; simpl. inv 1.
     intros i. inv_fin i; simpl; auto.
   - vec_double_ind v1 v2; [constructor|].
     intros ??? IH ?? H. constructor.

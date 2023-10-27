@@ -110,7 +110,7 @@ Section general.
   Lemma rtc_r x y z : rtc R x y → R y z → rtc R x z.
   Proof. intros. etrans; eauto. Qed.
   Lemma rtc_inv x z : rtc R x z → x = z ∨ ∃ y, R x y ∧ rtc R y z.
-  Proof. inversion_clear 1; eauto. Qed.
+  Proof. inv 1; eauto. Qed.
   Lemma rtc_ind_l (P : A → Prop) (z : A)
     (Prefl : P z) (Pstep : ∀ x y, R x y → rtc R y z → P y → P x) :
     ∀ x, rtc R x z → P x.

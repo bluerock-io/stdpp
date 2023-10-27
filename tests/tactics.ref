@@ -51,8 +51,14 @@ use opose proof instead.
   EQ : n' = n
   ============================
   even n
-"oinv_test1"
+"oinv_test2"
      : string
+1 goal
+  
+  n : nat
+  H' : even n
+  ============================
+  even n
 1 goal
   
   n : nat

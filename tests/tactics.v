@@ -197,9 +197,20 @@ Proof. intros H. oinversion H as [|n' Hn' EQ]. Show. done. Qed.
 Lemma oinv_test1 : ~(∀ n, even n).
 Proof. intros H. oinv (H 1). Qed.
 (* Ensure we clear the [H] if appropriate. *)
-Check "oinv_test1".
+Check "oinv_test2".
 Lemma oinv_test2 n : even (2 + n) → even n.
-Proof. intros H. oinv H as [|? H']. Show. done. Qed.
+Proof.
+  intros H. oinv H as [|? H']. Show. done.
+Restart.
+  oinv 1 as [|? H']. Show. done.
+Qed.
+Lemma oinv_test_num (P : Prop) n :
+  P → (P → even (2 + n)) → even n.
+Proof.
+  intros HP. oinv 1.
+  { exact HP. }
+  done.
+Qed.
 
 (** Some tests for f_equiv. *)
 (* Similar to [f_equal], it should solve goals by [reflexivity]. *)

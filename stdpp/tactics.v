@@ -700,6 +700,21 @@ Tactic Notation "oinv" uconstr(p) :=
     else
       let Hp := fresh in pose proof p as Hp; inv Hp).
 
+(* As above, we overload the notation with [integer] and [ident] to support
+[oinv 1], like the regular [inversion] tactic. *)
+Tactic Notation "oinv" integer(n) "as" simple_intropattern(ipat) :=
+  intros until n;
+  lazymatch goal with
+  | H : _ |- _ => (* matches the last hypothesis, which is what we want *)
+      oinv H as ipat
+  end.
+Tactic Notation "oinv" integer(n) :=
+  intros until n;
+  lazymatch goal with
+  | H : _ |- _ => (* matches the last hypothesis, which is what we want *)
+      oinv H
+  end.
+
 (** Helper for [ospecialize]: call [tac] with the name of the head term *if*
 that term is a variable.
 

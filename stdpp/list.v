@@ -2929,8 +2929,7 @@ Section Forall_Exists.
   Proof. induction 1; simpl; auto. Qed.
   Lemma Forall_app l1 l2 : Forall P (l1 ++ l2) ↔ Forall P l1 ∧ Forall P l2.
   Proof.
-    (* No [inv], we actually want to keep the original here. *)
-    split; [induction l1; inversion 1; intuition|].
+    split; [induction l1; inv 1; naive_solver|].
     intros [??]; auto using Forall_app_2.
   Qed.
   Lemma Forall_true l : (∀ x, P x) → Forall P l.
@@ -3067,8 +3066,7 @@ Section Forall_Exists.
   Lemma Exists_app l1 l2 : Exists P (l1 ++ l2) ↔ Exists P l1 ∨ Exists P l2.
   Proof.
     split.
-    - (* No [inv], we actually want to keep the original here. *)
-      induction l1; inversion 1; intuition.
+    - induction l1; inv 1; naive_solver.
     - intros [H|H]; [induction H | induction l1]; simpl; intuition.
   Qed.
   Lemma Exists_impl (Q : A → Prop) l :
@@ -4253,9 +4251,9 @@ Section omap.
   Lemma elem_of_list_omap l y : y ∈ omap f l ↔ ∃ x, x ∈ l ∧ f x = Some y.
   Proof.
     split.
-    - (* No [inv], we actually want to keep the original here. *)
-      induction l as [|x l]; csimpl; repeat case_match; inversion 1;
-        setoid_rewrite elem_of_cons; naive_solver.
+    - induction l as [|x l]; csimpl; repeat case_match;
+        repeat (setoid_rewrite elem_of_nil || setoid_rewrite elem_of_cons);
+        naive_solver.
     - intros (x&Hx&?). by induction Hx; csimpl; repeat case_match;
         simplify_eq; try constructor; auto.
   Qed.

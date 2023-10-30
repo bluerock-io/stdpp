@@ -61,10 +61,9 @@ Section choice.
     { intros help. by apply (help (encode x)). }
     intros i. induction i as [|i IH] using Pos.peano_ind; intros p ??.
     { constructor. intros j. assert (p = encode x) by lia; subst.
-      inversion 1 as [? Hd|?? Hd]; subst;
-        rewrite decode_encode in Hd; congruence. }
+      inv 1 as [? Hd|?? Hd]; rewrite decode_encode in Hd; congruence. }
     constructor. intros j.
-    inversion 1 as [? Hd|? y Hd]; subst; auto with lia.
+    inv 1 as [? Hd|? y Hd]; auto with lia.
   Qed.
 
   Context `{∀ x, Decision (P x)}.

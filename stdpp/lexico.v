@@ -138,7 +138,7 @@ Proof.
   | _ :: _, [] => inright _
   | x1 :: l1, x2 :: l2 => cast_trichotomy (trichotomyT lexico (x1,l1) (x2,l2))
   end); clear tA go go';
-    abstract (repeat (done || constructor || congruence || by inversion 1)).
+    abstract (repeat (done || constructor || congruence || by inv 1)).
 Defined.
 
 Global Instance sig_lexico_po `{Lexico A, !StrictOrder (@lexico A _)}

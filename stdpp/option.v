@@ -147,7 +147,7 @@ Section setoids.
   Lemma None_equiv_eq mx : mx ≡ None ↔ mx = None.
   Proof. split; [by inv 1|intros ->; constructor]. Qed.
   Lemma Some_equiv_eq mx y : mx ≡ Some y ↔ ∃ y', mx = Some y' ∧ y' ≡ y.
-  Proof. split; [inversion 1; naive_solver|naive_solver (by constructor)]. Qed.
+  Proof. split; [inv 1; naive_solver|naive_solver (by constructor)]. Qed.
 
   Global Instance is_Some_proper : Proper ((≡@{option A}) ==> iff) is_Some.
   Proof. by inv 1. Qed.
@@ -183,7 +183,7 @@ Global Instance option_mfail: MFail option := λ _ _, None.
 
 Lemma option_fmap_inj {A B} (R1 : A → A → Prop) (R2 : B → B → Prop) (f : A → B) :
   Inj R1 R2 f → Inj (option_Forall2 R1) (option_Forall2 R2) (fmap f).
-Proof. intros ? [?|] [?|]; inversion 1; constructor; auto. Qed.
+Proof. intros ? [?|] [?|]; inv 1; constructor; auto. Qed.
 Global Instance option_fmap_eq_inj {A B} (f : A → B) :
   Inj (=) (=) f → Inj (=@{option A}) (=@{option B}) (fmap f).
 Proof.
@@ -247,7 +247,7 @@ Lemma bind_Some {A B} (f : A → option B) (mx : option A) y :
 Proof. destruct mx; naive_solver. Qed.
 Lemma bind_Some_equiv {A} `{Equiv B} (f : A → option B) (mx : option A) y :
   mx ≫= f ≡ Some y ↔ ∃ x, mx = Some x ∧ f x ≡ Some y.
-Proof. destruct mx; (split; [inversion 1|]); naive_solver. Qed.
+Proof. destruct mx; split; first [by inv 1|naive_solver]. Qed.
 Lemma bind_None {A B} (f : A → option B) (mx : option A) :
   mx ≫= f = None ↔ mx = None ∨ ∃ x, mx = Some x ∧ f x = None.
 Proof. destruct mx; naive_solver. Qed.

@@ -49,7 +49,7 @@ Proof. apply not_elem_of_dom. Qed.
 Lemma subseteq_dom {A} (m1 m2 : M A) : m1 ⊆ m2 → dom m1 ⊆ dom m2.
 Proof.
   rewrite map_subseteq_spec.
-  intros ??. rewrite !elem_of_dom. inversion 1; eauto.
+  intros ??. rewrite !elem_of_dom. inv 1; eauto.
 Qed.
 Lemma subset_dom {A} (m1 m2 : M A) : m1 ⊂ m2 → dom m1 ⊂ dom m2.
 Proof.

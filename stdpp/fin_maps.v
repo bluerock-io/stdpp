@@ -255,7 +255,7 @@ Lemma lookup_weaken {A} (m1 m2 : M A) i x :
 Proof. rewrite !map_subseteq_spec. auto. Qed.
 Lemma lookup_weaken_is_Some {A} (m1 m2 : M A) i :
   is_Some (m1 !! i) → m1 ⊆ m2 → is_Some (m2 !! i).
-Proof. inversion 1. eauto using lookup_weaken. Qed.
+Proof. inv 1. eauto using lookup_weaken. Qed.
 Lemma lookup_weaken_None {A} (m1 m2 : M A) i :
   m2 !! i = None → m1 ⊆ m2 → m1 !! i = None.
 Proof.
@@ -274,7 +274,7 @@ Proof.
   - intros Hm. apply map_eq. intros i. by rewrite Hm, lookup_empty.
 Qed.
 Lemma lookup_empty_is_Some {A} i : ¬is_Some ((∅ : M A) !! i).
-Proof. rewrite lookup_empty. by inversion 1. Qed.
+Proof. rewrite lookup_empty. by inv 1. Qed.
 Lemma lookup_empty_Some {A} i (x : A) : ¬(∅ : M A) !! i = Some x.
 Proof. by rewrite lookup_empty. Qed.
 Lemma lookup_total_empty `{!Inhabited A} i : (∅ : M A) !!! i = inhabitant.
@@ -1213,7 +1213,7 @@ Lemma map_size_list_to_map {A} (l : list (K * A)) :
   NoDup l.*1 →
   size (list_to_map l : M A) = length l.
 Proof.
-  induction l; csimpl; inversion 1; simplify_eq/=; [by rewrite map_size_empty|].
+  induction l; csimpl; inv 1; simplify_eq/=; [by rewrite map_size_empty|].
   rewrite map_size_insert_None by eauto using not_elem_of_list_to_map_1.
   eauto with f_equal.
 Qed.
@@ -3265,7 +3265,7 @@ Section setoid.
     intros i1 x1 i2 x2 Heq. specialize (Heq i1).
     rewrite lookup_singleton in Heq. destruct (decide (i1 = i2)) as [->|].
     - rewrite lookup_singleton in Heq. apply (inj _) in Heq. naive_solver.
-    - rewrite lookup_singleton_ne in Heq by done. inversion Heq.
+    - rewrite lookup_singleton_ne in Heq by done. inv Heq.
   Qed.
 
   Global Instance map_fmap_equiv_inj `{Equiv B} (f : A → B) :

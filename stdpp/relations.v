@@ -110,7 +110,7 @@ Section general.
   Lemma rtc_r x y z : rtc R x y → R y z → rtc R x z.
   Proof. intros. etrans; eauto. Qed.
   Lemma rtc_inv x z : rtc R x z → x = z ∨ ∃ y, R x y ∧ rtc R y z.
-  Proof. inversion_clear 1; eauto. Qed.
+  Proof. inv 1; eauto. Qed.
   Lemma rtc_ind_l (P : A → Prop) (z : A)
     (Prefl : P z) (Pstep : ∀ x y, R x y → rtc R y z → P y → P x) :
     ∀ x, rtc R x z → P x.
@@ -143,7 +143,7 @@ Section general.
   Lemma nsteps_once x y : R x y → nsteps R 1 x y.
   Proof. eauto. Qed.
   Lemma nsteps_once_inv x y : nsteps R 1 x y → R x y.
-  Proof. inversion 1 as [|???? Hhead Htail]; by inv Htail. Qed.
+  Proof. inv 1 as [|???? Hhead Htail]; by inv Htail. Qed.
   Lemma nsteps_trans n m x y z :
     nsteps R n x y → nsteps R m y z → nsteps R (n + m) x z.
   Proof. induction 1; simpl; eauto. Qed.
@@ -354,7 +354,7 @@ Section general.
   Lemma ex_loop_inv x :
     ex_loop R x →
     ∃ x', R x x' ∧ ex_loop R x'.
-  Proof. inversion 1; eauto. Qed.
+  Proof. inv 1; eauto. Qed.
 
 End general.
 

@@ -564,6 +564,14 @@ Tactic Notation "iter" tactic(tac) tactic(l) :=
   let rec go l :=
   match l with ?x :: ?l => tac x || go l end in go l.
 
+(** Runs [tac] on the n-th hypothesis that can be introduced from the goal. *)
+Ltac num_tac n tac :=
+  intros until n;
+  lazymatch goal with
+  (* matches the last hypothesis, which is what we want *)
+  | H : _ |- _ => tac H
+  end.
+
 (** The tactic [inv] is a fixed version of [inversion_clear] from the standard
 library that works around <https://github.com/coq/coq/issues/2465>. It also
 has a shorter name since clearing is the default for [destruct], why wouldn't
@@ -574,6 +582,13 @@ Tactic Notation "inv" ident(H) "as" simple_intropattern(ipat) :=
   inversion H as ipat; clear H; simplify_eq.
 Tactic Notation "inv" ident(H) :=
   inversion H; clear H; simplify_eq.
+
+(* We overload the notation with [integer] and [ident] to support
+[inv H] and [inv 1], like the regular [inversion] tactic. *)
+Tactic Notation "inv" integer(n) "as" simple_intropattern(ipat) :=
+  num_tac n ltac:(fun H => inv H as ipat).
+Tactic Notation "inv" integer(n) :=
+  num_tac n ltac:(fun H => inv H).
 
 (** * The "o" family of tactics equips [pose proof], [destruct], [inversion],
 [generalize] and [specialize] with support for "o"pen terms. You can leave
@@ -684,6 +699,13 @@ Tactic Notation "oinv" uconstr(p) :=
       inv p
     else
       let Hp := fresh in pose proof p as Hp; inv Hp).
+
+(* As above, we overload the notation with [integer] and [ident] to support
+[oinv 1], like the regular [inversion] tactic. *)
+Tactic Notation "oinv" integer(n) "as" simple_intropattern(ipat) :=
+  num_tac n ltac:(fun H => oinv H as ipat).
+Tactic Notation "oinv" integer(n) :=
+  num_tac n ltac:(fun H => oinv H).
 
 (** Helper for [ospecialize]: call [tac] with the name of the head term *if*
 that term is a variable.

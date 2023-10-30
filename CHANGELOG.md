@@ -22,6 +22,8 @@ API-breaking change is listed.
   for easy measure/size induction.
 - Add `inv` tactic as a more well-behaved alternative to `inversion_clear`
   (inspired by CompCert), and `oinv` as its version on open terms.
+  These tactics support both named hypotheses (`inv H`) and using a number
+  to refer to a hypothesis on the goal (`inv 1`).
 - Add `prod_swap : A * B → B * A` and some basic theory about it.
 
 The following `sed` script should perform most of the renaming

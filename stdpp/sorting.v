@@ -59,13 +59,13 @@ Section sorted.
     StronglySorted R (l1 ++ l2) → StronglySorted R l1.
   Proof.
     induction l1 as [|x1' l1 IH]; simpl;
-      [|inversion_clear 1]; decompose_Forall; constructor; auto.
+      [|inv 1]; decompose_Forall; constructor; auto.
   Qed.
   Lemma StronglySorted_app_inv_r l1 l2 :
     StronglySorted R (l1 ++ l2) → StronglySorted R l2.
   Proof.
     induction l1 as [|x1' l1 IH]; simpl;
-      [|inversion_clear 1]; decompose_Forall; auto.
+      [|inv 1]; decompose_Forall; auto.
   Qed.
 
   Lemma Sorted_StronglySorted `{!Transitive R} l :
@@ -82,7 +82,7 @@ Section sorted.
     { rewrite Forall_forall in Hx1, Hx2.
       assert (x2 ∈ x1 :: l1) as Hx2' by (by rewrite E; left).
       assert (x1 ∈ x2 :: l2) as Hx1' by (by rewrite <-E; left).
-      inversion Hx1'; inversion Hx2'; simplify_eq; auto. }
+      inv Hx1'; inv Hx2'; simplify_eq; auto. }
     f_equal. by apply IH, (inj (x2 ::.)).
   Qed.
   Lemma Sorted_unique `{!Transitive R, !AntiSymm (=) R} l1 l2 :
@@ -96,7 +96,7 @@ Section sorted.
     match l with
     | [] => left _
     | y :: l => cast_if (decide (R x y))
-    end; abstract first [by constructor | by inversion 1].
+    end; abstract first [by constructor | by inv 1].
   Defined.
   Global Instance Sorted_dec `{∀ x y, Decision (R x y)} : ∀ l,
     Decision (Sorted R l).
@@ -106,7 +106,7 @@ Section sorted.
     match l return Decision (Sorted R l) with
     | [] => left _
     | x :: l => cast_if_and (decide (HdRel R x l)) (go l)
-    end); clear go; abstract first [by constructor | by inversion 1].
+    end); clear go; abstract first [by constructor | by inv 1].
   Defined.
   Global Instance StronglySorted_dec `{∀ x y, Decision (R x y)} : ∀ l,
     Decision (StronglySorted R l).
@@ -116,7 +116,7 @@ Section sorted.
     match l return Decision (StronglySorted R l) with
     | [] => left _
     | x :: l => cast_if_and (decide (Forall (R x) l)) (go l)
-    end); clear go; abstract first [by constructor | by inversion 1].
+    end); clear go; abstract first [by constructor | by inv 1].
   Defined.
 
   Section fmap.
@@ -144,9 +144,9 @@ Section sorted.
     induction 1 as [|y l Hsort IH Hhd]; intros Htl; simpl.
     { repeat constructor. }
     constructor.
-    - apply IH. inversion Htl as [|? [|??]]; simplify_list_eq; by constructor.
+    - apply IH. inv Htl as [|? [|??]]; simplify_list_eq; by constructor.
     - destruct Hhd; constructor; [|done].
-      inversion Htl as [|? [|??]]; by try discriminate_list.
+      inv Htl as [|? [|??]]; by try discriminate_list.
   Qed.
 End sorted.
 

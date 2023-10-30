@@ -359,7 +359,7 @@ Section list_set.
     match l return Decision (x ∈ l) with
     | [] => right _
     | y :: l => cast_if_or (decide (x = y)) (go x l)
-    end); clear go dec; subst; try (by constructor); abstract by inversion 1.
+    end); clear go dec; subst; try (by constructor); abstract by inv 1.
   Defined.
   Fixpoint remove_dups (l : list A) : list A :=
     match l with
@@ -905,7 +905,7 @@ Qed.
 
 (** ** Properties of the [elem_of] predicate *)
 Lemma not_elem_of_nil x : x ∉ [].
-Proof. by inversion 1. Qed.
+Proof. by inv 1. Qed.
 Lemma elem_of_nil x : x ∈ [] ↔ False.
 Proof. intuition. by destruct (not_elem_of_nil x). Qed.
 Lemma elem_of_nil_inv l : (∀ x, x ∉ l) → l = [].
@@ -913,7 +913,7 @@ Proof. destruct l; [done|]. by edestruct 1; constructor. Qed.
 Lemma elem_of_not_nil x l : x ∈ l → l ≠ [].
 Proof. intros ? ->. by apply (elem_of_nil x). Qed.
 Lemma elem_of_cons l x y : x ∈ y :: l ↔ x = y ∨ x ∈ l.
-Proof. by split; [inversion 1; subst|intros [->|?]]; constructor. Qed.
+Proof. by split; [inv 1; subst|intros [->|?]]; constructor. Qed.
 Lemma not_elem_of_cons l x y : x ∉ y :: l ↔ x ≠ y ∧ x ∉ l.
 Proof. rewrite elem_of_cons. tauto. Qed.
 Lemma elem_of_app l1 l2 x : x ∈ l1 ++ l2 ↔ x ∈ l1 ∨ x ∈ l2.
@@ -1029,7 +1029,7 @@ Qed.
 Lemma NoDup_nil : NoDup (@nil A) ↔ True.
 Proof. split; constructor. Qed.
 Lemma NoDup_cons x l : NoDup (x :: l) ↔ x ∉ l ∧ NoDup l.
-Proof. split; [by inversion 1|]. intros [??]. by constructor. Qed.
+Proof. split; [by inv 1|]. intros [??]. by constructor. Qed.
 Lemma NoDup_cons_1_1 x l : NoDup (x :: l) → x ∉ l.
 Proof. rewrite NoDup_cons. by intros [??]. Qed.
 Lemma NoDup_cons_1_2 x l : NoDup (x :: l) → NoDup l.
@@ -2477,7 +2477,7 @@ Proof. induction 1; simpl; auto with arith. Qed.
 Lemma sublist_nil_l l : [] `sublist_of` l.
 Proof. induction l; try constructor; auto. Qed.
 Lemma sublist_nil_r l : l `sublist_of` [] ↔ l = [].
-Proof. split; [by inversion 1|]. intros ->. constructor. Qed.
+Proof. split; [by inv 1|]. intros ->. constructor. Qed.
 Lemma sublist_app l1 l2 k1 k2 :
   l1 `sublist_of` l2 → k1 `sublist_of` k2 → l1 ++ k1 `sublist_of` l2 ++ k2.
 Proof. induction 1; simpl; try constructor; auto. Qed.
@@ -2487,7 +2487,7 @@ Lemma sublist_inserts_r k l1 l2 : l1 `sublist_of` l2 → l1 `sublist_of` l2 ++ k
 Proof. induction 1; simpl; try constructor; auto using sublist_nil_l. Qed.
 Lemma sublist_cons_r x l k :
   l `sublist_of` x :: k ↔ l `sublist_of` k ∨ ∃ l', l = x :: l' ∧ l' `sublist_of` k.
-Proof. split; [inversion 1; eauto|]. intros [?|(?&->&?)]; constructor; auto. Qed.
+Proof. split; [inv 1; eauto|]. intros [?|(?&->&?)]; constructor; auto. Qed.
 Lemma sublist_cons_l x l k :
   x :: l `sublist_of` k ↔ ∃ k1 k2, k = k1 ++ x :: k2 ∧ l `sublist_of` k2.
 Proof.
@@ -2913,23 +2913,23 @@ Section Forall_Exists.
 
   Lemma Forall_forall l : Forall P l ↔ ∀ x, x ∈ l → P x.
   Proof.
-    split; [induction 1; inversion 1; subst; auto|].
+    split; [induction 1; inv 1; auto|].
     intros Hin; induction l as [|x l IH]; constructor; [apply Hin; constructor|].
     apply IH. intros ??. apply Hin. by constructor.
   Qed.
   Lemma Forall_nil : Forall P [] ↔ True.
   Proof. done. Qed.
   Lemma Forall_cons_1 x l : Forall P (x :: l) → P x ∧ Forall P l.
-  Proof. by inversion 1. Qed.
+  Proof. by inv 1. Qed.
   Lemma Forall_cons x l : Forall P (x :: l) ↔ P x ∧ Forall P l.
-  Proof. split; [by inversion 1|]. intros [??]. by constructor. Qed.
+  Proof. split; [by inv 1|]. intros [??]. by constructor. Qed.
   Lemma Forall_singleton x : Forall P [x] ↔ P x.
   Proof. rewrite Forall_cons, Forall_nil; tauto. Qed.
   Lemma Forall_app_2 l1 l2 : Forall P l1 → Forall P l2 → Forall P (l1 ++ l2).
   Proof. induction 1; simpl; auto. Qed.
   Lemma Forall_app l1 l2 : Forall P (l1 ++ l2) ↔ Forall P l1 ∧ Forall P l2.
   Proof.
-    split; [induction l1; inversion 1; intuition|].
+    split; [induction l1; inv 1; naive_solver|].
     intros [??]; auto using Forall_app_2.
   Qed.
   Lemma Forall_true l : (∀ x, P x) → Forall P l.
@@ -2941,11 +2941,11 @@ Section Forall_Exists.
     (∀ x, P x ↔ Q x) → Forall P l ↔ Forall Q l.
   Proof. intros H. apply Forall_proper. { red; apply H. } done. Qed.
   Lemma Forall_not l : length l ≠ 0 → Forall (not ∘ P) l → ¬Forall P l.
-  Proof. by destruct 2; inversion 1. Qed.
+  Proof. by destruct 2; inv 1. Qed.
   Lemma Forall_and {Q} l : Forall (λ x, P x ∧ Q x) l ↔ Forall P l ∧ Forall Q l.
   Proof.
     split; [induction 1; constructor; naive_solver|].
-    intros [Hl Hl']; revert Hl'; induction Hl; inversion_clear 1; auto.
+    intros [Hl Hl']; revert Hl'; induction Hl; inv 1; auto.
   Qed.
   Lemma Forall_and_l {Q} l : Forall (λ x, P x ∧ Q x) l → Forall P l.
   Proof. rewrite Forall_and; tauto. Qed.
@@ -2996,7 +2996,7 @@ Section Forall_Exists.
     Forall P (alter f i l) → (∀ x, l !! i = Some x → P (f x) → P x) → Forall P l.
   Proof.
     revert i. induction l; intros [|?]; simpl;
-      inversion_clear 1; constructor; eauto.
+      inv 1; constructor; eauto.
   Qed.
   Lemma Forall_insert l i x : Forall P l → P x → Forall P (<[i:=x]>l).
   Proof. rewrite list_insert_alter; auto using Forall_alter. Qed.
@@ -3062,11 +3062,11 @@ Section Forall_Exists.
       inv Hin; subst; [left|right]; auto.
   Qed.
   Lemma Exists_inv x l : Exists P (x :: l) → P x ∨ Exists P l.
-  Proof. inversion 1; intuition trivial. Qed.
+  Proof. inv 1; intuition trivial. Qed.
   Lemma Exists_app l1 l2 : Exists P (l1 ++ l2) ↔ Exists P l1 ∨ Exists P l2.
   Proof.
     split.
-    - induction l1; inversion 1; intuition.
+    - induction l1; inv 1; naive_solver.
     - intros [H|H]; [induction H | induction l1]; simpl; intuition.
   Qed.
   Lemma Exists_impl (Q : A → Prop) l :
@@ -3074,9 +3074,9 @@ Section Forall_Exists.
   Proof. intros H ?. induction H; auto. Defined.
 
   Lemma Exists_not_Forall l : Exists (not ∘ P) l → ¬Forall P l.
-  Proof. induction 1; inversion_clear 1; contradiction. Qed.
+  Proof. induction 1; inv 1; contradiction. Qed.
   Lemma Forall_not_Exists l : Forall (not ∘ P) l → ¬Exists P l.
-  Proof. induction 1; inversion_clear 1; contradiction. Qed.
+  Proof. induction 1; inv 1; contradiction. Qed.
 
   Lemma Forall_list_difference `{!EqDecision A} l k :
     Forall P l → Forall P (list_difference l k).
@@ -3234,7 +3234,7 @@ Section Forall2.
   Lemma Forall2_transitive {C} (Q : B → C → Prop) (R : A → C → Prop) l k lC :
     (∀ x y z, P x y → Q y z → R x z) →
     Forall2 P l k → Forall2 Q k lC → Forall2 R l lC.
-  Proof. intros ? Hl. revert lC. induction Hl; inversion_clear 1; eauto. Qed.
+  Proof. intros ? Hl. revert lC. induction Hl; inv 1; eauto. Qed.
   Lemma Forall2_impl (Q : A → B → Prop) l k :
     Forall2 P l k → (∀ x y, P x y → Q x y) → Forall2 Q l k.
   Proof. intros H ?. induction H; auto. Defined.
@@ -3242,43 +3242,43 @@ Section Forall2.
     Forall2 P l k1 → Forall2 P l k2 →
     (∀ x y1 y2, P x y1 → P x y2 → y1 = y2) → k1 = k2.
   Proof.
-    intros H. revert k2. induction H; inversion_clear 1; intros; f_equal; eauto.
+    intros H. revert k2. induction H; inv 1; intros; f_equal; eauto.
   Qed.
 
   Lemma Forall_Forall2_l l k :
     length l = length k → Forall (λ x, ∀ y, P x y) l → Forall2 P l k.
-  Proof. rewrite <-Forall2_same_length. induction 1; inversion 1; auto. Qed.
+  Proof. rewrite <-Forall2_same_length. induction 1; inv 1; auto. Qed.
   Lemma Forall_Forall2_r l k :
     length l = length k → Forall (λ y, ∀ x, P x y) k → Forall2 P l k.
-  Proof. rewrite <-Forall2_same_length. induction 1; inversion 1; auto. Qed.
+  Proof. rewrite <-Forall2_same_length. induction 1; inv 1; auto. Qed.
 
   Lemma Forall2_Forall_l (Q : A → Prop) l k :
     Forall2 P l k → Forall (λ y, ∀ x, P x y → Q x) k → Forall Q l.
-  Proof. induction 1; inversion_clear 1; eauto. Qed.
+  Proof. induction 1; inv 1; eauto. Qed.
   Lemma Forall2_Forall_r (Q : B → Prop) l k :
     Forall2 P l k → Forall (λ x, ∀ y, P x y → Q y) l → Forall Q k.
-  Proof. induction 1; inversion_clear 1; eauto. Qed.
+  Proof. induction 1; inv 1; eauto. Qed.
 
   Lemma Forall2_nil_inv_l k : Forall2 P [] k → k = [].
-  Proof. by inversion 1. Qed.
+  Proof. by inv 1. Qed.
   Lemma Forall2_nil_inv_r l : Forall2 P l [] → l = [].
-  Proof. by inversion 1. Qed.
+  Proof. by inv 1. Qed.
   Lemma Forall2_nil : Forall2 P [] [] ↔ True.
   Proof. done. Qed.
 
   Lemma Forall2_cons_1 x l y k :
     Forall2 P (x :: l) (y :: k) → P x y ∧ Forall2 P l k.
-  Proof. by inversion 1. Qed.
+  Proof. by inv 1. Qed.
   Lemma Forall2_cons_inv_l x l k :
     Forall2 P (x :: l) k → ∃ y k', P x y ∧ Forall2 P l k' ∧ k = y :: k'.
-  Proof. inversion 1; subst; eauto. Qed.
+  Proof. inv 1; eauto. Qed.
   Lemma Forall2_cons_inv_r l k y :
     Forall2 P l (y :: k) → ∃ x l', P x y ∧ Forall2 P l' k ∧ l = x :: l'.
-  Proof. inversion 1; subst; eauto. Qed.
+  Proof. inv 1; eauto. Qed.
   Lemma Forall2_cons_nil_inv x l : Forall2 P (x :: l) [] → False.
-  Proof. by inversion 1. Qed.
+  Proof. by inv 1. Qed.
   Lemma Forall2_nil_cons_inv y k : Forall2 P [] (y :: k) → False.
-  Proof. by inversion 1. Qed.
+  Proof. by inv 1. Qed.
 
   Lemma Forall2_cons x l y k :
     Forall2 P (x :: l) (y :: k) ↔ P x y ∧ Forall2 P l k.
@@ -3298,21 +3298,21 @@ Section Forall2.
     length l1 = length k1 →
     Forall2 P (l1 ++ l2) (k1 ++ k2) → Forall2 P l1 k1 ∧ Forall2 P l2 k2.
   Proof.
-    rewrite <-Forall2_same_length. induction 1; inversion 1; naive_solver.
+    rewrite <-Forall2_same_length. induction 1; inv 1; naive_solver.
   Qed.
   Lemma Forall2_app_inv_l l1 l2 k :
     Forall2 P (l1 ++ l2) k ↔
       ∃ k1 k2, Forall2 P l1 k1 ∧ Forall2 P l2 k2 ∧ k = k1 ++ k2.
   Proof.
     split; [|intros (?&?&?&?&->); by apply Forall2_app].
-    revert k. induction l1; inversion 1; naive_solver.
+    revert k. induction l1; inv 1; naive_solver.
   Qed.
   Lemma Forall2_app_inv_r l k1 k2 :
     Forall2 P l (k1 ++ k2) ↔
       ∃ l1 l2, Forall2 P l1 k1 ∧ Forall2 P l2 k2 ∧ l = l1 ++ l2.
   Proof.
     split; [|intros (?&?&?&?&->); by apply Forall2_app].
-    revert l. induction k1; inversion 1; naive_solver.
+    revert l. induction k1; inv 1; naive_solver.
   Qed.
 
   Lemma Forall2_tail l k : Forall2 P l k → Forall2 P (tail l) (tail k).
@@ -3516,7 +3516,7 @@ Section Forall2.
     | [], [] => left _
     | x :: l, y :: k => cast_if_and (decide (P x y)) (go l k)
     | _, _ => right _
-    end); clear dec go; abstract first [by constructor | by inversion 1].
+    end); clear dec go; abstract first [by constructor | by inv 1].
   Defined.
 End Forall2.
 
@@ -3534,7 +3534,7 @@ Section Forall2_proper.
   Global Instance: PreOrder R → PreOrder (Forall2 R).
   Proof. split; apply _. Qed.
   Global Instance: AntiSymm (=) R → AntiSymm (=) (Forall2 R).
-  Proof. induction 2; inversion_clear 1; f_equal; auto. Qed.
+  Proof. induction 2; inv 1; f_equal; auto. Qed.
 
   Global Instance: Proper (R ==> Forall2 R ==> Forall2 R) (::).
   Proof. by constructor. Qed.
@@ -3593,12 +3593,12 @@ Section Forall3.
   Lemma Forall3_cons_inv_l x l k k' :
     Forall3 P (x :: l) k k' → ∃ y k2 z k2',
       k = y :: k2 ∧ k' = z :: k2' ∧ P x y z ∧ Forall3 P l k2 k2'.
-  Proof. inversion_clear 1; naive_solver. Qed.
+  Proof. inv 1; naive_solver. Qed.
   Lemma Forall3_app_inv_l l1 l2 k k' :
     Forall3 P (l1 ++ l2) k k' → ∃ k1 k2 k1' k2',
      k = k1 ++ k2 ∧ k' = k1' ++ k2' ∧ Forall3 P l1 k1 k1' ∧ Forall3 P l2 k2 k2'.
   Proof.
-    revert k k'. induction l1 as [|x l1 IH]; simpl; inversion_clear 1.
+    revert k k'. induction l1 as [|x l1 IH]; simpl; inv 1.
     - by repeat eexists; eauto.
     - by repeat eexists; eauto.
     - edestruct IH as (?&?&?&?&?&?&?&?); eauto; naive_solver.
@@ -3606,12 +3606,12 @@ Section Forall3.
   Lemma Forall3_cons_inv_m l y k k' :
     Forall3 P l (y :: k) k' → ∃ x l2 z k2',
       l = x :: l2 ∧ k' = z :: k2' ∧ P x y z ∧ Forall3 P l2 k k2'.
-  Proof. inversion_clear 1; naive_solver. Qed.
+  Proof. inv 1; naive_solver. Qed.
   Lemma Forall3_app_inv_m l k1 k2 k' :
     Forall3 P l (k1 ++ k2) k' → ∃ l1 l2 k1' k2',
      l = l1 ++ l2 ∧ k' = k1' ++ k2' ∧ Forall3 P l1 k1 k1' ∧ Forall3 P l2 k2 k2'.
   Proof.
-    revert l k'. induction k1 as [|x k1 IH]; simpl; inversion_clear 1.
+    revert l k'. induction k1 as [|x k1 IH]; simpl; inv 1.
     - by repeat eexists; eauto.
     - by repeat eexists; eauto.
     - edestruct IH as (?&?&?&?&?&?&?&?); eauto; naive_solver.
@@ -3619,12 +3619,12 @@ Section Forall3.
   Lemma Forall3_cons_inv_r l k z k' :
     Forall3 P l k (z :: k') → ∃ x l2 y k2,
       l = x :: l2 ∧ k = y :: k2 ∧ P x y z ∧ Forall3 P l2 k2 k'.
-  Proof. inversion_clear 1; naive_solver. Qed.
+  Proof. inv 1; naive_solver. Qed.
   Lemma Forall3_app_inv_r l k k1' k2' :
     Forall3 P l k (k1' ++ k2') → ∃ l1 l2 k1 k2,
       l = l1 ++ l2 ∧ k = k1 ++ k2 ∧ Forall3 P l1 k1 k1' ∧ Forall3 P l2 k2 k2'.
   Proof.
-    revert l k. induction k1' as [|x k1' IH]; simpl; inversion_clear 1.
+    revert l k. induction k1' as [|x k1' IH]; simpl; inv 1.
     - by repeat eexists; eauto.
     - by repeat eexists; eauto.
     - edestruct IH as (?&?&?&?&?&?&?&?); eauto; naive_solver.
@@ -3816,12 +3816,12 @@ Section setoid.
   Qed.
 
   Global Instance cons_equiv_inj : Inj2 (≡) (≡) (≡) (@cons A).
-  Proof. inversion 1; auto. Qed.
+  Proof. inv 1; auto. Qed.
 
   Lemma nil_equiv_eq l : l ≡ [] ↔ l = [].
-  Proof. split; [by inversion_clear 1|intros ->; constructor]. Qed.
+  Proof. split; [by inv 1|intros ->; constructor]. Qed.
   Lemma cons_equiv_eq l x k : l ≡ x :: k ↔ ∃ x' k', l = x' :: k' ∧ x' ≡ x ∧ k' ≡ k.
-  Proof. split; [inversion 1; naive_solver|naive_solver (by constructor)]. Qed.
+  Proof. split; [inv 1; naive_solver|naive_solver (by constructor)]. Qed.
   Lemma list_singleton_equiv_eq l x : l ≡ [x] ↔ ∃ x', l = [x'] ∧ x' ≡ x.
   Proof. rewrite cons_equiv_eq. setoid_rewrite nil_equiv_eq. naive_solver. Qed.
   Lemma app_equiv_eq l k1 k2 :
@@ -4091,7 +4091,7 @@ Section fmap.
   Proof. intros. subst. by apply elem_of_list_fmap_1. Qed.
   Lemma elem_of_list_fmap_2 l x : x ∈ f <$> l → ∃ y, x = f y ∧ y ∈ l.
   Proof.
-    induction l as [|y l IH]; simpl; inversion_clear 1.
+    induction l as [|y l IH]; simpl; inv 1.
     - exists y. split; [done | by left].
     - destruct IH as [z [??]]; [done|]. exists z. split; [done | by right].
   Qed.
@@ -4111,7 +4111,7 @@ Section fmap.
   Lemma list_fmap_inj R1 R2 :
     Inj R1 R2 f → Inj (Forall2 R1) (Forall2 R2) (fmap f).
   Proof.
-    intros ? l1. induction l1; intros [|??]; inversion 1; constructor; auto.
+    intros ? l1. induction l1; intros [|??]; inv 1; constructor; auto.
   Qed.
   Global Instance list_fmap_eq_inj : Inj (=) (=) f → Inj (=@{list A}) (=) (fmap f).
   Proof.
@@ -4140,7 +4140,7 @@ Section fmap.
 
   Lemma NoDup_fmap_1 l : NoDup (f <$> l) → NoDup l.
   Proof.
-    induction l; simpl; inversion_clear 1; constructor; auto.
+    induction l; simpl; inv 1; constructor; auto.
     rewrite elem_of_list_fmap in *. naive_solver.
   Qed.
   Lemma NoDup_fmap_2 `{!Inj (=) (=) f} l : NoDup l → NoDup (f <$> l).
@@ -4165,23 +4165,23 @@ Section fmap.
     induction l; simpl; constructor; simplify_eq; auto.
   Qed.
   Lemma Forall_fmap (P : B → Prop) l : Forall P (f <$> l) ↔ Forall (P ∘ f) l.
-  Proof. split; induction l; inversion_clear 1; constructor; auto. Qed.
+  Proof. split; induction l; inv 1; constructor; auto. Qed.
   Lemma Exists_fmap (P : B → Prop) l : Exists P (f <$> l) ↔ Exists (P ∘ f) l.
-  Proof. split; induction l; inversion 1; constructor; by auto. Qed.
+  Proof. split; induction l; inv 1; constructor; by auto. Qed.
 
   Lemma Forall2_fmap_l {C} (P : B → C → Prop) l k :
     Forall2 P (f <$> l) k ↔ Forall2 (P ∘ f) l k.
   Proof.
-    split; revert k; induction l; inversion_clear 1; constructor; auto.
+    split; revert k; induction l; inv 1; constructor; auto.
   Qed.
   Lemma Forall2_fmap_r {C} (P : C → B → Prop) k l :
     Forall2 P k (f <$> l) ↔ Forall2 (λ x, P x ∘ f) k l.
   Proof.
-    split; revert k; induction l; inversion_clear 1; constructor; auto.
+    split; revert k; induction l; inv 1; constructor; auto.
   Qed.
   Lemma Forall2_fmap_1 {C D} (g : C → D) (P : B → D → Prop) l k :
     Forall2 P (f <$> l) (g <$> k) → Forall2 (λ x1 x2, P (f x1) (g x2)) l k.
-  Proof. revert k; induction l; intros [|??]; inversion_clear 1; auto. Qed.
+  Proof. revert k; induction l; intros [|??]; inv 1; auto. Qed.
   Lemma Forall2_fmap_2 {C D} (g : C → D) (P : B → D → Prop) l k :
     Forall2 (λ x1 x2, P (f x1) (g x2)) l k → Forall2 P (f <$> l) (g <$> k).
   Proof. induction 1; csimpl; auto. Qed.
@@ -4251,8 +4251,9 @@ Section omap.
   Lemma elem_of_list_omap l y : y ∈ omap f l ↔ ∃ x, x ∈ l ∧ f x = Some y.
   Proof.
     split.
-    - induction l as [|x l]; csimpl; repeat case_match; inversion 1; subst;
-        setoid_rewrite elem_of_cons; naive_solver.
+    - induction l as [|x l]; csimpl; repeat case_match;
+        repeat (setoid_rewrite elem_of_nil || setoid_rewrite elem_of_cons);
+        naive_solver.
     - intros (x&Hx&?). by induction Hx; csimpl; repeat case_match;
         simplify_eq; try constructor; auto.
   Qed.
@@ -4310,7 +4311,7 @@ Section bind.
     x ∈ l ≫= f ↔ ∃ y, x ∈ f y ∧ y ∈ l.
   Proof.
     split.
-    - induction l as [|y l IH]; csimpl; [inversion 1|].
+    - induction l as [|y l IH]; csimpl; [inv 1|].
       rewrite elem_of_app. intros [?|?].
       + exists y. split; [done | by left].
       + destruct IH as [z [??]]; [done|]. exists z. split; [done | by right].
@@ -4965,7 +4966,7 @@ Lemma elem_of_zipped_map {A B} (f : list A → list A → A → B) l k x :
     ∃ k' k'' y, k = k' ++ [y] ++ k'' ∧ x = f (reverse k' ++ l) k'' y.
 Proof.
   split.
-  - revert l. induction k as [|z k IH]; simpl; intros l; inversion_clear 1.
+  - revert l. induction k as [|z k IH]; simpl; intros l; inv 1.
     { by eexists [], k, z. }
     destruct (IH (z :: l)) as (k'&k''&y&->&->); [done |].
     eexists (z :: k'), k'', y. by rewrite reverse_cons, <-(assoc_L (++)).
@@ -4984,7 +4985,7 @@ Lemma zipped_Forall_app {A} (P : list A → list A → A → Prop) l k k' :
   zipped_Forall P l (k ++ k') → zipped_Forall P (reverse k ++ l) k'.
 Proof.
   revert l. induction k as [|x k IH]; simpl; [done |].
-  inversion_clear 1. rewrite reverse_cons, <-(assoc_L (++)). by apply IH.
+  inv 1. rewrite reverse_cons, <-(assoc_L (++)). by apply IH.
 Qed.
 
 Lemma TCForall_Forall {A} (P : A → Prop) xs : TCForall P xs ↔ Forall P xs.

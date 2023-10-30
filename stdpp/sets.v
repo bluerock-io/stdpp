@@ -1099,7 +1099,7 @@ Section set_monad.
     Forall2 P l1 l2.
   Proof.
     rewrite elem_of_mapM. intros Hl1. revert l2.
-    induction Hl1; inversion_clear 1; constructor; auto.
+    induction Hl1; inv 1; constructor; auto.
   Qed.
 End set_monad.
 

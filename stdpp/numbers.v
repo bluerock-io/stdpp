@@ -21,7 +21,7 @@ The results for [Qc] are not yet in a module. This is in part because they
 still follow the old/non-module style in Coq's standard library. See also
 https://gitlab.mpi-sws.org/iris/stdpp/-/issues/147. *)
 
-From Coq Require Export EqdepFacts PArith NArith ZArith NPeano.
+From Coq Require Export EqdepFacts PArith NArith ZArith.
 From Coq Require Import QArith Qcanon.
 From stdpp Require Export base decidable option.
 From stdpp Require Import well_founded.

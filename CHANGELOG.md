@@ -3,6 +3,8 @@ API-breaking change is listed.
 
 ## std++ master
 
+Coq 8.19 is newly supported by this version of std++.
+
 - Add `TCSimpl` type class that is similar to `TCEq` but performs `simpl`
   before proving the goal by reflexivity.
 - Add new typeclass `MThrow E M` to generally represent throwing an error of

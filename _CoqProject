@@ -4,6 +4,8 @@
 -Q stdpp_unstable stdpp.unstable
 # Fixing this one requires Coq 8.17
 -arg -w -arg -future-coercion-class-field
+# Fixing this one requires Coq 8.19
+-arg -w -arg -argument-scope-delimiter
 
 stdpp/options.v
 stdpp/base.v

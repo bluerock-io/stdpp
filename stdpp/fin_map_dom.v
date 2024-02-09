@@ -12,8 +12,8 @@ Class FinMapDom K M D `{∀ A, Dom (M A) D, FMap M,
     OMap M, Merge M, ∀ A, MapFold K A (M A), EqDecision K,
     ElemOf K D, Empty D, Singleton K D,
     Union D, Intersection D, Difference D} := {
-  finmap_dom_map :> FinMap K M;
-  finmap_dom_set :> Set_ K D;
+  finmap_dom_map :: FinMap K M;
+  finmap_dom_set :: Set_ K D;
   elem_of_dom {A} (m : M A) i : i ∈ dom m ↔ is_Some (m !! i)
 }.
 

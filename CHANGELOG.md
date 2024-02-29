@@ -27,6 +27,7 @@ Coq 8.19 is newly supported by this version of std++.
   These tactics support both named hypotheses (`inv H`) and using a number
   to refer to a hypothesis on the goal (`inv 1`).
 - Add `prod_swap : A * B → B * A` and some basic theory about it.
+- Add lemma `join_app`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

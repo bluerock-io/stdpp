@@ -4366,6 +4366,13 @@ Section ret_join.
   Proof. by rewrite join_nil. Qed.
   Lemma join_nil_2 (ls : list (list A)) : Forall (.= []) ls → mjoin ls = [].
   Proof. by rewrite join_nil. Qed.
+
+  Lemma join_app (l1 l2 : list (list A)) :
+    mjoin (l1 ++ l2) = mjoin l1 ++ mjoin l2.
+  Proof.
+    induction l1 as [|x l1 IH]; simpl; [done|]. by rewrite <-(assoc_L _ _), IH.
+  Qed.
+
   Lemma Forall_join (P : A → Prop) (ls: list (list A)) :
     Forall (Forall P) ls → Forall P (mjoin ls).
   Proof. induction 1; simpl; auto using Forall_app_2. Qed.

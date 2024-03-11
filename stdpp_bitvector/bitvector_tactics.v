@@ -1,8 +1,8 @@
 (** This file is still experimental. See its tracking issue
 https://gitlab.mpi-sws.org/iris/stdpp/-/issues/146 for details on remaining
 issues before stabilization. This file is maintained by Michael Sammler. *)
-From stdpp.unstable Require Export bitvector.
-From stdpp.unstable Require Import bitblast.
+From stdpp.bv Require Export bitvector.
+From stdpp.bv Require Import bitblast.
 From stdpp Require Import options.
 
 (** * bitvector tactics *)

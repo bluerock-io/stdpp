@@ -463,17 +463,27 @@ Proof.
 Qed.
 
 (** * [bv_saturate]: Add range facts about bit vectors to the context *)
+Lemma bv_unsigned_in_range_alt n (b : bv n):
+  -1 < bv_unsigned b < bv_modulus n.
+Proof. pose proof (bv_unsigned_in_range _ b). lia. Qed.
+
 Ltac bv_saturate :=
   repeat match goal with b : bv _ |- _ => first [
      clear b | (* Clear if unused *)
-     learn_hyp (bv_unsigned_in_range _ b) |
+     (* We use [bv_unsigned_in_range_alt] instead of
+     [bv_unsigned_in_range] since hypothesis of the form [0 ≤ ... < ...]
+     can cause significant slowdowns in
+     [Z.euclidean_division_equations_cleanup] due to
+     https://github.com/coq/coq/pull/17984 . *)
+     learn_hyp (bv_unsigned_in_range_alt _ b) |
      learn_hyp (bv_signed_in_range _ b)
   ] end.
 
 Ltac bv_saturate_unsigned :=
   repeat match goal with b : bv _ |- _ => first [
      clear b | (* Clear if unused *)
-     learn_hyp (bv_unsigned_in_range _ b)
+     (* See comment in [bv_saturate]. *)
+     learn_hyp (bv_unsigned_in_range_alt _ b)
   ] end.
 
 (** * Operations on [bv n] *)

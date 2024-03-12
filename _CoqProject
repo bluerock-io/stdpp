@@ -1,8 +1,8 @@
 # Search paths for all packages. They must all match the regex
 # `-Q $PACKAGE[/ ]` so that we can filter out the right ones for each package.
 -Q stdpp stdpp
+-Q stdpp_bitvector stdpp.bitvector
 -Q stdpp_unstable stdpp.unstable
--Q stdpp_bitvector stdpp.bv
 # Fixing this one requires Coq 8.19
 -arg -w -arg -argument-scope-delimiter
 
@@ -56,6 +56,7 @@ stdpp/telescopes.v
 stdpp/binders.v
 stdpp/ssreflect.v
 
-stdpp_bitvector/bitblast.v
 stdpp_bitvector/bitvector.v
 stdpp_bitvector/bitvector_tactics.v
+
+stdpp_unstable/bitblast.v

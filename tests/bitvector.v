@@ -1,5 +1,5 @@
 From stdpp Require Import strings.
-From stdpp.bv Require Import bitvector.
+From stdpp.bitvector Require Import bitvector.
 
 Check "notation_test".
 Check (BV 10 3 = BV 10 5).

@@ -1,5 +1,6 @@
 From stdpp Require Import strings.
-From stdpp.bv Require Import bitblast bitvector_tactics.
+From stdpp.bitvector Require Import bitvector_tactics.
+From stdpp.unstable Require Import bitblast.
 Unset Mangle Names.
 
 Local Open Scope Z_scope.

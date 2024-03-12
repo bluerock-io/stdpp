@@ -1,4 +1,4 @@
-From stdpp.bv Require Import bitblast.
+From stdpp.unstable Require Import bitblast.
 
 Local Open Scope Z_scope.
 

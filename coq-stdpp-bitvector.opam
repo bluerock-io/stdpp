@@ -7,12 +7,15 @@ bug-reports: "https://gitlab.mpi-sws.org/iris/stdpp/issues"
 dev-repo: "git+https://gitlab.mpi-sws.org/iris/stdpp.git"
 version: "dev"
 
-synopsis: "std++ bitvector"
+synopsis: "A library for bitvectors based on std++"
 description: """
-Needs description
+This library provides the `bv n` type for representing n-bit bitvectors (i.e.,
+fixed-size integers with n bits). It comes with definitions for the standard operations
+(e.g., the operations exposed by SMT-LIB) and some basic automation for solving bitvector
+goals based on the lia tactic.
 """
 tags: [
-  "logpath:stdpp.bv"
+  "logpath:stdpp.bitvector"
 ]
 
 depends: [

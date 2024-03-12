@@ -372,17 +372,10 @@ Global Hint Resolve bitblast_setbit | 10 : bitblast.
 Lemma bitblast_mod z1 z2 z2' n b1 :
   IsPowerOfTwo z2 z2' →
   Bitblast z1 n b1 →
-  (* Coq 8.14 changed the definition of [x `mod` 0] from [0] to [x],
-  so we have to use the following definition to be compatible with
-  both Coq 8.12 and Coq 8.14. The [z2' < 0] case is hopefully not
-  common in practice. *)
-  (* TODO: After dropping support for Coq 8.14, switch to the following definition: *)
-  (* Bitblast (z1 `mod` z2) n ((bool_decide (z2' < 0 ∧ 0 ≤ n) || bool_decide (n < z2')) && b1). *)
-  Bitblast (z1 `mod` z2) n ((bool_decide (z2' < 0 ∧ 0 ≤ n) && Z.testbit (z1 `mod` 0) n)
-                            || (bool_decide (n < z2') && b1)).
+  Bitblast (z1 `mod` z2) n ((bool_decide (z2' < 0 ∧ 0 ≤ n) || bool_decide (n < z2')) && b1).
 Proof.
   move => [->] [<-]. constructor.
-  case_bool_decide => /=. { rewrite Z.pow_neg_r ?bool_decide_false /= ?orb_false_r; [done|lia..]. }
+  case_bool_decide => /=. { rewrite Z.pow_neg_r ?Zmod_0_r; [done|lia]. }
   destruct (decide (0 ≤ n)). 2: { rewrite !Z.testbit_neg_r ?andb_false_r //; lia. }
   rewrite -Z.land_ones; [|lia]. rewrite Z.land_spec Z.ones_spec; [|lia..].
   by rewrite andb_comm.

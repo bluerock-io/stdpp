@@ -57,6 +57,6 @@ stdpp/binders.v
 stdpp/ssreflect.v
 
 stdpp_bitvector/bitvector.v
-stdpp_bitvector/bitvector_tactics.v
+stdpp_bitvector/tactics.v
 
 stdpp_unstable/bitblast.v

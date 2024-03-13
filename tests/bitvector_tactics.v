@@ -1,5 +1,5 @@
 From stdpp Require Import strings.
-From stdpp.bitvector Require Import bitvector_tactics.
+From stdpp.bitvector Require Import tactics.
 From stdpp.unstable Require Import bitblast.
 Unset Mangle Names.
 

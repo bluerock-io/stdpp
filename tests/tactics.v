@@ -59,14 +59,14 @@ Qed.
 Goal ∀ n : nat, match n with | 0 => n = 0 | S n' => n = S n' end.
 Proof.
   intros. by case_match.
-Restart.
+Restart. Proof.
   intros. by case_match eqn:Heq; revert Heq. (* [revert Heq] checks that [Heq] exists *)
 Qed.
 
 Goal ∀ n m : nat, match n with | 0 => m = 0 | S n' => m = S n' end → n = m.
 Proof.
   intros. by case_match.
-Restart.
+Restart. Proof.
   intros. by case_match eqn:Heq; revert Heq. (* [revert Heq] checks that [Heq] exists *)
 Qed.
 
@@ -82,27 +82,27 @@ Proof.
   intros P Q ??.
   (* should select the last hypothesis *)
   destruct select (_ ∨ _); by constructor.
-Restart.
+Restart. Proof.
   intros P Q ??.
   (* should select the last hypothesis *)
   destruct select (_ ∨ _) as [H1|H2].
   - right. exact H1.
   - left. exact H2.
-Restart.
+Restart. Proof.
   intros P Q ??.
   (* should select the last hypothesis *)
   inv select (_ ∨ _); by constructor.
-Restart.
+Restart. Proof.
   intros P Q ??.
   (* should select the last hypothesis *)
   inv select (_ ∨ _) as [H1|H2].
   - right. exact H1.
   - left. exact H2.
-Restart.
+Restart. Proof.
   intros P Q ??.
   (* should select the last hypothesis *)
   inversion select (_ ∨ _); by constructor.
-Restart.
+Restart. Proof.
   intros P Q ??.
   (* should select the last hypothesis *)
   inversion select (_ ∨ _) as [H1|H2].
@@ -148,7 +148,7 @@ Proof.
   (* Make sure we do the same thing as [inversion_clear] when there are
   other hypotheses before the one we invert. *)
   inversion_clear 2 as [|? H']. Show.
-Restart.
+Restart. Proof.
   inv 2 as [|? H']. Show. done.
 Qed.
 
@@ -167,36 +167,36 @@ Proof.
   huge and we don't want to specify it. What do we do? The "o" family of tactics
   for working with "o"pen terms helps. *)
   opose proof (HPQR1 _ (S _) _ _) as HR; [exact HP1|exact HQ|]. exact HR.
-Restart.
+Restart. Proof.
   (** We can have fewer [_]. *)
   opose proof (HPQR1 _ (S _) _) as HR; [exact HP1|]. exact (HR HQ).
-Restart.
+Restart. Proof.
   (** And even fewer. *)
   opose proof (HPQR1 _ (S _)) as HR. exact (HR HP1 HQ).
-Restart.
+Restart. Proof.
   (** The [*] variant automatically adds [_]. *)
   opose proof* (HPQR1 _ (S _)) as HR; [exact HP1|exact HQ|]. exact HR.
-Restart.
+Restart. Proof.
   (** Same deal for [generalize]. *)
   ogeneralize (HPQR1 _ 1). intros HR. exact (HR HP1 HQ).
-Restart.
+Restart. Proof.
   ogeneralize (HPQR1 _ 1 _); [exact HP1|]. intros HR. exact (HR HQ).
-Restart.
+Restart. Proof.
   ogeneralize* (HPQR1 _ 1); [exact HP1|exact HQ|]. intros HR. exact HR.
-Restart.
+Restart. Proof.
   (** [odestruct] also automatically adds subgoals until there is something
   to destruct, as usual. Note that [edestruct] wouldn't help here,
   it just complains that it cannot infer the placeholder. *)
   Fail edestruct (HPQR2 _ 1).
   odestruct (HPQR2 _ 1) as [HR1 HR2]; [exact HP1|exact HQ|]. exact HR1.
-Restart.
+Restart. Proof.
   (** [ospecialize] is like [opose proof] but it reuses the name.
   It only works on local assumptions. *)
   Fail ospecialize (plus 0 0).
   ospecialize (HPQR1 _ 1 _); [exact HP1|]. exact (HPQR1 HQ).
-Restart.
+Restart. Proof.
   ospecialize (HPQR1 _ 1). exact (HPQR1 HP1 HQ).
-Restart.
+Restart. Proof.
   ospecialize* (HPQR1 _ 1); [exact HP1|exact HQ|]. exact HPQR1.
 Qed.
 
@@ -206,7 +206,7 @@ Lemma o_tactic_with_forall (P Q R : nat → Prop) :
 Proof.
   intros HP HQ HR.
   ospecialize* HR; [exact HP|exact HQ|exact HR].
-Restart.
+Restart. Proof.
   intros HP HQ HR.
   opose proof* HR as HR'; [exact HP|exact HQ|exact HR'].
 Qed.
@@ -223,7 +223,7 @@ Check "oinv_test2".
 Lemma oinv_test2 n : even (2 + n) → even n.
 Proof.
   intros H. oinv H as [|? H']. Show. done.
-Restart.
+Restart. Proof.
   oinv 1 as [|? H']. Show. done.
 Qed.
 Lemma oinv_test_num (P : Prop) n :
@@ -276,7 +276,7 @@ Section f_equiv.
   Proof.
     (* The Coq tactic prefers the ⊆. *)
     intros. Morphisms.f_equiv. Fail assumption.
-  Restart.
+  Restart. Proof.
     intros. f_equiv. assumption.
   Qed.
 End f_equiv.

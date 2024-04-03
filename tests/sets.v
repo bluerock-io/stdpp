@@ -25,7 +25,7 @@ Lemma set_guard_case_guard `{MonadSet M} `{Decision P} A (x : A) (X : M A) :
 Proof.
   (* Test that [case_guard] works for sets and indeed generates two goals *)
   case_guard; [set_solver|set_solver].
-Restart.
+Restart. Proof.
   (* Test that [set_solver] supports [guard]. *)
   set_solver.
 Qed.

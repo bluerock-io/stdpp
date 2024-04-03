@@ -18,38 +18,74 @@ Section map_tests.
   Global Instance map_alter_proper_test (f : A → A) i :
     Proper ((≡) ==> (≡)) f →
     Proper ((≡) ==> (≡)) (alter (M:=M A) f i).
-  Proof. apply _. Restart. solve_proper. Abort.
+  Proof.
+    apply _.
+  Restart. Proof.
+    solve_proper.
+  Abort.
   Global Instance map_zip_proper_test `{Equiv B} :
     Proper ((≡@{M A}) ==> (≡@{M B}) ==> (≡@{M (A * B)})) map_zip.
-  Proof. apply _. Restart. solve_proper. Abort.
+  Proof.
+    apply _.
+  Restart. Proof.
+    solve_proper.
+  Abort.
   Global Instance map_zip_with_proper_test `{Equiv B, Equiv C} (f : A → B → C) :
     Proper ((≡) ==> (≡) ==> (≡)) f →
     Proper ((≡) ==> (≡) ==> (≡)) (map_zip_with (M:=M) f).
-  Proof. apply _. Restart. solve_proper. Abort.
+  Proof.
+    apply _.
+  Restart. Proof.
+    solve_proper.
+  Abort.
   Global Instance map_fmap_proper_test `{Equiv B} (f : A → B) :
     Proper ((≡) ==> (≡)) f →
     Proper ((≡) ==> (≡@{M _})) (fmap f).
-  Proof. apply _. Restart. solve_proper. Abort.
+  Proof.
+    apply _.
+  Restart. Proof.
+    solve_proper.
+  Abort.
   Global Instance map_omap_proper_test `{Equiv B} (f : A → option B) :
     Proper ((≡) ==> (≡)) f →
     Proper ((≡) ==> (≡@{M _})) (omap f).
-  Proof. apply _. Restart. solve_proper. Abort.
+  Proof.
+    apply _.
+  Restart. Proof.
+    solve_proper.
+  Abort.
 End map_tests.
 
 (** And similarly for lists *)
 Global Instance list_alter_proper_test `{!Equiv A} (f : A → A) i :
   Proper ((≡) ==> (≡)) f →
   Proper ((≡) ==> (≡)) (alter (M:=list A) f i).
-Proof. apply _. Restart. solve_proper. Abort.
+Proof.
+  apply _.
+Restart. Proof.
+  solve_proper.
+Abort.
 Global Instance list_fmap_proper_test `{!Equiv A, !Equiv B} (f : A → B) :
   Proper ((≡) ==> (≡)) f → Proper ((≡@{list A}) ==> (≡)) (fmap f).
-Proof. apply _. Restart. solve_proper. Abort.
+Proof.
+  apply _.
+Restart. Proof.
+  solve_proper.
+Abort.
 Global Instance list_bind_proper_test `{!Equiv A, !Equiv B} (f : A → list B) :
   Proper ((≡) ==> (≡)) f → Proper ((≡) ==> (≡)) (mbind f).
-Proof. apply _. Restart. solve_proper. Abort.
+Proof.
+  apply _.
+Restart. Proof.
+  solve_proper.
+Abort.
 Global Instance mapM_proper_test `{!Equiv A, !Equiv B} (f : A → option B) :
   Proper ((≡) ==> (≡)) f → Proper ((≡) ==> (≡)) (mapM f).
-Proof. apply _. Restart. solve_proper. Abort.
+Proof.
+  apply _.
+Restart. Proof.
+  solve_proper.
+Abort.
 
 Lemma test_prod_equivalence (X1 X2 X3 Y : propset nat * propset nat) :
   X3 ≡ X2 → X2 ≡ X1 → (X1,Y) ≡ (X3,Y).

@@ -79,11 +79,33 @@ Proof. intros P **. rename select (P _) into HP4. apply HP4. Qed.
 
 Goal ∀ P Q : Prop, True ∨ True → P ∨ Q → Q ∨ P.
 Proof.
-  intros P Q ??. (* should select the last hypothesis *)
+  intros P Q ??.
+  (* should select the last hypothesis *)
   destruct select (_ ∨ _); by constructor.
 Restart.
-  intros P Q ??. (* should select the last hypothesis *)
+  intros P Q ??.
+  (* should select the last hypothesis *)
   destruct select (_ ∨ _) as [H1|H2].
+  - right. exact H1.
+  - left. exact H2.
+Restart.
+  intros P Q ??.
+  (* should select the last hypothesis *)
+  inv select (_ ∨ _); by constructor.
+Restart.
+  intros P Q ??.
+  (* should select the last hypothesis *)
+  inv select (_ ∨ _) as [H1|H2].
+  - right. exact H1.
+  - left. exact H2.
+Restart.
+  intros P Q ??.
+  (* should select the last hypothesis *)
+  inversion select (_ ∨ _); by constructor.
+Restart.
+  intros P Q ??.
+  (* should select the last hypothesis *)
+  inversion select (_ ∨ _) as [H1|H2].
   - right. exact H1.
   - left. exact H2.
 Qed.

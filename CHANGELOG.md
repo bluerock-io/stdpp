@@ -30,6 +30,8 @@ Coq 8.19 is newly supported by this version of std++.
 - Add lemma `join_app`.
 - Allow patterns and type annotations in `propset` notation, e.g.,
   `{[ (x, y) : nat * nat | x = y ]}`. (by Thibaut Pérami)
+- Add `inv select` and `inversion select` tactics that allow selecting the
+  to-be-inverted hypothesis with a pattern.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

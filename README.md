@@ -33,9 +33,9 @@ Notably:
 * The behavior of `Program` is tweaked: `Unset Transparent Obligations`,
   `Obligation Tactic := idtac`, `Add Search Blacklist "_obligation_"`.  See
   [`base.v`](theories/base.v) for further details.
-* It blocks `simpl` on all operations involving integers `Z` (by setting
-  `Arguments op : simpl never`). We do this because `simpl` tends to expose
-  the internals of said operations (e.g. try `simpl` on `Z.of_nat (S n) + y`).
+* It blocks `simpl` on all operations involving `Z`, `N`, and `positive` (by
+  setting `Arguments op : simpl never`). We do this because `simpl` tends to
+  expose the internals of said operations (e.g. try `simpl` on `Z.of_nat (S n) + y`).
 * It sets `intuition_solver` to `auto`. The default is `auto with *`, which is
   very expensive.
 

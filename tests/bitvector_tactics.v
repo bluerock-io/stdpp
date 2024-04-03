@@ -13,7 +13,7 @@ Ltac Zify.zify_post_hook ::= Z.to_euclidean_division_equations.
 Goal ∀ a : Z, Z_to_bv 64 a `+Z` 1 = Z_to_bv 64 (Z.succ a).
 Proof.
   intros. bv_simplify. Show.
-  Restart.
+Restart. Proof.
   intros. bv_solve.
 Qed.
 
@@ -26,7 +26,7 @@ Goal ∀ l r xs : bv 64, ∀ data : list (bv 64),
                        bv_extract 0 64 (bv_zero_extend 128 ((r - l) ≫ 1))) * 8) < 2 ^ 52.
 Proof.
   intros. bv_simplify_arith. Show.
-  Restart.
+Restart. Proof.
   intros. bv_solve.
 Qed.
 
@@ -40,7 +40,7 @@ Goal ∀ l r : bv 64, ∀ data : list (bv 64),
 Proof.
   intros. bv_simplify_arith select (¬ _ >= _). bv_simplify_arith.
   split. (* We need to split since the [_ < _ ≤ _] notation differs between Coq versions. *) Show.
-  Restart.
+Restart. Proof.
   intros. bv_simplify_arith select (¬ _ >= _). bv_solve.
 Qed.
 
@@ -50,7 +50,7 @@ Goal ∀ r1 : bv 64,
   bv_extract 0 64 (bv_zero_extend 128 r1 + 0xffffffffffffffe9 + 1) ≠ 0.
 Proof.
   intros. bv_simplify. Show.
-  Restart.
+Restart. Proof.
   intros. bv_solve.
 Qed.
 
@@ -62,7 +62,7 @@ Goal ∀ i n : bv 64,
   bv_unsigned (bv_extract 0 64 (bv_zero_extend 128 i) + 1) < bv_unsigned n.
 Proof.
   intros. bv_simplify_arith select (bv_extract _ _ _ ≠ _). bv_simplify. Show.
-  Restart.
+Restart. Proof.
   intros. bv_simplify_arith select (bv_extract _ _ _ ≠ _). bv_solve.
 Qed.
 
@@ -76,9 +76,18 @@ Qed.
 
 (** Regression test for https://gitlab.mpi-sws.org/iris/stdpp/-/merge_requests/411 *)
 Goal ∀ b : bv 16, bv_wrap 16 (bv_unsigned b) = bv_wrap 16 (bv_unsigned b).
-Proof. intros. bv_simplify. Show. Restart. intros. bv_solve. Qed.
+Proof.
+  intros. bv_simplify. Show.
+Restart. Proof.
+  intros. bv_solve.
+Qed.
 Goal ∀ b : bv 16, bv_wrap 16 (bv_unsigned b) ≠ bv_wrap 16 (bv_unsigned (b + 1)).
-Proof. intros. bv_simplify. Show. Restart. intros. bv_solve. Qed.
+Proof.
+  intros. bv_simplify. Show.
+Restart. Proof.
+  intros. bv_solve.
+Qed.
+
 Goal ∀ b : bv 16, bv_unsigned b = bv_unsigned b → True.
 Proof. intros ? H. bv_simplify H. Show. Abort.
 Goal ∀ b : bv 16, bv_unsigned b ≠ bv_unsigned (b + 1) → True.

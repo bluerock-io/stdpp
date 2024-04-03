@@ -774,6 +774,9 @@ Tactic Notation "select" open_constr(pat) tactic3(tac) :=
       so then shelved goals are produced for every such evar. *)
   | H : pat |- _ => let T := (type of H) in unify T pat; tac H
   end.
+
+(** We provide [select] variants of some widely used tactics. *)
+
 (** [select_revert] reverts the first hypothesis matching [pat]. *)
 Tactic Notation "revert" "select" open_constr(pat) := select pat (fun H => revert H).
 
@@ -784,6 +787,15 @@ Tactic Notation "destruct" "select" open_constr(pat) :=
   select pat (fun H => destruct H).
 Tactic Notation "destruct" "select" open_constr(pat) "as" simple_intropattern(ipat) :=
   select pat (fun H => destruct H as ipat).
+
+Tactic Notation "inversion" "select" open_constr(pat) :=
+  select pat (fun H => inversion H).
+Tactic Notation "inversion" "select" open_constr(pat) "as" simple_intropattern(ipat) :=
+  select pat (fun H => inversion H as ipat).
+Tactic Notation "inv" "select" open_constr(pat) :=
+  select pat (fun H => inv H).
+Tactic Notation "inv" "select" open_constr(pat) "as" simple_intropattern(ipat) :=
+  select pat (fun H => inv H as ipat).
 
 (** The tactic [is_closed_term t] succeeds if [t] is a closed term and fails otherwise.
 By closed we mean that [t] does not depend on any variable bound in the context.

@@ -1,8 +1,5 @@
-(** This file is still experimental. See its tracking issue
-https://gitlab.mpi-sws.org/iris/stdpp/-/issues/146 for details on remaining
-issues before stabilization. This file is maintained by Michael Sammler. *)
-From stdpp.unstable Require Export bitvector.
-From stdpp.unstable Require Import bitblast.
+(** This file is maintained by Michael Sammler. *)
+From stdpp.bitvector Require Export definitions.
 From stdpp Require Import options.
 
 (** * bitvector tactics *)
@@ -63,30 +60,7 @@ Tactic Notation "reduce_closed" constr(x) :=
   change_no_check x with r in *
 .
 
-(** * bitblast instances *)
-Lemma bitblast_bool_to_Z b n:
-  Bitblast (bool_to_Z b) n (bool_decide (n = 0) && b).
-Proof.
-  constructor. destruct b; simpl_bool; repeat case_bool_decide;
-    subst; try done; rewrite ?Z.bits_0; by destruct n.
-Qed.
-Global Hint Resolve bitblast_bool_to_Z | 10 : bitblast.
-
-Lemma bitblast_bounded_bv_unsigned n (b : bv n):
-  BitblastBounded (bv_unsigned b) (Z.of_N n).
-Proof. constructor. apply bv_unsigned_in_range. Qed.
-Global Hint Resolve bitblast_bounded_bv_unsigned | 15 : bitblast.
-
-Lemma bitblast_bv_wrap z1 n n1 b1:
-  Bitblast z1 n b1 →
-  Bitblast (bv_wrap n1 z1) n (bool_decide (n < Z.of_N n1) && b1).
-Proof.
-  intros [<-]. constructor.
-  destruct (decide (0 ≤ n)); [by rewrite bv_wrap_spec| rewrite !Z.testbit_neg_r; [|lia..]; btauto].
-Qed.
-Global Hint Resolve bitblast_bv_wrap | 10 : bitblast.
-
-(* The following two lemmas are proven using [bitblast]. *)
+(** * General lemmas *)
 Lemma bv_extract_concat_later m n1 n2 s l (b1 : bv n1) (b2 : bv n2):
   (n2 ≤ s)%N →
   (m = n1 + n2)%N →
@@ -94,7 +68,11 @@ Lemma bv_extract_concat_later m n1 n2 s l (b1 : bv n1) (b2 : bv n2):
 Proof.
   intros ? ->. apply bv_eq.
   rewrite !bv_extract_unsigned, bv_concat_unsigned, !bv_wrap_land by done.
-  bitblast. f_equal. lia.
+  apply Z.bits_inj_iff' => ??.
+  rewrite !Z.land_spec, !Z.shiftr_spec, Z.lor_spec, Z.shiftl_spec, Z.ones_spec; [|lia..].
+  case_bool_decide; rewrite ?andb_false_r, ?andb_true_r; [|done].
+  rewrite <-(bv_wrap_bv_unsigned _ b2), bv_wrap_spec_high, ?orb_false_r; [|lia].
+  f_equal. lia.
 Qed.
 Lemma bv_extract_concat_here m n1 n2 s (b1 : bv n1) (b2 : bv n2):
   s = 0%N →
@@ -103,7 +81,11 @@ Lemma bv_extract_concat_here m n1 n2 s (b1 : bv n1) (b2 : bv n2):
 Proof.
   intros -> ->. apply bv_eq.
   rewrite !bv_extract_unsigned, bv_concat_unsigned, !bv_wrap_land by done.
-  bitblast. f_equal. lia.
+  apply Z.bits_inj_iff' => ??.
+  rewrite !Z.land_spec, !Z.shiftr_spec, Z.lor_spec, Z.shiftl_spec, Z.ones_spec; [|lia..].
+  case_bool_decide; rewrite ?andb_false_r, ?andb_true_r.
+  - rewrite (Z.testbit_neg_r (bv_unsigned b1)); [|lia]. simpl. f_equal. lia.
+  - rewrite <-(bv_wrap_bv_unsigned _ b2), bv_wrap_spec_high, ?orb_false_l; lia.
 Qed.
 
 (** * [bv_simplify] rewrite database *)
@@ -500,7 +482,7 @@ Tactic Notation "bv_simplify" ident(H) :=
   | not (_ =@{bv _} _) => apply bv_neq in H
   | _ => idtac
   end;
-  tactic bv_unfold in H;
+  do [bv_unfold] in H;
   autorewrite with bv_unfolded_simplify in H.
 Tactic Notation "bv_simplify" "select" open_constr(pat) :=
   select pat (fun H => bv_simplify H).

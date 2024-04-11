@@ -1,6 +1,4 @@
-(** This file is still experimental. See its tracking issue
-https://gitlab.mpi-sws.org/iris/stdpp/-/issues/145 for details on remaining
-issues before stabilization. This file is maintained by Michael Sammler. *)
+(** This file is maintained by Michael Sammler. *)
 From stdpp Require Export numbers.
 From stdpp Require Import countable finite.
 From stdpp Require Import options.

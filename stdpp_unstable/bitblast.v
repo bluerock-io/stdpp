@@ -3,6 +3,7 @@ https://gitlab.mpi-sws.org/iris/stdpp/-/issues/141 for details on remaining
 issues before stabilization. This file is maintained by Michael Sammler. *)
 From Coq Require Import ssreflect.
 From Coq.btauto Require Export Btauto.
+From stdpp.bitvector Require Import definitions.
 From stdpp Require Export tactics numbers list.
 From stdpp Require Import options.
 
@@ -406,7 +407,27 @@ Proof.
   - by apply Z.clearbit_eq.
 Qed.
 Global Hint Resolve bitblast_clearbit | 10 : bitblast.
+Lemma bitblast_bool_to_Z b n:
+  Bitblast (bool_to_Z b) n (bool_decide (n = 0) && b).
+Proof.
+  constructor. destruct b; simpl_bool; repeat case_bool_decide;
+    subst; try done; rewrite ?Z.bits_0; by destruct n.
+Qed.
+Global Hint Resolve bitblast_bool_to_Z | 10 : bitblast.
 
+(** Instances for [bv] *)
+Lemma bitblast_bv_wrap z1 n n1 b1:
+  Bitblast z1 n b1 →
+  Bitblast (bv_wrap n1 z1) n (bool_decide (n < Z.of_N n1) && b1).
+Proof.
+  intros [<-]. constructor.
+  destruct (decide (0 ≤ n)); [by rewrite bv_wrap_spec| rewrite !Z.testbit_neg_r; [|lia..]; btauto].
+Qed.
+Global Hint Resolve bitblast_bv_wrap | 10 : bitblast.
+Lemma bitblast_bounded_bv_unsigned n (b : bv n):
+  BitblastBounded (bv_unsigned b) (Z.of_N n).
+Proof. constructor. apply bv_unsigned_in_range. Qed.
+Global Hint Resolve bitblast_bounded_bv_unsigned | 15 : bitblast.
 
 (** * Tactics *)
 

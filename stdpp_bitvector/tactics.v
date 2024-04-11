@@ -1,5 +1,5 @@
 (** This file is maintained by Michael Sammler. *)
-From stdpp.bitvector Require Export bitvector.
+From stdpp.bitvector Require Export definitions.
 From stdpp Require Import options.
 
 (** * bitvector tactics *)

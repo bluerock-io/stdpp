@@ -32,11 +32,12 @@ Coq 8.19 is newly supported by this version of std++.
   `{[ (x, y) : nat * nat | x = y ]}`. (by Thibaut Pérami)
 - Add `inv select` and `inversion select` tactics that allow selecting the
   to-be-inverted hypothesis with a pattern.
-- Create a `coq-stdpp-bitvector` package containing the previously
-  unstable `bitvector` library. Users of the library need to change
-  the import path from `stdpp.unstable.bitvector` to
-  `stdpp.bitvector.bitvector` and from `stdpp.unstable.bitvector_tactics` to
-  `stdpp.bitvector.tactics`.
+- The new `coq-stdpp-bitvector` package contains a library for `n`-bit
+  bitvectors (i.e., fixed-size integers with `n` bits).
+  Users of the previous unstable version need to change the import path from
+  `stdpp.unstable.bitvector` to `stdpp.bitvector.definitions` and from
+  `stdpp.unstable.bitvector_tactics` to `stdpp.bitvector.tactics`. The
+  complete library can be imported with `stdpp.bitvector.bitvector`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

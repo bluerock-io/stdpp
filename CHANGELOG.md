@@ -1,9 +1,21 @@
 This file lists "large-ish" changes to the std++ Coq library, but not every
 API-breaking change is listed.
 
-## std++ master
+## std++ 1.10.0 (2024-04)
 
-Coq 8.19 is newly supported by this version of std++.
+The highlight of this release is the bitvector library with support for
+fixed-size integers. It is distributed as a separate package,
+`coq-stdpp-bitvector`. The library is developed and maintained by Michael
+Sammler.
+
+std++ 1.10 supports Coq 8.18 and 8.19.
+Coq 8.16 and 8.17 are no longer supported.
+
+This release of std++ was managed by Ralf Jung and Robbert Krebbers, with
+contributions from Mathias Adam Møller, Michael Sammler, Pierre Rousselin,
+Pierre Roux, and Thibaut Pérami. Thanks a lot to everyone involved!
+
+**Detailed list of changes:**
 
 - Add `TCSimpl` type class that is similar to `TCEq` but performs `simpl`
   before proving the goal by reflexivity.
@@ -38,6 +50,7 @@ Coq 8.19 is newly supported by this version of std++.
   `stdpp.unstable.bitvector` to `stdpp.bitvector.definitions` and from
   `stdpp.unstable.bitvector_tactics` to `stdpp.bitvector.tactics`. The
   complete library can be imported with `stdpp.bitvector.bitvector`.
+  (by Michael Sammler)
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

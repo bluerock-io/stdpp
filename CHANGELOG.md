@@ -1,7 +1,7 @@
 This file lists "large-ish" changes to the std++ Coq library, but not every
 API-breaking change is listed.
 
-## std++ 1.10.0 (2024-04)
+## std++ 1.10.0 (2024-04-12)
 
 The highlight of this release is the bitvector library with support for
 fixed-size integers. It is distributed as a separate package,

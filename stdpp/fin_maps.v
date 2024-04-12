@@ -1443,7 +1443,7 @@ Proof.
     apply Hgm'. rewrite lookup_insert_ne by naive_solver. done.
 Qed.
 
-Lemma map_fold_comm_acc {A} (f : K → A → A → A) (g : A → A) (x : A) (m : M A) :
+Lemma map_fold_comm_acc {A B} (f : K → A → B → B) (g : B → B) (x : B) (m : M A) :
   (∀ j1 j2 z1 z2 y, f j1 z1 (f j2 z2 y) = f j2 z2 (f j1 z1 y)) →
   (∀ j z y, f j z (g y) = g (f j z y)) →
   map_fold f (g x) m = g (map_fold f x m).

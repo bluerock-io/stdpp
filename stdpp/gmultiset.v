@@ -599,9 +599,9 @@ Section more_lemmas.
     apply foldr_comm_acc_strong; [done|solve_proper|].
     intros. by apply Hfg, gmultiset_elem_of_elements.
   Qed.
-  Lemma gmultiset_set_fold_comm_acc (f : A → A → A) (g : A → A) (a : A) X :
+  Lemma gmultiset_set_fold_comm_acc {B} (f : A → B → B) (g : B → B) (b : B) X :
     (∀ x c, g (f x c) = f x (g c)) →
-    set_fold f (g a) X = g (set_fold f a X).
+    set_fold f (g b) X = g (set_fold f b X).
   Proof.
     intros. apply (gmultiset_set_fold_comm_acc_strong _); [solve_proper|done].
   Qed.

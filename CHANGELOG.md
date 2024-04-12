@@ -1,6 +1,11 @@
 This file lists "large-ish" changes to the std++ Coq library, but not every
 API-breaking change is listed.
 
+## std++ master
+
+- Generalize `foldr_comm_acc`, `map_fold_comm_acc`, `set_fold_comm_acc`, and
+  `gmultiset_set_fold_comm_acc` to have more general type. (by Yannick Zakowski)
+
 ## std++ 1.10.0 (2024-04-12)
 
 The highlight of this release is the bitvector library with support for

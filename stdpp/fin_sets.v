@@ -339,9 +339,9 @@ Proof.
   intros. unfold set_fold; simpl.
   apply foldr_comm_acc_strong; [done|solve_proper|set_solver].
 Qed.
-Lemma set_fold_comm_acc (f : A → A → A) (g : A → A) (a : A) X :
+Lemma set_fold_comm_acc {B} (f : A → B → B) (g : B → B) (b : B) X :
   (∀ x y, f x (g y) = g (f x y)) →
-  set_fold f (g a) X = g (set_fold f a X).
+  set_fold f (g b) X = g (set_fold f b X).
 Proof. intros. apply (set_fold_comm_acc_strong _); [solve_proper|auto]. Qed.
 
 (** * Minimal elements *)

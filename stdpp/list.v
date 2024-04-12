@@ -4691,9 +4691,9 @@ Proof.
   rewrite <-Hcomm by eauto using elem_of_list_here.
   by rewrite IH by eauto using elem_of_list_further.
 Qed.
-Lemma foldr_comm_acc {A} (f : A → A → A) (g : A → A) (a : A) l :
+Lemma foldr_comm_acc {A B} (f : A → B → B) (g : B → B) (b : B) l :
   (∀ x y, f x (g y) = g (f x y)) →
-  foldr f (g a) l = g (foldr f a l).
+  foldr f (g b) l = g (foldr f b l).
 Proof. intros. apply (foldr_comm_acc_strong _); [solve_proper|done]. Qed.
 
 Lemma foldl_app {A B} (f : A → B → A) (l k : list B) (a : A) :

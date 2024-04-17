@@ -2,6 +2,8 @@
 (lists of fixed length). It uses the definitions from the standard library, but
 renames or changes their notations, so that it becomes more consistent with the
 naming conventions in this development. *)
+Local Set Warnings "-stdlib-vector".
+From Coq Require Vector.
 From stdpp Require Import countable.
 From stdpp Require Export fin list.
 From stdpp Require Import options.

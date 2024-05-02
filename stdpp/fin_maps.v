@@ -3041,14 +3041,16 @@ Proof.
   rewrite lookup_difference.
   destruct (m1 !! i), (m2 !! i); compute; naive_solver.
 Qed.
-Lemma map_disjoint_difference_l {A} (m1 m2 : M A) : m1 ⊆ m2 → m2 ∖ m1 ##ₘ m1.
+
+Lemma map_disjoint_difference_l {A} (m1 m2 m3 : M A) : m3 ⊆ m2 → m1 ∖ m2 ##ₘ m3.
 Proof.
   intros Hm i; specialize (Hm i).
   unfold difference, map_difference; rewrite lookup_difference_with.
-  by destruct (m1 !! i), (m2 !! i).
+  by destruct (m1 !! i), (m2 !! i), (m3 !! i).
 Qed.
-Lemma map_disjoint_difference_r {A} (m1 m2 : M A) : m1 ⊆ m2 → m1 ##ₘ m2 ∖ m1.
+Lemma map_disjoint_difference_r {A} (m1 m2 m3 : M A) : m3 ⊆ m2 → m3 ##ₘ m1 ∖ m2.
 Proof. intros. symmetry. by apply map_disjoint_difference_l. Qed.
+
 Lemma map_subseteq_difference_l {A} (m1 m2 m : M A) : m1 ⊆ m → m1 ∖ m2 ⊆ m.
 Proof.
   rewrite !map_subseteq_spec. setoid_rewrite lookup_difference_Some. naive_solver.

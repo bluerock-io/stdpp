@@ -22,3 +22,5 @@ Makefile.package.*
 html/
 builddep/
 _opam
+_build/
+*.install

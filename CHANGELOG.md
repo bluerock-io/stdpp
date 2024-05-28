@@ -8,6 +8,8 @@ API-breaking change is listed.
 - Strengthen `map_disjoint_difference_l` and `map_disjoint_difference_l`, and
   thereby make them consistent with the corresponding lemmas for sets.
 - Add support for compiling the packages with dune. (by Rodolphe Lepigre)
+- Add lemmas `gset_to_gmap_singleton`, `difference_union_intersection`,
+  `difference_union_intersection_L`. (by Léo Stefanesco)
 
 ## std++ 1.10.0 (2024-04-12)
 

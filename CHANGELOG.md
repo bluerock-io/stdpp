@@ -5,6 +5,8 @@ API-breaking change is listed.
 
 - Generalize `foldr_comm_acc`, `map_fold_comm_acc`, `set_fold_comm_acc`, and
   `gmultiset_set_fold_comm_acc` to have more general type. (by Yannick Zakowski)
+- Strengthen `map_disjoint_difference_l` and `map_disjoint_difference_l`, and
+  thereby make them consistent with the corresponding lemmas for sets.
 
 ## std++ 1.10.0 (2024-04-12)
 

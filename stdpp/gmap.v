@@ -742,8 +742,8 @@ Section gset.
   Lemma gset_to_gmap_singleton {A} (x : A) i :
     gset_to_gmap x {[ i ]} = {[i:=x]}.
   Proof.
-    pose proof (gset_to_gmap_union_singleton x i ∅) as Heq.
-    rewrite gset_to_gmap_empty, union_empty_r_L in Heq. intuition.
+    rewrite <-(right_id_L ∅ (∪) {[ i ]}), gset_to_gmap_union_singleton.
+    by rewrite gset_to_gmap_empty.
   Qed.
   Lemma gset_to_gmap_difference_singleton {A} (x : A) i Y :
     gset_to_gmap x (Y ∖ {[i]}) = delete i (gset_to_gmap x Y).

@@ -7,7 +7,7 @@ API-breaking change is listed.
   `gmultiset_set_fold_comm_acc` to have more general type. (by Yannick Zakowski)
 - Strengthen `map_disjoint_difference_l` and `map_disjoint_difference_l`, and
   thereby make them consistent with the corresponding lemmas for sets.
-- Allow compiling the packages with dune (!552, by Rodolphe Lepigre).
+- Add support for compiling the packages with dune. (by Rodolphe Lepigre)
 
 ## std++ 1.10.0 (2024-04-12)
 

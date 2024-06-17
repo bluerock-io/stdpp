@@ -16,7 +16,7 @@ Useful links:
 Editor support
 --------------
 
-Good dune support in editors is lacking at the moment, but there are trick you
+Good dune support in editors is lacking at the moment, but there are tricks you
 can play to make it work.
 
 One option is to configure your editor to invoke the `dune coq top` command

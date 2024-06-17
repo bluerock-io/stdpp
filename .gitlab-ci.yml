@@ -70,7 +70,6 @@ build-coq.8.19.0-mr:
 # Also ensure Dune works.
 build-coq.8.19.0-dune:
   <<: *template
-  <<: *branches_and_mr
   variables:
     OPAM_PINS: "coq version 8.19.0   dune version 3.15.2"
     MAKE_TARGET: "dune"

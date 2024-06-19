@@ -3,6 +3,8 @@
 -Q stdpp stdpp
 -Q stdpp_bitvector stdpp.bitvector
 -Q stdpp_unstable stdpp.unstable
+
+# Custom flags (to be kept in sync with the dune file at the root of the repo).
 # Fixing this one requires Coq 8.19
 -arg -w -arg -argument-scope-delimiter
 

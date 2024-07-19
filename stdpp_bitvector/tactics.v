@@ -117,7 +117,7 @@ Class BvUnfold (n : N) (signed : bool) (wrapped : bool) (b : bv n) (z : Z) := {
 Global Arguments bv_unfold_proof {_ _ _} _ _ {_}.
 Global Hint Mode BvUnfold + + + + - : bv_unfold_db.
 
-(** [BV_UNFOLD_BLOCK] is a marker that this occurence of [bv_signed]
+(** [BV_UNFOLD_BLOCK] is a marker that this occurrence of [bv_signed]
 or [bv_unsigned] has already been simplified. *)
 Definition BV_UNFOLD_BLOCK {A} (x : A) : A := x.
 

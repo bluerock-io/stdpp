@@ -558,7 +558,7 @@ Ltac intros_revert tac :=
   end.
 
 (** The tactic [iter tac l] runs [tac x] for each element [x ∈ l] until [tac x]
-succeeds. If it does not suceed for any element of the generated list, the whole
+succeeds. If it does not succeed for any element of the generated list, the whole
 tactic wil fail. *)
 Tactic Notation "iter" tactic(tac) tactic(l) :=
   let rec go l :=

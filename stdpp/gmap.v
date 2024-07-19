@@ -15,9 +15,8 @@ has the same good properties:
 
 Compared to [Pmap], we not only need to make sure the trie representation is
 canonical, we also need to make sure that all positions (of type positive) are
-valid encodings of [K]. That is, for each position [q] in the trie, we have:
-
-  encode <$> decode q = Some q
+valid encodings of [K]. That is, for each position [q] in the trie, we have
+[encode <$> decode q = Some q].
 
 Instead of formalizing this condition using a Sigma type (which would break
 the strict positivity check in nested recursive definitions), we make

@@ -95,7 +95,7 @@ involving just [∈]. For example, [A → x ∈ X ∪ ∅] becomes [A → x ∈ 
 
 This transformation is implemented using type classes instead of setoid
 rewriting to ensure that we traverse each term at most once and to be able to
-deal with occurences of the set operations under binders. *)
+deal with occurrences of the set operations under binders. *)
 Class SetUnfold (P Q : Prop) := { set_unfold : P ↔ Q }.
 Global Arguments set_unfold _ _ {_} : assert.
 Global Hint Mode SetUnfold + - : typeclass_instances.

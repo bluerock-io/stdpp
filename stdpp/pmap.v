@@ -38,7 +38,7 @@ Global Arguments PNode101 {A} _ _ : assert.
 Global Arguments PNode110 {A} _ _ : assert.
 Global Arguments PNode111 {A} _ _ _ : assert.
 
-(** Using [Variant] we supress the generation of the induction scheme. We use
+(** Using [Variant] we suppress the generation of the induction scheme. We use
 the induction scheme [Pmap_ind] in terms of the smart constructors to reduce the
 number of cases, similar to Appel and Leroy. *)
 Variant Pmap (A : Type) := PEmpty : Pmap A | PNodes : Pmap_ne A → Pmap A.

@@ -316,7 +316,7 @@ Infix "`sublist_of`" := sublist (at level 70) : stdpp_scope.
 Global Hint Extern 0 (_ `sublist_of` _) => reflexivity : core.
 
 (** A list [l2] submseteq a list [l1] if [l2] is obtained by removing elements
-from [l1] while possiblity changing the order. *)
+from [l1] while possibly changing the order. *)
 Inductive submseteq {A} : relation (list A) :=
   | submseteq_nil : submseteq [] []
   | submseteq_skip x l1 l2 : submseteq l1 l2 → submseteq (x :: l1) (x :: l2)

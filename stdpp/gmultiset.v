@@ -183,11 +183,11 @@ instantiates universally quantified hypotheses [H : ∀ x : A, P x] in two ways:
   in [H], so variable [x].
 
 Step (4) is implemented using the tactic [multiset_simplify_singletons], which
-simplifies occurences of [multiplicity x {[ y ]}] as follows:
+simplifies occurrences of [multiplicity x {[ y ]}] as follows:
 
 - First, we try to turn these occurencess into [1] or [0] if either [x = y] or
   [x ≠ y] can be proved using [done], respectively.
-- Second, we try to turn these occurences into a fresh [z ≤ 1] if [y] does not
+- Second, we try to turn these occurrences into a fresh [z ≤ 1] if [y] does not
   occur elsewhere in the hypotheses or goal.
 - Finally, we make a case distinction between [x = y] or [x ≠ y]. This step is
   done last so as to avoid needless exponential blow-ups.
@@ -313,7 +313,7 @@ Ltac multiset_instantiate :=
   end.
 
 (** Step 4: simplify singletons *)
-(** This lemma results in information loss if there are other occurences of
+(** This lemma results in information loss if there are other occurrences of
 [y] in the goal. In the tactic [multiset_simplify_singletons] we use [clear y]
 to ensure we do not use the lemma if it leads to information loss. *)
 Local Lemma multiplicity_singleton_forget `{Countable A} x y :

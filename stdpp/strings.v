@@ -75,7 +75,7 @@ to be used as keys in [gmap].
 
 The encoding of [string] to [positive] is taken from
 https://github.com/xavierleroy/canonical-binary-tries/blob/v2/lib/String2pos.v.
-It avoids creating auxilary data structures such as [list bool], thereby
+It avoids creating auxiliary data structures such as [list bool], thereby
 improving efficiency. *)
 Local Definition bool_cons_pos (b : bool) (p : positive) : positive :=
   if b then p~1 else p~0.
@@ -99,7 +99,7 @@ The lemma [string_of_to_pos] ensures the generated definition is correct.
 
 Alternatively, we could implement it in two steps. Convert the [positive] to
 [list bool], and convert the list to [string]. This definition will be slower
-since auxilary data structures are created. *)
+since auxiliary data structures are created. *)
 Local Fixpoint pos_to_string (p : positive) : string.
 Proof.
   (** The argument [p] is the [positive] that we are peeling off.

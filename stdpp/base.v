@@ -1302,8 +1302,8 @@ Global Arguments insert _ _ _ _ !_ _ !_ / : simpl nomatch, assert.
 (* Defining a generic notation does not seem possible with Coq's
    recursive notation system, so we define individual notations
    for some cases relevant in practice. *)
-(* The "format" makes sure that linebreaks are placed after the separating semicola [;] when printing. *)
-(* TODO : we are using parantheses in the "de-sugaring" of the notation instead of [$] because Coq 8.12
+(* The "format" makes sure that linebreaks are placed after the separating semicolons [;] when printing. *)
+(* TODO : we are using parentheses in the "de-sugaring" of the notation instead of [$] because Coq 8.12
    and earlier have trouble with using the notation for printing otherwise.
    Once support for Coq 8.12 is dropped, this can be replaced with [$]. *)
 Notation "{[ k1 := a1 ; k2 := a2 ]}" :=
@@ -1586,17 +1586,17 @@ Class MonadSet M `{∀ A, ElemOf A (M A),
 }.
 
 (** The [Infinite A] class axiomatizes types [A] with infinitely many elements.
-It contains a function [fresh : list A → A] that given a list [xs] gives an
+It contains a function [fresh : list A → A] that, given a list [xs], gives an
 element [fresh xs ∉ xs].
 
 We do not directly make [fresh] a field of the [Infinite] class, but use a
 separate operational type class [Fresh] for it. That way we can overload [fresh]
-to pick fresh elements from other data structure like sets. See the file
+to pick fresh elements from other data structures like sets. See the file
 [fin_sets], where we define [fresh : C → A] for any finite set implementation
 [FinSet C A].
 
 Note: we require [fresh] to respect permutations, which is needed to define the
-aforementioned [fresh] function on finite sets that respects set equality.
+aforementioned [fresh] function on finite sets that respect set equality.
 
 Instead of instantiating [Infinite] directly, consider using [max_infinite] or
 [inj_infinite] from the [infinite] module. *)

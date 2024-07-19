@@ -52,7 +52,7 @@ Global Arguments GNode101 {A P} _ _ : assert.
 Global Arguments GNode110 {A P} _ _ _ : assert.
 Global Arguments GNode111 {A P} _ _ _ _ : assert.
 
-(** Using [Variant] we supress the generation of the induction scheme. We use
+(** Using [Variant] we suppress the generation of the induction scheme. We use
 the induction scheme [gmap_ind] in terms of the smart constructors to reduce the
 number of cases, similar to Appel and Leroy. *)
 Variant gmap_dep (A : Type) (P : positive → Prop) :=

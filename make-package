@@ -1,7 +1,14 @@
-#!/bin/bash
+#!/bin/sh
 set -e
 # Helper script to build and/or install just one package out of this repository.
 # Assumes that all the other packages it depends on have been installed already!
+
+OS=$(uname)
+MAKE="make"
+if [ $OS == "FreeBSD" ] || [ $OS == "OpenBSD" ] ||\
+       [ $OS == "NetBSD" ] || [ $OS == "DragonFly" ]; then
+    MAKE="gmake"
+fi
 
 PROJECT="$1"
 shift
@@ -26,7 +33,7 @@ grep -E "^$PROJECT/" _CoqProject >> "$COQFILE"
 "${COQBIN}coq_makefile" -f "$COQFILE" -o "$MAKEFILE"
 
 # Run build
-make -f "$MAKEFILE" "$@"
+$MAKE -f "$MAKEFILE" "$@"
 
 # Cleanup
 rm -f ".$MAKEFILE.d" "$MAKEFILE"*

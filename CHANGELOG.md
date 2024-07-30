@@ -10,6 +10,7 @@ API-breaking change is listed.
 - Add support for compiling the packages with dune. (by Rodolphe Lepigre)
 - Add lemmas `gset_to_gmap_singleton`, `difference_union_intersection`,
   `difference_union_intersection_L`. (by Léo Stefanesco)
+- Make the build script compatible with BSD systems. (by Yiyun Liu)
 
 ## std++ 1.10.0 (2024-04-12)
 

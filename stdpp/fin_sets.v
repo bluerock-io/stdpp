@@ -194,7 +194,7 @@ Qed.
 
 Lemma size_union X Y : X ## Y → size (X ∪ Y) = size X + size Y.
 Proof.
-  intros. unfold size, set_size. simpl. rewrite <-app_length.
+  intros. unfold size, set_size. simpl. rewrite <-length_app.
   apply Permutation_length, NoDup_Permutation.
   - apply NoDup_elements.
   - apply NoDup_app; repeat split; try apply NoDup_elements.
@@ -701,7 +701,7 @@ Section infinite.
     Forall_fresh X xs → Y ⊆ X → Forall_fresh Y xs.
   Proof. rewrite !Forall_fresh_alt; set_solver. Qed.
 
-  Lemma fresh_list_length n X : length (fresh_list n X) = n.
+  Lemma length_fresh_list n X : length (fresh_list n X) = n.
   Proof. revert X. induction n; simpl; auto. Qed.
   Lemma fresh_list_is_fresh n X x : x ∈ fresh_list n X → x ∉ X.
   Proof.
@@ -726,5 +726,5 @@ Lemma size_set_seq `{FinSet nat C} start len :
 Proof.
   rewrite <-list_to_set_seq, size_list_to_set.
   2:{ apply NoDup_seq. }
-  rewrite seq_length. done.
+  rewrite length_seq. done.
 Qed.

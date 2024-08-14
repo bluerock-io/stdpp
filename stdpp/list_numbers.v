@@ -51,6 +51,10 @@ Fixpoint little_endian_to_Z (n : Z) (bs : list Z) : Z :=
 Section seq.
   Implicit Types m n i j : nat.
 
+  (* TODO: Remove once we drop support for Coq 8.19 *)
+  Lemma length_seq m n : length (seq m n) = n.
+  Proof. revert m. induction n; intros; f_equal/=; auto. Qed.
+
   Lemma fmap_add_seq j j' n : Nat.add j <$> seq j' n = seq (j + j') n.
   Proof.
     revert j'. induction n as [|n IH]; intros j'; csimpl; [reflexivity|].
@@ -128,8 +132,8 @@ Section seqZ.
     rewrite <-fmap_S_seq, <-list_fmap_compose.
     apply map_ext; naive_solver lia.
   Qed.
-  Lemma seqZ_length m n : length (seqZ m n) = Z.to_nat n.
-  Proof. unfold seqZ; by rewrite fmap_length, seq_length. Qed.
+  Lemma length_seqZ m n : length (seqZ m n) = Z.to_nat n.
+  Proof. unfold seqZ; by rewrite length_fmap, length_seq. Qed.
   Lemma fmap_add_seqZ m m' n : Z.add m <$> seqZ m' n = seqZ (m + m') n.
   Proof.
     revert m'. induction n as [|n ? IH|] using (Z.succ_pred_induction 0); intros m'.
@@ -217,7 +221,7 @@ Section sum_list.
     sum_list szs = length l → mjoin (reshape szs l) = l.
   Proof.
     revert l. induction szs as [|sz szs IH]; simpl; intros l Hl; [by destruct l|].
-    by rewrite IH, take_drop by (rewrite drop_length; lia).
+    by rewrite IH, take_drop by (rewrite length_drop; lia).
   Qed.
   Lemma sum_list_replicate n m : sum_list (replicate m n) = m * n.
   Proof. induction m; simpl; auto. Qed.
@@ -237,9 +241,9 @@ Section mjoin.
   Implicit Types l k : list A.
   Implicit Types ls : list (list A).
 
-  Lemma join_length ls:
+  Lemma length_join ls:
     length (mjoin ls) = sum_list (length <$> ls).
-  Proof. induction ls; [done|]; csimpl. rewrite app_length. lia. Qed.
+  Proof. induction ls; [done|]; csimpl. rewrite length_app. lia. Qed.
 
   Lemma join_lookup_Some ls i x :
     mjoin ls !! i = Some x ↔ ∃ j l i', ls !! j = Some l ∧ l !! i' = Some x
@@ -262,7 +266,7 @@ Section mjoin.
     intros Hl. rewrite join_lookup_Some.
     f_equiv; intros j. f_equiv; intros l. f_equiv; intros i'.
     assert (ls !! j = Some l → j < length ls) by eauto using lookup_lt_Some.
-    rewrite (sum_list_fmap_same n), take_length by auto using Forall_take.
+    rewrite (sum_list_fmap_same n), length_take by auto using Forall_take.
     naive_solver lia.
   Qed.
 
@@ -358,7 +362,7 @@ Section Z_little_endian.
       rewrite !Z.ones_spec by lia. apply bool_decide_ext. lia.
   Qed.
 
-  Lemma Z_to_little_endian_length m n z :
+  Lemma length_Z_to_little_endian m n z :
     0 ≤ m →
     Z.of_nat (length (Z_to_little_endian m n z)) = m.
   Proof.

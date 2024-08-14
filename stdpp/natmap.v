@@ -282,8 +282,8 @@ Proof.
   apply set_eq. intros i. rewrite elem_of_union, !elem_of_bools_to_natset.
   revert i. induction Hβs as [|[] []]; intros [|?]; naive_solver.
 Qed.
-Lemma natset_to_bools_length (X : natset) sz : length (natset_to_bools sz X) = sz.
-Proof. apply resize_length. Qed.
+Lemma length_natset_to_bools (X : natset) sz : length (natset_to_bools sz X) = sz.
+Proof. apply length_resize. Qed.
 Lemma lookup_natset_to_bools_ge sz X i : sz ≤ i → natset_to_bools sz X !! i = None.
 Proof. by apply lookup_resize_old. Qed.
 Lemma lookup_natset_to_bools sz X i β :
@@ -293,9 +293,9 @@ Proof.
   intros. destruct (mapset_car X) as [l ?]; simpl.
   destruct (l !! i) as [mu|] eqn:Hmu; simpl.
   { rewrite lookup_resize, list_lookup_fmap, Hmu
-      by (rewrite ?fmap_length; eauto using lookup_lt_Some).
+      by (rewrite ?length_fmap; eauto using lookup_lt_Some).
     destruct mu as [[]|], β; simpl; intuition congruence. }
-  rewrite lookup_resize_new by (rewrite ?fmap_length;
+  rewrite lookup_resize_new by (rewrite ?length_fmap;
     eauto using lookup_ge_None_1); destruct β; intuition congruence.
 Qed.
 Lemma lookup_natset_to_bools_true sz X i :

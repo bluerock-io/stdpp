@@ -1162,7 +1162,7 @@ Section little.
   Proof.
     intros ->. apply (inj (fmap bv_unsigned)).
     rewrite bv_to_litte_endian_unsigned; [|lia].
-    apply Z_to_little_endian_to_Z; [by rewrite fmap_length | lia |].
+    apply Z_to_little_endian_to_Z; [by rewrite length_fmap | lia |].
     apply Forall_forall. intros ? [?[->?]]%elem_of_list_fmap_2. apply bv_unsigned_in_range.
   Qed.
 
@@ -1175,18 +1175,18 @@ Section little.
     apply little_endian_to_Z_to_little_endian; lia.
   Qed.
 
-  Lemma bv_to_little_endian_length m n z :
+  Lemma length_bv_to_little_endian m n z :
     0 ≤ m →
     length (bv_to_little_endian m n z) = Z.to_nat m.
   Proof.
-    intros ?. unfold bv_to_little_endian. rewrite fmap_length.
-    apply Nat2Z.inj. rewrite Z_to_little_endian_length, ?Z2Nat.id; try lia.
+    intros ?. unfold bv_to_little_endian. rewrite length_fmap.
+    apply Nat2Z.inj. rewrite length_Z_to_little_endian, ?Z2Nat.id; try lia.
   Qed.
 
   Lemma little_endian_to_bv_bound n bs :
     0 ≤ little_endian_to_bv n bs < 2 ^ (Z.of_nat (length bs) * Z.of_N n).
   Proof.
-    unfold little_endian_to_bv. rewrite <-(fmap_length bv_unsigned bs).
+    unfold little_endian_to_bv. rewrite <-(length_fmap bv_unsigned bs).
     apply little_endian_to_Z_bound; [lia|].
     apply Forall_forall. intros ? [? [-> ?]]%elem_of_list_fmap.
     apply bv_unsigned_in_range.
@@ -1231,9 +1231,9 @@ Section bv_seq.
   Context {n : N}.
   Implicit Types (b : bv n).
 
-  Lemma bv_seq_length b len:
+  Lemma length_bv_seq b len:
     length (bv_seq b len) = Z.to_nat len.
-  Proof. unfold bv_seq. by rewrite fmap_length, seqZ_length. Qed.
+  Proof. unfold bv_seq. by rewrite length_fmap, length_seqZ. Qed.
 
   Lemma bv_seq_succ b m:
     0 ≤ m →
@@ -1293,8 +1293,8 @@ Section bv_bits.
   Context {n : N}.
   Implicit Types (b : bv n).
 
-  Lemma bv_to_bits_length b : length (bv_to_bits b) = N.to_nat n.
-  Proof. unfold bv_to_bits. rewrite fmap_length, seqZ_length, <-Z_N_nat, N2Z.id. done. Qed.
+  Lemma length_bv_to_bits b : length (bv_to_bits b) = N.to_nat n.
+  Proof. unfold bv_to_bits. rewrite length_fmap, length_seqZ, <-Z_N_nat, N2Z.id. done. Qed.
 
   Lemma bv_to_bits_lookup_Some b i x:
     bv_to_bits b !! i = Some x ↔ (i < N.to_nat n)%nat ∧ x = Z.testbit (bv_unsigned b) (Z.of_nat i).

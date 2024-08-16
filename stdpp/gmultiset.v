@@ -640,7 +640,7 @@ Section more_lemmas.
   Lemma gmultiset_size_disj_union X Y : size (X ⊎ Y) = size X + size Y.
   Proof.
     unfold size, gmultiset_size; simpl.
-    by rewrite gmultiset_elements_disj_union, app_length.
+    by rewrite gmultiset_elements_disj_union, length_app.
   Qed.
   Lemma gmultiset_size_scalar_mul n X : size (n *: X) = n * size X.
   Proof.

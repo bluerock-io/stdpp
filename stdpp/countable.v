@@ -355,7 +355,7 @@ Proof.
     induction ts as [|t ts'' IH]; intros k ts'''; csimpl; auto.
     rewrite reverse_cons, <-!(assoc_L _), FIX; simpl; auto.
   - simpl. by rewrite take_app_length', drop_app_length', reverse_involutive
-      by (by rewrite reverse_length).
+      by (by rewrite length_reverse).
 Qed.
 
 Global Program Instance gen_tree_countable `{Countable T} : Countable (gen_tree T) :=

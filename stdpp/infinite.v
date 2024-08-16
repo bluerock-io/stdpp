@@ -45,7 +45,7 @@ Section search_infinite.
       split; [done|]. apply elem_of_list_filter; naive_solver lia. }
     intros xs. induction (well_founded_ltof _ length xs) as [xs _ IH].
     intros n1; constructor; intros n2 [Hn Hs].
-    apply help with (n2 - 1); [|lia]. apply IH. eapply filter_length_lt; eauto.
+    apply help with (n2 - 1); [|lia]. apply IH. eapply length_filter_lt; eauto.
   Qed.
 
   Definition search_infinite_go (xs : list B) (n : nat)
@@ -143,7 +143,7 @@ Global Program Instance list_infinite `{Inhabited A} : Infinite (list A) := {|
 Next Obligation.
   intros A ? xs ?. destruct (infinite_is_fresh (length <$> xs)).
   apply elem_of_list_fmap. eexists; split; [|done].
-  unfold fresh. by rewrite replicate_length.
+  unfold fresh. by rewrite length_replicate.
 Qed.
 Next Obligation. unfold fresh. by intros A ? xs1 xs2 ->. Qed.
 

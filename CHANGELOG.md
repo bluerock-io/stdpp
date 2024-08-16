@@ -11,6 +11,58 @@ API-breaking change is listed.
 - Add lemmas `gset_to_gmap_singleton`, `difference_union_intersection`,
   `difference_union_intersection_L`. (by Léo Stefanesco)
 - Make the build script compatible with BSD systems. (by Yiyun Liu)
+- Rename lemmas `X_length` into `length_X`, see the sed script below for an
+  overview. This follows https://github.com/coq/coq/pull/18564.
+
+The following `sed` script should perform most of the renaming
+(on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).
+Note that the script is not idempotent, do not run it twice.
+```
+sed -i -E -f- $(find theories -name "*.v") <<EOF
+# length
+s/\bnil_length\b/length_nil/g
+s/\bcons_length\b/length_cons/g
+s/\bapp_length\b/length_app/g
+s/\bmap_to_list_length\b/length_map_to_list/g
+s/\bseq_length\b/length_seq/g
+s/\bseqZ_length\b/length_seqZ/g
+s/\bjoin_length\b/length_join/g
+s/\bZ_to_little_endian_length\b/length_Z_to_little_endian/g
+s/\balter_length\b/length_alter/g
+s/\binsert_length\b/length_insert/g
+s/\binserts_length\b/length_inserts/g
+s/\breverse_length\b/length_reverse/g
+s/\btake_length\b/length_take/g
+s/\btake_length_le\b/length_take_le/g
+s/\btake_length_ge\b/length_take_ge/g
+s/\bdrop_length\b/length_drop/g
+s/\breplicate_length\b/length_replicate/g
+s/\bresize_length\b/length_resize/g
+s/\brotate_length\b/length_rotate/g
+s/\breshape_length\b/length_reshape/g
+s/\bsublist_alter_length\b/length_sublist_alter/g
+s/\bmask_length\b/length_mask/g
+s/\bfilter_length\b/length_filter/g
+s/\bfilter_length_lt\b/length_filter_lt/g
+s/\bfmap_length\b/length_fmap/g
+s/\bmapM_length\b/length_mapM/g
+s/\bset_mapM_length\b/length_set_mapM/g
+s/\bimap_length\b/length_imap/g
+s/\bzip_with_length\b/length_zip_with/g
+s/\bzip_with_length_l\b/length_zip_with_l/g
+s/\bzip_with_length_l_eq\b/length_zip_with_l_eq/g
+s/\bzip_with_length_r\b/length_zip_with_r/g
+s/\bzip_with_length_r_eq\b/length_zip_with_r_eq/g
+s/\bzip_with_length_same_l\b/length_zip_with_same_l/g
+s/\bzip_with_length_same_r\b/length_zip_with_same_r/g
+s/\bnatset_to_bools_length\b/length_natset_to_bools/g
+s/\bvec_to_list_length\b/length_vec_to_list/g
+s/\bfresh_list_length\b/length_fresh_list/g
+s/\bbv_to_little_endian_length\b/length_bv_to_little_endian/g
+s/\bbv_seq_length\b/length_bv_seq/g
+s/\bbv_to_bits_length\b/length_bv_to_bits/g
+EOF
+```
 
 ## std++ 1.10.0 (2024-04-12)
 

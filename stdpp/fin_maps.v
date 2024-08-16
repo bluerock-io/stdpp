@@ -1046,7 +1046,7 @@ Proof.
     auto using not_elem_of_list_to_map_1.
 Qed.
 
-Lemma map_to_list_length {A} (m : M A) :
+Lemma length_map_to_list {A} (m : M A) :
   length (map_to_list m) = size m.
 Proof.
   apply (map_fold_ind (λ n m, length (map_to_list m) = n)); clear m.
@@ -1147,10 +1147,10 @@ Proof. unfold map_imap. by rewrite map_to_list_empty. Qed.
 
 (** ** Properties of the size operation *)
 Lemma map_size_empty {A} : size (∅ : M A) = 0.
-Proof. by rewrite <-map_to_list_length, map_to_list_empty. Qed.
+Proof. by rewrite <-length_map_to_list, map_to_list_empty. Qed.
 Lemma map_size_empty_iff {A} (m : M A) : size m = 0 ↔ m = ∅.
 Proof.
-  by rewrite <-map_to_list_length, length_zero_iff_nil, map_to_list_empty_iff.
+  by rewrite <-length_map_to_list, length_zero_iff_nil, map_to_list_empty_iff.
 Qed.
 Lemma map_size_empty_inv {A} (m : M A) : size m = 0 → m = ∅.
 Proof. apply map_size_empty_iff. Qed.
@@ -1158,7 +1158,7 @@ Lemma map_size_non_empty_iff {A} (m : M A) : size m ≠ 0 ↔ m ≠ ∅.
 Proof. by rewrite map_size_empty_iff. Qed.
 
 Lemma map_size_singleton {A} i (x : A) : size ({[ i := x ]} : M A) = 1.
-Proof. by rewrite <-map_to_list_length, map_to_list_singleton. Qed.
+Proof. by rewrite <-length_map_to_list, map_to_list_singleton. Qed.
 
 Lemma map_size_ne_0_lookup {A} (m : M A) :
   size m ≠ 0 ↔ ∃ i, is_Some (m !! i).
@@ -1179,9 +1179,9 @@ Lemma map_size_insert {A} i x (m : M A) :
 Proof.
   destruct (m !! i) as [y|] eqn:?; simpl.
   - rewrite <-(insert_id m i y) at 2 by done. rewrite <-!(insert_delete_insert m).
-    rewrite <-!map_to_list_length.
+    rewrite <-!length_map_to_list.
     by rewrite !map_to_list_insert by (by rewrite lookup_delete).
-  - by rewrite <-!map_to_list_length, map_to_list_insert.
+  - by rewrite <-!length_map_to_list, map_to_list_insert.
 Qed.
 Lemma map_size_insert_Some {A} i x (m : M A) :
   is_Some (m !! i) → size (<[i:=x]> m) = size m.
@@ -1194,7 +1194,7 @@ Lemma map_size_delete {A} i (m : M A) :
   size (delete i m) = (match m !! i with Some _ => pred | None => id end) (size m).
 Proof.
   destruct (m !! i) as [y|] eqn:?; simpl.
-  - by rewrite <-!map_to_list_length, <-(map_to_list_delete m).
+  - by rewrite <-!length_map_to_list, <-(map_to_list_delete m).
   - by rewrite delete_notin.
 Qed.
 Lemma map_size_delete_Some {A} i (m : M A) :
@@ -1206,7 +1206,7 @@ Proof. intros Hi. by rewrite map_size_delete, Hi. Qed.
 
 Lemma map_size_fmap {A B} (f : A -> B) (m : M A) : size (f <$> m) = size m.
 Proof.
-  intros. by rewrite <-!map_to_list_length, map_to_list_fmap, fmap_length.
+  intros. by rewrite <-!length_map_to_list, map_to_list_fmap, length_fmap.
 Qed.
 
 Lemma map_size_list_to_map {A} (l : list (K * A)) :
@@ -1223,12 +1223,12 @@ Lemma map_subseteq_size_eq {A} (m1 m2 : M A) :
 Proof.
   intros. apply map_to_list_inj, submseteq_length_Permutation.
   - by apply map_to_list_submseteq.
-  - by rewrite !map_to_list_length.
+  - by rewrite !length_map_to_list.
 Qed.
 
 Lemma map_subseteq_size {A} (m1 m2 : M A) : m1 ⊆ m2 → size m1 ≤ size m2.
 Proof.
-  intros. rewrite <-!map_to_list_length.
+  intros. rewrite <-!length_map_to_list.
   by apply submseteq_length, map_to_list_submseteq.
 Qed.
 

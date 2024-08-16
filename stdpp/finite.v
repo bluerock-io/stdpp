@@ -120,7 +120,7 @@ Lemma finite_inj_Permutation `{Finite A} `{Finite B} (f : A → B)
 Proof.
   intros. apply submseteq_length_Permutation.
   - by apply finite_inj_submseteq.
-  - rewrite fmap_length. by apply Nat.eq_le_incl.
+  - rewrite length_fmap. by apply Nat.eq_le_incl.
 Qed.
 Lemma finite_inj_surj `{Finite A} `{Finite B} (f : A → B)
   `{!Inj (=) (=) f} : card A = card B → Surj (=) f.
@@ -146,7 +146,7 @@ Proof.
     { exists (card_0_inv B HA). intros y. apply (card_0_inv _ HA y). }
     destruct (finite_surj A B) as (g&?); auto with lia.
     destruct (surj_cancel g) as (f&?). exists f. apply cancel_inj.
-  - intros [f ?]. unfold card. rewrite <-(fmap_length f).
+  - intros [f ?]. unfold card. rewrite <-(length_fmap f).
     by apply submseteq_length, (finite_inj_submseteq f).
 Qed.
 Lemma finite_bijective A `{Finite A} B `{Finite B} :
@@ -216,7 +216,7 @@ Section enc_finite.
     split; auto. by apply elem_of_list_lookup_2 with (to_nat x), lookup_seq.
   Qed.
   Lemma enc_finite_card : card A = c.
-  Proof. unfold card. simpl. by rewrite fmap_length, seq_length. Qed.
+  Proof. unfold card. simpl. by rewrite length_fmap, length_seq. Qed.
 End enc_finite.
 
 (** If we have a surjection [f : A → B] and [A] is finite, then [B] is finite
@@ -262,7 +262,7 @@ Next Obligation.
   apply elem_of_list_fmap. eauto using elem_of_enum.
 Qed.
 Lemma option_cardinality `{Finite A} : card (option A) = S (card A).
-Proof. unfold card. simpl. by rewrite fmap_length. Qed.
+Proof. unfold card. simpl. by rewrite length_fmap. Qed.
 
 Global Program Instance Empty_set_finite : Finite Empty_set := {| enum := [] |}.
 Next Obligation. by apply NoDup_nil. Qed.
@@ -297,7 +297,7 @@ Next Obligation.
     [left|right]; (eexists; split; [done|apply elem_of_enum]).
 Qed.
 Lemma sum_card `{Finite A, Finite B} : card (A + B) = card A + card B.
-Proof. unfold card. simpl. by rewrite app_length, !fmap_length. Qed.
+Proof. unfold card. simpl. by rewrite length_app, !length_fmap. Qed.
 
 Global Program Instance prod_finite `{Finite A, Finite B} : Finite (A * B)%type :=
   {| enum := a ← enum A; (a,.) <$> enum B |}.
@@ -315,7 +315,7 @@ Qed.
 Lemma prod_card `{Finite A} `{Finite B} : card (A * B) = card A * card B.
 Proof.
   unfold card; simpl. induction (enum A); simpl; auto.
-  rewrite app_length, fmap_length. auto.
+  rewrite length_app, length_fmap. auto.
 Qed.
 
 Fixpoint vec_enum {A} (l : list A) (n : nat) : list (vec A n) :=
@@ -343,18 +343,18 @@ Proof.
   unfold card; simpl. induction n as [|n IH]; simpl; [done|].
   rewrite <-IH. clear IH. generalize (vec_enum (enum A) n).
   induction (enum A) as [|x xs IH]; intros l; csimpl; auto.
-  by rewrite app_length, fmap_length, IH.
+  by rewrite length_app, length_fmap, IH.
 Qed.
 
 Global Instance list_finite `{Finite A} n : Finite { l : list A | length l = n }.
 Proof.
-  refine (bijective_finite (λ v : vec A n, vec_to_list v ↾ vec_to_list_length _)).
+  refine (bijective_finite (λ v : vec A n, vec_to_list v ↾ length_vec_to_list _)).
   - abstract (by intros v1 v2 [= ?%vec_to_list_inj2]).
   - abstract (intros [l <-]; exists (list_to_vec l);
       apply (sig_eq_pi _), vec_to_list_to_vec).
 Defined.
 Lemma list_card `{Finite A} n : card { l : list A | length l = n } = card A ^ n.
-Proof. unfold card; simpl. rewrite fmap_length. apply vec_card. Qed.
+Proof. unfold card; simpl. rewrite length_fmap. apply vec_card. Qed.
 
 Fixpoint fin_enum (n : nat) : list (fin n) :=
   match n with 0 => [] | S n => 0%fin :: (FS <$> fin_enum n) end.
@@ -369,7 +369,7 @@ Next Obligation.
     rewrite elem_of_cons, ?elem_of_list_fmap; eauto.
 Qed.
 Lemma fin_card n : card (fin n) = n.
-Proof. unfold card; simpl. induction n; simpl; rewrite ?fmap_length; auto. Qed.
+Proof. unfold card; simpl. induction n; simpl; rewrite ?length_fmap; auto. Qed.
 
 (* shouldn’t be an instance (cycle with [sig_finite]): *)
 Lemma finite_sig_dec `{!EqDecision A} (P : A → Prop) `{Finite (sig P)} x :
@@ -415,7 +415,7 @@ Section sig_finite.
     split; [by destruct p | apply elem_of_enum].
   Qed.
   Lemma sig_card : card (sig P) = length (filter P (enum A)).
-  Proof. by rewrite <-list_filter_sig_filter, fmap_length. Qed.
+  Proof. by rewrite <-list_filter_sig_filter, length_fmap. Qed.
 End sig_finite.
 
 Lemma finite_pigeonhole `{Finite A} `{Finite B} (f : A → B) :

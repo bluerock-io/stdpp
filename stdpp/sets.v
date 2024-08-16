@@ -1089,7 +1089,7 @@ Section set_monad.
     - revert l. induction k; set_solver by eauto.
     - induction 1; set_solver.
   Qed.
-  Lemma set_mapM_length {A B} (f : A → M B) l k :
+  Lemma length_set_mapM {A B} (f : A → M B) l k :
     l ∈ mapM f k → length l = length k.
   Proof. revert l; induction k; set_solver by eauto. Qed.
   Lemma elem_of_mapM_fmap {A B} (f : A → B) (g : B → M A) l k :

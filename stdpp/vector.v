@@ -129,11 +129,11 @@ Lemma vec_to_list_app {A n m} (v : vec A n) (w : vec A m) :
 Proof. by induction v; f_equal/=. Qed.
 Lemma vec_to_list_to_vec {A} (l : list A): vec_to_list (list_to_vec l) = l.
 Proof. by induction l; f_equal/=. Qed.
-Lemma vec_to_list_length {A n} (v : vec A n) : length (vec_to_list v) = n.
+Lemma length_vec_to_list {A n} (v : vec A n) : length (vec_to_list v) = n.
 Proof. induction v; simpl; by f_equal. Qed.
 Lemma vec_to_list_same_length {A B n} (v : vec A n) (w : vec B n) :
   length v = length w.
-Proof. by rewrite !vec_to_list_length. Qed.
+Proof. by rewrite !length_vec_to_list. Qed.
 Lemma vec_to_list_inj1 {A n m} (v : vec A n) (w : vec A m) :
   vec_to_list v = vec_to_list w → n = m.
 Proof.
@@ -147,10 +147,10 @@ Proof.
     simplify_eq/=; f_equal; eauto.
 Qed.
 Lemma list_to_vec_to_list {A n} (v : vec A n) :
-  list_to_vec (vec_to_list v) = eq_rect _ _ v _ (eq_sym (vec_to_list_length v)).
+  list_to_vec (vec_to_list v) = eq_rect _ _ v _ (eq_sym (length_vec_to_list v)).
 Proof.
   apply vec_to_list_inj2. rewrite vec_to_list_to_vec.
-  by destruct (eq_sym (vec_to_list_length v)).
+  by destruct (eq_sym (length_vec_to_list v)).
 Qed.
 
 Lemma vlookup_middle {A n m} (v : vec A n) (w : vec A m) x :
@@ -191,7 +191,7 @@ Proof.
   split.
   - intros [Hlt ?]. rewrite <-(fin_to_nat_to_fin i n Hlt). by apply vlookup_lookup.
   - intros Hvix. assert (Hlt:=lookup_lt_Some _ _ _ Hvix).
-    rewrite vec_to_list_length in Hlt. exists Hlt.
+    rewrite length_vec_to_list in Hlt. exists Hlt.
     apply vlookup_lookup. by rewrite fin_to_nat_to_fin.
 Qed.
 Lemma elem_of_vlookup {A n} (v : vec A n) x :
@@ -345,5 +345,5 @@ Proof.
   intros v. case_guard as Hn; simplify_eq/=.
   - rewrite list_to_vec_to_list.
     rewrite (proof_irrel (eq_sym _) Hn). by destruct Hn.
-  - by rewrite vec_to_list_length in Hn.
+  - by rewrite length_vec_to_list in Hn.
 Qed.

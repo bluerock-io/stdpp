@@ -339,7 +339,7 @@ Module Pos.
 
   Fixpoint length (p : positive) : nat :=
     match p with 1 => 0%nat | p~0 | p~1 => S (length p) end.
-  Lemma app_length p1 p2 : length (p1 ++ p2) = (length p2 + length p1)%nat.
+  Lemma length_app p1 p2 : length (p1 ++ p2) = (length p2 + length p1)%nat.
   Proof. by induction p2; f_equal/=. Qed.
 
   Lemma lt_sum (x y : positive) : x < y ↔ ∃ z, y = x + z.

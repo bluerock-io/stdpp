@@ -424,7 +424,9 @@ Fixpoint positives_unflatten_go
   | _ => None
   end%positive.
 
-(* TODO: Remove once we drop support for Coq 8.19 *)
+(* TODO: Coq 8.20 has the same lemma under the same name, so remove our version
+once we require Coq 8.20. In Coq 8.19 and before, this lemma is called
+[app_length]. *)
 Lemma length_app {A} (l l' : list A) : length (l ++ l') = length l + length l'.
 Proof. induction l; f_equal/=; auto. Qed.
 

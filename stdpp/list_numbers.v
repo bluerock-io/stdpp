@@ -51,7 +51,9 @@ Fixpoint little_endian_to_Z (n : Z) (bs : list Z) : Z :=
 Section seq.
   Implicit Types m n i j : nat.
 
-  (* TODO: Remove once we drop support for Coq 8.19 *)
+  (* TODO: Coq 8.20 has the same lemma under the same name, so remove our version
+  once we require Coq 8.20. In Coq 8.19 and before, this lemma is called
+  [seq_length]. *)
   Lemma length_seq m n : length (seq m n) = n.
   Proof. revert m. induction n; intros; f_equal/=; auto. Qed.
 

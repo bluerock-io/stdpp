@@ -13,6 +13,7 @@ API-breaking change is listed.
 - Make the build script compatible with BSD systems. (by Yiyun Liu)
 - Rename lemmas `X_length` into `length_X`, see the sed script below for an
   overview. This follows https://github.com/coq/coq/pull/18564.
+- Redefine `map_imap` so it can be used in nested recursive `Fixpoint`s.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

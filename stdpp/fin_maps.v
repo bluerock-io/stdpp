@@ -145,11 +145,13 @@ index contains a value in the second map as well. *)
 Global Instance map_difference `{Merge M} {A} : Difference (M A) :=
   difference_with (λ _ _, None).
 
-(** A stronger variant of map that allows the mapped function to use the index
-of the elements. Implemented by conversion to lists, so not very efficient. *)
+(** A stronger variant of [fmap] that allows the mapped function to use the
+index of the elements. Implemented by folding over the map, and repeatedly
+inserting the new elements, so not very efficient. (For [gmap] this function is
+[O (n log n)], while [fmap] is [O (n)] in the size [n] of the map. *)
 Definition map_imap `{∀ A, Insert K A (M A), ∀ A, Empty (M A),
-    ∀ A, MapFold K A (M A)} {A B} (f : K → A → option B) (m : M A) : M B :=
-  list_to_map (omap (λ ix, (fst ix ,.) <$> uncurry f ix) (map_to_list m)).
+    ∀ A, MapFold K A (M A)} {A B} (f : K → A → option B) : M A → M B :=
+  map_fold (λ i x m, match f i x with Some y => <[i:=y]> m | None => m end) ∅.
 
 (** Given a function [f : K1 → K2], the function [kmap f] turns a maps with
 keys of type [K1] into a map with keys of type [K2]. The function [kmap f]
@@ -1074,17 +1076,14 @@ Proof. destruct (decide (m = ∅)); [right|left]; auto using map_choose. Qed.
 Lemma map_lookup_imap {A B} (f : K → A → option B) (m : M A) i :
   map_imap f m !! i = m !! i ≫= f i.
 Proof.
-  unfold map_imap; destruct (m !! i ≫= f i) as [y|] eqn:Hi; simpl.
-  - destruct (m !! i) as [x|] eqn:?; simplify_eq/=.
-    apply elem_of_list_to_map_1'.
-    { intros y'; rewrite elem_of_list_omap; intros ([i' x']&Hi'&?).
-      by rewrite elem_of_map_to_list in Hi'; simplify_option_eq. }
-    apply elem_of_list_omap; exists (i,x); split;
-      [by apply elem_of_map_to_list|by simplify_option_eq].
-  - apply not_elem_of_list_to_map; rewrite elem_of_list_fmap.
-    intros ([i' x]&->&Hi'); simplify_eq/=.
-    rewrite elem_of_list_omap in Hi'; destruct Hi' as ([j y]&Hj&?).
-    rewrite elem_of_map_to_list in Hj; simplify_option_eq.
+  unfold map_imap. apply (map_fold_ind (λ r m, r !! i = m !! i ≫= f i)); clear m.
+  { by rewrite !lookup_empty. }
+  intros j y m m' Hj Hi. destruct (decide (i = j)) as [->|].
+  - rewrite lookup_insert; simpl. destruct (f j y).
+    + by rewrite lookup_insert.
+    + by rewrite Hi, Hj.
+  - rewrite lookup_insert_ne by done.
+    destruct (f j y); by rewrite ?lookup_insert_ne by done.
 Qed.
 
 Lemma map_imap_Some {A} (m : M A) : map_imap (λ _, Some) m = m.
@@ -1143,7 +1142,7 @@ Qed.
 
 Lemma map_imap_empty {A B} (f : K → A → option B) :
   map_imap f ∅ =@{M B} ∅.
-Proof. unfold map_imap. by rewrite map_to_list_empty. Qed.
+Proof. apply map_eq; intros i. by rewrite map_lookup_imap, !lookup_empty. Qed.
 
 (** ** Properties of the size operation *)
 Lemma map_size_empty {A} : size (∅ : M A) = 0.

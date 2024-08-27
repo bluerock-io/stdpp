@@ -435,7 +435,8 @@ Proof. discriminate. Qed.
 Goal GTest {[ GTest {[ 1 := GTest ∅ ]} := GTest ∅ ]} ≠@{gtest (gtest nat)} GTest ∅.
 Proof. discriminate. Qed.
 
-(* Test that [map_imap] can be used in nested recursive fixpoints. *)
+(* Test that a fixpoint can be recursively invoked in the closure argument
+of [map_imap]. *)
 Fixpoint gtest_imap `{Countable K} (j : K) (t : gtest K) : gtest K :=
   let '(GTest ts) := t in
   GTest (map_imap (λ i t, guard (i = j);; Some (gtest_imap j t)) ts).

@@ -145,10 +145,10 @@ index contains a value in the second map as well. *)
 Global Instance map_difference `{Merge M} {A} : Difference (M A) :=
   difference_with (λ _ _, None).
 
-(** A stronger variant of map that allows the mapped function to use the index
-of the elements. Implemented by folding over the map, and repeatedly inserting
-the new elements so not very efficient. (For `gmap` this function is
-`O (n log n)`, while `fmap` is `O (n)` in the size `n` of the map. *)
+(** A stronger variant of [fmap] that allows the mapped function to use the
+index of the elements. Implemented by folding over the map, and repeatedly
+inserting the new elements, so not very efficient. (For [gmap] this function is
+[O (n log n)], while [fmap] is [O (n)] in the size [n] of the map. *)
 Definition map_imap `{∀ A, Insert K A (M A), ∀ A, Empty (M A),
     ∀ A, MapFold K A (M A)} {A B} (f : K → A → option B) : M A → M B :=
   map_fold (λ i x m, match f i x with Some y => <[i:=y]> m | None => m end) ∅.

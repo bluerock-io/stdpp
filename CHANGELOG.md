@@ -15,13 +15,18 @@ API-breaking change is listed.
   overview. This follows https://github.com/coq/coq/pull/18564.
 - Redefine `map_imap` so its closure argument can contain recursive
   occurrences of a `Fixpoint`.
-* Add lemma `fmap_insert_inv`.
+- Add lemma `fmap_insert_inv`.
+- Rename `minimal_exists` to `minimal_exists_elem_of` and
+  `minimal_exists_L` to `minimal_exists_elem_of_L`.
+  Add new `minimal_exists` lemma. (by Lennard Gäher)
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).
 Note that the script is not idempotent, do not run it twice.
 ```
 sed -i -E -f- $(find theories -name "*.v") <<EOF
+s/\bminimal_exists_L\b/minimal_exists_elem_of_L/g
+s/\bminimal_exists\b/minimal_exists_elem_of/g
 # length
 s/\bnil_length\b/length_nil/g
 s/\bcons_length\b/length_cons/g

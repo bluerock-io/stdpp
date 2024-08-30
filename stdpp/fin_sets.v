@@ -365,6 +365,7 @@ Lemma minimal_exists_elem_of_L R `{!LeibnizEquiv C, !Transitive R,
     ∀ x y, Decision (R x y)} (X : C) :
   X ≠ ∅ → ∃ x, x ∈ X ∧ minimal R x X.
 Proof. unfold_leibniz. apply (minimal_exists_elem_of R). Qed.
+
 Lemma minimal_exists R `{!Transitive R,
     ∀ x y, Decision (R x y)} `{!Inhabited A} (X : C) :
   ∃ x, minimal R x X.

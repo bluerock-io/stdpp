@@ -15,6 +15,7 @@ API-breaking change is listed.
   overview. This follows https://github.com/coq/coq/pull/18564.
 - Redefine `map_imap` so its closure argument can contain recursive
   occurrences of a `Fixpoint`.
+* Add lemma `fmap_insert_inv`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

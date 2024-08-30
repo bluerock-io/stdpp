@@ -25,8 +25,6 @@ The following `sed` script should perform most of the renaming
 Note that the script is not idempotent, do not run it twice.
 ```
 sed -i -E -f- $(find theories -name "*.v") <<EOF
-s/\bminimal_exists_L\b/minimal_exists_elem_of_L/g
-s/\bminimal_exists\b/minimal_exists_elem_of/g
 # length
 s/\bnil_length\b/length_nil/g
 s/\bcons_length\b/length_cons/g
@@ -69,6 +67,9 @@ s/\bfresh_list_length\b/length_fresh_list/g
 s/\bbv_to_little_endian_length\b/length_bv_to_little_endian/g
 s/\bbv_seq_length\b/length_bv_seq/g
 s/\bbv_to_bits_length\b/length_bv_to_bits/g
+# renaming of minimal_exists
+s/\bminimal_exists_L\b/minimal_exists_elem_of_L/g
+s/\bminimal_exists\b/minimal_exists_elem_of/g
 EOF
 ```
 

@@ -7,6 +7,7 @@ Local Open Scope Z_scope.
 
 Record Zmap (A : Type) : Type :=
   ZMap { Zmap_0 : option A; Zmap_pos : Pmap A; Zmap_neg : Pmap A }.
+Add Printing Constructor Zmap.
 Global Arguments Zmap_0 {_} _ : assert.
 Global Arguments Zmap_pos {_} _ : assert.
 Global Arguments Zmap_neg {_} _ : assert.
@@ -60,14 +61,17 @@ Proof.
   - intros ??? [??] []; simpl; [done| |]; apply lookup_fmap.
   - intros ?? f [??] [|?|?]; simpl; [done| |]; apply (lookup_omap f).
   - intros ??? f [??] [??] [|?|?]; simpl; [done| |]; apply (lookup_merge f).
-  - intros A B P f b Hemp Hinsert [mx t t'].
-    apply (map_fold_ind (λ r t, P r (ZMap mx t t'))); clear t.
-    { apply (map_fold_ind (λ r t', P r (ZMap mx ∅ t'))); clear t'.
+  - done.
+  - intros A P Hemp Hins [mx t t'].
+    induction t as [|i x t ? Hfold IH] using map_fold_ind.
+    { induction t' as [|i x t' ? Hfold IH] using map_fold_ind.
       { destruct mx as [x|]; [|done].
         replace (ZMap (Some x) ∅ ∅) with (<[0:=x]> ∅ : Zmap _) by done.
-        by apply Hinsert. }
-      intros i x t' r ??. by apply (Hinsert (Z.neg i) x (ZMap mx ∅ t')). }
-    intros i x t r ??. by apply (Hinsert (Z.pos i) x (ZMap mx t t')).
+        by apply Hins. }
+      apply (Hins (Z.neg i) x (ZMap mx ∅ t')); [done| |done].
+      intros B f b. apply Hfold. }
+    apply (Hins (Z.pos i) x (ZMap mx t t')); [done| |done].
+    intros B f b. apply Hfold.
 Qed.
 
 (** * Finite sets *)

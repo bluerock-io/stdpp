@@ -322,40 +322,52 @@ Section Pmap_merge.
 End Pmap_merge.
 
 Section Pmap_fold.
-  Context {A B} (f : positive → A → B → B).
   Local Notation Pmap_fold f := (Pmap_fold_aux (Pmap_ne_fold f)).
 
-  Local Lemma Pmap_fold_PNode i y ml mx mr :
-    PNode_valid ml mx mr →
+  Local Lemma Pmap_fold_PNode {A B} (f : positive → A → B → B) i y ml mx mr :
     Pmap_fold f i y (PNode ml mx mr) = Pmap_fold f i~1
       (Pmap_fold f i~0
         match mx with None => y | Some x => f (Pos.reverse i) x y end ml) mr.
   Proof. by destruct ml, mx, mr. Qed.
 
-  Local Lemma Pmap_fold_ind (P : B → Pmap A → Prop) (b : B) j :
-    P b PEmpty →
-    (∀ i x mt r, mt !! i = None →
-      P r mt → P (f (Pos.reverse_go i j) x r) (<[i:=x]> mt)) →
-    ∀ mt, P (Pmap_fold f j b mt) mt.
+  Local Lemma Pmap_fold_ind {A} (P : Pmap A → Prop) :
+    P PEmpty →
+    (∀ i x mt,
+      mt !! i = None →
+      (∀ j B (f : positive → A → B → B) b,
+        Pmap_fold f j b (<[i:=x]> mt) = f (Pos.reverse_go i j) x (Pmap_fold f j b mt)) →
+      P mt → P (<[i:=x]> mt)) →
+    ∀ mt, P mt.
   Proof.
-    intros Hemp Hinsert mt. revert P b j Hemp Hinsert.
+    intros Hemp Hinsert mt. revert P Hemp Hinsert.
     induction mt as [|ml mx mr ? IHl IHr] using Pmap_ind;
-      intros P b j Hemp Hinsert; [done|].
-    rewrite Pmap_fold_PNode by done.
-    apply (IHr (λ y mt, P y (PNode ml mx mt))).
-    { apply (IHl (λ y mt, P y (PNode mt mx PEmpty))).
+      intros P Hemp Hinsert; [done|].
+    apply (IHr (λ mt, P (PNode ml mx mt))).
+    { apply (IHl (λ mt, P (PNode mt mx PEmpty))).
       { destruct mx as [x|]; [|done].
         replace (PNode PEmpty (Some x) PEmpty)
           with (<[1:=x]> PEmpty : Pmap A) by done.
         by apply Hinsert. }
-      intros i x mt r ??.
+      intros i x mt r ? Hfold.
       replace (PNode (<[i:=x]> mt) mx PEmpty)
         with (<[i~0:=x]> (PNode mt mx PEmpty)) by (by destruct mt, mx).
-      apply Hinsert; by rewrite ?Pmap_lookup_PNode. }
-    intros i x mt r ??.
+      apply Hinsert.
+      - by rewrite Pmap_lookup_PNode.
+      - intros j B f b.
+        replace (<[i~0:=x]> (PNode mt mx PEmpty))
+          with (PNode (<[i:=x]> mt) mx PEmpty) by (by destruct mt, mx).
+        rewrite !Pmap_fold_PNode; simpl; auto.
+      - done. }
+    intros i x mt r ? Hfold.
     replace (PNode ml mx (<[i:=x]> mt))
       with (<[i~1:=x]> (PNode ml mx mt)) by (by destruct ml, mx, mt).
-    apply Hinsert; by rewrite ?Pmap_lookup_PNode.
+    apply Hinsert.
+    - by rewrite Pmap_lookup_PNode.
+    - intros j B f b.
+      replace (<[i~1:=x]> (PNode ml mx mt))
+        with (PNode ml mx (<[i:=x]> mt)) by (by destruct ml, mx, mt).
+      rewrite !Pmap_fold_PNode; simpl; auto.
+    - done.
   Qed.
 End Pmap_fold.
 
@@ -370,7 +382,9 @@ Proof.
   - intros. apply Pmap_lookup_fmap.
   - intros. apply Pmap_lookup_omap.
   - intros. apply Pmap_lookup_merge.
-  - intros A B P f b Hemp Hinsert. by apply (Pmap_fold_ind f P).
+  - done.
+  - intros A P Hemp Hinsert. apply Pmap_fold_ind; [done|].
+    intros i x mt ? Hfold. apply Hinsert; [done|]. apply (Hfold 1).
 Qed.
 
 (** Type annotation [list (positive * A)] seems needed in Coq 8.14, not in more

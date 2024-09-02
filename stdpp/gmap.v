@@ -455,9 +455,10 @@ Local Lemma gmap_dep_fold_ind {A} {P} (Q : gmap_dep A P → Prop) :
   Q GEmpty →
   (∀ i p x mt,
     gmap_dep_lookup i mt = None →
-    (∀ j B (f : positive → A → B → B) b,
-      gmap_dep_fold f j b (gmap_dep_partial_alter (λ _, Some x) i p mt)
-      = f (Pos.reverse_go i j) x (gmap_dep_fold f j b mt)) →
+    (∀ j A' B (f : positive → A' → B → B) (g : A → A') b x',
+      gmap_dep_fold f j b
+        (gmap_dep_partial_alter (λ _, Some x') i p (gmap_dep_fmap g mt))
+      = f (Pos.reverse_go i j) x' (gmap_dep_fold f j b (gmap_dep_fmap g mt))) →
     Q mt → Q (gmap_dep_partial_alter (λ _, Some x) i p mt)) →
   ∀ mt, Q mt.
 Proof.
@@ -476,9 +477,14 @@ Proof.
       by (by destruct mt, mx as [[]|]).
     apply Hinsert.
     - by rewrite gmap_dep_lookup_GNode.
-    - intros j B f b.
-      replace (gmap_dep_partial_alter (λ _, Some x) (i~0) p (GNode mt mx GEmpty))
-        with (GNode (gmap_dep_partial_alter (λ _, Some x) i p mt) mx GEmpty)
+    - intros j A' B f g b x'.
+      replace (gmap_dep_partial_alter (λ _, Some x') (i~0) p
+          (gmap_dep_fmap g (GNode mt mx GEmpty)))
+        with (GNode (gmap_dep_partial_alter (λ _, Some x') i p (gmap_dep_fmap g mt))
+          (prod_map id g <$> mx) GEmpty)
+        by (by destruct mt, mx as [[]|]).
+      replace (gmap_dep_fmap g (GNode mt mx GEmpty))
+        with (GNode (gmap_dep_fmap g mt) (prod_map id g <$> mx) GEmpty)
         by (by destruct mt, mx as [[]|]).
       rewrite !gmap_dep_fold_GNode; simpl; auto.
     - done. }
@@ -488,9 +494,14 @@ Proof.
     by (by destruct ml, mx as [[]|], mt).
   apply Hinsert.
   - by rewrite gmap_dep_lookup_GNode.
-  - intros j B f b.
-    replace (gmap_dep_partial_alter (λ _, Some x) (i~1) p (GNode ml mx mt))
-      with (GNode ml mx (gmap_dep_partial_alter (λ _, Some x) i p mt))
+  - intros j A' B f g b x'.
+    replace (gmap_dep_partial_alter (λ _, Some x') (i~1) p
+        (gmap_dep_fmap g (GNode ml mx mt)))
+      with (GNode (gmap_dep_fmap g ml) (prod_map id g <$> mx)
+        (gmap_dep_partial_alter (λ _, Some x') i p (gmap_dep_fmap g mt)))
+      by (by destruct ml, mx as [[]|], mt).
+    replace (gmap_dep_fmap g (GNode ml mx mt))
+      with (GNode (gmap_dep_fmap g ml) (prod_map id g <$> mx) (gmap_dep_fmap g mt))
       by (by destruct ml, mx as [[]|], mt).
     rewrite !gmap_dep_fold_GNode; simpl; auto.
   - done.
@@ -514,9 +525,9 @@ Proof.
     intros i [Hk] x mt ? Hfold. destruct (fmap_Some_1 _ _ _ Hk) as (k&Hk'&->).
     assert (GMapKey Hk = gmap_key_encode k) as Hkk by (apply proof_irrel).
     rewrite Hkk in Hfold |- *. clear Hk Hkk.
-    apply (Hins k x (GMap mt)); [done|]. intros B f b.
-    trans ((match decode (encode k) with Some k => f k x | None => id end)
-      (map_fold f b (GMap mt))); [apply (Hfold 1)|].
+    apply (Hins k x (GMap mt)); [done|]. intros A' B f g b x'.
+    trans ((match decode (encode k) with Some k => f k x' | None => id end)
+      (map_fold f b (g <$> GMap mt))); [apply (Hfold 1)|].
     by rewrite Hk'.
 Qed.
 

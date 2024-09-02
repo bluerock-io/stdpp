@@ -59,12 +59,12 @@ Proof.
   - intros ??? f [??] [??] [|?]; simpl; [done|]; apply (lookup_merge f).
   - done.
   - intros A P Hemp Hins [mx t].
-    induction t as [|i x t ? Hfold IH] using map_fold_ind.
+    induction t as [|i x t ? Hfold IH] using map_fold_fmap_ind.
     { destruct mx as [x|]; [|done].
       replace (NMap (Some x) ∅) with (<[0:=x]> ∅ : Nmap _) by done.
       by apply Hins. }
     apply (Hins (N.pos i) x (NMap mx t)); [done| |done].
-    intros B f b. apply Hfold.
+    intros A' B f g b. apply Hfold.
 Qed.
 
 (** * Finite sets *)

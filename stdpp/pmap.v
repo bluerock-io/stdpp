@@ -334,8 +334,9 @@ Section Pmap_fold.
     P PEmpty →
     (∀ i x mt,
       mt !! i = None →
-      (∀ j B (f : positive → A → B → B) b,
-        Pmap_fold f j b (<[i:=x]> mt) = f (Pos.reverse_go i j) x (Pmap_fold f j b mt)) →
+      (∀ j A' B (f : positive → A' → B → B) (g : A → A') b x',
+        Pmap_fold f j b (<[i:=x']> (g <$> mt))
+        = f (Pos.reverse_go i j) x' (Pmap_fold f j b (g <$> mt))) →
       P mt → P (<[i:=x]> mt)) →
     ∀ mt, P mt.
   Proof.
@@ -348,14 +349,17 @@ Section Pmap_fold.
         replace (PNode PEmpty (Some x) PEmpty)
           with (<[1:=x]> PEmpty : Pmap A) by done.
         by apply Hinsert. }
-      intros i x mt r ? Hfold.
+      intros i x mt ? Hfold ?.
       replace (PNode (<[i:=x]> mt) mx PEmpty)
         with (<[i~0:=x]> (PNode mt mx PEmpty)) by (by destruct mt, mx).
       apply Hinsert.
       - by rewrite Pmap_lookup_PNode.
-      - intros j B f b.
-        replace (<[i~0:=x]> (PNode mt mx PEmpty))
-          with (PNode (<[i:=x]> mt) mx PEmpty) by (by destruct mt, mx).
+      - intros j A' B f g b x'.
+        replace (<[i~0:=x']> (g <$> PNode mt mx PEmpty))
+          with (PNode (<[i:=x']> (g <$> mt)) (g <$> mx) PEmpty)
+          by (by destruct mt, mx).
+        replace (g <$> PNode mt mx PEmpty)
+          with (PNode (g <$> mt) (g <$> mx) PEmpty) by (by destruct mt, mx).
         rewrite !Pmap_fold_PNode; simpl; auto.
       - done. }
     intros i x mt r ? Hfold.
@@ -363,9 +367,12 @@ Section Pmap_fold.
       with (<[i~1:=x]> (PNode ml mx mt)) by (by destruct ml, mx, mt).
     apply Hinsert.
     - by rewrite Pmap_lookup_PNode.
-    - intros j B f b.
-      replace (<[i~1:=x]> (PNode ml mx mt))
-        with (PNode ml mx (<[i:=x]> mt)) by (by destruct ml, mx, mt).
+    - intros j A' B f g b x'.
+      replace (<[i~1:=x']> (g <$> PNode ml mx mt))
+        with (PNode (g <$> ml) (g <$> mx) (<[i:=x']> (g <$> mt)))
+        by (by destruct ml, mx, mt).
+      replace (g <$> PNode ml mx mt)
+        with (PNode (g <$> ml) (g <$> mx) (g <$> mt)) by (by destruct ml, mx, mt).
       rewrite !Pmap_fold_PNode; simpl; auto.
     - done.
   Qed.

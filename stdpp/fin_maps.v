@@ -67,14 +67,13 @@ Class FinMap K M `{FMap M, ∀ A, Lookup K A (M A), ∀ A, Empty (M A), ∀ A,
     merge f m1 m2 !! i = diag_None f (m1 !! i) (m2 !! i);
   map_fold_empty {A B} (f : K → A → B → B) (b : B) :
     map_fold f b ∅ = b;
-  map_fold_ind {A} (P : M A → Prop) :
+  map_fold_fmap_ind {A} (P : M A → Prop) :
     P ∅ →
     (∀ i x m,
       m !! i = None →
-      (∀ B (f : K → A → B → B) b,
-        map_fold f b (<[i:=x]> m) = f i x (map_fold f b m)) →
-      P m →
-      P (<[i:=x]> m)) →
+      (∀ A' B (f : K → A' → B → B) (g : A → A') b x',
+        map_fold f b (<[i:=x']> (g <$> m)) = f i x' (map_fold f b (g <$> m))) →
+      P m → P (<[i:=x]> m)) →
     ∀ m, P m;
 }.
 
@@ -304,6 +303,23 @@ Proof.
 Qed.
 Lemma map_empty_subseteq {A} (m : M A) : ∅ ⊆ m.
 Proof. apply map_subseteq_spec. intros k v []%lookup_empty_Some. Qed.
+
+Lemma map_fold_ind {A} (P : M A → Prop) :
+  P ∅ →
+  (∀ i x m,
+    m !! i = None →
+    (∀ B (f : K → A → B → B) b x',
+      map_fold f b (<[i:=x']> m) = f i x' (map_fold f b m)) →
+    P m → P (<[i:=x]> m)) →
+  ∀ m, P m.
+Proof.
+  intros Hemp Hins m.
+  induction m as [|i x m ? Hfold IH] using map_fold_fmap_ind; [done|].
+  apply Hins; [done| |done]. intros B f b x'.
+  assert (m = id <$> m) as ->.
+  { apply map_eq; intros j; by rewrite lookup_fmap, option_fmap_id. }
+  apply Hfold.
+Qed.
 
 Lemma map_fold_weak_ind {A B} (P : B → M A → Prop) (f : K → A → B → B) (b : B) :
   P b ∅ →

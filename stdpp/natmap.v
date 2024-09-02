@@ -108,6 +108,22 @@ Proof.
   rewrite natmap_lookup_singleton_raw_ne; congruence.
 Qed.
 
+Definition natmap_fmap_raw {A B} (f : A → B) : natmap_raw A → natmap_raw B :=
+  fmap (fmap (M:=option) f).
+Lemma natmap_fmap_wf {A B} (f : A → B) l :
+  natmap_wf l → natmap_wf (natmap_fmap_raw f l).
+Proof.
+  unfold natmap_fmap_raw, natmap_wf. rewrite fmap_last.
+  destruct (last l); [|done]. by apply fmap_is_Some.
+Qed.
+Lemma natmap_lookup_fmap_raw {A B} (f : A → B) i l :
+  mjoin (natmap_fmap_raw f l !! i) = f <$> mjoin (l !! i).
+Proof.
+  unfold natmap_fmap_raw. rewrite list_lookup_fmap. by destruct (l !! i).
+Qed.
+Global Instance natmap_fmap : FMap natmap := λ A B f m,
+  let (l,Hl) := m in NatMap (natmap_fmap_raw f l) (natmap_fmap_wf _ _ Hl).
+
 Definition natmap_omap_raw {A B} (f : A → option B) :
     natmap_raw A → natmap_raw B :=
   fix go l :=
@@ -167,9 +183,10 @@ Lemma natmap_fold_raw_ind {A} (P : natmap_raw A → Prop) :
   (∀ i x l,
     natmap_wf l →
     mjoin (l !! i) = None →
-    (∀ j B (f : nat → A → B → B) b,
-      natmap_fold_raw f j b (natmap_partial_alter_raw (λ _, Some x) i l)
-      = f (i + j) x (natmap_fold_raw f j b l)) →
+    (∀ j A' B (f : nat → A' → B → B) (g : A → A') b x',
+      natmap_fold_raw f j b
+        (natmap_partial_alter_raw (λ _, Some x') i (natmap_fmap_raw g l))
+      = f (i + j) x' (natmap_fold_raw f j b (natmap_fmap_raw g l))) →
     P l → P (natmap_partial_alter_raw (λ _, Some x) i l)) →
   ∀ l, natmap_wf l → P l.
 Proof.
@@ -190,31 +207,20 @@ Proof.
   apply Hinsert.
   - by apply natmap_cons_canon_wf.
   - by destruct mx, l'.
-  - intros j B f b.
-    replace (natmap_partial_alter_raw (λ _, Some x) (S i) (natmap_cons_canon mx l'))
-      with (natmap_cons_canon mx (natmap_partial_alter_raw (λ _, Some x) i l'))
+  - intros j A' B f g b x'.
+    replace (natmap_partial_alter_raw (λ _, Some x') (S i)
+        (natmap_fmap_raw g (natmap_cons_canon mx l')))
+      with (natmap_cons_canon (g <$> mx)
+        (natmap_partial_alter_raw (λ _, Some x') i (natmap_fmap_raw g l')))
+      by (by destruct i, mx, l').
+    replace (natmap_fmap_raw g (natmap_cons_canon mx l'))
+      with (natmap_cons_canon (g <$> mx) (natmap_fmap_raw g l'))
       by (by destruct i, mx, l').
     rewrite !natmap_fold_raw_cons_canon, Nat.add_succ_comm. simpl; auto.
 Qed.
 
 Global Instance natmap_fold {A} : MapFold nat A (natmap A) := λ B f d m,
   let (l,_) := m in natmap_fold_raw f 0 d l.
-
-Definition natmap_fmap_raw {A B} (f : A → B) : natmap_raw A → natmap_raw B :=
-  fmap (fmap (M:=option) f).
-Lemma natmap_fmap_wf {A B} (f : A → B) l :
-  natmap_wf l → natmap_wf (natmap_fmap_raw f l).
-Proof.
-  unfold natmap_fmap_raw, natmap_wf. rewrite fmap_last.
-  destruct (last l); [|done]. by apply fmap_is_Some.
-Qed.
-Lemma natmap_lookup_fmap_raw {A B} (f : A → B) i l :
-  mjoin (natmap_fmap_raw f l !! i) = f <$> mjoin (l !! i).
-Proof.
-  unfold natmap_fmap_raw. rewrite list_lookup_fmap. by destruct (l !! i).
-Qed.
-Global Instance natmap_fmap : FMap natmap := λ A B f m,
-  let (l,Hl) := m in NatMap (natmap_fmap_raw f l) (natmap_fmap_wf _ _ Hl).
 
 Global Instance natmap_map : FinMap nat natmap.
 Proof.
@@ -248,7 +254,7 @@ Proof.
     intros i x l Hl ? Hfold H Hxl.
     replace (NatMap _ Hxl) with (<[i:=x]> (NatMap _ Hl)) by (by apply natmap_eq).
     apply Hins; [done| |done].
-    intros B f b. rewrite <-(Nat.add_0_r i) at 2. apply (Hfold 0).
+    intros A' B f g b x'. rewrite <-(Nat.add_0_r i) at 2. apply (Hfold 0).
 Qed.
 
 Fixpoint strip_Nones {A} (l : list (option A)) : list (option A) :=

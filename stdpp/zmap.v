@@ -63,15 +63,15 @@ Proof.
   - intros ??? f [??] [??] [|?|?]; simpl; [done| |]; apply (lookup_merge f).
   - done.
   - intros A P Hemp Hins [mx t t'].
-    induction t as [|i x t ? Hfold IH] using map_fold_ind.
-    { induction t' as [|i x t' ? Hfold IH] using map_fold_ind.
+    induction t as [|i x t ? Hfold IH] using map_fold_fmap_ind.
+    { induction t' as [|i x t' ? Hfold IH] using map_fold_fmap_ind.
       { destruct mx as [x|]; [|done].
         replace (ZMap (Some x) ∅ ∅) with (<[0:=x]> ∅ : Zmap _) by done.
         by apply Hins. }
       apply (Hins (Z.neg i) x (ZMap mx ∅ t')); [done| |done].
-      intros B f b. apply Hfold. }
+      intros A' B f g b. apply Hfold. }
     apply (Hins (Z.pos i) x (ZMap mx t t')); [done| |done].
-    intros B f b. apply Hfold.
+    intros A' B f g b. apply Hfold.
 Qed.
 
 (** * Finite sets *)

@@ -304,6 +304,7 @@ Qed.
 Lemma map_empty_subseteq {A} (m : M A) : ∅ ⊆ m.
 Proof. apply map_subseteq_spec. intros k v []%lookup_empty_Some. Qed.
 
+(** Induction principles for [map_fold_ind] *)
 Lemma map_fold_ind {A} (P : M A → Prop) :
   P ∅ →
   (∀ i x m,
@@ -1071,7 +1072,10 @@ Proof.
   intros; apply NoDup_submseteq; [by eauto using NoDup_map_to_list|].
   intros [i x]. rewrite !elem_of_map_to_list; eauto using lookup_weaken.
 Qed.
-Lemma map_to_list_fmap {A B} (f : A → B) (m : M A) :
+
+(** FIXME (improve structure): Remove in favor of [map_to_list_fmap], which
+gives [=] instead of [≡ₚ]. *)
+Local Lemma map_to_list_fmap_weak {A B} (f : A → B) (m : M A) :
   map_to_list (f <$> m) ≡ₚ prod_map id f <$> map_to_list m.
 Proof.
   assert (NoDup ((prod_map id f <$> map_to_list m).*1)).
@@ -1257,7 +1261,7 @@ Proof. intros Hi. by rewrite map_size_delete, Hi. Qed.
 
 Lemma map_size_fmap {A B} (f : A -> B) (m : M A) : size (f <$> m) = size m.
 Proof.
-  intros. by rewrite <-!length_map_to_list, map_to_list_fmap, length_fmap.
+  intros. by rewrite <-!length_map_to_list, map_to_list_fmap_weak, length_fmap.
 Qed.
 
 Lemma map_size_list_to_map {A} (l : list (K * A)) :
@@ -1367,6 +1371,14 @@ Proof.
   unfold map_to_list. induction m as [|i x m ? Hfold IH] using map_fold_ind.
   - by rewrite !map_fold_empty.
   - by rewrite !Hfold, IH.
+Qed.
+
+(** FIXME (Improve order): Move to [map_to_list] section *)
+Lemma map_to_list_fmap {A B} (f : A → B) (m : M A) :
+  map_to_list (f <$> m) = prod_map id f <$> map_to_list m.
+Proof.
+  unfold map_to_list. rewrite map_fold_fmap, !map_fold_foldr.
+  induction (map_to_list m) as [|[]]; f_equal/=; auto.
 Qed.
 
 Lemma map_fold_singleton {A B} (f : K → A → B → B) (b : B) i x :

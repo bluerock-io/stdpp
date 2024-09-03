@@ -116,21 +116,30 @@ Definition map_Forall `{Lookup K A M} (P : K → A → Prop) : M → Prop :=
 Definition map_Exists `{Lookup K A M} (P : K → A → Prop) : M → Prop :=
   λ m, ∃ i x, m !! i = Some x ∧ P i x.
 
-Definition map_relation `{∀ A, Lookup K A (M A)} {A B} (R : A → B → Prop)
-    (P : A → Prop) (Q : B → Prop) (m1 : M A) (m2 : M B) : Prop := ∀ i,
-  option_relation R P Q (m1 !! i) (m2 !! i).
-Definition map_included `{∀ A, Lookup K A (M A)} {A}
-  (R : relation A) : relation (M A) := map_relation R (λ _, False) (λ _, True).
+Definition map_relation `{∀ A, Lookup K A (M A)} {A B} (R : K → A → B → Prop)
+    (P : K → A → Prop) (Q : K → B → Prop) (m1 : M A) (m2 : M B) : Prop :=
+  ∀ i, option_relation (R i) (P i) (Q i) (m1 !! i) (m2 !! i).
+
+Definition map_Forall2 `{∀ A, Lookup K A (M A)} {A B}
+    (R : K → A → B → Prop) : M A → M B → Prop :=
+  map_relation R (λ _ _, False) (λ _ _, False).
+
+Definition map_included `{∀ A, Lookup K A (M A)} {A B}
+    (R : K → A → B → Prop) : M A → M B → Prop :=
+  map_relation R (λ _ _, False) (λ _ _, True).
+
 Definition map_agree `{∀ A, Lookup K A (M A)} {A} : relation (M A) :=
-  map_relation (=) (λ _, True) (λ _, True).
+  map_relation (λ _, (=)) (λ _ _, True) (λ _ _, True).
+
 Definition map_disjoint `{∀ A, Lookup K A (M A)} {A} : relation (M A) :=
-  map_relation (λ _ _, False) (λ _, True) (λ _, True).
+  map_relation (λ _ _ _, False) (λ _ _, True) (λ _ _, True).
 Infix "##ₘ" := map_disjoint (at level 70) : stdpp_scope.
 Global Hint Extern 0 (_ ##ₘ _) => symmetry; eassumption : core.
 Notation "( m ##ₘ.)" := (map_disjoint m) (only parsing) : stdpp_scope.
 Notation "(.##ₘ m )" := (λ m2, m2 ##ₘ m) (only parsing) : stdpp_scope.
+
 Global Instance map_subseteq `{∀ A, Lookup K A (M A)} {A} : SubsetEq (M A) :=
-  map_included (=).
+  map_included (λ _, (=)).
 
 (** The union of two finite maps only has a meaningful definition for maps
 that are disjoint. However, as working with partial functions is inconvenient
@@ -229,8 +238,8 @@ Proof.
   unfold subseteq, map_subseteq, map_relation. split; intros Hm i;
     specialize (Hm i); destruct (m1 !! i), (m2 !! i); naive_solver.
 Qed.
-Global Instance map_included_preorder {A} (R : relation A) :
-  PreOrder R → PreOrder (map_included R : relation (M A)).
+Global Instance map_included_preorder {A} (R : K → relation A) :
+  (∀ i, PreOrder (R i)) → PreOrder (map_included R : relation (M A)).
 Proof.
   split; [intros m i; by destruct (m !! i); simpl|].
   intros m1 m2 m3 Hm12 Hm23 i; specialize (Hm12 i); specialize (Hm23 i).
@@ -572,8 +581,8 @@ Proof.
   intros; apply map_eq; intros j; destruct (decide (i = j)) as [->|];
     by rewrite ?lookup_insert, ?lookup_insert_ne by done.
 Qed.
-Lemma insert_included {A} R `{!Reflexive R} (m : M A) i x :
-  (∀ y, m !! i = Some y → R y x) → map_included R m (<[i:=x]>m).
+Lemma insert_included {A} R `{!∀ i, Reflexive (R i)} (m : M A) i x :
+  (∀ y, m !! i = Some y → R i y x) → map_included R m (<[i:=x]>m).
 Proof.
   intros ? j; destruct (decide (i = j)) as [->|].
   - rewrite lookup_insert. destruct (m !! j); simpl; eauto.
@@ -2144,19 +2153,23 @@ Proof.
 Qed.
 
 (** ** Properties on the [map_relation] relation *)
-Section Forall2.
-  Context {A B} (R : A → B → Prop) (P : A → Prop) (Q : B → Prop).
-  Context `{∀ x y, Decision (R x y), ∀ x, Decision (P x), ∀ y, Decision (Q y)}.
+Section map_relation.
+  Context {A B} (R : K → A → B → Prop) (P : K → A → Prop) (Q : K → B → Prop).
+  Context `{!∀ i x y, Decision (R i x y),
+    !∀ i x, Decision (P i x), !∀ i y, Decision (Q i y)}.
 
-  Let f (mx : option A) (my : option B) : option bool :=
+  (** The function [f] and lemma [map_relation_alt] are helpers to prove the
+  [Decision] instance. These should not be used elsewhere. *)
+  Let f (mx : option A) (my : option B) : option (K → bool) :=
     match mx, my with
-    | Some x, Some y => Some (bool_decide (R x y))
-    | Some x, None => Some (bool_decide (P x))
-    | None, Some y => Some (bool_decide (Q y))
+    | Some x, Some y => Some (λ i, bool_decide (R i x y))
+    | Some x, None => Some (λ i, bool_decide (P i x))
+    | None, Some y => Some (λ i, bool_decide (Q i y))
     | None, None => None
     end.
-  Lemma map_relation_alt (m1 : M A) (m2 : M B) :
-    map_relation R P Q m1 m2 ↔ map_Forall (λ _, Is_true) (merge f m1 m2).
+
+  Local Lemma map_relation_alt (m1 : M A) (m2 : M B) :
+    map_relation R P Q m1 m2 ↔ map_Forall (λ i b, Is_true (b i)) (merge f m1 m2).
   Proof.
     split.
     - intros Hm i P'; rewrite lookup_merge; intros.
@@ -2164,20 +2177,23 @@ Section Forall2.
         simplify_eq/=; auto using bool_decide_pack.
     - intros Hm i. specialize (Hm i). rewrite lookup_merge in Hm.
       destruct (m1 !! i), (m2 !! i); simplify_eq/=; auto;
-        by eapply bool_decide_unpack, Hm.
+        eapply bool_decide_unpack, (Hm _ eq_refl).
   Qed.
+
   Global Instance map_relation_dec : RelDecision (map_relation (M:=M) R P Q).
   Proof.
-    refine (λ m1 m2, cast_if (decide (map_Forall (λ _, Is_true) (merge f m1 m2))));
+    refine (λ m1 m2,
+      cast_if (decide (map_Forall (λ i b, Is_true (b i)) (merge f m1 m2))));
       abstract by rewrite map_relation_alt.
   Defined.
+
   (** Due to the finiteness of finite maps, we can extract a witness if the
   relation does not hold. *)
-  Lemma map_not_Forall2 (m1 : M A) (m2 : M B) :
+  Lemma map_not_relation (m1 : M A) (m2 : M B) :
     ¬map_relation R P Q m1 m2 ↔ ∃ i,
-      (∃ x y, m1 !! i = Some x ∧ m2 !! i = Some y ∧ ¬R x y)
-      ∨ (∃ x, m1 !! i = Some x ∧ m2 !! i = None ∧ ¬P x)
-      ∨ (∃ y, m1 !! i = None ∧ m2 !! i = Some y ∧ ¬Q y).
+      (∃ x y, m1 !! i = Some x ∧ m2 !! i = Some y ∧ ¬R i x y)
+      ∨ (∃ x, m1 !! i = Some x ∧ m2 !! i = None ∧ ¬P i x)
+      ∨ (∃ y, m1 !! i = None ∧ m2 !! i = Some y ∧ ¬Q i y).
   Proof.
     split.
     - rewrite map_relation_alt, (map_not_Forall _). intros (i&?&Hm&?); exists i.
@@ -2187,9 +2203,93 @@ Section Forall2.
       by intros [i[(x&y&?&?&?)|[(x&?&?&?)|(y&?&?&?)]]] Hm;
         specialize (Hm i); simplify_option_eq.
   Qed.
-End Forall2.
+End map_relation.
 
-(** ** Properties of the [map_agree] operation *)
+(** ** Properties of the [map_Forall2] relation *)
+Section map_Forall2.
+  Context {A B} (R : K → A → B → Prop).
+
+  Lemma map_Forall2_impl (R' : K → A → B → Prop) (m1 : M A) (m2 : M B) :
+    map_Forall2 R m1 m2 →
+    (∀ i x1 x2, R i x1 x2 → R' i x1 x2) →
+    map_Forall2 R' m1 m2.
+  Proof.
+    intros Hm ? i. specialize (Hm i).
+    destruct (m1 !! i), (m2 !! i); simpl; eauto.
+  Qed.
+
+  Lemma map_Forall2_empty : map_Forall2 R (∅ : M A) ∅.
+  Proof. intros i. by rewrite !lookup_empty. Qed.
+  Lemma map_Forall2_empty_inv_l (m2 : M B) : map_Forall2 R ∅ m2 → m2 = ∅.
+  Proof.
+    intros Hm. apply map_eq; intros i. rewrite lookup_empty, eq_None_not_Some.
+    intros [x Hi]. specialize (Hm i). by rewrite lookup_empty, Hi in Hm.
+  Qed.
+  Lemma map_Forall2_empty_inv_r (m1 : M A) : map_Forall2 R m1 ∅ → m1 = ∅.
+  Proof.
+    intros Hm. apply map_eq; intros i. rewrite lookup_empty, eq_None_not_Some.
+    intros [x Hi]. specialize (Hm i). by rewrite lookup_empty, Hi in Hm.
+  Qed.
+
+  Lemma map_Forall2_delete (m1 : M A) (m2 : M B) i :
+    map_Forall2 R m1 m2 → map_Forall2 R (delete i m1) (delete i m2).
+  Proof.
+    intros Hm j. destruct (decide (i = j)) as [->|].
+    - by rewrite !lookup_delete.
+    - by rewrite !lookup_delete_ne by done.
+  Qed.
+
+  Lemma map_Forall2_insert_2 (m1 : M A) (m2 : M B) i x1 x2 :
+    R i x1 x2 → map_Forall2 R m1 m2 → map_Forall2 R (<[i:=x1]> m1) (<[i:=x2]> m2).
+  Proof.
+    intros Hx Hm j. destruct (decide (i = j)) as [->|].
+    - by rewrite !lookup_insert.
+    - by rewrite !lookup_insert_ne by done.
+  Qed.
+  Lemma map_Forall2_insert (m1 : M A) (m2 : M B) i x1 x2 :
+    m1 !! i = None → m2 !! i = None →
+    map_Forall2 R (<[i:=x1]> m1) (<[i:=x2]> m2) ↔ R i x1 x2 ∧ map_Forall2 R m1 m2.
+  Proof.
+    intros Hi1 Hi2. split; [|naive_solver eauto using map_Forall2_insert_2].
+    intros Hm. split.
+    - specialize (Hm i). by rewrite !lookup_insert in Hm.
+    - intros j. destruct (decide (i = j)) as [->|].
+      + by rewrite Hi1, Hi2.
+      + specialize (Hm j). by rewrite !lookup_insert_ne in Hm by done.
+  Qed.
+
+  Lemma map_Forall2_insert_inv_l (m1 : M A) (m2 : M B) i x1 :
+    m1 !! i = None →
+    map_Forall2 R (<[i:=x1]> m1) m2 →
+    ∃ x2 m2', m2 = <[i:=x2]> m2' ∧ m2' !! i = None ∧ R i x1 x2 ∧ map_Forall2 R m1 m2'.
+  Proof.
+    intros ? Hm. pose proof (Hm i) as Hi. rewrite lookup_insert in Hi.
+    destruct (m2 !! i) as [x2|] eqn:?; simplify_eq/=; [|done].
+    exists x2, (delete i m2). split; [by rewrite insert_delete|].
+    split; [by rewrite lookup_delete|]. split; [done|].
+    rewrite <-(delete_insert m1 i x1) by done. by apply map_Forall2_delete.
+  Qed.
+  Lemma map_Forall2_insert_inv_r (m1 : M A) (m2 : M B) i x2 :
+    m2 !! i = None →
+    map_Forall2 R m1 (<[i:=x2]> m2) →
+    ∃ x1 m1', m1 = <[i:=x1]> m1' ∧ m1' !! i = None ∧ R i x1 x2 ∧ map_Forall2 R m1' m2.
+  Proof.
+    intros ? Hm. pose proof (Hm i) as Hi. rewrite lookup_insert in Hi.
+    destruct (m1 !! i) as [x1|] eqn:?; simplify_eq/=; [|done].
+    exists x1, (delete i m1). split; [by rewrite insert_delete|].
+    split; [by rewrite lookup_delete|]. split; [done|].
+    rewrite <-(delete_insert m2 i x2) by done. by apply map_Forall2_delete.
+  Qed.
+
+  Lemma map_Forall2_singleton i x1 x2 :
+    map_Forall2 R ({[ i := x1 ]} : M A) {[ i := x2 ]} ↔ R i x1 x2.
+  Proof.
+    rewrite <-!insert_empty, map_Forall2_insert by (by rewrite lookup_empty).
+    naive_solver eauto using map_Forall2_empty.
+  Qed.
+End map_Forall2.
+
+(** ** Properties of the [map_agree] relation *)
 Lemma map_agree_spec {A} (m1 m2 : M A) :
   map_agree m1 m2 ↔ ∀ i x y, m1 !! i = Some x → m2 !! i = Some y → x = y.
 Proof.
@@ -2203,7 +2303,7 @@ Qed.
 Lemma map_not_agree {A} (m1 m2 : M A) `{!EqDecision A}:
   ¬map_agree m1 m2 ↔ ∃ i x1 x2, m1 !! i = Some x1 ∧ m2 !! i = Some x2 ∧ x1 ≠ x2.
 Proof.
-  unfold map_agree. rewrite map_not_Forall2 by solve_decision. naive_solver.
+  unfold map_agree. rewrite map_not_relation by solve_decision. naive_solver.
 Qed.
 Global Instance map_agree_refl {A} : Reflexive (map_agree : relation (M A)).
 Proof. intros ?. rewrite !map_agree_spec. naive_solver. Qed.
@@ -2292,7 +2392,7 @@ Qed.
 Lemma map_not_disjoint {A} (m1 m2 : M A) :
   ¬m1 ##ₘ m2 ↔ ∃ i x1 x2, m1 !! i = Some x1 ∧ m2 !! i = Some x2.
 Proof.
-  unfold disjoint, map_disjoint. rewrite map_not_Forall2 by solve_decision.
+  unfold disjoint, map_disjoint. rewrite map_not_relation by solve_decision.
   naive_solver.
 Qed.
 Global Instance map_disjoint_sym {A} : Symmetric (map_disjoint : relation (M A)).

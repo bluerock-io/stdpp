@@ -67,6 +67,13 @@ Class FinMap K M `{FMap M, ∀ A, Lookup K A (M A), ∀ A, Empty (M A), ∀ A,
     merge f m1 m2 !! i = diag_None f (m1 !! i) (m2 !! i);
   map_fold_empty {A B} (f : K → A → B → B) (b : B) :
     map_fold f b ∅ = b;
+  (** The law [map_fold_fmap_ind] implies that all uses of [map_fold] and the
+  induction principle traverse the map in the same way. This also means that
+  [map_fold] enjoys parametricity, i.e., the order cannot depend on the choice
+  of [A], [B], [f], and [b]. To make sure it cannot depend on [A], we quantify
+  over a function [g : A → A')].
+  This law can be used with [induction m as ... using map_fold_fmap_ind], but
+  in practice [map_first_key_ind] is more convenient. *)
   map_fold_fmap_ind {A} (P : M A → Prop) :
     P ∅ →
     (∀ i x m,
@@ -98,6 +105,9 @@ Global Instance map_size `{MapFold K A M} : Size M :=
 Definition map_to_list `{MapFold K A M} : M → list (K * A) :=
   map_fold (λ i x, ((i,x) ::.)) [].
 
+(** The key [i] is the first to occur in the conversion to list/fold of [m].
+This definition is useful in combination with [map_first_key_ind] and
+[map_fold_insert_first_key]/[map_to_list_insert_first_key]. *)
 Definition map_first_key `{MapFold K A M} (m : M) (i : K) :=
   ∃ x, map_to_list m !! 0 = Some (i,x).
 
@@ -308,7 +318,8 @@ Lemma map_empty_subseteq {A} (m : M A) : ∅ ⊆ m.
 Proof. apply map_subseteq_spec. intros k v []%lookup_empty_Some. Qed.
 
 (** Induction principles for [map_fold] *)
-Lemma map_fold_ind {A} (P : M A → Prop) :
+(** Use [map_first_key_ind] instead. *)
+Local Lemma map_fold_ind {A} (P : M A → Prop) :
   P ∅ →
   (∀ i x m,
     m !! i = None →
@@ -325,6 +336,9 @@ Proof.
   apply Hfold.
 Qed.
 
+(** Use as [induction m as ... using map_first_key_ind]. In the inductive case
+[map_first_key (<[i:=x]> m) i] can be used in combination with the lemmas
+[map_fold_insert_first_key] and [map_to_list_first_key]. *)
 Lemma map_first_key_ind {A} (P : M A → Prop) :
   P ∅ →
   (∀ i x m,
@@ -338,6 +352,8 @@ Proof.
   rewrite Hfold. eauto.
 Qed.
 
+(** The lemma [map_fold_weak_ind] exists for backwards compatibility; use
+[map_first_key_ind] instead, which is much more convenient to use. *)
 Lemma map_fold_weak_ind {A B} (P : B → M A → Prop) (f : K → A → B → B) (b : B) :
   P b ∅ →
   (∀ i x m r, m !! i = None → P r m → P (f i x r) (<[i:=x]> m)) →

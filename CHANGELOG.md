@@ -19,6 +19,12 @@ API-breaking change is listed.
 - Rename `minimal_exists` to `minimal_exists_elem_of` and
   `minimal_exists_L` to `minimal_exists_elem_of_L`.
   Add new `minimal_exists` lemma. (by Lennard Gäher)
+- Generalize `map_relation R P Q` to have the key (extra argument `K`) in the
+  predicates `R`, `P` and `Q`.
+- Generalize `map_included R` to a predicate `R : K → A → B → Prop`, i.e., (a)
+  to have the key, and (b) to have different types `A` and `B`.
+- Add `map_Forall2` and some basic lemmas about it.
+- Rename `map_not_Forall2` into `map_not_relation`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).
@@ -70,6 +76,8 @@ s/\bbv_to_bits_length\b/length_bv_to_bits/g
 # renaming of minimal_exists
 s/\bminimal_exists_L\b/minimal_exists_elem_of_L/g
 s/\bminimal_exists\b/minimal_exists_elem_of/g
+# map_relation
+s/\bmap_not_Forall2\b/map_not_relation/g
 EOF
 ```
 

@@ -655,15 +655,17 @@ Section more_lemmas.
 
   Local Lemma gmultiset_subseteq_alt X Y :
     X ⊆ Y ↔
-    map_relation Pos.le (λ _, False) (λ _, True) (gmultiset_car X) (gmultiset_car Y).
+    map_relation (λ _, Pos.le) (λ _ _, False) (λ _ _, True)
+      (gmultiset_car X) (gmultiset_car Y).
   Proof.
     apply forall_proper; intros x. unfold multiplicity.
     destruct (gmultiset_car X !! x), (gmultiset_car Y !! x); naive_solver lia.
   Qed.
   Global Instance gmultiset_subseteq_dec : RelDecision (⊆@{gmultiset A}).
   Proof.
-   refine (λ X Y, cast_if (decide (map_relation Pos.le
-     (λ _, False) (λ _, True) (gmultiset_car X) (gmultiset_car Y))));
+   refine (λ X Y, cast_if (decide (map_relation
+       (λ _, Pos.le) (λ _ _, False) (λ _ _, True)
+       (gmultiset_car X) (gmultiset_car Y))));
      by rewrite gmultiset_subseteq_alt.
   Defined.
 

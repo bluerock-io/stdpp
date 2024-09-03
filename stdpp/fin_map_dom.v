@@ -177,6 +177,16 @@ Proof.
   - simpl. by rewrite dom_insert, IH.
 Qed.
 
+Lemma map_first_key_dom {A B} (m1 : M A) (m2 : M B) i :
+  dom m1 ≡ dom m2 → map_first_key m1 i ↔ map_first_key m2 i.
+Proof.
+  intros Hm. apply map_first_key_dom'. intros j.
+  by rewrite <-!elem_of_dom, Hm.
+Qed.
+Lemma map_first_key_dom_L {A B} (m1 : M A) (m2 : M B) i :
+  dom m1 = dom m2 → map_first_key m1 i ↔ map_first_key m2 i.
+Proof. intros Hm. apply map_first_key_dom. by rewrite Hm. Qed.
+
 (** Alternative definition of [dom] in terms of [map_to_list]. *)
 Lemma dom_alt {A} (m : M A) :
   dom m ≡ list_to_set (map_to_list m).*1.

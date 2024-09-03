@@ -378,11 +378,12 @@ Proof.
   intros Hnode t.
   remember (gtest_size t) as n eqn:Hn. revert t Hn.
   induction (lt_wf n) as [n _ IH]; intros [ts] ->; simpl in *.
-  apply Hnode. induction ts as [|k t m ? Hfold IHm] using map_fold_ind.
+  apply Hnode. induction ts as [|k t m ? Hfold IHm] using map_first_key_ind.
   - apply map_Forall_empty.
   - apply map_Forall_insert; [done|]. split.
-    + eapply IH; [|done]. rewrite Hfold. lia.
-    + eapply IHm. intros; eapply IH; [|done]. rewrite Hfold. lia.
+    + eapply IH; [|done]. rewrite map_fold_insert_first_key by done. lia.
+    + eapply IHm. intros; eapply IH; [|done].
+      rewrite map_fold_insert_first_key by done. lia.
 Qed.
 
 (** We show that [gtest K] is countable itself. This means that we can use
@@ -415,8 +416,8 @@ Global Program Instance gtest_countable `{Countable K} : Countable (gtest K) :=
 Next Obligation.
   intros K ?? enc dec_list dec t.
   induction (Nat.lt_wf_0_projected gtest_size t) as [[ts] _ IH]. f_equal/=.
-  induction ts as [|i t ts ? Hfold IHts] using map_fold_ind; [done|].
-  rewrite Hfold. f_equal/=.
+  induction ts as [|i t ts ? Hfold IHts] using map_first_key_ind; [done|].
+  rewrite map_fold_insert_first_key by done. f_equal/=.
   - eapply IH. rewrite map_fold_insert_L by auto with lia. lia.
   - apply IHts; intros t' ?. eapply IH.
     rewrite map_fold_insert_L by auto with lia. lia.

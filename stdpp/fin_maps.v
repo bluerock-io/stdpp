@@ -98,6 +98,9 @@ Global Instance map_size `{MapFold K A M} : Size M :=
 Definition map_to_list `{MapFold K A M} : M → list (K * A) :=
   map_fold (λ i x, ((i,x) ::.)) [].
 
+Definition map_first_key `{MapFold K A M} (m : M) (i : K) :=
+  ∃ x, map_to_list m !! 0 = Some (i,x).
+
 Definition map_to_set `{MapFold K A M,
     Singleton B C, Empty C, Union C} (f : K → A → B) (m : M) : C :=
   list_to_set (uncurry f <$> map_to_list m).
@@ -304,7 +307,7 @@ Qed.
 Lemma map_empty_subseteq {A} (m : M A) : ∅ ⊆ m.
 Proof. apply map_subseteq_spec. intros k v []%lookup_empty_Some. Qed.
 
-(** Induction principles for [map_fold_ind] *)
+(** Induction principles for [map_fold] *)
 Lemma map_fold_ind {A} (P : M A → Prop) :
   P ∅ →
   (∀ i x m,
@@ -320,6 +323,19 @@ Proof.
   assert (m = id <$> m) as ->.
   { apply map_eq; intros j; by rewrite lookup_fmap, option_fmap_id. }
   apply Hfold.
+Qed.
+
+Lemma map_first_key_ind {A} (P : M A → Prop) :
+  P ∅ →
+  (∀ i x m,
+    m !! i = None → map_first_key (<[i:=x]> m) i →
+    P m → P (<[i:=x]> m)) →
+  ∀ m, P m.
+Proof.
+  intros Hemp Hins m.
+  induction m as [|i x m ? Hfold IH] using map_fold_ind; first done.
+  apply Hins; [done| |done]. unfold map_first_key, map_to_list.
+  rewrite Hfold. eauto.
 Qed.
 
 Lemma map_fold_weak_ind {A B} (P : B → M A → Prop) (f : K → A → B → B) (b : B) :
@@ -1373,6 +1389,15 @@ Proof.
   - by rewrite !Hfold, IH.
 Qed.
 
+Lemma map_fold_fmap {A A' B} (f : K → A' → B → B) (g : A → A') b (m : M A) :
+  map_fold f b (g <$> m) = map_fold (λ i, f i ∘ g) b m.
+Proof.
+  induction m as [|i x m ? Hfold IH] using map_fold_fmap_ind.
+  { by rewrite fmap_empty, !map_fold_empty. }
+  rewrite fmap_insert. rewrite <-(map_fmap_id m) at 2. rewrite !Hfold.
+  by rewrite IH, map_fmap_id.
+Qed.
+
 (** FIXME (Improve order): Move to [map_to_list] section *)
 Lemma map_to_list_fmap {A B} (f : A → B) (m : M A) :
   map_to_list (f <$> m) = prod_map id f <$> map_to_list m.
@@ -1384,6 +1409,64 @@ Qed.
 Lemma map_fold_singleton {A B} (f : K → A → B → B) (b : B) i x :
   map_fold f b {[i:=x]} = f i x b.
 Proof. by rewrite map_fold_foldr, map_to_list_singleton. Qed.
+
+Lemma map_fold_delete_first_key {A B} (f : K → A → B → B) b (m : M A) i x :
+  m !! i = Some x → map_first_key m i →
+  map_fold f b m = f i x (map_fold f b (delete i m)).
+Proof.
+  intros Hi [x' ([] & ixs & Hixs & ?)%elem_of_list_split_length]; simplify_eq/=.
+  destruct m as [|j y m ? Hfold _] using map_fold_ind.
+  { by rewrite map_to_list_empty in Hixs. }
+  unfold map_to_list in Hixs. rewrite Hfold in Hixs. simplify_eq.
+  rewrite lookup_insert in Hi. simplify_eq.
+  by rewrite Hfold, delete_insert by done.
+Qed.
+
+Lemma map_fold_insert_first_key {A B} (f : K → A → B → B) b (m : M A) i x :
+  m !! i = None → map_first_key (<[i:=x]> m) i →
+  map_fold f b (<[i:=x]> m) = f i x (map_fold f b m).
+Proof.
+  intros. rewrite <-(delete_insert m i x) at 2 by done.
+  apply map_fold_delete_first_key; auto using lookup_insert.
+Qed.
+
+(** FIXME (Improve order): Move to [map_to_list] section *)
+Lemma map_to_list_delete_first_key {A} (m : M A) i x :
+  m !! i = Some x → map_first_key m i →
+  map_to_list m = (i,x) :: map_to_list (delete i m).
+Proof.
+  intros. unfold map_to_list. by erewrite map_fold_delete_first_key by done.
+Qed.
+
+(** FIXME (Improve order): Move to [map_to_list] section *)
+Lemma map_to_list_insert_first_key {A} (m : M A) i x :
+  m !! i = None → map_first_key (<[i:=x]> m) i →
+  map_to_list (<[i:=x]> m) = (i,x) :: map_to_list m.
+Proof.
+  intros. unfold map_to_list. by rewrite map_fold_insert_first_key by done.
+Qed.
+
+Lemma map_first_key_fmap {A B} (f : A → B) (m : M A) i :
+  map_first_key (f <$> m) i ↔ map_first_key m i.
+Proof.
+  split.
+  - intros [x Hm]. rewrite map_to_list_fmap, list_lookup_fmap, fmap_Some in Hm.
+    destruct Hm as ([i' x'] & Hm & ?); simplify_eq/=. by exists x'.
+  - intros [x Hm]. exists (f x).
+    by rewrite map_to_list_fmap, list_lookup_fmap, Hm.
+Qed.
+
+(** We do not have [dom] here, [map_first_key_same_dom] from [fin_map_dom] is
+typically more convenient. *)
+Lemma map_first_key_dom' {A B} (m1 : M A) (m2 : M B) i :
+  (∀ j, is_Some (m1 !! j) ↔ is_Some (m2 !! j)) →
+  map_first_key m1 i ↔ map_first_key m2 i.
+Proof.
+  intros Hm. rewrite <-(map_first_key_fmap (λ _, ()) m1).
+  rewrite <-(map_first_key_fmap (λ _, ()) m2). f_equiv. apply map_eq; intros j.
+  specialize (Hm j). rewrite !lookup_fmap. unfold is_Some in *.
+  destruct (m1 !! j), (m2 !! j); naive_solver.
+Qed.
 
 Lemma map_fold_insert {A B} (R : relation B) `{!PreOrder R}
     (f : K → A → B → B) (b : B) (i : K) (x : A) (m : M A) :

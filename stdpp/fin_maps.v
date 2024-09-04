@@ -80,7 +80,8 @@ Class FinMap K M `{FMap M, ∀ A, Lookup K A (M A), ∀ A, Empty (M A), ∀ A,
       m !! i = None →
       (∀ A' B (f : K → A' → B → B) (g : A → A') b x',
         map_fold f b (<[i:=x']> (g <$> m)) = f i x' (map_fold f b (g <$> m))) →
-      P m → P (<[i:=x]> m)) →
+      P m →
+      P (<[i:=x]> m)) →
     ∀ m, P m;
 }.
 
@@ -325,7 +326,8 @@ Local Lemma map_fold_ind {A} (P : M A → Prop) :
     m !! i = None →
     (∀ B (f : K → A → B → B) b x',
       map_fold f b (<[i:=x']> m) = f i x' (map_fold f b m)) →
-    P m → P (<[i:=x]> m)) →
+    P m →
+    P (<[i:=x]> m)) →
   ∀ m, P m.
 Proof.
   intros Hemp Hins m.
@@ -343,7 +345,8 @@ Lemma map_first_key_ind {A} (P : M A → Prop) :
   P ∅ →
   (∀ i x m,
     m !! i = None → map_first_key (<[i:=x]> m) i →
-    P m → P (<[i:=x]> m)) →
+    P m →
+    P (<[i:=x]> m)) →
   ∀ m, P m.
 Proof.
   intros Hemp Hins m.
@@ -1105,8 +1108,9 @@ Proof.
   intros [i x]. rewrite !elem_of_map_to_list; eauto using lookup_weaken.
 Qed.
 
-(** FIXME (improve structure): Remove in favor of [map_to_list_fmap], which
-gives [=] instead of [≡ₚ]. *)
+(** FIXME (improve structure): Remove in favor of [map_to_list_fmap] (proved
+below), which gives [=] instead of [≡ₚ]. Moving requires a bunch of reordering
+in this file. *)
 Local Lemma map_to_list_fmap_weak {A B} (f : A → B) (m : M A) :
   map_to_list (f <$> m) ≡ₚ prod_map id f <$> map_to_list m.
 Proof.
@@ -1414,7 +1418,8 @@ Proof.
   by rewrite IH, map_fmap_id.
 Qed.
 
-(** FIXME (Improve order): Move to [map_to_list] section *)
+(** FIXME (Improve order): Move to [map_to_list] section. Moving requires a
+bunch of reordering in this file. *)
 Lemma map_to_list_fmap {A B} (f : A → B) (m : M A) :
   map_to_list (f <$> m) = prod_map id f <$> map_to_list m.
 Proof.
@@ -1427,7 +1432,8 @@ Lemma map_fold_singleton {A B} (f : K → A → B → B) (b : B) i x :
 Proof. by rewrite map_fold_foldr, map_to_list_singleton. Qed.
 
 Lemma map_fold_delete_first_key {A B} (f : K → A → B → B) b (m : M A) i x :
-  m !! i = Some x → map_first_key m i →
+  m !! i = Some x →
+  map_first_key m i →
   map_fold f b m = f i x (map_fold f b (delete i m)).
 Proof.
   intros Hi [x' ([] & ixs & Hixs & ?)%elem_of_list_split_length]; simplify_eq/=.
@@ -1439,24 +1445,29 @@ Proof.
 Qed.
 
 Lemma map_fold_insert_first_key {A B} (f : K → A → B → B) b (m : M A) i x :
-  m !! i = None → map_first_key (<[i:=x]> m) i →
+  m !! i = None →
+  map_first_key (<[i:=x]> m) i →
   map_fold f b (<[i:=x]> m) = f i x (map_fold f b m).
 Proof.
   intros. rewrite <-(delete_insert m i x) at 2 by done.
   apply map_fold_delete_first_key; auto using lookup_insert.
 Qed.
 
-(** FIXME (Improve order): Move to [map_to_list] section *)
+(** FIXME (Improve order): Move to [map_to_list] section. Moving requires a
+bunch of reordering in this file. *)
 Lemma map_to_list_delete_first_key {A} (m : M A) i x :
-  m !! i = Some x → map_first_key m i →
+  m !! i = Some x →
+  map_first_key m i →
   map_to_list m = (i,x) :: map_to_list (delete i m).
 Proof.
   intros. unfold map_to_list. by erewrite map_fold_delete_first_key by done.
 Qed.
 
-(** FIXME (Improve order): Move to [map_to_list] section *)
+(** FIXME (Improve order): Move to [map_to_list] section. Moving requires a
+bunch of reordering in this file. *)
 Lemma map_to_list_insert_first_key {A} (m : M A) i x :
-  m !! i = None → map_first_key (<[i:=x]> m) i →
+  m !! i = None →
+  map_first_key (<[i:=x]> m) i →
   map_to_list (<[i:=x]> m) = (i,x) :: map_to_list m.
 Proof.
   intros. unfold map_to_list. by rewrite map_fold_insert_first_key by done.

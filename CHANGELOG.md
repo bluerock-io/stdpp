@@ -25,6 +25,23 @@ API-breaking change is listed.
   to have the key, and (b) to have different types `A` and `B`.
 - Add `map_Forall2` and some basic lemmas about it.
 - Rename `map_not_Forall2` into `map_not_relation`.
+- Replace the induction principle `map_fold_ind` for `map_fold` with a stronger
+  version:
+  + The main new induction principle is `map_first_key_ind`, which is meant
+    to be used together with the lemmas `map_fold_insert_first_key` and
+    `map_to_list_insert_first_key` (and others about `map_first_key`). This
+    induction scheme reflects all these operations (induction, `map_fold`,
+    `map_to_list`) process the map in the same order.
+  + The new primitive induction principle `map_fold_fmap_ind` is only relevant
+    for implementers of `FinMap` instances.
+  + The lemma `map_fold_foldr` has been strengthened to (a) drop the
+    commutativity requirement and (b) give an equality (`=`) instead of being
+    generic over a relation `R`.
+  + The lemma `map_to_list_fmap` has been strengthened to give an equality (`=`)
+    instead of a permutation (`≡ₚ`).
+  + The lemmas `map_fold_comm_acc_strong` and `map_fold_comm_acc` have been
+    strengthened to only require commutativity w.r.t. the accumulator, not
+    commutativity of the folded function itself.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).
@@ -78,6 +95,8 @@ s/\bminimal_exists_L\b/minimal_exists_elem_of_L/g
 s/\bminimal_exists\b/minimal_exists_elem_of/g
 # map_relation
 s/\bmap_not_Forall2\b/map_not_relation/g
+# map_fold
+s/\bmap_fold_ind2\b/map_fold_weak_ind/g
 EOF
 ```
 

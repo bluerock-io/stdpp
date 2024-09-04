@@ -40,8 +40,9 @@ API-breaking change is listed.
   + The lemma `map_to_list_fmap` has been strengthened to give an equality (`=`)
     instead of a permutation (`≡ₚ`).
   + The lemmas `map_fold_comm_acc_strong` and `map_fold_comm_acc` have been
-    strengthened to only require commutativity w.r.t. the accumulator, not
-    commutativity of the folded function itself.
+    strengthened to only require commutativity w.r.t. the operation being
+    pulled out of the accumulator, not commutativity of
+    the folded function itself.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

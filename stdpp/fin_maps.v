@@ -65,10 +65,24 @@ Class FinMap K M `{FMap M, ∀ A, Lookup K A (M A), ∀ A, Empty (M A), ∀ A,
     omap f m !! i = m !! i ≫= f;
   lookup_merge {A B C} (f : option A → option B → option C) (m1 : M A) (m2 : M B) i :
     merge f m1 m2 !! i = diag_None f (m1 !! i) (m2 !! i);
-  map_fold_ind {A B} (P : B → M A → Prop) (f : K → A → B → B) (b : B) :
-    P b ∅ →
-    (∀ i x m r, m !! i = None → P r m → P (f i x r) (<[i:=x]> m)) →
-    ∀ m, P (map_fold f b m) m
+  map_fold_empty {A B} (f : K → A → B → B) (b : B) :
+    map_fold f b ∅ = b;
+  (** The law [map_fold_fmap_ind] implies that all uses of [map_fold] and the
+  induction principle traverse the map in the same way. This also means that
+  [map_fold] enjoys parametricity, i.e., the order cannot depend on the choice
+  of [A], [B], [f], and [b]. To make sure it cannot depend on [A], we quantify
+  over a function [g : A → A')].
+  This law can be used with [induction m as ... using map_fold_fmap_ind], but
+  in practice [map_first_key_ind] is more convenient. *)
+  map_fold_fmap_ind {A} (P : M A → Prop) :
+    P ∅ →
+    (∀ i x m,
+      m !! i = None →
+      (∀ A' B (f : K → A' → B → B) (g : A → A') b x',
+        map_fold f b (<[i:=x']> (g <$> m)) = f i x' (map_fold f b (g <$> m))) →
+      P m →
+      P (<[i:=x]> m)) →
+    ∀ m, P m;
 }.
 
 (** * Derived operations *)
@@ -88,8 +102,15 @@ Definition list_to_map `{Insert K A M, Empty M} : list (K * A) → M :=
 
 Global Instance map_size `{MapFold K A M} : Size M :=
   map_fold (λ _ _, S) 0.
+
 Definition map_to_list `{MapFold K A M} : M → list (K * A) :=
   map_fold (λ i x, ((i,x) ::.)) [].
+
+(** The key [i] is the first to occur in the conversion to list/fold of [m].
+This definition is useful in combination with [map_first_key_ind] and
+[map_fold_insert_first_key]/[map_to_list_insert_first_key]. *)
+Definition map_first_key `{MapFold K A M} (m : M) (i : K) :=
+  ∃ x, map_to_list m !! 0 = Some (i,x).
 
 Definition map_to_set `{MapFold K A M,
     Singleton B C, Empty C, Union C} (f : K → A → B) (m : M) : C :=
@@ -297,12 +318,61 @@ Qed.
 Lemma map_empty_subseteq {A} (m : M A) : ∅ ⊆ m.
 Proof. apply map_subseteq_spec. intros k v []%lookup_empty_Some. Qed.
 
+(** Induction principles for [map_fold] *)
+(** Use [map_first_key_ind] instead. *)
+Local Lemma map_fold_ind {A} (P : M A → Prop) :
+  P ∅ →
+  (∀ i x m,
+    m !! i = None →
+    (∀ B (f : K → A → B → B) b x',
+      map_fold f b (<[i:=x']> m) = f i x' (map_fold f b m)) →
+    P m →
+    P (<[i:=x]> m)) →
+  ∀ m, P m.
+Proof.
+  intros Hemp Hins m.
+  induction m as [|i x m ? Hfold IH] using map_fold_fmap_ind; [done|].
+  apply Hins; [done| |done]. intros B f b x'.
+  assert (m = id <$> m) as ->.
+  { apply map_eq; intros j; by rewrite lookup_fmap, option_fmap_id. }
+  apply Hfold.
+Qed.
+
+(** Use as [induction m as ... using map_first_key_ind]. In the inductive case
+[map_first_key (<[i:=x]> m) i] can be used in combination with the lemmas
+[map_fold_insert_first_key] and [map_to_list_first_key]. *)
+Lemma map_first_key_ind {A} (P : M A → Prop) :
+  P ∅ →
+  (∀ i x m,
+    m !! i = None → map_first_key (<[i:=x]> m) i →
+    P m →
+    P (<[i:=x]> m)) →
+  ∀ m, P m.
+Proof.
+  intros Hemp Hins m.
+  induction m as [|i x m ? Hfold IH] using map_fold_ind; first done.
+  apply Hins; [done| |done]. unfold map_first_key, map_to_list.
+  rewrite Hfold. eauto.
+Qed.
+
+(** The lemma [map_fold_weak_ind] exists for backwards compatibility; use
+[map_first_key_ind] instead, which is much more convenient to use. *)
+Lemma map_fold_weak_ind {A B} (P : B → M A → Prop) (f : K → A → B → B) (b : B) :
+  P b ∅ →
+  (∀ i x m r, m !! i = None → P r m → P (f i x r) (<[i:=x]> m)) →
+  ∀ m, P (map_fold f b m) m.
+Proof.
+  intros Hemp Hins m. induction m as [|i x m ? Hfold IH] using map_fold_ind.
+  - by rewrite map_fold_empty.
+  - rewrite Hfold. by apply Hins.
+Qed.
+
 (** [NoDup_map_to_list] and [NoDup_map_to_list] need to be proved mutually,
 hence a [Local] helper lemma. *)
 Local Lemma map_to_list_spec {A} (m : M A) :
   NoDup (map_to_list m) ∧ (∀ i x, (i,x) ∈ map_to_list m ↔ m !! i = Some x).
 Proof.
-  apply (map_fold_ind (λ l m,
+  apply (map_fold_weak_ind (λ l m,
     NoDup l ∧ ∀ i x, (i,x) ∈ l ↔ m !! i = Some x)); clear m.
   { split; [constructor|]. intros i x. by rewrite elem_of_nil, lookup_empty. }
   intros i x m l ? [IH1 IH2]. split; [constructor; naive_solver|].
@@ -1037,7 +1107,11 @@ Proof.
   intros; apply NoDup_submseteq; [by eauto using NoDup_map_to_list|].
   intros [i x]. rewrite !elem_of_map_to_list; eauto using lookup_weaken.
 Qed.
-Lemma map_to_list_fmap {A B} (f : A → B) (m : M A) :
+
+(** FIXME (improve structure): Remove in favor of [map_to_list_fmap] (proved
+below), which gives [=] instead of [≡ₚ]. Moving requires a bunch of reordering
+in this file. *)
+Local Lemma map_to_list_fmap_weak {A B} (f : A → B) (m : M A) :
   map_to_list (f <$> m) ≡ₚ prod_map id f <$> map_to_list m.
 Proof.
   assert (NoDup ((prod_map id f <$> map_to_list m).*1)).
@@ -1068,7 +1142,7 @@ Qed.
 Lemma length_map_to_list {A} (m : M A) :
   length (map_to_list m) = size m.
 Proof.
-  apply (map_fold_ind (λ n m, length (map_to_list m) = n)); clear m.
+  apply (map_fold_weak_ind (λ n m, length (map_to_list m) = n)); clear m.
   { by rewrite map_to_list_empty. }
   intros i x m n ? IH. by rewrite map_to_list_insert, <-IH by done.
 Qed.
@@ -1093,7 +1167,8 @@ Proof. destruct (decide (m = ∅)); [right|left]; auto using map_choose. Qed.
 Lemma map_lookup_imap {A B} (f : K → A → option B) (m : M A) i :
   map_imap f m !! i = m !! i ≫= f i.
 Proof.
-  unfold map_imap. apply (map_fold_ind (λ r m, r !! i = m !! i ≫= f i)); clear m.
+  unfold map_imap.
+  apply (map_fold_weak_ind (λ r m, r !! i = m !! i ≫= f i)); clear m.
   { by rewrite !lookup_empty. }
   intros j y m m' Hj Hi. destruct (decide (i = j)) as [->|].
   - rewrite lookup_insert; simpl. destruct (f j y).
@@ -1222,7 +1297,7 @@ Proof. intros Hi. by rewrite map_size_delete, Hi. Qed.
 
 Lemma map_size_fmap {A B} (f : A -> B) (m : M A) : size (f <$> m) = size m.
 Proof.
-  intros. by rewrite <-!length_map_to_list, map_to_list_fmap, length_fmap.
+  intros. by rewrite <-!length_map_to_list, map_to_list_fmap_weak, length_fmap.
 Qed.
 
 Lemma map_size_list_to_map {A} (l : list (K * A)) :
@@ -1326,54 +1401,98 @@ Lemma elem_of_map_to_set_pair `{SemiSet (K * A) C} (m : M A) i x :
 Proof. rewrite elem_of_map_to_set. naive_solver. Qed.
 
 (** ** The fold operation *)
-Lemma map_fold_foldr {A B} (R : relation B) `{!PreOrder R} (l : list (K * A))
-    (f : K → A → B → B) (b : B) m :
-  (∀ j z, Proper (R ==> R) (f j z)) →
-  (∀ j1 j2 z1 z2 y,
-    j1 ≠ j2 → m !! j1 = Some z1 → m !! j2 = Some z2 →
-    R (f j1 z1 (f j2 z2 y)) (f j2 z2 (f j1 z1 y))) →
-  map_to_list m ≡ₚ l →
-  R (map_fold f b m) (foldr (uncurry f) b l).
+Lemma map_fold_foldr {A B} (f : K → A → B → B) b (m : M A) :
+  map_fold f b m = foldr (uncurry f) b (map_to_list m).
 Proof.
-  intros Hf_proper. revert l. apply (map_fold_ind (λ r m, ∀ l,
-    (∀ j1 j2 z1 z2 y,
-      j1 ≠ j2 → m !! j1 = Some z1 → m !! j2 = Some z2 →
-      R (f j1 z1 (f j2 z2 y)) (f j2 z2 (f j1 z1 y))) →
-    map_to_list m ≡ₚ l →
-    R r (foldr (uncurry f) b l))); clear m.
-  { intros [|x l] _; simpl; [done|].
-    by rewrite map_to_list_empty, Permutation_nil_l. }
-  intros i x m r ? IH l Hf Hl. rewrite map_to_list_insert in Hl by done.
-  etrans; [|apply (foldr_permutation R), Hl]; simpl.
-  - f_equiv. apply IH; [|done]. intros j1 j2 z1 z2 y ???.
-    apply Hf; [done|rewrite lookup_insert_Some; naive_solver..].
-  - intros []; apply _.
-  - intros j1 [k1 y1] j2 [k2 y2] c Hj Hj1 Hj2. apply Hf.
-    + intros ->. eapply Hj, (NoDup_lookup ((i,x) :: map_to_list m).*1).
-      * csimpl. apply NoDup_cons_2, NoDup_fst_map_to_list.
-        intros ([??]&?&?%elem_of_map_to_list)%elem_of_list_fmap; naive_solver.
-      * by rewrite list_lookup_fmap, Hj1.
-      * by rewrite list_lookup_fmap, Hj2.
-    + apply elem_of_map_to_list. rewrite map_to_list_insert by done.
-      by eapply elem_of_list_lookup_2.
-    + apply elem_of_map_to_list. rewrite map_to_list_insert by done.
-      by eapply elem_of_list_lookup_2.
+  unfold map_to_list. induction m as [|i x m ? Hfold IH] using map_fold_ind.
+  - by rewrite !map_fold_empty.
+  - by rewrite !Hfold, IH.
 Qed.
 
-Lemma map_fold_empty {A B} (f : K → A → B → B) (b : B) :
-  map_fold f b ∅ = b.
+Lemma map_fold_fmap {A A' B} (f : K → A' → B → B) (g : A → A') b (m : M A) :
+  map_fold f b (g <$> m) = map_fold (λ i, f i ∘ g) b m.
 Proof.
-  apply (map_fold_foldr _ []); [solve_proper|..].
-  - intros j1 j2 z1 z2 y. by rewrite !lookup_empty.
-  - by rewrite map_to_list_empty.
+  induction m as [|i x m ? Hfold IH] using map_fold_fmap_ind.
+  { by rewrite fmap_empty, !map_fold_empty. }
+  rewrite fmap_insert. rewrite <-(map_fmap_id m) at 2. rewrite !Hfold.
+  by rewrite IH, map_fmap_id.
+Qed.
+
+(** FIXME (Improve order): Move to [map_to_list] section. Moving requires a
+bunch of reordering in this file. *)
+Lemma map_to_list_fmap {A B} (f : A → B) (m : M A) :
+  map_to_list (f <$> m) = prod_map id f <$> map_to_list m.
+Proof.
+  unfold map_to_list. rewrite map_fold_fmap, !map_fold_foldr.
+  induction (map_to_list m) as [|[]]; f_equal/=; auto.
 Qed.
 
 Lemma map_fold_singleton {A B} (f : K → A → B → B) (b : B) i x :
   map_fold f b {[i:=x]} = f i x b.
+Proof. by rewrite map_fold_foldr, map_to_list_singleton. Qed.
+
+Lemma map_fold_delete_first_key {A B} (f : K → A → B → B) b (m : M A) i x :
+  m !! i = Some x →
+  map_first_key m i →
+  map_fold f b m = f i x (map_fold f b (delete i m)).
 Proof.
-  apply (map_fold_foldr _ [(i,x)]); [solve_proper|..].
-  - intros j1 j2 z1 z2 y ?. rewrite !lookup_singleton_Some. naive_solver.
-  - by rewrite map_to_list_singleton.
+  intros Hi [x' ([] & ixs & Hixs & ?)%elem_of_list_split_length]; simplify_eq/=.
+  destruct m as [|j y m ? Hfold _] using map_fold_ind.
+  { by rewrite map_to_list_empty in Hixs. }
+  unfold map_to_list in Hixs. rewrite Hfold in Hixs. simplify_eq.
+  rewrite lookup_insert in Hi. simplify_eq.
+  by rewrite Hfold, delete_insert by done.
+Qed.
+
+Lemma map_fold_insert_first_key {A B} (f : K → A → B → B) b (m : M A) i x :
+  m !! i = None →
+  map_first_key (<[i:=x]> m) i →
+  map_fold f b (<[i:=x]> m) = f i x (map_fold f b m).
+Proof.
+  intros. rewrite <-(delete_insert m i x) at 2 by done.
+  apply map_fold_delete_first_key; auto using lookup_insert.
+Qed.
+
+(** FIXME (Improve order): Move to [map_to_list] section. Moving requires a
+bunch of reordering in this file. *)
+Lemma map_to_list_delete_first_key {A} (m : M A) i x :
+  m !! i = Some x →
+  map_first_key m i →
+  map_to_list m = (i,x) :: map_to_list (delete i m).
+Proof.
+  intros. unfold map_to_list. by erewrite map_fold_delete_first_key by done.
+Qed.
+
+(** FIXME (Improve order): Move to [map_to_list] section. Moving requires a
+bunch of reordering in this file. *)
+Lemma map_to_list_insert_first_key {A} (m : M A) i x :
+  m !! i = None →
+  map_first_key (<[i:=x]> m) i →
+  map_to_list (<[i:=x]> m) = (i,x) :: map_to_list m.
+Proof.
+  intros. unfold map_to_list. by rewrite map_fold_insert_first_key by done.
+Qed.
+
+Lemma map_first_key_fmap {A B} (f : A → B) (m : M A) i :
+  map_first_key (f <$> m) i ↔ map_first_key m i.
+Proof.
+  split.
+  - intros [x Hm]. rewrite map_to_list_fmap, list_lookup_fmap, fmap_Some in Hm.
+    destruct Hm as ([i' x'] & Hm & ?); simplify_eq/=. by exists x'.
+  - intros [x Hm]. exists (f x).
+    by rewrite map_to_list_fmap, list_lookup_fmap, Hm.
+Qed.
+
+(** We do not have [dom] here, [map_first_key_same_dom] from [fin_map_dom] is
+typically more convenient. *)
+Lemma map_first_key_dom' {A B} (m1 : M A) (m2 : M B) i :
+  (∀ j, is_Some (m1 !! j) ↔ is_Some (m2 !! j)) →
+  map_first_key m1 i ↔ map_first_key m2 i.
+Proof.
+  intros Hm. rewrite <-(map_first_key_fmap (λ _, ()) m1).
+  rewrite <-(map_first_key_fmap (λ _, ()) m2). f_equiv. apply map_eq; intros j.
+  specialize (Hm j). rewrite !lookup_fmap. unfold is_Some in *.
+  destruct (m1 !! j), (m2 !! j); naive_solver.
 Qed.
 
 Lemma map_fold_insert {A B} (R : relation B) `{!PreOrder R}
@@ -1385,12 +1504,17 @@ Lemma map_fold_insert {A B} (R : relation B) `{!PreOrder R}
   m !! i = None →
   R (map_fold f b (<[i:=x]> m)) (f i x (map_fold f b m)).
 Proof.
-  intros Hf_proper Hf Hi. trans (f i x (foldr (uncurry f) b (map_to_list m))).
-  - apply (map_fold_foldr _ ((i,x) :: map_to_list m)); [solve_proper|done|].
-    by rewrite map_to_list_insert by done.
-  - f_equiv. apply (map_fold_foldr (flip R)); [solve_proper| |done].
-    intros j1 j2 z1 z2 y ???.
-    apply Hf; rewrite ?lookup_insert_Some; naive_solver.
+  intros Hf_proper Hf Hi. rewrite !map_fold_foldr.
+  change (f i x) with (uncurry f (i,x)). rewrite <-foldr_cons.
+  assert (∀ kz, Proper (R ==> R) (uncurry f kz)) by (intros []; solve_proper).
+  eapply (foldr_permutation R (uncurry f) b), map_to_list_insert; [|done].
+  intros j1 [k1 y1] j2 [k2 y2] c Hj Hj1 Hj2. apply Hf.
+  - intros ->.
+    eapply Hj, NoDup_lookup; [apply (NoDup_fst_map_to_list (<[i:=x]> m))| | ].
+    + by rewrite list_lookup_fmap, Hj1.
+    + by rewrite list_lookup_fmap, Hj2.
+  - by eapply elem_of_map_to_list, elem_of_list_lookup_2.
+  - by eapply elem_of_map_to_list, elem_of_list_lookup_2.
 Qed.
 
 Lemma map_fold_insert_L {A B} (f : K → A → B → B) (b : B) (i : K) (x : A) (m : M A) :
@@ -1425,47 +1549,23 @@ Lemma map_fold_delete_L {A B} (f : K → A → B → B) (b : B) (i : K) (x : A) 
   map_fold f b m = f i x (map_fold f b (delete i m)).
 Proof. apply map_fold_delete; apply _. Qed.
 
-(** This lemma for commuting [g] in/out of a [map_fold] requires [g] to be
-[Proper] (second premise) and [f] to be associative/commutative (third premise).
-Those requirements do not show up for the equivalent lemmas on sets/multisets
-because their fold operation is defined in terms of [foldr] on lists, so we know
-that both folds ([set_fold f (g x) m] and [set_fold f x m]) happen in the same
-order. The [map_fold_ind] principle does not guarantee this happens for
-[map_fold] too. *)
 Lemma map_fold_comm_acc_strong {A B} (R : relation B) `{!PreOrder R}
     (f : K → A → B → B) (g : B → B) (x : B) (m : M A) :
   (∀ j z, Proper (R ==> R) (f j z)) →
-  Proper (R ==> R) g →
-  (∀ j1 j2 z1 z2 y,
-    j1 ≠ j2 → m !! j1 = Some z1 → m !! j2 = Some z2 →
-    R (f j1 z1 (f j2 z2 y)) (f j2 z2 (f j1 z1 y))) →
   (∀ j z y, m !! j = Some z → R (f j z (g y)) (g (f j z y))) →
   R (map_fold f (g x) m) (g (map_fold f x m)).
 Proof.
-  intros ? ? Hf Hg.
-  apply (map_fold_ind (λ z m,
-    (∀ j1 j2 z1 z2 y,
-      j1 ≠ j2 → m !! j1 = Some z1 → m !! j2 = Some z2 →
-      R (f j1 z1 (f j2 z2 y)) (f j2 z2 (f j1 z1 y))) →
-    (∀ j z y, m !! j = Some z → R (f j z (g y)) (g (f j z y))) →
-    R (map_fold f (g x) m) (g z)));
-     [by rewrite map_fold_empty| |apply Hf|apply Hg].
-  intros i x' m' r Hx' IH Hfm' Hgm'.
-  rewrite map_fold_insert by (apply _ || done).
-  rewrite <-Hgm' by (by rewrite lookup_insert). f_equiv. apply IH.
-  - intros j1 j2 z1 z2 y Hjs Hl1 Hl2.
-    apply Hfm'; [done|rewrite lookup_insert_Some; naive_solver..].
-  - intros j z y Hj.
-    apply Hgm'. rewrite lookup_insert_ne by naive_solver. done.
+  intros ? Hg. induction m as [|i x' m ? Hfold IH] using map_fold_ind.
+  { by rewrite !map_fold_empty. }
+  rewrite !Hfold.
+  rewrite <-Hg by (by rewrite lookup_insert). f_equiv. apply IH.
+  intros j z y Hj. apply Hg. rewrite lookup_insert_ne by naive_solver. done.
 Qed.
 
 Lemma map_fold_comm_acc {A B} (f : K → A → B → B) (g : B → B) (x : B) (m : M A) :
-  (∀ j1 j2 z1 z2 y, f j1 z1 (f j2 z2 y) = f j2 z2 (f j1 z1 y)) →
   (∀ j z y, f j z (g y) = g (f j z y)) →
   map_fold f (g x) m = g (map_fold f x m).
-Proof.
-  intros. apply (map_fold_comm_acc_strong _); [solve_proper|solve_proper|done..].
-Qed.
+Proof. intros. apply (map_fold_comm_acc_strong _); [solve_proper|done..]. Qed.
 
 (** ** Properties of the [map_Forall] predicate *)
 Section map_Forall.
@@ -1641,7 +1741,7 @@ Section map_lookup_filter.
   Lemma map_lookup_filter m i :
     filter P m !! i = x ← m !! i; guard (P (i,x));; Some x.
   Proof.
-    revert m i. apply (map_fold_ind (λ m1 m2,
+    revert m i. apply (map_fold_weak_ind (λ m1 m2,
       ∀ i, m1 !! i = x ← m2 !! i; guard (P (i,x));; Some x)); intros i.
     { by rewrite lookup_empty. }
     intros y m m' Hm IH j. case (decide (j = i))as [->|?].
@@ -4432,7 +4532,7 @@ Section map_compose.
                | None => id
                end) ∅ n.
   Proof.
-    apply (map_fold_ind (λ mn n, omap (m !!.) n = mn)).
+    apply (map_fold_weak_ind (λ mn n, omap (m !!.) n = mn)).
     { apply map_compose_empty_r. }
     intros k b n' mn Hn' IH. rewrite omap_insert, <-IH.
     destruct (m !! b); [done|].

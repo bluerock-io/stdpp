@@ -7,6 +7,7 @@ From stdpp Require Import options.
 Local Open Scope N_scope.
 
 Record Nmap (A : Type) : Type := NMap { Nmap_0 : option A; Nmap_pos : Pmap A }.
+Add Printing Constructor Nmap.
 Global Arguments Nmap_0 {_} _ : assert.
 Global Arguments Nmap_pos {_} _ : assert.
 Global Arguments NMap {_} _ _ : assert.
@@ -56,12 +57,14 @@ Proof.
   - intros ??? [??] []; simpl; [done|]. apply lookup_fmap.
   - intros ?? f [??] [|?]; simpl; [done|]; apply (lookup_omap f).
   - intros ??? f [??] [??] [|?]; simpl; [done|]; apply (lookup_merge f).
-  - intros A B P f b Hemp Hinsert [mx t]. unfold map_fold; simpl.
-    apply (map_fold_ind (λ r t, P r (NMap mx t))); clear t.
+  - done.
+  - intros A P Hemp Hins [mx t].
+    induction t as [|i x t ? Hfold IH] using map_fold_fmap_ind.
     { destruct mx as [x|]; [|done].
       replace (NMap (Some x) ∅) with (<[0:=x]> ∅ : Nmap _) by done.
-      by apply Hinsert. }
-    intros i x t r ??. by apply (Hinsert (N.pos i) x (NMap mx t)).
+      by apply Hins. }
+    apply (Hins (N.pos i) x (NMap mx t)); [done| |done].
+    intros A' B f g b. apply Hfold.
 Qed.
 
 (** * Finite sets *)

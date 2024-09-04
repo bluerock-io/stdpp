@@ -378,12 +378,12 @@ Proof.
   intros Hnode t.
   remember (gtest_size t) as n eqn:Hn. revert t Hn.
   induction (lt_wf n) as [n _ IH]; intros [ts] ->; simpl in *.
-  apply Hnode. revert ts IH.
-  apply (map_fold_ind (λ r ts, (∀ n', n' < S r → _) → map_Forall (λ _, P) ts)).
-  - intros IH. apply map_Forall_empty.
-  - intros k t m r ? IHm IHt. apply map_Forall_insert; [done|]. split.
-    + eapply IHt; [|done]; lia.
-    + eapply IHm. intros; eapply IHt;[|done]; lia.
+  apply Hnode. induction ts as [|k t m ? Hfold IHm] using map_first_key_ind.
+  - apply map_Forall_empty.
+  - apply map_Forall_insert; [done|]. split.
+    + eapply IH; [|done]. rewrite map_fold_insert_first_key by done. lia.
+    + eapply IHm. intros; eapply IH; [|done].
+      rewrite map_fold_insert_first_key by done. lia.
 Qed.
 
 (** We show that [gtest K] is countable itself. This means that we can use
@@ -415,12 +415,11 @@ Global Program Instance gtest_countable `{Countable K} : Countable (gtest K) :=
   inj_countable' enc dec _.
 Next Obligation.
   intros K ?? enc dec_list dec t.
-  induction (Nat.lt_wf_0_projected gtest_size t) as [[ts] _ IH].
-  simpl in *; f_equal.
-  revert ts IH. apply (map_fold_ind (λ r ts, _ → dec_list dec r = ts)); [done|].
-  intros i t ts r ? IHts IHt; simpl. f_equal.
-  - eapply IHt. rewrite map_fold_insert_L by auto with lia. lia.
-  - apply IHts; intros t' ?. eapply IHt.
+  induction (Nat.lt_wf_0_projected gtest_size t) as [[ts] _ IH]. f_equal/=.
+  induction ts as [|i t ts ? Hfold IHts] using map_first_key_ind; [done|].
+  rewrite map_fold_insert_first_key by done. f_equal/=.
+  - eapply IH. rewrite map_fold_insert_L by auto with lia. lia.
+  - apply IHts; intros t' ?. eapply IH.
     rewrite map_fold_insert_L by auto with lia. lia.
 Qed.
 

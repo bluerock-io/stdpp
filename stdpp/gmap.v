@@ -63,6 +63,7 @@ Global Arguments GNodes {A P} _.
 
 Record gmap_key K `{Countable K} (q : positive) :=
   GMapKey { _ : encode (A:=K) <$> decode q = Some q }.
+Add Printing Constructor gmap_key.
 Global Arguments GMapKey {_ _ _ _} _.
 
 Lemma gmap_key_encode `{Countable K} (k : K) : gmap_key K (encode k).
@@ -71,6 +72,7 @@ Global Instance gmap_key_pi `{Countable K} q : ProofIrrel (gmap_key K q).
 Proof. intros [?] [?]. f_equal. apply (proof_irrel _). Qed.
 
 Record gmap K `{Countable K} A := GMap { gmap_car : gmap_dep A (gmap_key K) }.
+Add Printing Constructor gmap.
 Global Arguments GMap {_ _ _ _} _.
 Global Arguments gmap_car {_ _ _ _} _.
 
@@ -442,45 +444,68 @@ Section gmap_merge.
   Qed.
 End gmap_merge.
 
-Section gmap_fold.
-  Context {A B} (f : positive → A → B → B).
+Local Lemma gmap_dep_fold_GNode {A B} (f : positive → A → B → B)
+    {P} i y (ml : gmap_dep A P~0) mx mr :
+  gmap_dep_fold f i y (GNode ml mx mr) = gmap_dep_fold f i~1
+    (gmap_dep_fold f i~0
+      match mx with None => y | Some (_,x) => f (Pos.reverse i) x y end ml) mr.
+Proof. by destruct ml, mx as [[]|], mr. Qed.
 
-  Local Lemma gmap_dep_fold_GNode {P} i y (ml : gmap_dep A P~0) mx mr :
-    GNode_valid ml mx mr →
-    gmap_dep_fold f i y (GNode ml mx mr) = gmap_dep_fold f i~1
-      (gmap_dep_fold f i~0
-        match mx with None => y | Some (_,x) => f (Pos.reverse i) x y end ml) mr.
-  Proof. by destruct ml, mx as [[]|], mr. Qed.
-
-  Local Lemma gmap_dep_fold_ind {P} (Q : B → gmap_dep A P → Prop) (b : B) j :
-    Q b GEmpty →
-    (∀ i p x mt r, gmap_dep_lookup i mt = None →
-      Q r mt →
-      Q (f (Pos.reverse_go i j) x r) (gmap_dep_partial_alter (λ _, Some x) i p mt)) →
-    ∀ mt, Q (gmap_dep_fold f j b mt) mt.
-  Proof.
-    intros Hemp Hinsert mt. revert Q b j Hemp Hinsert.
-    induction mt as [|P ml mx mr ? IHl IHr] using gmap_dep_ind;
-      intros Q b j Hemp Hinsert; [done|].
-    rewrite gmap_dep_fold_GNode by done.
-    apply (IHr (λ y mt, Q y (GNode ml mx mt))).
-    { apply (IHl (λ y mt, Q y (GNode mt mx GEmpty))).
-      { destruct mx as [[p x]|]; [|done].
-        replace (GNode GEmpty (Some (p,x)) GEmpty) with
-          (gmap_dep_partial_alter (λ _, Some x) 1 p GEmpty) by done.
-        by apply Hinsert. }
-      intros i p x mt r ??.
-      replace (GNode (gmap_dep_partial_alter (λ _, Some x) i p mt) mx GEmpty)
-        with (gmap_dep_partial_alter (λ _, Some x) (i~0) p (GNode mt mx GEmpty))
+Local Lemma gmap_dep_fold_ind {A} {P} (Q : gmap_dep A P → Prop) :
+  Q GEmpty →
+  (∀ i p x mt,
+    gmap_dep_lookup i mt = None →
+    (∀ j A' B (f : positive → A' → B → B) (g : A → A') b x',
+      gmap_dep_fold f j b
+        (gmap_dep_partial_alter (λ _, Some x') i p (gmap_dep_fmap g mt))
+      = f (Pos.reverse_go i j) x' (gmap_dep_fold f j b (gmap_dep_fmap g mt))) →
+    Q mt → Q (gmap_dep_partial_alter (λ _, Some x) i p mt)) →
+  ∀ mt, Q mt.
+Proof.
+  intros Hemp Hinsert mt. revert Q Hemp Hinsert.
+  induction mt as [|P ml mx mr ? IHl IHr] using gmap_dep_ind;
+    intros Q Hemp Hinsert; [done|].
+  apply (IHr (λ mt, Q (GNode ml mx mt))).
+  { apply (IHl (λ mt, Q (GNode mt mx GEmpty))).
+    { destruct mx as [[p x]|]; [|done].
+      replace (GNode GEmpty (Some (p,x)) GEmpty) with
+        (gmap_dep_partial_alter (λ _, Some x) 1 p GEmpty) by done.
+      by apply Hinsert. }
+    intros i p x mt r ? Hfold.
+    replace (GNode (gmap_dep_partial_alter (λ _, Some x) i p mt) mx GEmpty)
+      with (gmap_dep_partial_alter (λ _, Some x) (i~0) p (GNode mt mx GEmpty))
+      by (by destruct mt, mx as [[]|]).
+    apply Hinsert.
+    - by rewrite gmap_dep_lookup_GNode.
+    - intros j A' B f g b x'.
+      replace (gmap_dep_partial_alter (λ _, Some x') (i~0) p
+          (gmap_dep_fmap g (GNode mt mx GEmpty)))
+        with (GNode (gmap_dep_partial_alter (λ _, Some x') i p (gmap_dep_fmap g mt))
+          (prod_map id g <$> mx) GEmpty)
         by (by destruct mt, mx as [[]|]).
-      apply Hinsert; by rewrite ?gmap_dep_lookup_GNode. }
-    intros i p x mt r ??.
-    replace (GNode ml mx (gmap_dep_partial_alter (λ _, Some x) i p mt))
-      with (gmap_dep_partial_alter (λ _, Some x) (i~1) p (GNode ml mx mt))
+      replace (gmap_dep_fmap g (GNode mt mx GEmpty))
+        with (GNode (gmap_dep_fmap g mt) (prod_map id g <$> mx) GEmpty)
+        by (by destruct mt, mx as [[]|]).
+      rewrite !gmap_dep_fold_GNode; simpl; auto.
+    - done. }
+  intros i p x mt r ? Hfold.
+  replace (GNode ml mx (gmap_dep_partial_alter (λ _, Some x) i p mt))
+    with (gmap_dep_partial_alter (λ _, Some x) (i~1) p (GNode ml mx mt))
+    by (by destruct ml, mx as [[]|], mt).
+  apply Hinsert.
+  - by rewrite gmap_dep_lookup_GNode.
+  - intros j A' B f g b x'.
+    replace (gmap_dep_partial_alter (λ _, Some x') (i~1) p
+        (gmap_dep_fmap g (GNode ml mx mt)))
+      with (GNode (gmap_dep_fmap g ml) (prod_map id g <$> mx)
+        (gmap_dep_partial_alter (λ _, Some x') i p (gmap_dep_fmap g mt)))
       by (by destruct ml, mx as [[]|], mt).
-    apply Hinsert; by rewrite ?gmap_dep_lookup_GNode.
-  Qed.
-End gmap_fold.
+    replace (gmap_dep_fmap g (GNode ml mx mt))
+      with (GNode (gmap_dep_fmap g ml) (prod_map id g <$> mx) (gmap_dep_fmap g mt))
+      by (by destruct ml, mx as [[]|], mt).
+    rewrite !gmap_dep_fold_GNode; simpl; auto.
+  - done.
+Qed.
 
 (** Instance of the finite map type class *)
 Global Instance gmap_finmap `{Countable K} : FinMap K (gmap K).
@@ -494,11 +519,16 @@ Proof.
   - intros A b f [mt] i. apply gmap_dep_lookup_fmap.
   - intros A B f [mt] i. apply gmap_dep_lookup_omap.
   - intros A B C f [mt1] [mt2] i. apply gmap_dep_lookup_merge.
-  - intros A B P f b Hemp Hinsert [mt].
-    apply (gmap_dep_fold_ind _ (λ r mt, P r (GMap mt))); clear mt; [done|].
-    intros i [Hk] x mt r ??; simpl. destruct (fmap_Some_1 _ _ _ Hk) as (k&->&->).
-    assert (GMapKey Hk = gmap_key_encode k) as -> by (apply proof_irrel).
-    by apply (Hinsert _ _ (GMap mt)).
+  - done.
+  - intros A P Hemp Hins [mt].
+    apply (gmap_dep_fold_ind (λ mt, P (GMap mt))); clear mt; [done|].
+    intros i [Hk] x mt ? Hfold. destruct (fmap_Some_1 _ _ _ Hk) as (k&Hk'&->).
+    assert (GMapKey Hk = gmap_key_encode k) as Hkk by (apply proof_irrel).
+    rewrite Hkk in Hfold |- *. clear Hk Hkk.
+    apply (Hins k x (GMap mt)); [done|]. intros A' B f g b x'.
+    trans ((match decode (encode k) with Some k => f k x' | None => id end)
+      (map_fold f b (g <$> GMap mt))); [apply (Hfold 1)|].
+    by rewrite Hk'.
 Qed.
 
 Global Program Instance gmap_countable
@@ -581,10 +611,10 @@ Section curry_uncurry.
   Lemma lookup_gmap_uncurry (m : gmap K1 (gmap K2 A)) i j :
     gmap_uncurry m !! (i,j) = m !! i ≫= (.!! j).
   Proof.
-    apply (map_fold_ind (λ mr m, mr !! (i,j) = m !! i ≫= (.!! j))).
+    apply (map_fold_weak_ind (λ mr m, mr !! (i,j) = m !! i ≫= (.!! j))).
     { by rewrite !lookup_empty. }
     clear m; intros i' m2 m m12 Hi' IH.
-    apply (map_fold_ind (λ m2r m2, m2r !! (i,j) = <[i':=m2]> m !! i ≫= (.!! j))).
+    apply (map_fold_weak_ind (λ m2r m2, m2r !! (i,j) = <[i':=m2]> m !! i ≫= (.!! j))).
     { rewrite IH. destruct (decide (i' = i)) as [->|].
       - rewrite lookup_insert, Hi'; simpl; by rewrite lookup_empty.
       - by rewrite lookup_insert_ne by done. }
@@ -598,7 +628,7 @@ Section curry_uncurry.
   Lemma lookup_gmap_curry (m : gmap (K1 * K2) A) i j :
     gmap_curry m !! i ≫= (.!! j) = m !! (i, j).
   Proof.
-    apply (map_fold_ind (λ mr m, mr !! i ≫= (.!! j) = m !! (i, j))).
+    apply (map_fold_weak_ind (λ mr m, mr !! i ≫= (.!! j) = m !! (i, j))).
     { by rewrite !lookup_empty. }
     clear m; intros [i' j'] x m12 mr Hij' IH.
     destruct (decide (i = i')) as [->|].
@@ -611,8 +641,8 @@ Section curry_uncurry.
   Lemma lookup_gmap_curry_None (m : gmap (K1 * K2) A) i :
     gmap_curry m !! i = None ↔ (∀ j, m !! (i, j) = None).
   Proof.
-    apply (map_fold_ind (λ mr m, mr !! i = None ↔ (∀ j, m !! (i, j) = None)));
-      [done|].
+    apply (map_fold_weak_ind
+      (λ mr m, mr !! i = None ↔ (∀ j, m !! (i, j) = None))); [done|].
     clear m; intros [i' j'] x m12 mr Hij' IH.
     destruct (decide (i = i')) as [->|].
     - split; [by rewrite lookup_partial_alter|].

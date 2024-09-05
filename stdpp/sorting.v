@@ -71,10 +71,13 @@ Section sorted.
   Lemma Sorted_StronglySorted `{!Transitive R} l :
     Sorted R l → StronglySorted R l.
   Proof. by apply Sorted.Sorted_StronglySorted. Qed.
-  Lemma StronglySorted_unique `{!AntiSymm (=) R} l1 l2 :
+
+  Lemma StronglySorted_unique_strong l1 l2 :
+    (∀ x1 x2, x1 ∈ l1 → x2 ∈ l2 → R x1 x2 → R x2 x1 → x1 = x2) →
     StronglySorted R l1 → StronglySorted R l2 → l1 ≡ₚ l2 → l1 = l2.
   Proof.
-    intros Hl1; revert l2. induction Hl1 as [|x1 l1 ? IH Hx1]; intros l2 Hl2 E.
+    intros Hasym Hl1. revert l2 Hasym.
+    induction Hl1 as [|x1 l1 ? IH Hx1]; intros l2 Hasym Hl2 E.
     { symmetry. by apply Permutation_nil. }
     destruct Hl2 as [|x2 l2 ? Hx2].
     { by apply Permutation_nil_r in E. }
@@ -82,9 +85,19 @@ Section sorted.
     { rewrite Forall_forall in Hx1, Hx2.
       assert (x2 ∈ x1 :: l1) as Hx2' by (by rewrite E; left).
       assert (x1 ∈ x2 :: l2) as Hx1' by (by rewrite <-E; left).
-      inv Hx1'; inv Hx2'; simplify_eq; auto. }
-    f_equal. by apply IH, (inj (x2 ::.)).
+      inv Hx1'; inv Hx2'; simplify_eq; [eauto..|].
+      apply Hasym; [by constructor..| |]; by eauto. }
+    f_equal. apply IH, (inj (x2 ::.)); [|done..].
+    intros ????. apply Hasym; by constructor.
   Qed.
+  Lemma StronglySorted_unique `{!AntiSymm (=) R} l1 l2 :
+    StronglySorted R l1 → StronglySorted R l2 → l1 ≡ₚ l2 → l1 = l2.
+  Proof. apply StronglySorted_unique_strong; eauto. Qed.
+
+  Lemma Sorted_unique_strong `{!Transitive R} l1 l2 :
+    (∀ x1 x2, x1 ∈ l1 → x2 ∈ l2 → R x1 x2 → R x2 x1 → x1 = x2) →
+    Sorted R l1 → Sorted R l2 → l1 ≡ₚ l2 → l1 = l2.
+  Proof. auto using StronglySorted_unique_strong, Sorted_StronglySorted. Qed.
   Lemma Sorted_unique `{!Transitive R, !AntiSymm (=) R} l1 l2 :
     Sorted R l1 → Sorted R l2 → l1 ≡ₚ l2 → l1 = l2.
   Proof. auto using StronglySorted_unique, Sorted_StronglySorted. Qed.

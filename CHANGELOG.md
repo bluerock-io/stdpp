@@ -45,6 +45,8 @@ API-breaking change is listed.
     the folded function itself.
 - Add string literal notation "my string" to `std_scope`, and no longer globally
   open `string_scope`.
+- Add lemmas `Sorted_unique_strong` and `StronglySorted_unique_strong` that only
+  require anti-symmetry for the elements that are in the list.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

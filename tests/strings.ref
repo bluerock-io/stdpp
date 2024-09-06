@@ -1,0 +1,8 @@
+"foo"
+     : string
+10 =? 10
+     : bool
+[10] ++ [12]
+     : list nat
+"foo" +:+ "bar"
+     : string

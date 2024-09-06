@@ -4,15 +4,16 @@ From stdpp Require Export list.
 From stdpp Require Import countable.
 From stdpp Require Import options.
 
-(* To avoid randomly ending up with String.length because this module is
+(** To avoid randomly ending up with [String.length] because this module is
 imported hereditarily somewhere. *)
 Notation length := List.length.
 
-(** * Fix scopes *)
-Global Open Scope string_scope.
-(* Make sure [list_scope] has priority over [string_scope], so that
-   the "++" notation designates list concatenation. *)
-Global Open Scope list_scope.
+(** Enable the string literal and append notation in [stdpp_scope], making it
+possible to write string literals as "foo" instead of "foo"%string.
+One could also enable the string literal notation via [Open Scope string_scope]
+but that overrides various notations (e.g, [++] on [list], [=?] on [nat]) with
+the version for strings. *)
+String Notation string string_of_list_byte list_byte_of_string : stdpp_scope.
 Infix "+:+" := String.append (at level 60, right associativity) : stdpp_scope.
 Global Arguments String.append : simpl never.
 

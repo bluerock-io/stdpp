@@ -113,7 +113,7 @@ Proof. apply _. Qed.
 Global Instance pretty_Z : Pretty Z := λ x,
   match x with
   | Z0 => "0" | Zpos x => pretty x | Zneg x => "-" +:+ pretty x
-  end%string.
+  end.
 Global Instance pretty_Z_inj : Inj (=@{Z}) (=) pretty.
 Proof.
   unfold pretty, pretty_Z.

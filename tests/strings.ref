@@ -1,8 +1,14 @@
 "foo"
      : string
+"foo"
+     : string
 10 =? 10
      : bool
 [10] ++ [12]
      : list nat
-"foo" +:+ "bar"
+("foo" =? "bar")%string
+     : bool
+String.app "foo" "bar"
      : string
+String.app
+     : string → string → string

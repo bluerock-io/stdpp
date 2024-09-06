@@ -25,8 +25,8 @@ End N.
 Fixed by making the [wp_guard] in [pretty_N_go] proportional to the
 size of the input so that it blocks in case the input is an open term. *)
 Lemma test_no_stack_overflow p n :
-  get n (pretty (N.pos p)) ≠ Some "_"%char →
-  get (S n) ("-" +:+ pretty (N.pos p)) ≠ Some "_"%char.
+  String.get n (pretty (N.pos p)) ≠ Some "_"%char →
+  String.get (S n) ("-" +:+ pretty (N.pos p)) ≠ Some "_"%char.
 Proof. intros Hlem. apply Hlem. Qed.
 
 Section nat.

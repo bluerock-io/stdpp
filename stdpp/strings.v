@@ -1,74 +1,27 @@
 From Coq Require Import Ascii.
-From Coq Require Export String.
+From Coq Require String.
 From stdpp Require Export list.
 From stdpp Require Import countable.
 From stdpp Require Import options.
 
-(** To avoid randomly ending up with [String.length] because this module is
-imported hereditarily somewhere. *)
-Notation length := List.length.
+(** We define the ascii/string methods in corresponding modules, similar to what
+is done for numbers. These modules should generally not be imported, e.g., use
+[Ascii.is_nat] instead. *)
 
-(** Enable the string literal and append notation in [stdpp_scope], making it
-possible to write string literals as "foo" instead of "foo"%string.
+(** To avoid poluting the global namespace, we export only the [string] data
+type (with its constructors and eliminators) and notations. *)
+Export String (string(..)).
+Export (notations) String.
+
+(** Enable the string literal and append notation in [stdpp_scope], making
+it possible to write string literals as "foo" instead of "foo"%string.
 One could also enable the string literal notation via [Open Scope string_scope]
-but that overrides various notations (e.g, [++] on [list], [=?] on [nat]) with
-the version for strings. *)
-String Notation string string_of_list_byte list_byte_of_string : stdpp_scope.
+but that overrides various notations (e.g, [=?] on [nat]) with the version for
+strings. *)
+String Notation string
+  String.string_of_list_byte String.list_byte_of_string : stdpp_scope.
+
 Infix "+:+" := String.append (at level 60, right associativity) : stdpp_scope.
-Global Arguments String.append : simpl never.
-
-(** * Decision of equality *)
-Global Instance ascii_eq_dec : EqDecision ascii := ascii_dec.
-Global Instance string_eq_dec : EqDecision string.
-Proof. solve_decision. Defined.
-Global Instance string_app_inj s1 : Inj (=) (=) (String.append s1).
-Proof. intros ???. induction s1; simplify_eq/=; f_equal/=; auto. Qed.
-
-Global Instance string_inhabited : Inhabited string := populate "".
-
-(* Reverse *)
-Fixpoint string_rev_app (s1 s2 : string) : string :=
-  match s1 with
-  | "" => s2
-  | String a s1 => string_rev_app s1 (String a s2)
-  end.
-Definition string_rev (s : string) : string := string_rev_app s "".
-
-Definition is_nat (x : ascii) : option nat :=
-  match x with
-  | "0" => Some 0
-  | "1" => Some 1
-  | "2" => Some 2
-  | "3" => Some 3
-  | "4" => Some 4
-  | "5" => Some 5
-  | "6" => Some 6
-  | "7" => Some 7
-  | "8" => Some 8
-  | "9" => Some 9
-  | _ => None
-  end%char.
-
-(* Break a string up into lists of words, delimited by white space *)
-Definition is_space (x : Ascii.ascii) : bool :=
-  match x with
-  | "009" | "010" | "011" | "012" | "013" | " " => true | _ => false
-  end%char.
-
-Fixpoint words_go (cur : option string) (s : string) : list string :=
-  match s with
-  | "" => option_list (string_rev <$> cur)
-  | String a s =>
-     if is_space a then option_list (string_rev <$> cur) ++ words_go None s
-     else words_go (Some (from_option (String a) (String a "") cur)) s
-  end.
-Definition words : string → list string := words_go None.
-
-Ltac words s :=
-  match type of s with
-  | list string => s
-  | string => eval vm_compute in (words s)
-  end.
 
 (** * Encoding and decoding *)
 (** The [Countable] instance of [string] is particularly useful to allow strings
@@ -77,7 +30,11 @@ to be used as keys in [gmap].
 The encoding of [string] to [positive] is taken from
 https://github.com/xavierleroy/canonical-binary-tries/blob/v2/lib/String2pos.v.
 It avoids creating auxiliary data structures such as [list bool], thereby
-improving efficiency. *)
+improving efficiency.
+
+We first provide some [Local] helper functions and then define the [Countable]
+instances for encoding/decoding in the modules [Ascii] and [String]. End-users
+should always use these instances. *)
 Local Definition bool_cons_pos (b : bool) (p : positive) : positive :=
   if b then p~1 else p~0.
 Local Definition ascii_cons_pos (c : ascii) (p : positive) : positive :=
@@ -128,13 +85,78 @@ Defined.
 Local Lemma pos_to_string_string_to_pos s : pos_to_string (string_to_pos s) = s.
 Proof. induction s as [|[[][][][][][][][]]]; by f_equal/=. Qed.
 
-Global Program Instance string_countable : Countable string := {|
-  encode := string_to_pos; decode p := Some (pos_to_string p)
-|}.
-Solve Obligations with
-  naive_solver eauto using pos_to_string_string_to_pos with f_equal.
+Module Ascii.
+  Global Instance eq_dec : EqDecision ascii := ascii_dec.
 
-Global Instance ascii_countable : Countable ascii :=
-  inj_countable (λ a, String a EmptyString)
-                (λ s, match s with String a _ => Some a | _ => None end)
-                (λ a, eq_refl).
+  Global Program Instance countable : Countable ascii := {|
+    encode a := string_to_pos (String a EmptyString);
+    decode p := match pos_to_string p return _ with String a _ => Some a | _ => None end
+  |}.
+  Next Obligation. by intros [[] [] [] [] [] [] [] []]. Qed.
+
+  Definition is_nat (x : ascii) : option nat :=
+    match x with
+    | "0" => Some 0
+    | "1" => Some 1
+    | "2" => Some 2
+    | "3" => Some 3
+    | "4" => Some 4
+    | "5" => Some 5
+    | "6" => Some 6
+    | "7" => Some 7
+    | "8" => Some 8
+    | "9" => Some 9
+    | _ => None
+    end%char.
+
+  Definition is_space (x : ascii) : bool :=
+    match x with
+    | "009" | "010" | "011" | "012" | "013" | " " => true | _ => false
+    end%char.
+End Ascii.
+
+Module String.
+  (** Use a name that is consistent with [list]. *)
+  Notation app := String.append.
+
+  (** And obtain a proper behavior for [simpl]. *)
+  Global Arguments app : simpl never.
+
+  Global Instance eq_dec : EqDecision string.
+  Proof. solve_decision. Defined.
+  Global Instance app_inj s1 : Inj (=) (=) (app s1).
+  Proof. intros ???. induction s1; simplify_eq/=; f_equal/=; auto. Qed.
+
+  Global Instance inhabited : Inhabited string := populate "".
+
+  Global Program Instance countable : Countable string := {|
+    encode := string_to_pos;
+    decode p := Some (pos_to_string p)
+  |}.
+  Solve Obligations with
+    naive_solver eauto using pos_to_string_string_to_pos with f_equal.
+
+  Fixpoint rev_app (s1 s2 : string) : string :=
+    match s1 with
+    | "" => s2
+    | String a s1 => rev_app s1 (String a s2)
+    end.
+  Definition rev (s : string) : string := rev_app s "".
+
+  (* Break a string up into lists of words, delimited by white space *)
+  Fixpoint words_go (cur : option string) (s : string) : list string :=
+    match s with
+    | "" => option_list (rev <$> cur)
+    | String a s =>
+       if Ascii.is_space a
+       then option_list (rev <$> cur) ++ words_go None s
+       else words_go (Some (from_option (String a) (String a "") cur)) s
+    end.
+  Definition words : string → list string := words_go None.
+
+  Ltac words s :=
+    match type of s with
+    | list string => s
+    | string => eval vm_compute in (words s)
+    end.
+End String.

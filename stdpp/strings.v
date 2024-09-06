@@ -124,8 +124,6 @@ Module String.
 
   Global Instance eq_dec : EqDecision string.
   Proof. solve_decision. Defined.
-  Global Instance app_inj s1 : Inj (=) (=) (app s1).
-  Proof. intros ???. induction s1; simplify_eq/=; f_equal/=; auto. Qed.
 
   Global Instance inhabited : Inhabited string := populate "".
 
@@ -135,6 +133,45 @@ Module String.
   |}.
   Solve Obligations with
     naive_solver eauto using pos_to_string_string_to_pos with f_equal.
+
+  Definition le (s1 s2 : string) : Prop := String.leb s1 s2.
+
+  Global Instance le_dec : RelDecision le.
+  Proof. intros s1 s2. apply _. Defined.
+  Global Instance le_pi s1 s2 : ProofIrrel (le s1 s2).
+  Proof. apply _. Qed.
+
+  Global Instance le_po : PartialOrder le.
+  Proof.
+    unfold le. split; [split|].
+    - intros s. unfold String.leb. assert ((s ?= s)%string = Eq) as ->; [|done].
+      induction s; simpl; [done|].
+      unfold Ascii.compare. by rewrite N.compare_refl.
+    - intros s1 s2 s3. unfold String.leb.
+      destruct (s1 ?= s2)%string eqn:Hs12; [..|done].
+      { by apply String.compare_eq_iff in Hs12 as ->. }
+      destruct (s2 ?= s3)%string eqn:Hs23; [..|done].
+      { apply String.compare_eq_iff in Hs23 as ->. by rewrite Hs12. }
+      assert ((s1 ?= s3)%string = Lt) as ->; [|done].
+      revert s2 s3 Hs12 Hs23.
+      induction s1 as [|a1 s1]; intros [|a2 s2] [|a3 s3] ??;
+        simplify_eq/=; [done..|].
+      destruct (Ascii.compare a1 a2) eqn:Ha12; simplify_eq/=.
+      { apply Ascii.compare_eq_iff in Ha12 as ->.
+        destruct (Ascii.compare a2 a3); simpl; eauto. }
+      destruct (Ascii.compare a2 a3) eqn:Ha23; simplify_eq/=.
+      { apply Ascii.compare_eq_iff in Ha23 as ->. by rewrite Ha12. }
+      assert (Ascii.compare a1 a3 = Lt) as ->; [|done].
+      apply N.compare_lt_iff. by etrans; apply N.compare_lt_iff.
+    - intros s1 s2 ?%Is_true_true ?%Is_true_true. by apply String.leb_antisym.
+  Qed.
+  Global Instance le_total : Total le.
+  Proof.
+    intros s1 s2. unfold le. destruct (String.leb_total s1 s2) as [->| ->]; auto.
+  Qed.
+
+  Global Instance app_inj s1 : Inj (=) (=) (app s1).
+  Proof. intros ???. induction s1; simplify_eq/=; f_equal/=; auto. Qed.
 
   Fixpoint rev_app (s1 s2 : string) : string :=
     match s1 with
@@ -160,3 +197,10 @@ Module String.
     | string => eval vm_compute in (words s)
     end.
 End String.
+
+Infix "≤" := String.le : string_scope.
+Notation "(≤)" := String.le (only parsing) : string_scope.
+Notation "x ≤ y ≤ z" := (x ≤ y ∧ y ≤ z)%string : string_scope.
+Notation "x ≤ y ≤ z ≤ z'" := (x ≤ y ∧ y ≤ z ∧ z ≤ z')%string : string_scope.
+
+Global Hint Extern 0 (_ ≤ _)%string => reflexivity : core.

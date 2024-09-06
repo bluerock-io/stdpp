@@ -43,6 +43,8 @@ API-breaking change is listed.
     strengthened to only require commutativity w.r.t. the operation being
     pulled out of the accumulator, not commutativity of
     the folded function itself.
+- Add string literal notation "my string" to `std_scope`, and no longer globally
+  open `string_scope`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

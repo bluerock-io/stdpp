@@ -43,14 +43,26 @@ API-breaking change is listed.
     strengthened to only require commutativity w.r.t. the operation being
     pulled out of the accumulator, not commutativity of
     the folded function itself.
-- Add string literal notation "my string" to `std_scope`, and no longer globally
-  open `string_scope`.
 - Add lemmas `Sorted_unique_strong` and `StronglySorted_unique_strong` that only
   require anti-symmetry for the elements that are in the list.
 - Rename `foldr_cons_permute` into `foldr_cons_permute_strong` and strengthen
   (a) from function `f : A → A → A` to `f : A → B → B`, and (b) to only require
   associativity/commutativity for the elements that are in the list.
 - Rename `foldr_cons_permute_eq` into `foldr_cons_permute`.
+- Various improvements to the support of strings:
+  + Add string literal notation "my string" to `std_scope`, and no longer
+    globally open `string_scope`.
+  + Move all definitions and lemmas about strings/ascii into the modules
+    `String`/`Ascii`, i.e., rename `string_rev_app` into `String.rev_app`,
+    `string_rev` into `String.rev`, `is_nat` into `Ascii.is_nat`, `is_space`
+    into `Ascii.is_space` and `words` into `String.words`.
+  + The file `std.strings` no longer exports the `String` module, it only
+    exports the `string` type, its constructors, induction principles, and
+    notations (in `string_scope`). Similar to the number types (`nat`, `N`,
+    `Z`), importing the `String` module yourself is discouraged, rather use
+    `String.function` and `String.lemma`.
+  + Add `String.le` and some theory about it (decidability, proof irrelevance,
+    total order).
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).
@@ -109,6 +121,12 @@ s/\bmap_fold_ind2\b/map_fold_weak_ind/g
 # foldr_cons_permute
 s/\bfoldr_cons_permute\b/foldr_cons_permute_strong/g
 s/\bfoldr_cons_permute_eq\b/foldr_cons_permute/g
+# strings
+s/\bstring_rev_app\b/String.rev_app/g
+s/\bstring_rev\b/String.rev/g
+s/\bis_nat\b/Ascii.is_nat/g
+s/\bis_space\b/Ascii.is_space/g
+s/\bwords\b/String.words/g
 EOF
 ```
 

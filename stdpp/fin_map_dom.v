@@ -187,6 +187,15 @@ Lemma map_first_key_dom_L {A B} (m1 : M A) (m2 : M B) i :
   dom m1 = dom m2 → map_first_key m1 i ↔ map_first_key m2 i.
 Proof. intros Hm. apply map_first_key_dom. by rewrite Hm. Qed.
 
+Lemma map_Forall2_dom {A B} (P : K → A → B → Prop) (m1 : M A) (m2 : M B) :
+  map_Forall2 P m1 m2 → dom m1 ≡ dom m2.
+Proof.
+  revert m2. induction m1 as [|i x1 m1 ? IH] using map_ind; intros m2.
+  { intros ->%map_Forall2_empty_inv_l. by rewrite !dom_empty. }
+  intros (x2 & m2' & -> & ? & ? & ?)%map_Forall2_insert_inv_l; last done.
+  by rewrite !dom_insert, IH by done.
+Qed.
+
 (** Alternative definition of [dom] in terms of [map_to_list]. *)
 Lemma dom_alt {A} (m : M A) :
   dom m ≡ list_to_set (map_to_list m).*1.
@@ -324,6 +333,7 @@ Proof. intros ???. unfold_leibniz. by apply dom_proper. Qed.
 
 Section leibniz.
   Context `{!LeibnizEquiv D}.
+
   Lemma dom_filter_L {A} (P : K * A → Prop) `{!∀ x, Decision (P x)} (m : M A) X :
     (∀ i, i ∈ X ↔ ∃ x, m !! i = Some x ∧ P (i, x)) →
     dom (filter P m) = X.
@@ -358,6 +368,9 @@ Section leibniz.
   Proof. unfold_leibniz; apply dom_difference. Qed.
   Lemma dom_fmap_L {A B} (f : A → B) (m : M A) : dom (f <$> m) = dom m.
   Proof. unfold_leibniz; apply dom_fmap. Qed.
+  Lemma map_Forall2_dom_L {A B} (P : K → A → B → Prop) (m1 : M A) (m2 : M B) :
+    map_Forall2 P m1 m2 → dom m1 = dom m2.
+  Proof. unfold_leibniz. apply map_Forall2_dom. Qed.
   Lemma dom_imap_L {A B} (f: K → A → option B) (m: M A) X :
     (∀ i, i ∈ X ↔ ∃ x, m !! i = Some x ∧ is_Some (f i x)) →
     dom (map_imap f m) = X.

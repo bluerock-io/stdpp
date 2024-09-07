@@ -165,7 +165,7 @@ Module Nat.
 
   Global Instance divide_dec : RelDecision Nat.divide.
   Proof.
-    refine (λ x y, cast_if (decide (lcm x y = y))); by rewrite Nat.divide_lcm_iff.
+    refine (λ x y, cast_if (decide (lcm x y = y))); abstract (by rewrite Nat.divide_lcm_iff).
   Defined.
   Global Instance divide_po : PartialOrder divide.
   Proof.
@@ -1018,7 +1018,7 @@ Module Qp.
   Global Instance eq_dec : EqDecision Qp.
   Proof.
     refine (λ p q, cast_if (decide (Qp_to_Qc p = Qp_to_Qc q)));
-      by rewrite <-to_Qc_inj_iff.
+      abstract (by rewrite <-to_Qc_inj_iff).
   Defined.
 
   Definition add (p q : Qp) : Qp :=

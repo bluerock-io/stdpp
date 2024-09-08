@@ -47,6 +47,10 @@ API-breaking change is listed.
   open `string_scope`.
 - Add lemmas `Sorted_unique_strong` and `StronglySorted_unique_strong` that only
   require anti-symmetry for the elements that are in the list.
+- Rename `foldr_cons_permute` into `foldr_cons_permute_strong` and strengthen
+  (a) from function `f : A → A → A` to `f : A → B → B`, and (b) to only require
+  associativity/commutativity for the elements that are in the list.
+- Rename `foldr_cons_permute_eq` into `foldr_cons_permute`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).
@@ -102,6 +106,9 @@ s/\bminimal_exists\b/minimal_exists_elem_of/g
 s/\bmap_not_Forall2\b/map_not_relation/g
 # map_fold
 s/\bmap_fold_ind2\b/map_fold_weak_ind/g
+# foldr_cons_permute
+s/\bfoldr_cons_permute\b/foldr_cons_permute_strong/g
+s/\bfoldr_cons_permute_eq\b/foldr_cons_permute/g
 EOF
 ```
 

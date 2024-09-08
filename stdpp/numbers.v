@@ -165,7 +165,8 @@ Module Nat.
 
   Global Instance divide_dec : RelDecision Nat.divide.
   Proof.
-    refine (λ x y, cast_if (decide (lcm x y = y))); abstract (by rewrite Nat.divide_lcm_iff).
+    refine (λ x y, cast_if (decide (lcm x y = y)));
+      abstract (by rewrite Nat.divide_lcm_iff).
   Defined.
   Global Instance divide_po : PartialOrder divide.
   Proof.

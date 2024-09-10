@@ -63,6 +63,10 @@ API-breaking change is listed.
     `String.function` and `String.lemma`.
   + Add `String.le` and some theory about it (decidability, proof irrelevance,
     total order).
+- Add lemmas `foldr_idemp_strong` and `foldr_idemp`.
+- Add lemmas `set_fold_union_strong` and `set_fold_union`.
+- Add lemmas `map_fold_union_strong`, `map_fold_union`,
+  `map_fold_disj_union_strong`, `map_fold_disj_union` and `map_fold_proper`.
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

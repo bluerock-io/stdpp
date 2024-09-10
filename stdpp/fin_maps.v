@@ -1567,6 +1567,19 @@ Lemma map_fold_comm_acc {A B} (f : K → A → B → B) (g : B → B) (x : B) (m
   map_fold f (g x) m = g (map_fold f x m).
 Proof. intros. apply (map_fold_comm_acc_strong _); [solve_proper|done..]. Qed.
 
+(** Not written using [Instance .. Proper] because it is ambigious to apply due
+to the arbitrary [R]. *)
+Lemma map_fold_proper {A B} (R : relation B) `{!PreOrder R}
+    (f : K → A → B → B) (b1 b2 : B) (m : M A) :
+  (∀ j z, Proper (R ==> R) (f j z)) →
+  R b1 b2 →
+  R (map_fold f b1 m) (map_fold f b2 m).
+Proof.
+  intros Hf Hb. induction m as [|i x m ?? IH] using map_first_key_ind.
+  { by rewrite !map_fold_empty. }
+  rewrite !map_fold_insert_first_key by done. by f_equiv.
+Qed.
+
 (** ** Properties of the [map_Forall] predicate *)
 Section map_Forall.
   Context {A} (P : K → A → Prop).
@@ -2986,6 +2999,92 @@ Proof.
     rewrite map_lookup_filter_Some, lookup_union_Some, <-not_eq_None_Some by done.
     rewrite map_disjoint_alt in Hcd_disj; naive_solver.
 Qed.
+
+(** The following lemma shows that folding over two maps separately (using the
+result of the first fold as input for the second fold) is equivalent to folding
+over the union, *if* the function is idempotent for the elements that will be
+processed twice ([m1 ∩ m2]) and does not care about the order in which elements
+are processed.
+
+This is a generalization of [map_fold_union] (below) with a.) a relation [R]
+instead of equality b.) premises that ensure the elements are in [m1 ∪ m2]. *)
+Lemma map_fold_union_strong {A B} (R : relation B) `{!PreOrder R}
+    (f : K → A → B → B) (b : B) (m1 m2 : M A) :
+  (∀ j z, Proper (R ==> R) (f j z)) →
+  (∀ j z1 z2 y,
+    (** This is morally idempotence for elements of [m1 ∩ m2] *)
+    m1 !! j = Some z1 → m2 !! j = Some z2 →
+    (** We cannot write this in the usual direction of idempotence properties
+    (i.e., [R (f j z1 (f j z2 y)) (f j z1 y)]) because [R] is not symmetric. *)
+    R (f j z1 y) (f j z1 (f j z2 y))) →
+  (∀ j1 j2 z1 z2 y,
+    (** This is morally commutativity + associativity for elements of [m1 ∪ m2] *)
+    j1 ≠ j2 →
+    m1 !! j1 = Some z1 ∨ m2 !! j1 = Some z1 →
+    m1 !! j2 = Some z2 ∨ m2 !! j2 = Some z2 →
+    R (f j1 z1 (f j2 z2 y)) (f j2 z2 (f j1 z1 y))) →
+  R (map_fold f b (m1 ∪ m2)) (map_fold f (map_fold f b m2) m1).
+Proof.
+  intros Hf. revert m2.
+  induction m1 as [|j x m Hmj IH] using map_ind; intros m2 Hf_idemp Hf_assoc.
+  { by rewrite (left_id_L _ _), map_fold_empty. }
+  setoid_rewrite lookup_insert_Some in Hf_assoc.
+  setoid_rewrite lookup_insert_Some in Hf_idemp.
+  rewrite <-insert_union_l, insert_union_r,
+    <-insert_delete_insert, <-insert_union_r by done.
+  trans (f j x (map_fold f b (m ∪ delete j m2))).
+  { apply (map_fold_insert R f); [solve_proper|..].
+    - intros j1 j2 z1 z2 y ? Hj1 Hj2.
+      apply Hf_assoc; [done|revert Hj1|revert Hj2];
+        rewrite lookup_insert_Some, !lookup_union_Some_raw, lookup_delete_Some;
+        naive_solver.
+    - by rewrite lookup_union, Hmj, lookup_delete. }
+  trans (f j x (map_fold f (map_fold f b (delete j m2)) m)).
+  { apply Hf, IH.
+    - intros j' z1 z2 y ? Hj'. apply Hf_idemp; revert Hj';
+        rewrite lookup_delete_Some, ?lookup_insert_Some; naive_solver.
+    - intros j1 j2 z1 z2 y ? Hj1 Hj2.
+      apply Hf_assoc; [done|revert Hj1|revert Hj2];
+        rewrite lookup_delete_Some; clear Hf_idemp Hf_assoc; naive_solver. }
+  trans (f j x (map_fold f (map_fold f b m2) m)).
+  - destruct (m2 !! j) as [x'|] eqn:?; [|by rewrite delete_notin by done].
+    trans (f j x (f j x' (map_fold f (map_fold f b (delete j m2)) m))); [by auto|].
+    f_equiv. trans (map_fold f (f j x' (map_fold f b (delete j m2))) m).
+    + apply (map_fold_comm_acc_strong (flip R)); [solve_proper|].
+      intros; apply Hf_assoc;
+        rewrite ?lookup_union_Some_raw, ?lookup_insert_Some; naive_solver.
+    + apply map_fold_proper; [solve_proper..|].
+      apply (map_fold_delete (flip R)); [solve_proper|naive_solver..].
+  - apply (map_fold_insert (flip R)); [solve_proper| |done].
+    intros j1 j2 z1 z2 y ? Hj1 Hj2.
+    apply Hf_assoc; [done|revert Hj2|revert Hj1];
+      rewrite !lookup_insert_Some; naive_solver.
+Qed.
+Lemma map_fold_union {A B} (f : K → A → B → B) (b : B) m1 m2 :
+  (∀ j z1 z2 y, f j z1 (f j z2 y) = f j z1 y) →
+  (∀ j1 j2 z1 z2 y, f j1 z1 (f j2 z2 y) = f j2 z2 (f j1 z1 y)) →
+  map_fold f b (m1 ∪ m2) = map_fold f (map_fold f b m2) m1.
+Proof. intros. apply (map_fold_union_strong _); [solve_proper|auto..]. Qed.
+
+Lemma map_fold_disj_union_strong {A B} (R : relation B) `{!PreOrder R}
+    (f : K → A → B → B) (b : B) (m1 m2 : M A) :
+  (∀ j z, Proper (R ==> R) (f j z)) →
+  m1 ##ₘ m2 →
+  (∀ j1 j2 z1 z2 y,
+    j1 ≠ j2 →
+    m1 !! j1 = Some z1 ∨ m2 !! j1 = Some z1 →
+    m1 !! j2 = Some z2 ∨ m2 !! j2 = Some z2 →
+    R (f j1 z1 (f j2 z2 y)) (f j2 z2 (f j1 z1 y))) →
+  R (map_fold f b (m1 ∪ m2)) (map_fold f (map_fold f b m2) m1).
+Proof.
+  rewrite map_disjoint_spec. intros ??.
+  apply (map_fold_union_strong _); [solve_proper|naive_solver].
+Qed.
+Lemma map_fold_disj_union {A B} (f : K → A → B → B) (b : B) m1 m2 :
+  m1 ##ₘ m2 →
+  (∀ j1 j2 z1 z2 y, f j1 z1 (f j2 z2 y) = f j2 z2 (f j1 z1 y)) →
+  map_fold f b (m1 ∪ m2) = map_fold f (map_fold f b m2) m1.
+Proof. intros. apply (map_fold_disj_union_strong _); [solve_proper|auto..]. Qed.
 
 (** ** Properties of the [union_list] operation *)
 Lemma map_disjoint_union_list_l {A} (ms : list (M A)) (m : M A) :

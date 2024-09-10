@@ -4659,6 +4659,7 @@ Proof.
     symmetry in Hl12; apply Permutation_inj in Hl12 as [_ (g&?&Hg)].
     apply (Hf' (g j1) _ (g j2)); [naive_solver|by rewrite <-Hg..].
 Qed.
+
 Lemma foldr_permutation_proper {A B} (R : relation B) `{!PreOrder R}
     (f : A → B → B) (b : B) `{!∀ x, Proper (R ==> R) (f x)}
     (Hf : ∀ a1 a2 b, R (f a1 (f a2 b)) (f a2 (f a1 b))) :
@@ -4692,6 +4693,46 @@ Lemma foldr_cons_permute {A} (f : A → A → A) (a : A) x l :
 Proof.
   intros. apply (foldr_cons_permute_strong (=) f a).
   intros j1 a1 j2 a2 b _ _ _. by rewrite !(assoc_L f), (comm_L f a1).
+Qed.
+
+(** The following lemma shows that folding over a list twice (using the result
+of the first fold as input for the second fold) is equivalent to folding over
+the list once, *if* the function is idempotent for the elements of the list
+and does not care about the order in which elements are processed. *)
+Lemma foldr_idemp_strong {A B} (R : relation B) `{!PreOrder R}
+    (f : A → B → B) (b : B) `{!∀ x, Proper (R ==> R) (f x)} (l : list A) :
+  (∀ j a b,
+    (** This is morally idempotence for elements of [l] *)
+    l !! j = Some a →
+    R (f a (f a b)) (f a b)) →
+  (∀ j1 a1 j2 a2 b,
+    (** This is morally commutativity + associativity for elements of [l] *)
+    j1 ≠ j2 → l !! j1 = Some a1 → l !! j2 = Some a2 →
+    R (f a1 (f a2 b)) (f a2 (f a1 b))) →
+  R (foldr f (foldr f b l) l) (foldr f b l).
+Proof.
+  intros Hfidem Hfcomm. induction l as [|x l IH]; simpl; [done|].
+  trans (f x (f x (foldr f (foldr f b l) l))).
+  { f_equiv. rewrite <-foldr_snoc, <-foldr_cons.
+    apply (foldr_permutation (flip R) f).
+    - solve_proper.
+    - intros j1 a1 j2 a2 b' ???. by apply (Hfcomm j2 _ j1).
+    - by rewrite <-Permutation_cons_append. }
+  rewrite <-foldr_cons.
+  trans (f x (f x (foldr f b l))); [|by apply (Hfidem 0)].
+  simpl. do 2 f_equiv. apply IH.
+  - intros j a b' ?. by apply (Hfidem (S j)).
+  - intros j1 a1 j2 a2 b' ???. apply (Hfcomm (S j1) _ (S j2)); auto with lia.
+Qed.
+Lemma foldr_idemp {A} (f : A → A → A) (a : A) (l : list A) :
+  IdemP (=) f →
+  Assoc (=) f →
+  Comm (=) f →
+  foldr f (foldr f a l) l = foldr f a l.
+Proof.
+  intros. apply (foldr_idemp_strong (=) f a).
+  - intros j a1 a2 _. by rewrite (assoc_L f), (idemp f).
+  - intros x1 a1 x2 a2 a3 _ _ _. by rewrite !(assoc_L f), (comm_L f a1).
 Qed.
 
 Lemma foldr_comm_acc_strong {A B} (R : relation B) `{!PreOrder R}

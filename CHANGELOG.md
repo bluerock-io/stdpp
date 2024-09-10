@@ -53,9 +53,9 @@ API-breaking change is listed.
   + Add string literal notation "my string" to `std_scope`, and no longer
     globally open `string_scope`.
   + Move all definitions and lemmas about strings/ascii into the modules
-    `String`/`Ascii`, i.e., rename `string_rev_app` into `String.rev_app`,
-    `string_rev` into `String.rev`, `is_nat` into `Ascii.is_nat`, `is_space`
-    into `Ascii.is_space` and `words` into `String.words`.
+    `String`/`Ascii`, i.e., rename `string_rev_app` → `String.rev_app`,
+    `string_rev` → `String.rev`, `is_nat` → `Ascii.is_nat`,
+    `is_space` → `Ascii.is_space` and `words` → `String.words`.
   + The file `std.strings` no longer exports the `String` module, it only
     exports the `string` type, its constructors, induction principles, and
     notations (in `string_scope`). Similar to the number types (`nat`, `N`,

@@ -4695,6 +4695,10 @@ Proof.
   intros j1 a1 j2 a2 b _ _ _. by rewrite !(assoc_L f), (comm_L f a1).
 Qed.
 
+(** The following lemma shows that folding over a list twice (using the result
+of the first fold as input for the second fold) is equivalent to folding over
+the list once, *if* the function is idempotent for the elements of the list
+and does not care about the order in which elements are processed. *)
 Lemma foldr_idemp_strong {A B} (R : relation B) `{!PreOrder R}
     (f : A → B → B) (b : B) `{!∀ x, Proper (R ==> R) (f x)} (l : list A) :
   (∀ j a b,

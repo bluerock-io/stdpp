@@ -3000,13 +3000,25 @@ Proof.
     rewrite map_disjoint_alt in Hcd_disj; naive_solver.
 Qed.
 
+(** The following lemma shows that folding over two maps separately (using the
+result of the first fold as input for the second fold) is equivalent to folding
+over the union, *if* the function is idempotent for the elements that will be
+processed twice ([m1 ∩ m2]) and does not care about the order in which elements
+are processed.
+
+This is a generalization of [map_fold_union] (below) with a.) a relation [R]
+instead of equality b.) premises that ensure the elements are in [m1 ∪ m2]. *)
 Lemma map_fold_union_strong {A B} (R : relation B) `{!PreOrder R}
     (f : K → A → B → B) (b : B) (m1 m2 : M A) :
   (∀ j z, Proper (R ==> R) (f j z)) →
   (∀ j z1 z2 y,
+    (** This is morally idempotence for elements of [m1 ∩ m2] *)
     m1 !! j = Some z1 → m2 !! j = Some z2 →
+    (** We cannot write this in the usual direction of idempotence properties
+    (i.e., [R (f j z1 (f j z2 y)) (f j z1 y)]) because [R] is not symmetric. *)
     R (f j z1 y) (f j z1 (f j z2 y))) →
   (∀ j1 j2 z1 z2 y,
+    (** This is morally commutativity + associativity for elements of [m1 ∪ m2] *)
     j1 ≠ j2 →
     m1 !! j1 = Some z1 ∨ m2 !! j1 = Some z1 →
     m1 !! j2 = Some z2 ∨ m2 !! j2 = Some z2 →

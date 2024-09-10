@@ -299,7 +299,13 @@ Lemma set_fold_singleton {B} (f : A → B → B) (b : B) (a : A) :
   set_fold f b ({[a]} : C) = f a b.
 Proof. by unfold set_fold; simpl; rewrite elements_singleton. Qed.
 
-(** Generalization of [set_fold_union] (below) with a.) a relation [R]
+(** The following lemma shows that folding over two sets separately (using the
+result of the first fold as input for the second fold) is equivalent to folding
+over the union, *if* the function is idempotent for the elements that will be
+processed twice ([X ∩ Y]) and does not care about the order in which elements
+are processed.
+
+This is a generalization of [set_fold_union] (below) with a.) a relation [R]
 instead of equality b.) a function [f : A → B → B] instead of [f : A → A → A],
 and c.) premises that ensure the elements are in [X ∪ Y]. *)
 Lemma set_fold_union_strong {B} (R : relation B) `{!PreOrder R}

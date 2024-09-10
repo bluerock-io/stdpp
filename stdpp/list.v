@@ -4674,19 +4674,25 @@ Proof.
   intros a1 a2 b.
   by rewrite (assoc f), (comm f _ b), (assoc f), (comm f b), (comm f _ a2).
 Qed.
-Lemma foldr_cons_permute {A} (R : relation A) `{!PreOrder R}
-    (f : A → A → A) (a : A)
-    `{!∀ a, Proper (R ==> R) (f a), !Assoc R f, !Comm R f} x l :
-  R (foldr f a (x :: l)) (foldr f (f x a) l).
+
+Lemma foldr_cons_permute_strong {A B} (R : relation B) `{!PreOrder R}
+    (f : A → B → B) (b : B) `{!∀ a, Proper (R ==> R) (f a)} x l :
+  (∀ j1 a1 j2 a2 b,
+    j1 ≠ j2 → (x :: l) !! j1 = Some a1 → (x :: l) !! j2 = Some a2 →
+    R (f a1 (f a2 b)) (f a2 (f a1 b))) →
+  R (foldr f b (x :: l)) (foldr f (f x b) l).
 Proof.
-  rewrite <-foldr_snoc.
-  eapply foldr_permutation_proper'; [done..|].
-  rewrite Permutation_app_comm. done.
+  intros. rewrite <-foldr_snoc.
+  apply (foldr_permutation _ f b); [done|]. by rewrite Permutation_app_comm.
 Qed.
-Lemma foldr_cons_permute_eq {A} (f : A → A → A) (a : A)
-    `{!Assoc (=) f, !Comm (=) f} x l :
+Lemma foldr_cons_permute {A} (f : A → A → A) (a : A) x l :
+  Assoc (=) f →
+  Comm (=) f →
   foldr f a (x :: l) = foldr f (f x a) l.
-Proof. eapply (foldr_cons_permute eq); apply _. Qed.
+Proof.
+  intros. apply (foldr_cons_permute_strong (=) f a).
+  intros j1 a1 j2 a2 b _ _ _. by rewrite !(assoc_L f), (comm_L f a1).
+Qed.
 
 Lemma foldr_comm_acc_strong {A B} (R : relation B) `{!PreOrder R}
     (f : A → B → B) (g : B → B) b l :

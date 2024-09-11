@@ -881,7 +881,10 @@ Proof. unfold reverse. by rewrite <-!rev_alt, rev_unit. Qed.
 Lemma reverse_app l1 l2 : reverse (l1 ++ l2) = reverse l2 ++ reverse l1.
 Proof. unfold reverse. rewrite <-!rev_alt. apply rev_app_distr. Qed.
 Lemma length_reverse l : length (reverse l) = length l.
-Proof. unfold reverse. rewrite <-!rev_alt. apply rev_length. Qed.
+Proof.
+  induction l as [|x l IH]; [done|].
+  rewrite reverse_cons, length_app, IH. simpl. lia.
+Qed.
 Lemma reverse_involutive l : reverse (reverse l) = l.
 Proof. unfold reverse. rewrite <-!rev_alt. apply rev_involutive. Qed.
 Lemma reverse_lookup l i :

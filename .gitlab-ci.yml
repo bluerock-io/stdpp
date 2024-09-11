@@ -74,10 +74,10 @@ build-coq.8.20.0-dune:
     OPAM_PINS: "coq version 8.20.0   dune version 3.15.2"
     MAKE_TARGET: "dune"
 
-build-coq.8.19.0:
+build-coq.8.19.1:
   <<: *template
   variables:
-    OPAM_PINS: "coq version 8.19.0"
+    OPAM_PINS: "coq version 8.19.1"
     DENY_WARNINGS: "1"
 
 # The oldest version runs in MRs, without name mangling.

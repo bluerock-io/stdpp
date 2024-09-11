@@ -21,11 +21,12 @@
   data : list (bv 64)
   H : bv_unsigned l < bv_unsigned r
   H0 : bv_unsigned r ≤ Z.of_nat (length data)
-  H1 : ¬ bv_swrap 128 (bv_unsigned l) >=
-         bv_swrap 128
-           (bv_wrap 64
-              (bv_wrap 64 (bv_unsigned r - bv_unsigned l) `div` 2 ^ 1 +
-               bv_unsigned l + 0))
+  H1 :
+    ¬ bv_swrap 128 (bv_unsigned l) >=
+      bv_swrap 128
+        (bv_wrap 64
+           (bv_wrap 64 (bv_unsigned r - bv_unsigned l) `div` 2 ^ 1 +
+            bv_unsigned l + 0))
   ============================
   bv_unsigned l <
   bv_wrap 64
@@ -46,9 +47,10 @@ goal 2 is:
   
   i, n : bv 64
   H : bv_unsigned i < bv_unsigned n
-  H0 : bv_wrap 64
-         (bv_unsigned n + bv_wrap 64 (- bv_wrap 64 (bv_unsigned i + 1) - 1) +
-          1) ≠ 0%Z
+  H0 :
+    bv_wrap 64
+      (bv_unsigned n + bv_wrap 64 (- bv_wrap 64 (bv_unsigned i + 1) - 1) + 1)
+    ≠ 0%Z
   ============================
   bv_wrap 64 (bv_unsigned i + 1) < bv_unsigned n
 1 goal

@@ -142,8 +142,8 @@ Definition map_relation `{∀ A, Lookup K A (M A)} {A B} (R : K → A → B → 
   ∀ i, option_relation (R i) (P i) (Q i) (m1 !! i) (m2 !! i).
 
 Definition map_Forall2 `{∀ A, Lookup K A (M A)} {A B}
-    (R : K → A → B → Prop) : M A → M B → Prop :=
-  map_relation R (λ _ _, False) (λ _ _, False).
+    (R : K → A → B → Prop) (m1 : M A) (m2 : M B) : Prop :=
+  ∀ i, option_Forall2 (R i) (m1 !! i) (m2 !! i).
 
 Definition map_included `{∀ A, Lookup K A (M A)} {A B}
     (R : K → A → B → Prop) : M A → M B → Prop :=
@@ -2326,29 +2326,26 @@ Section map_Forall2.
     map_Forall2 R m1 m2 →
     (∀ i x1 x2, R i x1 x2 → R' i x1 x2) →
     map_Forall2 R' m1 m2.
-  Proof.
-    intros Hm ? i. specialize (Hm i).
-    destruct (m1 !! i), (m2 !! i); simpl; eauto.
-  Qed.
+  Proof. intros Hm ? i. destruct (Hm i); constructor; eauto. Qed.
 
   Lemma map_Forall2_empty : map_Forall2 R (∅ : M A) ∅.
-  Proof. intros i. by rewrite !lookup_empty. Qed.
+  Proof. intros i. rewrite !lookup_empty. constructor. Qed.
   Lemma map_Forall2_empty_inv_l (m2 : M B) : map_Forall2 R ∅ m2 → m2 = ∅.
   Proof.
     intros Hm. apply map_eq; intros i. rewrite lookup_empty, eq_None_not_Some.
-    intros [x Hi]. specialize (Hm i). by rewrite lookup_empty, Hi in Hm.
+    intros [x Hi]. specialize (Hm i). rewrite lookup_empty, Hi in Hm. inv Hm.
   Qed.
   Lemma map_Forall2_empty_inv_r (m1 : M A) : map_Forall2 R m1 ∅ → m1 = ∅.
   Proof.
     intros Hm. apply map_eq; intros i. rewrite lookup_empty, eq_None_not_Some.
-    intros [x Hi]. specialize (Hm i). by rewrite lookup_empty, Hi in Hm.
+    intros [x Hi]. specialize (Hm i). rewrite lookup_empty, Hi in Hm. inv Hm.
   Qed.
 
   Lemma map_Forall2_delete (m1 : M A) (m2 : M B) i :
     map_Forall2 R m1 m2 → map_Forall2 R (delete i m1) (delete i m2).
   Proof.
     intros Hm j. destruct (decide (i = j)) as [->|].
-    - by rewrite !lookup_delete.
+    - rewrite !lookup_delete. constructor.
     - by rewrite !lookup_delete_ne by done.
   Qed.
 
@@ -2356,7 +2353,7 @@ Section map_Forall2.
     R i x1 x2 → map_Forall2 R m1 m2 → map_Forall2 R (<[i:=x1]> m1) (<[i:=x2]> m2).
   Proof.
     intros Hx Hm j. destruct (decide (i = j)) as [->|].
-    - by rewrite !lookup_insert.
+    - rewrite !lookup_insert. by constructor.
     - by rewrite !lookup_insert_ne by done.
   Qed.
   Lemma map_Forall2_insert (m1 : M A) (m2 : M B) i x1 x2 :
@@ -2365,9 +2362,9 @@ Section map_Forall2.
   Proof.
     intros Hi1 Hi2. split; [|naive_solver eauto using map_Forall2_insert_2].
     intros Hm. split.
-    - specialize (Hm i). by rewrite !lookup_insert in Hm.
+    - specialize (Hm i). rewrite !lookup_insert in Hm. by inv Hm.
     - intros j. destruct (decide (i = j)) as [->|].
-      + by rewrite Hi1, Hi2.
+      + rewrite Hi1, Hi2. constructor.
       + specialize (Hm j). by rewrite !lookup_insert_ne in Hm by done.
   Qed.
 
@@ -2377,7 +2374,7 @@ Section map_Forall2.
     ∃ x2 m2', m2 = <[i:=x2]> m2' ∧ m2' !! i = None ∧ R i x1 x2 ∧ map_Forall2 R m1 m2'.
   Proof.
     intros ? Hm. pose proof (Hm i) as Hi. rewrite lookup_insert in Hi.
-    destruct (m2 !! i) as [x2|] eqn:?; simplify_eq/=; [|done].
+    destruct (m2 !! i) as [x2|] eqn:?; inv Hi.
     exists x2, (delete i m2). split; [by rewrite insert_delete|].
     split; [by rewrite lookup_delete|]. split; [done|].
     rewrite <-(delete_insert m1 i x1) by done. by apply map_Forall2_delete.
@@ -2388,7 +2385,7 @@ Section map_Forall2.
     ∃ x1 m1', m1 = <[i:=x1]> m1' ∧ m1' !! i = None ∧ R i x1 x2 ∧ map_Forall2 R m1' m2.
   Proof.
     intros ? Hm. pose proof (Hm i) as Hi. rewrite lookup_insert in Hi.
-    destruct (m1 !! i) as [x1|] eqn:?; simplify_eq/=; [|done].
+    destruct (m1 !! i) as [x1|] eqn:?; inv Hi.
     exists x1, (delete i m1). split; [by rewrite insert_delete|].
     split; [by rewrite lookup_delete|]. split; [done|].
     rewrite <-(delete_insert m2 i x2) by done. by apply map_Forall2_delete.

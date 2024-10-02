@@ -434,8 +434,19 @@ Proof. discriminate. Qed.
 Goal GTest {[ GTest {[ 1 := GTest ∅ ]} := GTest ∅ ]} ≠@{gtest (gtest nat)} GTest ∅.
 Proof. discriminate. Qed.
 
-(* Test that a fixpoint can be recursively invoked in the closure argument
+(** Test that a fixpoint can be recursively invoked in the closure argument
 of [map_imap]. *)
 Fixpoint gtest_imap `{Countable K} (j : K) (t : gtest K) : gtest K :=
   let '(GTest ts) := t in
   GTest (map_imap (λ i t, guard (i = j);; Some (gtest_imap j t)) ts).
+
+(** Test that [map_Forall P] and [map_Forall2 P] can be used in an inductive
+definition with a recursive occurence in the predicate/relation [P] without
+bothering the positivity checker. *)
+Inductive gtest_pred `{Countable K} : gtest K → Prop :=
+  | GTest_pred ts :
+     map_Forall (λ _, gtest_pred) ts → gtest_pred (GTest ts).
+
+Inductive gtest_rel `{Countable K} : relation (gtest K) :=
+  | GTest_rel ts1 ts2 :
+     map_Forall2 (λ _, gtest_rel) ts1 ts2 → gtest_rel (GTest ts1) (GTest ts2).

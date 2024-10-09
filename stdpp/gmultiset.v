@@ -61,6 +61,10 @@ Section definitions.
 
   Global Instance gmultiset_dom : Dom (gmultiset A) (gset A) := λ X,
     let (X) := X in dom X.
+
+  Definition gmultiset_map `{Elements A C, SingletonMS B D, Empty D, DisjUnion D}
+      (f : A → B) (X : C) : D :=
+    list_to_set_disj (f <$> elements X).
 End definitions.
 
 Global Typeclasses Opaque gmultiset_elem_of gmultiset_subseteq.

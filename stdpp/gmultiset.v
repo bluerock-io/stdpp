@@ -813,7 +813,7 @@ Section map.
     multiset_solver.
   Qed.
 
-  Lemma multiplicity_gmultiset_map_inj f X x :
+  Lemma multiplicity_gmultiset_map f X x :
     Inj (=) (=) f → multiplicity (f x) (gmultiset_map f X) = multiplicity x X.
   Proof.
     induction X as [|x' X IH] using gmultiset_ind; intros Hinj.
@@ -821,6 +821,16 @@ Section map.
     - rewrite gmultiset_map_disj_union, !multiplicity_disj_union, IH; [|done].
       destruct (bool_decide (x = x'));
         rewrite gmultiset_map_singleton; multiset_solver.
+  Qed.
+
+  Lemma gmultiset_map_eq_iff f X Y :
+    Inj (=) (=) f → gmultiset_map f X = gmultiset_map f Y ↔ X = Y.
+  Proof.
+    intros Hinj. split; intros Heq.
+    - apply gmultiset_leibniz; intros x.
+      rewrite <- !multiplicity_gmultiset_map with f _ _; [|done|done].
+      by rewrite Heq.
+    - by subst.
   Qed.
 
   Global Instance set_unfold_gmultiset_map 
@@ -834,6 +844,6 @@ Section map.
     MultisetUnfold (f x) (gmultiset_map f X) n.
   Proof.
     intros Hinj [HX]; constructor.
-    by rewrite multiplicity_gmultiset_map_inj, HX.
+    by rewrite multiplicity_gmultiset_map, HX.
   Qed.
 End map.

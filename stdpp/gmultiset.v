@@ -783,7 +783,7 @@ Section map.
 
   Implicit Type f : A -> B.
 
-  Definition gmultiset_map (f : A → B) (X : gmultiset A) : gmultiset B :=
+  Definition gmultiset_map f (X : gmultiset A) : gmultiset B :=
     list_to_set_disj (f <$> elements X).
 
   Lemma elem_of_gmultiset_map f X y :
@@ -824,7 +824,7 @@ Section map.
   Qed.
 
   Global Instance set_unfold_gmultiset_map 
-    (f : A → B) (X : gmultiset A) (P : A → Prop) y :
+    f X (P : A → Prop) y :
     (∀ x, SetUnfoldElemOf x X (P x)) →
       SetUnfoldElemOf y (gmultiset_map f X) (∃ x, y = f x ∧ P x).
   Proof. constructor. rewrite elem_of_gmultiset_map; naive_solver. Qed.

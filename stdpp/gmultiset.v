@@ -816,7 +816,7 @@ Section map.
   Lemma multiplicity_gmultiset_map_inj f X x :
     Inj (=) (=) f → multiplicity (f x) (gmultiset_map f X) = multiplicity x X.
   Proof.
-    induction X as [|y] using gmultiset_ind; intros Hinj.
+    induction X as [|y X] using gmultiset_ind; intros Hinj.
     - multiset_solver.
     - rewrite gmultiset_map_disj_union, !multiplicity_disj_union, IHX; [|done].
       destruct (bool_decide (x = y));

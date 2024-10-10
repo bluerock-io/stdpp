@@ -61,10 +61,6 @@ Section definitions.
 
   Global Instance gmultiset_dom : Dom (gmultiset A) (gset A) := λ X,
     let (X) := X in dom X.
-
-  Definition gmultiset_map `{Elements A C, SingletonMS B D, Empty D, DisjUnion D}
-      (f : A → B) (X : C) : D :=
-    list_to_set_disj (f <$> elements X).
 End definitions.
 
 Global Typeclasses Opaque gmultiset_elem_of gmultiset_subseteq.
@@ -780,3 +776,64 @@ Section more_lemmas.
     apply Hinsert, IH; multiset_solver.
   Qed.
 End more_lemmas.
+
+(** * Map *)
+Section map.
+  Context `{Countable A, Countable B}.
+
+  Implicit Type f : A -> B.
+
+  Definition gmultiset_map (f : A → B) (X : gmultiset A) : gmultiset B :=
+    list_to_set_disj (f <$> elements X).
+
+  Lemma elem_of_gmultiset_map f X y :
+    y ∈ gmultiset_map f X ↔ ∃ x, y = f x ∧ x ∈ X.
+  Proof.
+    unfold gmultiset_map. rewrite elem_of_list_to_set_disj, elem_of_list_fmap.
+    by setoid_rewrite gmultiset_elem_of_elements.
+  Qed.
+
+  Lemma gmultiset_map_empty f :
+    gmultiset_map f ∅ = ∅.
+  Proof. done. Qed.
+
+  Lemma gmultiset_map_disj_union f X Y :
+    gmultiset_map f (X ⊎ Y) = gmultiset_map f X ⊎ gmultiset_map f Y.
+  Proof.
+    unfold gmultiset_map.
+    rewrite gmultiset_elements_disj_union, fmap_app.
+    by rewrite list_to_set_disj_app.
+  Qed.
+
+  Lemma gmultiset_map_singleton f x :
+    gmultiset_map f {[+ x +]} = {[+ f x +]}.
+  Proof.
+    unfold gmultiset_map.
+    rewrite gmultiset_elements_singleton.
+    multiset_solver.
+  Qed.
+
+  Lemma multiplicity_gmultiset_map_inj f X x :
+    Inj (=) (=) f → multiplicity (f x) (gmultiset_map f X) = multiplicity x X.
+  Proof.
+    induction X as [|y] using gmultiset_ind; intros Hinj.
+    - multiset_solver.
+    - rewrite gmultiset_map_disj_union, !multiplicity_disj_union, IHX; [|done].
+      destruct (bool_decide (x = y));
+        rewrite gmultiset_map_singleton; multiset_solver.
+  Qed.
+
+  Global Instance set_unfold_gmultiset_map 
+    (f : A → B) (X : gmultiset A) (P : A → Prop) y :
+    (∀ x, SetUnfoldElemOf x X (P x)) →
+      SetUnfoldElemOf y (gmultiset_map f X) (∃ x, y = f x ∧ P x).
+  Proof. constructor. rewrite elem_of_gmultiset_map; naive_solver. Qed.
+
+  Global Instance multiset_unfold_map x X n f :
+    Inj (=) (=) f → MultisetUnfold x X n →
+    MultisetUnfold (f x) (gmultiset_map f X) n.
+  Proof.
+    intros Hinj [HX]; constructor.
+    by rewrite multiplicity_gmultiset_map_inj, HX.
+  Qed.
+End map.

@@ -63,6 +63,13 @@ Section definitions.
     let (X) := X in dom X.
 End definitions.
 
+Section more_definitions.
+  Context `{Countable A} `{Countable B}.
+
+  Definition gmultiset_map f (X : gmultiset A) : gmultiset B :=
+    list_to_set_disj (f <$> elements X).
+End more_definitions.
+
 Global Typeclasses Opaque gmultiset_elem_of gmultiset_subseteq.
 Global Typeclasses Opaque gmultiset_elements gmultiset_size gmultiset_empty.
 Global Typeclasses Opaque gmultiset_singleton gmultiset_union gmultiset_difference.
@@ -782,9 +789,6 @@ Section map.
   Context `{Countable A, Countable B}.
 
   Implicit Type f : A → B.
-
-  Definition gmultiset_map f (X : gmultiset A) : gmultiset B :=
-    list_to_set_disj (f <$> elements X).
 
   Lemma elem_of_gmultiset_map f X y :
     y ∈ gmultiset_map f X ↔ ∃ x, y = f x ∧ x ∈ X.

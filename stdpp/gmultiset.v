@@ -832,10 +832,9 @@ Section map.
     - by subst.
   Qed.
 
-  Global Instance set_unfold_gmultiset_map 
-    f X (P : A → Prop) y :
+  Global Instance set_unfold_gmultiset_map f X (P : A → Prop) y :
     (∀ x, SetUnfoldElemOf x X (P x)) →
-      SetUnfoldElemOf y (gmultiset_map f X) (∃ x, y = f x ∧ P x).
+    SetUnfoldElemOf y (gmultiset_map f X) (∃ x, y = f x ∧ P x).
   Proof. constructor. rewrite elem_of_gmultiset_map; naive_solver. Qed.
 
   Global Instance multiset_unfold_map x X n f :

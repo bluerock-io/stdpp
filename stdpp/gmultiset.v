@@ -818,9 +818,8 @@ Section map.
   Proof.
     induction X as [|x' X IH] using gmultiset_ind; intros Hinj.
     - multiset_solver.
-    - rewrite gmultiset_map_disj_union, !multiplicity_disj_union, IH; [|done].
-      destruct (bool_decide (x = x'));
-        rewrite gmultiset_map_singleton; multiset_solver.
+    - rewrite gmultiset_map_disj_union, gmultiset_map_singleton, !multiplicity_disj_union.
+      destruct (bool_decide (x = x')); multiset_solver.
   Qed.
 
   Lemma gmultiset_map_eq_iff f X Y :

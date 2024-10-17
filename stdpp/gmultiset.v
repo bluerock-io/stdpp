@@ -821,15 +821,13 @@ Section map.
     - rewrite gmultiset_map_disj_union, gmultiset_map_singleton, !multiplicity_disj_union.
       destruct (bool_decide (x = x')); multiset_solver.
   Qed.
-
-  Lemma gmultiset_map_eq_iff f X Y :
-    Inj (=) (=) f → gmultiset_map f X = gmultiset_map f Y ↔ X = Y.
+  
+  Global Instance gmultiset_map_inj f : Inj (=) (=) f → Inj (=) (=) (gmultiset_map f).
   Proof.
-    intros Hinj. split; intros Heq.
-    - apply gmultiset_leibniz; intros x.
-      rewrite <- !multiplicity_gmultiset_map with f _ _; [|done|done].
-      by rewrite Heq.
-    - by subst.
+    intros Hinj. intros X Y Heq.
+    apply gmultiset_leibniz; intros x.
+    rewrite <- !multiplicity_gmultiset_map with f _ _; [|done|done].
+    by rewrite Heq.
   Qed.
 
   Global Instance set_unfold_gmultiset_map f X (P : A → Prop) y :

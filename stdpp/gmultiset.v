@@ -781,7 +781,7 @@ End more_lemmas.
 Section map.
   Context `{Countable A, Countable B}.
 
-  Implicit Type f : A -> B.
+  Implicit Type f : A → B.
 
   Definition gmultiset_map f (X : gmultiset A) : gmultiset B :=
     list_to_set_disj (f <$> elements X).

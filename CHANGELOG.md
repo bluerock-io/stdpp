@@ -67,6 +67,7 @@ API-breaking change is listed.
 - Add lemmas `set_fold_union_strong` and `set_fold_union`.
 - Add lemmas `map_fold_union_strong`, `map_fold_union`,
   `map_fold_disj_union_strong`, `map_fold_disj_union` and `map_fold_proper`.
+- Add `gmultiset_map` and associated lemmas. (by Marijn van Wezel)
 
 The following `sed` script should perform most of the renaming
 (on macOS, replace `sed` by `gsed`, installed via e.g. `brew install gnu-sed`).

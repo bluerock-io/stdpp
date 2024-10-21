@@ -61,12 +61,19 @@ Section definitions.
 
   Global Instance gmultiset_dom : Dom (gmultiset A) (gset A) := λ X,
     let (X) := X in dom X.
+
+  Definition gmultiset_map `{Countable B} (f : A → B)
+      (X : gmultiset A) : gmultiset B :=
+    GMultiSet $ map_fold
+      (λ x n, partial_alter (Some ∘ from_option (Pos.add n) n) (f x))
+      ∅
+      (gmultiset_car X).
 End definitions.
 
 Global Typeclasses Opaque gmultiset_elem_of gmultiset_subseteq.
 Global Typeclasses Opaque gmultiset_elements gmultiset_size gmultiset_empty.
 Global Typeclasses Opaque gmultiset_singleton gmultiset_union gmultiset_difference.
-Global Typeclasses Opaque gmultiset_scalar_mul gmultiset_dom.
+Global Typeclasses Opaque gmultiset_scalar_mul gmultiset_dom gmultiset_map.
 
 Section basic_lemmas.
   Context `{Countable A}.
@@ -485,6 +492,9 @@ Section more_lemmas.
   Global Instance list_to_set_disj_perm :
     Proper ((≡ₚ) ==> (=)) (list_to_set_disj (C:=gmultiset A)).
   Proof. induction 1; multiset_solver. Qed.
+  Lemma list_to_set_disj_replicate n x :
+    list_to_set_disj (replicate n x) =@{gmultiset A} n *: {[+ x +]}.
+  Proof. induction n; multiset_solver. Qed.
 
   (** Properties of the elements operation *)
   Lemma gmultiset_elements_empty : elements (∅ : gmultiset A) = [].
@@ -776,3 +786,79 @@ Section more_lemmas.
     apply Hinsert, IH; multiset_solver.
   Qed.
 End more_lemmas.
+
+(** * Map *)
+Section map.
+  Context `{Countable A, Countable B}.
+  Context (f : A → B).
+
+  Lemma gmultiset_map_alt X :
+    gmultiset_map f X = list_to_set_disj (f <$> elements X).
+  Proof.
+    destruct X as [m]. unfold elements, gmultiset_map. simpl.
+    induction m as [|x n m ?? IH] using map_first_key_ind; [done|].
+    rewrite map_to_list_insert_first_key, map_fold_insert_first_key by done.
+    csimpl. rewrite fmap_app, fmap_replicate, list_to_set_disj_app, <-IH.
+    apply gmultiset_eq; intros y.
+    rewrite multiplicity_disj_union, list_to_set_disj_replicate.
+    rewrite multiplicity_scalar_mul, multiplicity_singleton'.
+    unfold multiplicity; simpl. destruct (decide (y = f x)) as [->|].
+    - rewrite lookup_partial_alter; simpl. destruct (_ !! f x); simpl; lia.
+    - rewrite lookup_partial_alter_ne by done. lia.
+  Qed.
+
+  Lemma gmultiset_map_empty : gmultiset_map f ∅ = ∅.
+  Proof. done. Qed.
+
+  Lemma gmultiset_map_disj_union X Y :
+    gmultiset_map f (X ⊎ Y) = gmultiset_map f X ⊎ gmultiset_map f Y.
+  Proof.
+    apply gmultiset_eq; intros x.
+    rewrite !gmultiset_map_alt, gmultiset_elements_disj_union, fmap_app.
+    by rewrite list_to_set_disj_app.
+  Qed.
+
+  Lemma gmultiset_map_singleton x :
+    gmultiset_map f {[+ x +]} = {[+ f x +]}.
+  Proof.
+    rewrite gmultiset_map_alt, gmultiset_elements_singleton.
+    multiset_solver.
+  Qed.
+
+  Lemma elem_of_gmultiset_map X y :
+    y ∈ gmultiset_map f X ↔ ∃ x, y = f x ∧ x ∈ X.
+  Proof.
+    rewrite gmultiset_map_alt, elem_of_list_to_set_disj, elem_of_list_fmap.
+    by setoid_rewrite gmultiset_elem_of_elements.
+  Qed.
+
+  Lemma multiplicity_gmultiset_map X x :
+    Inj (=) (=) f →
+    multiplicity (f x) (gmultiset_map f X) = multiplicity x X.
+  Proof.
+    intros. induction X as [|y X IH] using gmultiset_ind; [multiset_solver|].
+    rewrite gmultiset_map_disj_union, gmultiset_map_singleton,
+      !multiplicity_disj_union.
+    multiset_solver.
+  Qed.
+
+  Global Instance gmultiset_map_inj :
+    Inj (=) (=) f → Inj (=) (=) (gmultiset_map f).
+  Proof.
+    intros ? X Y HXY. apply gmultiset_eq; intros x.
+    by rewrite <-!(multiplicity_gmultiset_map _ _ _), HXY.
+  Qed.
+
+  Global Instance set_unfold_gmultiset_map X (P : A → Prop) y :
+    (∀ x, SetUnfoldElemOf x X (P x)) →
+    SetUnfoldElemOf y (gmultiset_map f X) (∃ x, y = f x ∧ P x).
+  Proof. constructor. rewrite elem_of_gmultiset_map; naive_solver. Qed.
+
+  Global Instance multiset_unfold_map x X n :
+    Inj (=) (=) f →
+    MultisetUnfold x X n →
+    MultisetUnfold (f x) (gmultiset_map f X) n.
+  Proof.
+    intros ? [HX]; constructor. by rewrite multiplicity_gmultiset_map, HX.
+  Qed.
+End map.
